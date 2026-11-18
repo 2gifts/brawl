@@ -52,8 +52,6 @@ void ftPopoStatusUniqProcessSpecialHiPartner::initStatus(soModuleAccesser* modul
     }
 }
 
-// HYPOTHESIS: the native soMotionChangeParam constructor takes keepFrame as a bool (the target passes it
-// unmasked); with the u8 declaration the call masks it (same blocker as final_partner / special_s_partner).
 void ftPopoStatusUniqProcessSpecialHiPartner::execFixPos(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000014) == true) {
         moduleAccesser->getWorkManageModule().offFlag(0x22000014);

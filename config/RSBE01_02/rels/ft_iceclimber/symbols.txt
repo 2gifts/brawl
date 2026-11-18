@@ -264,7 +264,7 @@ notifyEventChangeSituation__6ftPopoF13SituationKind13SituationKindP16soModuleAcc
 getInstance__16ftPopoTransactorFv = .text:0x0000B02C; // type:function size:0x70
 getPartner__6ftPopoFv = .text:0x0000B09C; // type:function size:0x9C
 fn_105_B138 = .text:0x0000B138; // type:function size:0xC18
-__ct__19soMotionChangeParamFiffUcUcUcUc = .text:0x0000BD50; // type:function size:0x20
+__ct__19soMotionChangeParamFiffUcUcbUc = .text:0x0000BD50; // type:function size:0x20
 __ct__5Vec2fFff = .text:0x0000BD70; // type:function size:0xC
 notifyEventChangeMotion__6ftPopoFiiPvP16soModuleAccesser = .text:0x0000BD7C; // type:function size:0x198
 fn_105_BF14 = .text:0x0000BF14; // type:function size:0x4

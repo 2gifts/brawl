@@ -103,7 +103,7 @@ struct ftSamusParamChargeShot {
     float stepFrames;
 };
 
-inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, u8 c, u8 d) :
+inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, bool c, u8 d) :
     m_kind(kind), m_frame(frame), m_rate(rate), _12(a), _13(b), _14(c), _15(d) {}
 
 // Charging: one step every stepFrames frames up to maxCharge (then the fully charged status on the ground); on the

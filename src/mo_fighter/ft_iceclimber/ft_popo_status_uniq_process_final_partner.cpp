@@ -47,10 +47,6 @@ void ftPopoStatusUniqProcessFinalPartner::initStatus(soModuleAccesser* moduleAcc
     moduleAccesser->getPostureModule().setLr(soExternalValueAccesser::getLr(partner));
 }
 
-// HYPOTHESIS: the native soMotionChangeParam constructor takes this flag as a bool (the target passes it
-// unmasked); with the u8 declaration the call masks it, so this function stays fn_. Checked with a
-// bool sixth parameter in a scratch shadow header: the body then matches and only the callee's mangled name
-// differs, so the fix is the shared header plus the sora_melee symbol rename.
 void ftPopoStatusUniqProcessFinalPartner::execFixPos(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000011) == true) {
         moduleAccesser->getWorkManageModule().offFlag(0x22000011);

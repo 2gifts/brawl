@@ -2,7 +2,7 @@
 #include <ft/ft_status_uniq_process_gimmick.h>
 #include <so/so_module_accesser.h>
 
-inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, u8 c, u8 d) :
+inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, bool c, u8 d) :
     m_kind(kind), m_frame(frame), m_rate(rate), _12(a), _13(b), _14(c), _15(d) { }
 
 void ftStatusUniqProcessGimmickLadder::initLadderEnd(soModuleAccesser* moduleAccesser, soGimmickLadderEventArgs* info) {

@@ -139,7 +139,7 @@ void ftYoshiStatusUniqProcessSpecialSLoop::execFixPosCounter(soModuleAccesser* a
     }
 }
 // Original emitted constructor and setter belong to the natural Loop TU.
-soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, u8 c, u8 d) {
+soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, bool c, u8 d) {
     m_kind = kind; m_frame = frame; m_rate = rate;
     _12 = a; _13 = b; _14 = c; _15 = d;
 }

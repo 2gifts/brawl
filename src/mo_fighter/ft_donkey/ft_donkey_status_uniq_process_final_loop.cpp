@@ -304,7 +304,7 @@ void ftDonkeyStatusUniqProcessFinalLoop::execStatus(soModuleAccesser* moduleAcce
 
 // The native loop calls this constructor separately for the base and strong-strike motions.
 #pragma dont_inline on
-soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, u8 c, u8 d) :
+soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, bool c, u8 d) :
     m_kind(kind), m_frame(frame), m_rate(rate), _12(a), _13(b), _14(c), _15(d) { }
 #pragma dont_inline reset
 

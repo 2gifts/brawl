@@ -8,7 +8,8 @@ public:
     float m_frame, m_rate;
     u8 _12, _13, _14, _15;
     soMotionChangeParam() {}
-    soMotionChangeParam(int, float, float, u8, u8, u8, u8);
+    // The sixth flag is a bool: callers pass a bool local without masking it.
+    soMotionChangeParam(int, float, float, u8, u8, bool, u8);
     void operator=(const soMotionChangeParam& other) {
         if (this != &other) {
             m_kind = other.m_kind;

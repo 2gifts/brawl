@@ -39,7 +39,7 @@ extern const float g_wnWolfBlasterBulletGroundOffsetX = 8.0f;
 wnClassInfoImpl<39, wnWolfBlasterBullet, wnWolfBlasterBulletData> g_wnWolfBlasterBulletClassInfo;
 
 // BYTES: the motion change parameter constructor is expanded in this unit (the weak inline copy of the original).
-inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, u8 c, u8 d) :
+inline soMotionChangeParam::soMotionChangeParam(int kind, float frame, float rate, u8 a, u8 b, bool c, u8 d) :
     m_kind(kind), m_frame(frame), m_rate(rate), _12(a), _13(b), _14(c), _15(d) { }
 
 // BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
