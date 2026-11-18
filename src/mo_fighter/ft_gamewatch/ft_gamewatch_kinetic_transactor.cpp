@@ -168,7 +168,8 @@ void ftGameWatchKineticTransactor::changeKineticSub3(bool*, void*, Vec2f*, soMod
     soKineticUtility::resetEnableEnergy(2, acc, 5, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f));
     ftKineticEnergyController& controller =
         dynamic_cast<ftKineticEnergyController&>(*acc->getKineticModule().getEnergy(2));
-    ftGameWatchKineticParam* param = getKineticParam();
+    ftGameWatchData* data = static_cast<ftGameWatchData*>(g_ftCommonDataAccesser.getData(Fighter_GameWatch));
+    ftGameWatchKineticParam* param = data->m_kineticParam;
     float lr = acc->getPostureModule().getLr();
     float add = param->unk10;
     float x = controller.getSpeed().m_x;
@@ -204,7 +205,8 @@ void ftGameWatchKineticTransactor::changeKineticSub5(bool*, void*, Vec2f* speed,
     soKineticUtility::resetEnableEnergy(2, acc, 8, speed, &Vec3f(0.0f, 0.0f, 0.0f));
     ftKineticEnergyController& controller =
         dynamic_cast<ftKineticEnergyController&>(*acc->getKineticModule().getEnergy(2));
-    ftGameWatchKineticParam* param = getKineticParam();
+    ftGameWatchData* data = static_cast<ftGameWatchData*>(g_ftCommonDataAccesser.getData(Fighter_GameWatch));
+    ftGameWatchKineticParam* param = data->m_kineticParam;
     float lr = acc->getPostureModule().getLr();
     float add = param->unk10;
     float x = controller.getSpeed().m_x;
