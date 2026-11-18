@@ -1432,8 +1432,7 @@ void muButtonTask::mainStepRestoreDlg(muButtonTask* task) {
             if (info->m_stickKind >= 2) {
                 edit->m_flag6 = false;
             }
-            int num = info->m_buttonNum;
-            for (int i = 0; i < num; i++) {
+            for (int i = 0; i < info->m_buttonNum; i++) {
                 task->printButton(padKind, i, i + 5, task->m_work->m_edit.m_buttons[i], false);
             }
             if (info->m_stickKind >= 1) {
