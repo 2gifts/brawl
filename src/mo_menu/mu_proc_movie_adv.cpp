@@ -171,8 +171,9 @@ void muProcMovieAdv::makeMovieList() {
     int count = 0;
     m_list = static_cast<int*>(gfHeapManager::alloc(Heaps::MenuInstance, Id_Count * sizeof(int)));
     const u32* flag = reinterpret_cast<const u32*>(g_GameGlobal->getMovieAppFlag());
+    int id;
     for (int i = 0; i < Id_Count; i++) {
-        int id = i + Id_First;
+        id = i + Id_First;
         if (isMovieOpen(flag, id)) {
             m_list[count] = id;
             count++;

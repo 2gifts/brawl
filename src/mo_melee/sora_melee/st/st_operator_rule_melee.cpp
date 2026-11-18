@@ -207,8 +207,8 @@ void stOperatorRuleMelee::updateFrameCounter() {
     float* time = reinterpret_cast<float*>(byteAt(this, 0xEC));
     *time += *reinterpret_cast<float*>(byteAt(this, 0xF4));
     float whole = floor(*time);
-    int frames = whole;
     *time -= whole;
+    int frames = whole;
     if (frames != 0) {
         if (m_remainingFrameTime > frames) {
             m_remainingFrameTime -= frames;
