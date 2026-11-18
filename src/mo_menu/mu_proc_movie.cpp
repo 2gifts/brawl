@@ -280,12 +280,11 @@ void muProcMovie::makeMovieList() {
 void muProcMovie::dispPage(int page) {
     int first = page * Slots;
     int num = getPageNum(this);
-    nw4r::g3d::ScnGroup* slots = getSlotGroup(this);
-    removeAllIcons(slots);
-    int i = 0;
+    removeAllIcons(getSlotGroup(this));
+    int i;
     int* movie = &m_list[first];
     u32 slot = 0;
-    for (; i < num; i++, movie++) {
+    for (i = 0; i < num; i++, movie++) {
         nw4r::g3d::ScnObj* icon;
         u32 line;
         u32 text;

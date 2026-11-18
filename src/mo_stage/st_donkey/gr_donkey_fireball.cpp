@@ -80,7 +80,8 @@ void grDonkeyFireBall::updateYakumono() {
 
 static inline bool donkeyNearZero(float v) {
     bool result = false;
-    if ((float)fabs(v) < 1e-5f) {
+    float a = fabs(v);
+    if (a < 1e-5f) {
         result = true;
     }
     return result;
