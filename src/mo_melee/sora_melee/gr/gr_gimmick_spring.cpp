@@ -167,22 +167,26 @@ void grGimmickSpring::setInitializeFlag() {
 void grGimmickSpring::onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId) {
     // HYPOTHESIS: 0x17..0x19 are the spring events (on, shoot, position); 0x33 is skipped first.
     int kind = eventInfo->m_kind;
-    if (kind != 0x33 && kind > 0x16 && kind < 0x1A) {
-        switch (kind) {
-        case 0x17:
-            if (m_state != State_On) {
-                if (m_state != State_Rest) {
-                    m_modelAnims[0]->unbindShapeAnim(m_sceneModels[0]);
-                }
-                changeNodeAnim(1, 0);
-                changeShapeAnim(1, 0);
-                // MATCH-ONLY: the frame constant is loaded before the state byte is stored.
-                f32 animFrame = lbl_27_rodata_4410;
-                m_state = State_On;
-                m_animFrame = animFrame;
+    if (kind == 0x33) {
+        return;
+    }
+    if (kind <= 0x16 || kind >= 0x1A) {
+        return;
+    }
+    switch (kind) {
+    case 0x17:
+        if (m_state != State_On) {
+            if (m_state != State_Rest) {
+                m_modelAnims[0]->unbindShapeAnim(m_sceneModels[0]);
             }
-            getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
-            break;
+            changeNodeAnim(1, 0);
+            changeShapeAnim(1, 0);
+            // MATCH-ONLY: the frame constant is loaded before the state byte is stored.
+            f32 animFrame = lbl_27_rodata_4410;
+            m_state = State_On;
+            m_animFrame = animFrame;
         }
+        getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
+        break;
     }
 }

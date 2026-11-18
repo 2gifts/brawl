@@ -133,14 +133,15 @@ int grGimmickMotionPath::getModelCount() {
 void grGimmickMotionPath::setFrameModelAnim() {
     nw4r::g3d::ScnMdl* model = m_sceneModels[0];
     gfModelAnimation* animation = m_modelAnims[0];
-    if (model != NULL && animation != NULL) {
-        animation->setFrame(m_frame);
-        animation->setUpdateRate(0.0f);
-        static_cast<nw4r::g3d::ScnMdlSimple*>(model)->UpdateFrame();
-        m_hasUpdatedG3dCalcWorld = false;
-        updateG3dProcCalcWorld();
-        setTRS();
+    if (model == NULL || animation == NULL) {
+        return;
     }
+    animation->setFrame(m_frame);
+    animation->setUpdateRate(0.0f);
+    static_cast<nw4r::g3d::ScnMdlSimple*>(model)->UpdateFrame();
+    m_hasUpdatedG3dCalcWorld = false;
+    updateG3dProcCalcWorld();
+    setTRS();
 }
 
 bool grGimmickMotionPath::isMoveEnd() {

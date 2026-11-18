@@ -21,28 +21,35 @@ grCalcWorldCallBack::~grCalcWorldCallBack() {
     }
 }
 
+static inline void resetNodeCallbackData(grNodeCallbackData* data) {
+    data->m_nodeIndex = 0;
+    data->m_flags = 0;
+    data->m_pos = Vec3f(0.0f, 0.0f, 0.0f);
+    data->m_rot = Vec3f(0.0f, 0.0f, 0.0f);
+    data->m_scale = Vec3f(1.0f, 1.0f, 1.0f);
+    data->m_offsetPos = Vec3f(0.0f, 0.0f, 0.0f);
+    data->m_offsetRot = Vec3f(0.0f, 0.0f, 0.0f);
+    data->m_offsetScale = Vec3f(1.0f, 1.0f, 1.0f);
+    data->m_matrix.setIdentity();
+}
+
 int grCalcWorldCallBack::initialize(bool unk1, HeapType heapType) {
     grNodeCallbackData* datas;
-    if (!unk1) {
+    switch (unk1) {
+    case false:
         datas = m_nodeCallbackDatas = new (heapType) grNodeCallbackData[m_numNodeCallbackData];
-    } else {
+        break;
+    default:
         datas = NULL;
+        break;
     }
     if (datas == NULL) {
         return false;
     }
+    int i;
     int count = m_numNodeCallbackData;
-    for (int i = 0; i != count; i++) {
-        grNodeCallbackData* data = &m_nodeCallbackDatas[i];
-        data->m_nodeIndex = 0;
-        data->m_flags = 0;
-        data->m_pos = Vec3f(0.0f, 0.0f, 0.0f);
-        data->m_rot = Vec3f(0.0f, 0.0f, 0.0f);
-        data->m_scale = Vec3f(1.0f, 1.0f, 1.0f);
-        data->m_offsetPos = Vec3f(0.0f, 0.0f, 0.0f);
-        data->m_offsetRot = Vec3f(0.0f, 0.0f, 0.0f);
-        data->m_offsetScale = Vec3f(1.0f, 1.0f, 1.0f);
-        data->m_matrix.setIdentity();
+    for (i = 0; i != count; i++) {
+        resetNodeCallbackData(&m_nodeCallbackDatas[i]);
     }
     return true;
 }

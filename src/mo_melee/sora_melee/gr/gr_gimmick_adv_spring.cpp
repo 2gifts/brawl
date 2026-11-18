@@ -125,14 +125,18 @@ void grGimmickAdvSpring::setInitializeFlag() {
 void grGimmickAdvSpring::onGimmickEvent(soGimmickEventArgs* eventInfo, int* taskId) {
     // HYPOTHESIS: 0x17..0x19 are the spring events (on, shoot, position); 0x33 is skipped first.
     int kind = eventInfo->m_kind;
-    if (kind != 0x33 && kind > 0x16 && kind < 0x1A) {
-        switch (kind) {
-        case 0x17:
-            if (m_state != State_On) {
-                setMotionOn();
-            }
-            getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
-            break;
+    if (kind == 0x33) {
+        return;
+    }
+    if (kind <= 0x16 || kind >= 0x1A) {
+        return;
+    }
+    switch (kind) {
+    case 0x17:
+        if (m_state != State_On) {
+            setMotionOn();
         }
+        getTopNode(&static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos);
+        break;
     }
 }
