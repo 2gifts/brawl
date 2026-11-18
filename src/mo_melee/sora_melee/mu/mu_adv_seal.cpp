@@ -341,6 +341,7 @@ void muAdvSealWinNotice::end() {
 
 void muAdvSealWinNotice::update() {
     ecMgr* ec = g_ecMgr;
+    nw4r::g3d::ScnMdlSimple* obj;
     switch (m_state) {
     case 1:
         if (m_lines[1] >= 0) {
@@ -368,7 +369,7 @@ void muAdvSealWinNotice::update() {
                 }
             }
         }
-        nw4r::g3d::ScnMdlSimple* obj = fn_800607C8(ec, m_effect);
+        obj = fn_800607C8(ec, m_effect);
         if (obj != NULL) {
             setScnObjHidden(obj, 1);
         }
