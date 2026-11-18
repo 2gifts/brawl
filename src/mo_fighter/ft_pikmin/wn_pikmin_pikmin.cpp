@@ -903,7 +903,9 @@ void wnPikminPikmin::notifyEventChangeStatus(int statusKind, int prevStatusKind,
         wnPikminLinkEventCling event(0xB, statusKind + 0x50);
         m_moduleAccesser->getLinkModule().sendEventNodes(0, event, 0);
         soModuleAccesser* acc = m_moduleAccesser;
-        acc->getWorkManageModule().setInt(acc->getLinkModule().getNodeTaskId(0), 0x20000001);
+        soLinkModule& link = acc->getLinkModule();
+        soWorkManageModule& work = acc->getWorkManageModule();
+        work.setInt(link.getNodeTaskId(0), 0x20000001);
         m_moduleAccesser->getWorkManageModule().setInt(event.unkC, 0x20000002);
         m_moduleAccesser->getWorkManageModule().setInt(event.unk10, 0x20000003);
         break;
@@ -916,11 +918,15 @@ void wnPikminPikmin::notifyEventChangeStatus(int statusKind, int prevStatusKind,
             m_moduleAccesser->getLinkModule().unlink(3);
         }
         soModuleAccesser* acc = m_moduleAccesser;
-        if (acc->getLinkModule().link(3, acc->getWorkManageModule().getInt(0x20000000)) == false) {
+        soWorkManageModule& work = acc->getWorkManageModule();
+        soLinkModule& link = acc->getLinkModule();
+        if (link.link(3, work.getInt(0x20000000)) == false) {
             return;
         }
         soModuleAccesser* acc2 = m_moduleAccesser;
-        acc2->getLinkModule().setModelConstraintPosOrt(3, 4, acc2->getWorkManageModule().getInt(0x20000001), 3, true);
+        soWorkManageModule& work2 = acc2->getWorkManageModule();
+        soLinkModule& link2 = acc2->getLinkModule();
+        link2.setModelConstraintPosOrt(3, 4, work2.getInt(0x20000001), 3, true);
         break;
     }
     case 0x33: {

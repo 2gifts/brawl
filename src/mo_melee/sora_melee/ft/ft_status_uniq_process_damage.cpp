@@ -27,9 +27,10 @@ static inline void applyDriftInput(soModuleAccesser* moduleAccesser, soDamageLog
         float angle = atan2(-damageLog->m_groundTouchNormal.m_x, damageLog->m_groundTouchNormal.m_y);
         drift.rot(angle, &drift);
     }
+    float z = pos.m_z; // MATCH-ONLY: z is re-stored from a copy taken before the x/y update.
     pos.m_y += drift.m_y;
     pos.m_x += drift.m_x;
-    pos.m_z = pos.m_z;
+    pos.m_z = z;
     moduleAccesser->getPostureModule().setPos(&pos);
 }
 
@@ -271,7 +272,8 @@ void ftStatusUniqProcessDamage::execStatus(soModuleAccesser* moduleAccesser) {
                     float threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xc65, 0);
                     float ySq = stickY * stickY;
                     float xSq = stickX * stickX;
-                    if (xSq + ySq >= threshold * threshold) {
+                    float thresholdSq = threshold * threshold;
+                    if (xSq + ySq >= thresholdSq) {
                         applyDriftInput(moduleAccesser, damageLog, 0xc66, stickX, stickY);
                         moduleAccesser->getControllerModule().resetFlickX();
                         moduleAccesser->getControllerModule().resetFlickY();
@@ -298,7 +300,8 @@ void ftStatusUniqProcessDamage::execStop(soModuleAccesser* moduleAccesser) {
                     float threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xc65, 0);
                     float ySq = stickY * stickY;
                     float xSq = stickX * stickX;
-                    if (xSq + ySq >= threshold * threshold) {
+                    float thresholdSq = threshold * threshold;
+                    if (xSq + ySq >= thresholdSq) {
                         applyDriftInput(moduleAccesser, damageLog, 0xc66, stickX, stickY);
                         moduleAccesser->getControllerModule().resetFlickX();
                         moduleAccesser->getControllerModule().resetFlickY();
@@ -344,9 +347,10 @@ void ftStatusUniqProcessDamage::leaveStop(soModuleAccesser* moduleAccesser, int 
                 }
             }
         }
+        ftAudience* audience;
         int entryId = moduleAccesser->getWorkManageModule().getInt(0x1000003f);
         if (entryId != -1) {
-            ftAudience* audience = g_ftAudienceManager->m_audience;
+            audience = g_ftAudienceManager->m_audience;
             audience->checkCheer(0.0f, entryId, moduleAccesser->getWorkManageModule().getInt(0x10000000));
             moduleAccesser->getWorkManageModule().setInt(-1, 0x1000003f);
         }
