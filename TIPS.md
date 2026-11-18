@@ -1459,3 +1459,21 @@ Method used for `soModelModuleImpl` (sora_melee 0x77DC-0xE268, `include/so/model
   a scratch link of an unsplit unit says nothing about `.data`. **MEDIUM**
 - **Float pool order is the order of first use over all emitted functions, dropped weak copies included.** The Mario
   fireball unit keeps every weak copy, so it shows the original emission order for sora_melee articles. **MEDIUM**
+
+## Scene root (gf_3d_scene part A) findings
+
+- **A member bitfield written in the constructor's initializer list comes out as the same `lbz/rlwinm/stb` read-modify-write as in the
+  body, but before the member arrays are constructed;** a plain POD member (`utList`) with `unk()` in the list emits nothing, a
+  class with a constructor that clears it emits the stores in member order. `gfSceneRoot` needed `m_transformFlag()` (a union with a
+  constructor setting the top byte) and `gfSceneRootEventList` deriving from `utList` with a clearing constructor. **MEDIUM**
+- **A `u8` stored as the top byte of a word (`rlwimi` with a register 5, not `oris`) needs a bitfield view:** `struct { u32 a : 8; u32 b : 24; }`
+  cast over the byte (`Layer::unkC`, `LayerEfb::m_enable : 8`). Tag it `BYTES`. **MEDIUM**
+- **A function that the game calls out of line although it is a tiny header inline** (`LightSetting::GetLightSet`) stayed out of line only
+  when its return class (`LightSet`) had a user-declared destructor; `dont_inline` pragmas and `never_inline` on the member changed other
+  things (the pragma also stops the class's own constructor from inlining into it: 116 bytes instead of 60). **LOW**
+- **Local struct order sets stack slot order:** the first declared local gets the lowest address. A `Vec3f dir; Vec3f pos;` pair declared
+  first and assigned field by field later keeps the original slots where constructors with arguments hoist the constant loads. **MEDIUM**
+- **Two copies of the same code with the redundant second null test** (`bne L; ...; L: beq end`) is `if (a == NULL) { a = b; if (a) X } else if (a) X`
+  with `X` an inlined helper, not a ternary. A float `rate` that is loaded before a null test is a variable that exists before the `if`. **MEDIUM**
+- **Virtual slot layout of `nw4r::g3d::AnmScnRes`:** 0x24 SetUpdateRate, 0x28 GetUpdateRate, 0x2C UpdateFrame (the BrawlHeaders order was wrong), 0x50 and 0x58
+  are the inline `GetLightSetMaxRefNumber` / `GetDiffuseLightMaxRefNumber` (weak copies are emitted right behind the function that calls them). **HIGH**

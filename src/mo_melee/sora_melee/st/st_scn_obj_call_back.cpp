@@ -6,30 +6,6 @@
 #include <string.h>
 #include <types.h>
 
-namespace nw4r {
-namespace g3d {
-// HYPOTHESIS: the parts of the nw4r light object and fog data the callback touches (the shared headers do not describe
-// them; this unit does not include them).
-class LightObj {
-public:
-    void InitLightColor(GXColor color);
-    void InitLightPos(f32 x, f32 y, f32 z);
-    void InitLightDir(f32 x, f32 y, f32 z);
-
-    u8 _0[0x44];
-};
-
-struct FogData {
-    int m_type;      // 0x0
-    f32 m_startZ;    // 0x4
-    f32 m_endZ;      // 0x8
-    f32 m_nearZ;     // 0xC
-    f32 m_farZ;      // 0x10
-    GXColor m_color; // 0x14
-};
-} // namespace g3d
-} // namespace nw4r
-
 // HYPOTHESIS: the light setting of the scene root (offsets are the words the callback reads).
 struct stScnRootLightView {
     u8 _0[0x2878];
@@ -203,26 +179,26 @@ void stScnObjCallBack::ExecCallback_CALC_WORLD(nw4r::g3d::ScnObj::Timing timing,
         for (u32 i = 0; i < m_fogNum; i++) {
             nw4r::g3d::FogData* fog = scnRoot->GetFog(m_fogs[i].m_fogIndex).ptr();
             if ((m_fogs[i].m_flags & 1) && fog != NULL) {
-                fog->m_type = m_fogs[i].m_type;
+                fog->type = static_cast<GXFogType>(m_fogs[i].m_type);
             }
             if (m_fogs[i].m_flags & 2) {
                 if (m_fogs[i].m_start >= m_fogs[i].m_end) {
                     m_fogs[i].m_start = m_fogs[i].m_end - 1.0f;
                 }
                 if (fog != NULL) {
-                    fog->m_startZ = m_fogs[i].m_start;
-                    fog->m_endZ = m_fogs[i].m_end;
+                    fog->startz = m_fogs[i].m_start;
+                    fog->endz = m_fogs[i].m_end;
                 }
             }
             if ((m_fogs[i].m_flags & 4) && fog != NULL) {
-                fog->m_nearZ = m_fogs[i].unk14;
-                fog->m_farZ = m_fogs[i].unk18;
+                fog->nearz = m_fogs[i].unk14;
+                fog->farz = m_fogs[i].unk18;
             }
             if (m_fogs[i].m_flags & 8) {
                 GXColor color = { (u8)m_fogs[i].m_color.m_r, (u8)m_fogs[i].m_color.m_g, (u8)m_fogs[i].m_color.m_b,
                                   (u8)m_fogs[i].m_color.m_a };
                 if (fog != NULL) {
-                    fog->m_color = color;
+                    fog->color = color;
                 }
             }
         }

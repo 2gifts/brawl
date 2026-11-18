@@ -28,7 +28,6 @@ extern "C" void Release__Q34nw4r3g3d7ResFileFv(nw4r::g3d::ResFile* resFile);
 extern "C" void* GetResAnmScn__Q34nw4r3g3d7ResFileCFi(const nw4r::g3d::ResFile* resFile, int index);
 extern "C" void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(void* self, void* anm);
 // gfSceneRoot::setInfoCamResAnm(animation), gfSceneRoot::removeInfoCamResAnm() and gfSceneRoot::remove(layer, model)
-extern "C" void fn_8000D1B8(gfSceneRoot* root, int layer, void* scnMdl);
 
 // The flag of the menu data (of the record of the game) that says that the screen is wide.
 // HYPOTHESIS: the name; the flag is the high bit of the byte at 0x28.
@@ -275,7 +274,7 @@ void muEndMovieTask::processDefault() {
         break;
     }
     case Step_Hide:
-        fn_8000D1B8(g_gfSceneRoot, 8, m_object->m_sceneModel);
+        g_gfSceneRoot->remove((gfSceneRoot::LayerType)8, (nw4r::g3d::ScnMdl*)m_object->m_sceneModel);
         m_step = Step_Done;
         break;
     case Step_Done:

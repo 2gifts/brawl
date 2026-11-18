@@ -7,7 +7,6 @@
 #include <mu/mu_how_to_play.h>
 
 // gfSceneRoot: main.dol has the functions, the shared header does not.
-extern "C" void fn_8000D1B8(gfSceneRoot* root, int layer, nw4r::g3d::ScnMdl* model);
 // nw4r::g3d::ResAnmScn, ResNode
 extern "C" void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn anmScn);
 extern "C" void ResNode_SetRotate__FPQ34nw4r3g3d7ResNodefff(void* node, float x, float y, float z);
@@ -127,7 +126,7 @@ void muHowToPlayTask::addMovieModel() {
 }
 
 void muHowToPlayTask::removeMovieModel() {
-    fn_8000D1B8(g_gfSceneRoot, 8, m_object->m_sceneModel);
+    g_gfSceneRoot->remove((gfSceneRoot::LayerType)8, m_object->m_sceneModel);
 }
 
 // Takes the model out of the scene and ends the movie.

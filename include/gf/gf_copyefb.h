@@ -1,6 +1,7 @@
 #pragma once
 
-// Local shadow of BrawlHeaders/gf/gf_copyefb.h: names the fields of one copied frame (format, buffer, size, dimensions).
+// Shadows include/Brawl/Include/gf/gf_copyefb.h: m_104 is a mode byte (0, 1 or 2) that gfSceneRoot::renderXlu switches
+// on, and the word at 0x6C is the color gfSceneRoot::renderXlu draws the copy with.
 
 #include <StaticAssert.h>
 #include <memory.h>
@@ -22,7 +23,7 @@ static_assert(sizeof(gfCopyEFB) == 52, "Class is wrong size!");
 class gfCopyEFBMgr {
 public:
     gfCopyEFB m_copyEFBs[2];
-    bool m_104;
+    u8 m_104; // HYPOTHESIS: 0 = off, 1 = copy after layer 6, 2 = copy after layer 3 (renderXlu); st_tengan sets it to 1
     char _105[3];
     int m_108;
 

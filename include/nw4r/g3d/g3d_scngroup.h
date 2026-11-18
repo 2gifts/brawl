@@ -24,9 +24,9 @@ public:
     virtual void GetValueForSortOpa();
     virtual void GetValueForSortXlu();
     virtual void CalcWorldMtx();
-    virtual void Insert(int sceneId, nw4r::g3d::ScnObj* scnObj);
+    virtual bool Insert(int sceneId, nw4r::g3d::ScnObj* scnObj);
     virtual void Remove(u32);
-    virtual void Remove(nw4r::g3d::ScnObj* obj);
+    virtual bool Remove(nw4r::g3d::ScnObj* obj);
     // 0xDC: first member after the ScnObj base
     char spacer2[0x8];
     int sceneItemsCount;
