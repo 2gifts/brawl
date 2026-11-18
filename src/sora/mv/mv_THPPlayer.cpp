@@ -1,3 +1,5 @@
+#include <revolution/DVD/dvd.h>
+#include <revolution/OS/OSMessage.h>
 #include <mv/mv_THPAudioDecode.h>
 #include <mv/mv_THPDraw.h>
 #include <mv/mv_THPPlayer.h>
@@ -254,3 +256,255 @@ BOOL THPPlayerPlay() {
     }
     return FALSE;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_8007C9DC {
+
+struct Work {
+    char pad[0x7c0];
+    OSMessageQueue queue;
+    char pad2[0x7f4 - 0x7c0 - sizeof(OSMessageQueue)];
+    int value;
+    int* first;
+    int* second;
+};
+extern Work* lbl_805A01F8;
+extern "C" int fn_801E8078(int);
+extern "C" int fn_801FB0F8(void*);
+extern "C" void fn_8007E4C4();
+extern "C" void fn_80207BC0(int*);
+extern "C" void fn_801FF4CC(void*);
+
+extern "C" void fn_8007C9DC() {
+    if (*(int*)&g_thpObject.unk80[0x20] && g_thpObject.unk80[0x24]) {
+        g_thpObject.unk80[0x25] = 0;
+        g_thpObject.unk80[0x24] = 0;
+        fn_801E8078(lbl_805A01F8->value);
+        if (!*(int*)&g_thpObject.unkAC[4]) {
+            fn_801FB0F8(&g_thpObject);
+            ReadThreadCancel();
+        }
+        fn_8007E4C4();
+        if (g_thpObject.unkA7[0]) {
+            if (lbl_805A01F8->first) {
+                fn_80207BC0(lbl_805A01F8->first);
+                fn_801FF4CC(lbl_805A01F8->first);
+                lbl_805A01F8->first = 0;
+            }
+            if (lbl_805A01F8->second) {
+                fn_80207BC0(lbl_805A01F8->second);
+                fn_801FF4CC(lbl_805A01F8->second);
+                lbl_805A01F8->second = 0;
+            }
+            AudioDecodeThreadCancel();
+        }
+        OSMessage msg;
+        void* result;
+        do {
+            if (OSReceiveMessage(&lbl_805A01F8->queue, &msg, 0) == 1)
+                result = msg;
+            else
+                result = 0;
+        } while (result);
+        g_thpObject.unkA8 = 0;
+        *(int*)&g_thpObject.unkAC[0] = 0;
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8007BE4C {
+
+extern "C" {
+extern char* lbl_805A01F8;
+extern int lbl_805A01E8;
+extern int lbl_805A01EC;
+extern unsigned int lbl_805A01F0;
+extern int lbl_805A01F4;
+extern char lbl_8059DB98;
+extern char g_thpObject[];
+void* memcpy(void*, const void*, unsigned long);
+int strcmp(const char*, const char*);
+int fn_801F6708(void*, void*, unsigned int, unsigned int,
+                void (*)(void*, void*), void*);
+int fn_801F6524(void*);
+
+int fn_8007BE4C(void) {
+    switch (lbl_805A01E8) {
+    case 0:
+        fn_801F6708(g_thpObject, lbl_805A01F8 + 0x20, 0x40, 0, 0, (void*)2);
+        lbl_805A01E8 = lbl_805A01E8 + 1;
+        break;
+    case 1:
+        if (DVDGetCommandBlockStatus((DVDCommandBlock*)g_thpObject) == 0) {
+            lbl_805A01E8 = lbl_805A01E8 + 1;
+        }
+        break;
+    case 2:
+        memcpy(g_thpObject + 0x3C, lbl_805A01F8 + 0x20, 0x30);
+        if (strcmp(g_thpObject + 0x3C, &lbl_8059DB98) != 0) {
+            fn_801F6524(g_thpObject);
+            return -1;
+        }
+        if ((*(unsigned int*)(g_thpObject + 0x40) - 0x10000) != 0x1000) {
+            fn_801F6524(g_thpObject);
+            return -1;
+        }
+        lbl_805A01EC = *(int*)(g_thpObject + 0x5C);
+        fn_801F6708(g_thpObject, lbl_805A01F8 + 0x20, 0x20, lbl_805A01EC, 0,
+                    (void*)2);
+        lbl_805A01E8 = lbl_805A01E8 + 1;
+        break;
+    case 3:
+        if (DVDGetCommandBlockStatus((DVDCommandBlock*)g_thpObject) == 0) {
+            lbl_805A01E8 = lbl_805A01E8 + 1;
+        }
+        break;
+    case 4:
+        memcpy(g_thpObject + 0x6C, lbl_805A01F8 + 0x20, 0x14);
+        lbl_805A01EC = lbl_805A01EC + 0x14;
+        *(unsigned char*)(g_thpObject + 0xA7) = 0;
+        lbl_805A01F0 = 0;
+        lbl_805A01E8 = lbl_805A01E8 + 1;
+        break;
+    case 5:
+        if (lbl_805A01F0 < *(unsigned int*)(g_thpObject + 0x6C)) {
+            unsigned char b = *(unsigned char*)(g_thpObject + 0x70 + lbl_805A01F0);
+            switch (b) {
+            case 0:
+                fn_801F6708(g_thpObject, lbl_805A01F8 + 0x20, 0x20,
+                            lbl_805A01EC, 0, (void*)2);
+                break;
+            case 1:
+                fn_801F6708(g_thpObject, lbl_805A01F8 + 0x20, 0x20,
+                            lbl_805A01EC, 0, (void*)2);
+                break;
+            default:
+                fn_801F6524(g_thpObject);
+                return -1;
+            }
+            lbl_805A01E8 = lbl_805A01E8 + 1;
+        } else {
+            lbl_805A01E8 = lbl_805A01E8 + 2;
+        }
+        break;
+    case 6:
+        if (DVDGetCommandBlockStatus((DVDCommandBlock*)g_thpObject) == 0) {
+            unsigned char b = *(unsigned char*)(g_thpObject + 0x70 + lbl_805A01F0);
+            switch (b) {
+            case 0:
+                memcpy(g_thpObject + 0x80, lbl_805A01F8 + 0x20, 0xC);
+                lbl_805A01EC = lbl_805A01EC + 0xC;
+                break;
+            case 1:
+                memcpy(g_thpObject + 0x8C, lbl_805A01F8 + 0x20, 0x10);
+                *(unsigned char*)(g_thpObject + 0xA7) = 1;
+                lbl_805A01EC = lbl_805A01EC + 0x10;
+                break;
+            }
+            lbl_805A01F0 = lbl_805A01F0 + 1;
+            lbl_805A01E8 = lbl_805A01E8 - 1;
+        }
+        break;
+    case 7:
+        *(unsigned char*)(g_thpObject + 0xA5) = 0;
+        *(unsigned char*)(g_thpObject + 0xA4) = 0;
+        *(unsigned char*)(g_thpObject + 0xA6) = 0;
+        *(int*)(g_thpObject + 0xB0) = lbl_805A01F4;
+        *(int*)(g_thpObject + 0xA0) = 1;
+        return 1;
+    }
+    return 0;
+}
+}
+}
+
+namespace jj_8007CB98 {
+#pragma opt_common_subs off
+extern int* lbl_805A01F8;
+extern "C" int fn_801E9AB0(void);
+extern "C" int fn_8007E958(int);
+extern "C" void fn_802022DC(int, int);
+extern "C" int fn_8007CF00(void);
+#define P ((char*)&g_thpObject)
+#define I(n) (*(int*)(P + (n)))
+#define B(n) (*(u8*)(P + (n)))
+#define Q (*(u64*)(P + 0xC8))
+extern "C" void fn_8007CB98(int arg) {
+    int r31;
+    void (*cb)(int) = (void (*)(int))*(int*)((char*)lbl_805A01F8 + 0x7F4);
+    if (cb) cb(arg);
+    r31 = -1;
+    if (I(0xA0) != 0 && B(0xA4) == 2) {
+        if (I(0xA8) != 0 || I(0xAC) != 0) {
+            B(0xA5) = 5; B(0xA4) = 5; return;
+        }
+        ++Q;
+        if ((I(0xCC) | I(0xC8)) == 0) {
+            int flags = I(0x88);
+            int r;
+            if (flags & 1) {
+                if (fn_801E9AB0() == 0) r = 1;
+                else goto fail;
+            } else if (flags & 2) {
+                if ((u32)fn_801E9AB0() == 1) r = 1;
+                else goto fail;
+            } else r = 1;
+            goto done;
+        fail: r = 0;
+        done:
+            if (r != 0) {
+                if (B(0xA7) != 0) {
+                    if (I(0xE0) - I(0xE4) <= 1) {
+                        r31 = fn_8007E958(0);
+                        I(0xE0) = I(0xE0) + 1;
+                    } else {
+                        int v = *(int*)((char*)lbl_805A01F8 + 0x7F8);
+                        if (v != 0) fn_802022DC(v, 1);
+                        v = *(int*)((char*)lbl_805A01F8 + 0x7FC);
+                        if (v != 0) fn_802022DC(v, 1);
+                        B(0xA5) = 2;
+                    }
+                } else r31 = fn_8007E958(0);
+            } else { I(0xCC) = -1; I(0xC8) = -1; }
+        } else {
+            if (B(0xA7) != 0 && ((I(0xCC) ^ 1) | I(0xC8)) == 0 && B(0xA5) != 2) {
+                int v = *(int*)((char*)lbl_805A01F8 + 0x7F8);
+                if (v != 0) fn_802022DC(v, 1);
+                v = *(int*)((char*)lbl_805A01F8 + 0x7FC);
+                if (v != 0) fn_802022DC(v, 1);
+                B(0xA5) = 2;
+            }
+            if (fn_8007CF00() != 0) {
+                if (B(0xA7) != 0) {
+                    if (I(0xE0) - I(0xE4) <= 1) {
+                        r31 = fn_8007E958(0);
+                        I(0xE0) = I(0xE0) + 1;
+                    }
+                } else r31 = fn_8007E958(0);
+            }
+        }
+        if (r31 != 0 && (u32)r31 != 0xffffffffUL) {
+            if (I(0xE8) != 0)
+                OSSendMessage((OSMessageQueue*)((char*)lbl_805A01F8 + 0x7C0), (void*)I(0xE8), 0);
+            I(0xE8) = r31;
+        }
+        if ((B(0xA6) & 1) == 0) {
+            if (B(0xA7) != 0) {
+                u32 count = (u32)(I(0xE4) + I(0xC0));
+                if (count == (u32)I(0x50) && I(0xEC) == 0) {
+                    B(0xA5) = 3; B(0xA4) = 3;
+                }
+            } else {
+                u32 target;
+                if (I(0xE8) != 0) target = *(u32*)(I(0xE8) + 0xC) + (u32)I(0xC0);
+                else target = (u32)I(0xC0) - 1;
+                if (target == (u32)(I(0x50) - 1) && r31 == 0) {
+                    B(0xA5) = 3; B(0xA4) = 3;
+                }
+            }
+        }
+    }
+}
+}
+

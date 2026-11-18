@@ -1,3 +1,4 @@
+#include <types.h>
 #include <nw4r/ef.h>
 
 namespace nw4r {
@@ -377,3 +378,9 @@ void Effect::SetRootMtx(const math::MTX34& rMtx) {
 
 } // namespace ef
 } // namespace nw4r
+
+// TODO: clean up, give variables real names
+extern "C" u32 fn_801643C8(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x24);
+}
+

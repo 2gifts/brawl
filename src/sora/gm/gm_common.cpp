@@ -3040,3 +3040,343 @@ bool gmItSwitch::gmCheckItemSwitch(itKind kind) {
     }
     return enabled;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800557F8 {
+extern "C" void* fn_8004E5C4(void*);
+extern void* g_GameGlobal;
+
+extern "C" s32 fn_800557F8(s32 arg0, s32 arg1, s32 arg2) {
+    s32 off = arg2 * 0xCC;
+    s32 base = (arg0 - 1) * 0x264;
+    s32 sh = arg1 * 4;
+    s32 i;
+    for (i = arg2; i < 3; i++) {
+        u32 t = (u32)fn_8004E5C4(g_GameGlobal);
+        t = t + base;
+        t = t + off;
+        u32 v = *(u32*)(t + sh + 0x32C);
+        if ((v >> 30) != 0) {
+            return 1;
+        }
+        off += 0xCC;
+    }
+    return 0;
+}
+}
+
+namespace jj_80055888 {
+extern "C" void* fn_8004E5C4(void*);
+extern "C" void* g_GameGlobal;
+
+inline u32 findEntry(s32 a, s32 b, s32 i) {
+    for (s32 j = b; j < 3; j++) {
+        u32* p = (u32*)((u8*)fn_8004E5C4(g_GameGlobal) + 0x32c + (a - 1) * 0x264 + j * 0xcc + i * 4);
+        if (*p >> 30) return 1;
+    }
+    return 0;
+}
+
+extern "C" s32 fn_80055888(s32 a, s32 b) {
+    s32 count = 0;
+    for (s32 i = 0; i < 0x33; i++) {
+        if (findEntry(a, b, i) == 1) count++;
+    }
+    return count;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80056184 {
+struct ItemFlags { int unk0, unk4, unk8, unkC; };
+extern "C" {
+extern ItemFlags lbl_8042D098;
+extern ItemFlags lbl_804977E0;
+extern u32 fn_8004F3BC(u8);
+ItemFlags* fn_80056184(void) {
+    int* src = (int*)&lbl_8042D098;
+    int* dst = (int*)&lbl_804977E0;
+    *dst++ = *src++;
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    ItemFlags* p = &lbl_804977E0;
+    if (*(u8*)((char*)g_GameGlobal->m_modeMelee + 0x13) != 1) p->unk0 &= 0xFFFFBFFF;
+    if (fn_8004F3BC(0) == 0) p->unkC &= 0xFFFFFFF7;
+    if (fn_8004F3BC(1) == 0) p->unkC &= 0xFFF7FFFF;
+    if (fn_8004F3BC(2) == 0) p->unkC &= 0xFF7FFFFF;
+    if (fn_8004F3BC(3) == 0) p->unkC &= 0xFFFFFFFD;
+    if (fn_8004F3BC(4) == 0) p->unkC &= 0xFFFFFFFB;
+    if (fn_8004F3BC(5) == 0) p->unkC &= 0xFFDFFFFF;
+    return p;
+}
+}
+}
+
+namespace jj_80055DD4 {
+
+struct ItemFlags { int unk0, unk4, unk8, unkC; };
+
+extern "C" {
+extern ItemFlags lbl_8042C828[];
+extern ItemFlags lbl_804977E0;
+extern u32 fn_8004F3BC(u8);
+
+ItemFlags* fn_80055DD4(int arg0) {
+    int* src = (int*)&lbl_8042C828[arg0];
+    int* dst = (int*)&lbl_804977E0;
+    *dst++ = *src++;
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    ItemFlags* p = &lbl_804977E0;
+    if (*(u8*)((char*)g_GameGlobal->m_modeMelee + 0x13) != 1)
+        p->unk0 &= 0xFFFFBFFF;
+    if (fn_8004F3BC(0) == 0) p->unkC &= 0xFFFFFFF7;
+    if (fn_8004F3BC(1) == 0) p->unkC &= 0xFFF7FFFF;
+    if (fn_8004F3BC(2) == 0) p->unkC &= 0xFF7FFFFF;
+    if (fn_8004F3BC(3) == 0) p->unkC &= 0xFFFFFFFD;
+    if (fn_8004F3BC(4) == 0) p->unkC &= 0xFFFFFFFB;
+    if (fn_8004F3BC(5) == 0) p->unkC &= 0xFFDFFFFF;
+    return p;
+}
+}
+}
+
+namespace jj_80056064 {
+
+struct ItemFlags { int unk0, unk4, unk8, unkC; };
+
+extern "C" {
+extern ItemFlags lbl_8042CFB8[];
+extern ItemFlags lbl_804977E0;
+extern u32 fn_8004F3BC(u8);
+
+ItemFlags* fn_80056064(int arg0) {
+    int* src = (int*)&lbl_8042CFB8[arg0];
+    int* dst = (int*)&lbl_804977E0;
+    *dst++ = *src++;
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    ItemFlags* p = &lbl_804977E0;
+    if (*(u8*)((char*)g_GameGlobal->m_modeMelee + 0x13) != 1)
+        p->unk0 &= 0xFFFFBFFF;
+    if (fn_8004F3BC(0) == 0) p->unkC &= 0xFFFFFFF7;
+    if (fn_8004F3BC(1) == 0) p->unkC &= 0xFFF7FFFF;
+    if (fn_8004F3BC(2) == 0) p->unkC &= 0xFF7FFFFF;
+    if (fn_8004F3BC(3) == 0) p->unkC &= 0xFFFFFFFD;
+    if (fn_8004F3BC(4) == 0) p->unkC &= 0xFFFFFFFB;
+    if (fn_8004F3BC(5) == 0) p->unkC &= 0xFFDFFFFF;
+    return p;
+}
+}
+}
+
+namespace jj_80053078 {
+extern "C" {
+extern void* g_GameGlobal;
+unsigned int* fn_8004E640(void*);
+unsigned int* fn_8004E64C(void*);
+unsigned int* fn_8004E658(void*);
+unsigned int* fn_8004E664(void*);
+unsigned int* fn_8004E670(void*);
+unsigned int* fn_8004E67C(void*);
+unsigned int* fn_8004E688(void*);
+unsigned int* fn_8004E694(void*);
+}
+extern "C" void fn_80053078(int a, int b, int c, int d, unsigned int* p) {
+    p = 0;
+    if ((unsigned char)(b + 0xF7) <= 1U) {
+        if (d == 0) p = fn_8004E694(g_GameGlobal);
+    } else if (c != 0) {
+        p = fn_8004E664(g_GameGlobal);
+    } else if (d != 0) {
+        switch (a) {
+        case 0:
+        default: p = fn_8004E670(g_GameGlobal); break;
+        case 1: p = fn_8004E67C(g_GameGlobal); break;
+        case 2: p = fn_8004E688(g_GameGlobal); break;
+        }
+    } else {
+        switch (a) {
+        case 0:
+        default: p = fn_8004E640(g_GameGlobal); break;
+        case 1: p = fn_8004E64C(g_GameGlobal); break;
+        case 2: p = fn_8004E658(g_GameGlobal); break;
+        }
+    }
+    if (p != 0) {
+        unsigned int v = *p;
+        unsigned int n = 0x05F5E0FFU;
+        if (v <= 0x05F5E0FEU) n = v + 1;
+        *p = n;
+    }
+}
+}
+
+namespace jj_80055EF4 {
+
+struct ItemFlags { int unk0, unk4, unk8, unkC; };
+
+extern "C" {
+extern ItemFlags lbl_8042C958[];
+extern ItemFlags lbl_8042CC88[];
+extern ItemFlags lbl_804977E0;
+extern u32 fn_8004F3BC(u8);
+
+ItemFlags* fn_80055EF4(int arg0, int arg1) {
+    if (arg1 == 1) {
+        int* src = (int*)&lbl_8042C958[arg0];
+        int* dst = (int*)&lbl_804977E0;
+        *dst++ = *src++;
+        dst[0] = src[0];
+        dst[1] = src[1];
+        dst[2] = src[2];
+    }
+    if (arg1 == 2) {
+        int* src = (int*)&lbl_8042CC88[arg0];
+        int* dst = (int*)&lbl_804977E0;
+        *dst++ = *src++;
+        dst[0] = src[0];
+        dst[1] = src[1];
+        dst[2] = src[2];
+    }
+    ItemFlags* p = &lbl_804977E0;
+    if (*(u8*)((char*)g_GameGlobal->m_modeMelee + 0x13) != 1)
+        p->unk0 &= 0xFFFFBFFF;
+    if (fn_8004F3BC(0) == 0) p->unkC &= 0xFFFFFFF7;
+    if (fn_8004F3BC(1) == 0) p->unkC &= 0xFFF7FFFF;
+    if (fn_8004F3BC(2) == 0) p->unkC &= 0xFF7FFFFF;
+    if (fn_8004F3BC(3) == 0) p->unkC &= 0xFFFFFFFD;
+    if (fn_8004F3BC(4) == 0) p->unkC &= 0xFFFFFFFB;
+    if (fn_8004F3BC(5) == 0) p->unkC &= 0xFFDFFFFF;
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8005541C {
+
+
+extern "C" int fn_8005541C() {
+    GameGlobal* g = g_GameGlobal;
+    unsigned char* rule = (unsigned char*)g->m_setRule;
+    signed char* mode = (signed char*)g->m_modeMelee;
+    unsigned char* chars = (unsigned char*)g->m_selCharData;
+
+    switch (rule[7]) {
+    default:
+    case 0:
+        mode[0] = -1;
+        return 0;
+
+    case 1:
+        mode[0] = -1;
+        return 1;
+
+    case 2: {
+        int index = mode[0];
+        int found = 0;
+        if (index == -1) {
+            index = 0;
+        } else {
+            index = index + 1;
+        }
+
+        for (int i = 0; i != 4; i++) {
+            int n = (index + i) % 4;
+            if (chars[n * 0x5c + 0xb9] == 0) {
+                index = n;
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            index = -1;
+        }
+        mode[0] = index;
+        return 0;
+    }
+
+    case 3:
+        mode[0] = -1;
+        return 2;
+
+    case 4: {
+        signed char n = mode[2];
+        int index = -1;
+        if (n != -1) {
+            unsigned char* row = chars + n * 0x5c;
+            if (row[0xb9] == 0) {
+                index = n;
+            }
+        }
+        mode[0] = index;
+        return 0;
+    }
+    }
+}
+}
+
+namespace jj_80053C34 {
+struct Player { char pad[0x25]; u8 type; char pad26[3]; u8 value; char pad2a[9]; u8 rank; char rest[0x278]; };
+struct Mode { char pad[5]; u8 mode; };
+struct Global { char pad[0x18]; Player* players; Mode* mode; };
+extern "C" Global* g_GameGlobal;
+extern "C" u16* fn_8004DA14(void*, int, int);
+extern "C" void fn_80053C34() {
+    Player* players = g_GameGlobal->players;
+    if (g_GameGlobal->mode->mode == 1) {
+        int count = 0;
+        Player* p = players;
+        u16* scores[4] = {0, 0, 0, 0};
+        u16** score = scores;
+        int order[4];
+        int* out = order;
+        for (int i = 0; i < 4; i++, p++, score++) {
+            if (p->type != 3) {
+                count++;
+                *score = fn_8004DA14(g_GameGlobal, i, p->value);
+                if (p->rank != 0) *out++ = i;
+            }
+        }
+        int exempt = -1;
+        if (count == 4) {
+            if (*scores[order[0]] < *scores[order[1]]) { int temp = order[0]; order[0] = order[1]; order[1] = temp; }
+            if (*scores[order[0]] < *scores[order[2]]) { int temp = order[0]; order[0] = order[2]; order[2] = temp; }
+            if (*scores[order[1]] < *scores[order[2]]) { int temp = order[1]; order[1] = order[2]; order[2] = temp; }
+            if (*scores[order[0]] == *scores[order[1]] && players[order[0]].rank < players[order[1]].rank) { int temp = order[0]; order[0] = order[1]; order[1] = temp; }
+            if (*scores[order[0]] == *scores[order[2]] && players[order[0]].rank < players[order[2]].rank) { int temp = order[0]; order[0] = order[2]; order[2] = temp; }
+            if (*scores[order[1]] == *scores[order[2]] && players[order[1]].rank < players[order[2]].rank) { int temp = order[1]; order[1] = order[2]; order[2] = temp; }
+            exempt = order[2];
+        }
+        score = scores;
+        for (int i = 0; i < 4; players++, score++, i++) {
+            u16* entry;
+            if (players->type != 3 && (entry = *score) != 0) {
+                u16 value = *entry;
+                if (players->rank == 0) {
+                    value += 20;
+                    if (value > 300) value = 300;
+                } else {
+                    switch (count) {
+                    case 2:
+                        if (value >= 20) value -= 20;
+                        else value = 0;
+                        break;
+                    case 3:
+                    case 4:
+                        if (i != exempt) value = value >= 10 ? (u16)(value - 10) : 0;
+                        break;
+                    }
+                }
+                *entry = value;
+            }
+        }
+    }
+}
+}
+

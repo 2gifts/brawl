@@ -1,3 +1,8 @@
+#include <gf/gf_heap_manager.h>
+#include <gf/gf_error_check.h>
+#include <gm/gm_global.h>
+#include <revolution/FA/FARemove.h>
+#include <revolution/OS/OSError.h>
 #include <gf/gf_callback.h>
 #include <gf/gf_error_manager.h>
 #include <gf/gf_file_io.h>
@@ -994,3 +999,1263 @@ extern "C" int fn_8001F988(gfFileIORequest* request) {
     }
     return result;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800207FC {
+extern "C" {
+void OSReport(const char* fmt, ...);
+void OSSleepTicks(u64 ticks);
+void fn_8001B8E0(int, int);
+void fn_8001B9EC(void* dest, const char* src);
+s32 fn_8020A870(void* p);
+extern char lbl_804215C8[];
+}
+
+extern "C" s32 fn_800207FC(u8* arg0) {
+    char buf[0x74];
+    s32 retry;
+    s32 status;
+    const char** list;
+    s32 result = 0;
+    u32 count;
+    u32 i = 0;
+
+    count = *(u32*)(arg0 + 0x8);
+    list = *(const char***)(arg0 + 0xC);
+
+    for (; i < count; i++) {
+        fn_8001B9EC(buf, *list);
+        do {
+            status = fn_8020A870(buf);
+            retry = 0;
+            if ((u32)(status + 3) <= 1) {
+                OSSleepTicks((u64)((*(u32*)0x800000F8 >> 2) / 1000) << 4);
+                retry = 1;
+            } else if (status != -0xC) {
+                fn_8001B8E0(status, 0);
+            }
+        } while (retry != 0);
+
+        if (status == 0) {
+            result = 0;
+        } else {
+            OSReport(lbl_804215C8, status);
+        }
+        list++;
+    }
+    return result;
+}
+}
+
+namespace jj_8001BBB8 {
+struct Work {
+    void* first;
+    void* second;
+    unsigned short count;
+    unsigned short count2;
+    int value;
+    int value2;
+};
+
+struct State {
+    int value;
+    Work* work;
+    unsigned char bytes[8];
+};
+
+extern "C" {
+void fn_8001BB1C();
+void fn_8001BB8C();
+void fn_803EC154(int, void (*)(), void (*)());
+void fn_803EBFCC(int);
+void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int, unsigned long);
+void fn_803EBC54(int, int, int, State*);
+int fn_803EC094(int);
+void fn_801FC318(void*, const void*, const void*, int, int);
+
+extern State lbl_80494928;
+extern unsigned char lbl_80494938[];
+extern int lbl_8059C52C;
+extern unsigned char lbl_8059FFDC;
+extern const unsigned char lbl_805A14B0[8];
+extern const unsigned char lbl_805A14B8[8];
+
+void fn_8001BBB8() {
+    fn_803EC154(0, fn_8001BB1C, fn_8001BB8C);
+    fn_803EBFCC(0x10000);
+
+    lbl_80494928.value = 0;
+    lbl_80494928.work = 0;
+
+    Work* work =
+        (Work*)alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(1, 0x1194);
+    work->first = (char*)work + 0x20;
+    work->second = (char*)work + 0x160;
+    work->count = 4;
+    work->count2 = 4;
+    work->value = 1;
+    work->value2 = 1;
+    lbl_80494928.work = work;
+
+    fn_803EBC54(0, 0, 0, &lbl_80494928);
+
+    if (lbl_80494928.bytes[1] & 0x10) {
+        lbl_8059C52C = 1;
+        int enabled = 0;
+        lbl_8059FFDC = 1;
+
+        if (fn_803EC094(0x41) == 1) {
+            enabled = 1;
+        }
+        if (enabled) {
+            lbl_8059C52C = 3;
+        }
+    }
+
+    fn_801FC318(lbl_80494938, lbl_805A14B0, lbl_805A14B8, 0, 2);
+}
+}
+}
+
+namespace jj_8001CFA4 {
+extern "C" {
+void OSLockMutex(void*);
+void OSUnlockMutex(void*);
+int fn_8001D134(void*);
+char* strcpy(char*, const char*);
+char* strcat(char*, const char*);
+unsigned long strlen(const char*);
+extern char lbl_80494910[0x18];
+extern char lbl_8059C570[6];
+}
+
+struct S {
+    const char* p;
+    int a, b, c, d;
+    unsigned r : 8;
+    unsigned x : 8;
+    unsigned y : 16;
+};
+
+struct Lock {
+    void* mutex;
+    bool locked : 8;
+
+    Lock(void* m, bool l = true) {
+        mutex = m;
+        locked = l;
+        if (locked) OSLockMutex(mutex);
+    }
+
+    void release() {
+        if (locked) OSUnlockMutex(mutex);
+    }
+};
+
+extern "C" int fn_8001CFA4(S* arg) {
+    Lock lock(lbl_80494910);
+    S local;
+    char buf2[0x80];
+    char buf1[0x80];
+
+    local = *arg;
+
+    const char* s = arg->p;
+    const char* p = &s[strlen(s) - 1];
+    do {
+        if (*(p - 1) == '/') break;
+        p--;
+    } while (p != s);
+    strcpy(buf2, p);
+
+    strcpy(buf1, lbl_8059C570);
+    strcat(buf1, buf2);
+    local.p = buf1;
+
+    int result = fn_8001D134(&local);
+    if (result == 0) {
+        arg->c = local.c;
+        arg->b = local.b;
+        arg->r = result;
+    }
+
+    Lock* lp = &lock;
+    lp->release();
+    return result;
+}
+}
+
+namespace jj_8001FB64 {
+
+
+extern "C" {
+
+int fn_803EBE4C(void);
+extern char lbl_8042153C[];
+
+int fn_8001FB64(const char* pattern, unsigned int dest, int unused, int size) {
+    int result;
+    char* output = (char*)dest;
+    char buffer[0x444];
+
+    if ((result = FAFsfirst(pattern, 0x20, (FAEntryInfo*)buffer)) != 0) {
+        if (fn_803EBE4C() != 2) {
+            fn_803EBE4C();
+        }
+    } else {
+        {
+            char* name = buffer + 0x23a;
+            if (*name == 0) {
+                name = buffer + 0x22d;
+            }
+
+            unsigned int length = strlen(name);
+            if (size == 0 || length < (unsigned int)size) {
+                strcpy(output, name);
+                *(output += length) = 0;
+                ++output;
+            }
+        }
+
+        while (result == 0) {
+            result = FAFsnext((FAEntryInfo*)buffer);
+            if (result == 0) {
+                char* name = buffer + 0x23a;
+                if (*name == 0) {
+                    name = buffer + 0x22d;
+                }
+
+                unsigned int length = strlen(name);
+                strcpy(output, name);
+                *(output += length) = 0;
+                ++output;
+            } else {
+                if (fn_803EBE4C() != 2) {
+                    fn_803EBE4C();
+                    OSReport(lbl_8042153C, pattern);
+                }
+                break;
+            }
+        }
+    }
+
+    return 0;
+}
+
+}
+}
+
+namespace jj_8001D8E8 {
+extern "C" {
+unsigned int strlen(const char*);
+char* strncpy(char*, const char*, unsigned int);
+int fn_8001B7F8(const char*);
+int fn_8001DA24(char**);
+int fn_8001DC28(char**);
+int fn_8001DB34(char**);
+}
+struct A { const char* p; int a, b, c, d; unsigned r : 8; unsigned x : 8; unsigned y : 16; };
+struct B { unsigned char pad[0x15]; unsigned char x : 8; };
+extern "C" int fn_8001D8E8(A* self) {
+    char buf[128];
+    int t = fn_8001B7F8(self->p);
+    const char* s = self->p;
+    unsigned int n = strlen(s);
+    const char* q = s;
+    for (unsigned int i = 0; i < n; i++) {
+        if (*q == ':') { strncpy(buf, q + 1, 128); goto done; }
+        q++;
+    }
+    strncpy(buf, s, 128);
+done:
+    A l;
+    ((int*)&l)[0] = ((int*)self)[0];
+    ((int*)&l)[1] = ((int*)self)[1];
+    ((int*)&l)[2] = ((int*)self)[2];
+    ((int*)&l)[3] = ((int*)self)[3];
+    ((int*)&l)[4] = ((int*)self)[4];
+    ((int*)&l)[5] = ((int*)self)[5];
+    l.p = buf;
+    int r = 5;
+    switch (t) {
+    case 0: r = 5; break;
+    case 2: r = fn_8001DA24((char**)&l); break;
+    case 3: r = fn_8001DC28((char**)&l); break;
+    case 4:
+        ((B*)&l)->x = ((const unsigned char*)self->p)[2] - '0';
+        r = fn_8001DB34((char**)&l);
+        break;
+    }
+    return r;
+}
+}
+
+namespace jj_8001F84C {
+extern "C" {
+int fn_803C3DE0(int*, int, int);
+void fn_8001B9E8(void);
+int fn_803C3ED8(int*);
+extern const char lbl_80421520[];
+int fn_8001F84C(int arg0, unsigned int dest, int unused, int size) {
+    char buffer[0x444];
+    int status;
+    int result;
+    char* output = (char*)dest;
+    result = -1;
+    status = fn_803C3DE0((int*)buffer, arg0, 0x20);
+    if (status != 0) {
+        if (status != 2) fn_8001B9E8();
+    } else {
+        {
+            char* name = buffer + 0x23A;
+            if (*name == 0) name = buffer + 0x22D;
+            unsigned int length = strlen(name);
+            if (size == 0 || length < (unsigned int)size) {
+                strcpy(output, name);
+                *(output += length) = 0;
+                ++output;
+            }
+        }
+        result = 1;
+        for (; status == 0; ++result) {
+            status = fn_803C3ED8((int*)buffer);
+            if (status == 0) {
+                char* name = buffer + 0x23A;
+                if (*name == 0) name = buffer + 0x22D;
+                unsigned int length = strlen(name);
+                strcpy(output, name);
+                *(output += length) = 0;
+                ++output;
+            } else {
+                if (status != 2) {
+                    fn_8001B9E8();
+                    OSReport(lbl_80421520, arg0);
+                }
+                break;
+            }
+        }
+    }
+    return result;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800208E8 {
+extern "C" {
+void OSLockMutex(void*);
+void OSUnlockMutex(void*);
+void OSReport(const char*, ...);
+void fn_8020D38C(char*);
+s32 fn_8020B5A0(char*, char*);
+s32 fn_8020B834(char*, char*);
+unsigned int strlen(const char*);
+char* strncpy(char*, const char*, unsigned int);
+char* strcat(char*, const char*);
+int strncmp(const char*, const char*, unsigned int);
+extern char lbl_80494910[0x18];
+extern char lbl_8059C57C[5];
+extern char lbl_804215D8[];
+extern char lbl_804215F8[];
+struct Lock {
+    void* mutex;
+    bool locked : 8;
+    Lock(void* m, bool l = true) { mutex = m; locked = l; if (locked) OSLockMutex(mutex); }
+    void release() { if (locked) OSUnlockMutex(mutex); }
+};
+}
+extern "C" int fn_800208E8(const char* name, int arg1) {
+    if (name == 0 || arg1 == 0)
+        return 0;
+    char buf_name[0x80];
+    char buf_path[0x80];
+    char buf_tmp[0x80];
+    Lock lock(lbl_80494910);
+    char arg2[8];
+    unsigned int len = strlen(name);
+    const char* p = name;
+    unsigned int i;
+    for (i = 0; i < len; i++) {
+        if (*p == ':') {
+            strncpy(buf_name, p + 1, 0x80);
+            goto copied;
+        }
+        p++;
+    }
+    strncpy(buf_name, name, 0x80);
+copied:
+    buf_path[0] = 0;
+    if (strncmp(buf_name, lbl_8059C57C, 4) == 0) {
+        strcat(buf_path, buf_name);
+    } else {
+        fn_8020D38C(buf_tmp);
+        strncpy(buf_path, buf_tmp, 0x40);
+        strcat(buf_path, buf_name);
+    }
+    int r = fn_8020B5A0(buf_path, arg2);
+    if (r != 0) {
+        OSReport(lbl_804215D8, r, buf_path);
+        Lock* lp = &lock;
+        lp->release();
+        return 0;
+    }
+    arg2[7] = (char)arg1;
+    r = fn_8020B834(buf_path, arg2);
+    if (r != 0) {
+        OSReport(lbl_804215F8, r, buf_path);
+        Lock* lp = &lock;
+        lp->release();
+        return 0;
+    }
+    Lock* lp = &lock;
+    lp->release();
+    return 1;
+}
+}
+
+namespace jj_8001EE94 {
+
+extern "C" {
+unsigned int strlen(const char*);
+char* strncpy(char*, const char*, int);
+void OSReport(const char*, ...);
+int fn_8001B7F8(const char*);
+int fn_8001B8E0(int, int);
+int fn_8020DA08(int*, int*);
+int fn_803EBF9C(int, void*);
+int fn_803EBE4C(void);
+int fn_803C3FD0(signed char*);
+int fn_803C3F44(void);
+int fn_8001B9E8(void);
+extern char lbl_80420FC0[];
+extern unsigned char lbl_8059C5B4;
+extern unsigned char lbl_8059C5B5;
+}
+
+struct Flags {
+    unsigned r : 8;
+    unsigned x : 8;
+    unsigned y : 16;
+};
+
+struct S {
+    const char* p;
+    int a, b, c, d;
+    Flags flags;
+};
+
+struct B {
+    unsigned char pad[0x15];
+    unsigned char x : 8;
+};
+
+extern "C" int fn_8001EE94(S* self) {
+    int out2;
+    int out1;
+    int data[4];
+    S local;
+    char text[128];
+    char* base = lbl_80420FC0;
+    int type = fn_8001B7F8(self->p);
+    const char* s = self->p;
+    unsigned int n = strlen(s);
+    const char* q = s;
+    for (unsigned int i = 0; i < n; i++) {
+        if (*q == ':') {
+            strncpy(text, q + 1, 128);
+            goto copied;
+        }
+        q++;
+    }
+    strncpy(text, s, 128);
+copied:
+    local.flags = self->flags;
+    int result = self->b;
+    int status = 5;
+    switch (type) {
+    case 1:
+        break;
+    case 2: {
+        status = 0x10;
+        int rv = fn_8020DA08(&out1, &out2);
+        if (rv != 0) {
+            fn_8001B8E0(rv, 0);
+            OSReport(base + 0x4F8);
+        } else {
+            status = 0;
+            result = out1;
+            ((B*)&local)->x = out2;
+        }
+        break;
+    }
+    case 3: {
+        status = 0x10;
+        if (fn_803EBF9C(0x41, data) != 0) {
+            fn_803EBE4C();
+            OSReport(base + 0x510);
+        } else {
+            status = 0;
+            result = (unsigned)(data[1] * data[3] * data[2]) >> 17;
+        }
+        break;
+    }
+    case 4: {
+        signed char bytes[2];
+        status = 0x10;
+        int delta = (unsigned char)self->p[2] - '0';
+        ((B*)&local)->x = delta;
+        bytes[0] = lbl_8059C5B4 + ((B*)&local)->x;
+        bytes[1] = lbl_8059C5B5;
+        int rv = fn_803C3FD0(bytes);
+        if (rv < 0) {
+            fn_803C3F44();
+            fn_8001B9E8();
+            OSReport(base + 0x528);
+        } else {
+            status = 0;
+            result = rv / 131072;
+        }
+        break;
+    }
+    }
+    self->flags.r = status;
+    self->b = result;
+    ((B*)self)->x = ((B*)&local)->x;
+    return status;
+}
+}
+
+namespace jj_8002035C {
+typedef unsigned int u32;
+typedef unsigned long long u64;
+
+extern "C" {
+extern void OSReport(const char *, ...);
+extern void OSSleepTicks(u64);
+extern int fn_8001B8E0(int, int);
+extern void fn_8001B9EC(void *, int);
+extern int fn_8020A710(void *, int, int);
+extern int fn_8020B9BC(void *, int, int);
+extern char lbl_80420FC0[];
+
+int fn_8002035C(int arg0, int arg1) {
+    char sp8[0x7C];
+    char *base;
+    int ret;
+    int r25;
+    int flag;
+    int r26;
+    u32 q;
+
+    base = lbl_80420FC0;
+    fn_8001B9EC(sp8, arg0);
+    ret = 0;
+    OSReport(base + 0x598, sp8);
+    do {
+        r25 = fn_8020B9BC(sp8, arg1, 2);
+        flag = 0;
+        if ((u32)r25 + 3 <= 1) {
+            q = (*(u32 *)0x800000F8 / 4) / 1000;
+            OSSleepTicks((u64)q << 4);
+            flag = 1;
+        } else if (r25 != -0xC) {
+            fn_8001B8E0(r25, 0);
+        }
+    } while (flag != 0);
+
+    if (r25 == 0) {
+        ret = 1;
+    } else {
+        do {
+            r26 = fn_8020A710(sp8, 0x34, 2);
+            flag = 0;
+            if ((u32)r26 + 3 <= 1) {
+                q = (*(u32 *)0x800000F8 / 4) / 1000;
+                OSSleepTicks((u64)q << 4);
+                flag = 1;
+            } else if (r26 != -0xC) {
+                fn_8001B8E0(r26, 0);
+            }
+        } while (flag != 0);
+
+        if (r26 != 0) {
+            OSReport(base + 0x5B0, r26);
+        } else {
+            do {
+                r25 = fn_8020B9BC(sp8, arg1, 2);
+                flag = 0;
+                if ((u32)r25 + 3 <= 1) {
+                    q = (*(u32 *)0x800000F8 / 4) / 1000;
+                    OSSleepTicks((u64)q << 4);
+                    flag = 1;
+                } else if (r25 != -0xC) {
+                    fn_8001B8E0(r25, 0);
+                }
+            } while (flag != 0);
+
+            if (r25 != 0) {
+                OSReport(base + 0x2D0, r25);
+            } else {
+                ret = 1;
+            }
+        }
+    }
+    return ret;
+}
+}
+}
+
+namespace jj_8001FDDC {
+
+
+extern "C" {
+int fn_8001B7F8(const char*);
+int fn_8001FAD8(const char*);
+int fn_8001F7C4(const char*);
+extern OSMutex lbl_80494910;
+extern char lbl_8059C58C[4];
+extern char lbl_8059C598[4];
+}
+
+struct Flags {
+    unsigned int res : 8;
+    unsigned int drive : 8;
+    unsigned int rest : 16;
+};
+
+struct Arg {
+    const char* path;
+    int pad4;
+    int r8;
+    int rC;
+    int pad10;
+    Flags flags;
+};
+
+struct Drive {
+    unsigned char pad[0x15];
+    unsigned char value : 8;
+};
+
+struct Lock {
+    OSMutex* mutex;
+    bool locked : 8;
+
+    Lock(OSMutex* m, bool l = true) {
+        mutex = m;
+        locked = l;
+        if (locked)
+            OSLockMutex(mutex);
+    }
+
+    void release() {
+        if (locked)
+            OSUnlockMutex(mutex);
+    }
+};
+
+extern "C" int fn_8001FDDC(Arg* arg) {
+    char name[0x80];
+    char path[0x80];
+    Arg local;
+
+    int type = fn_8001B7F8(arg->path);
+    const char* p = arg->path;
+    unsigned int len = strlen(p);
+    const char* q = p;
+
+    for (unsigned int i = 0; i < len; i++, q++) {
+        if (*q == ':') {
+            strncpy(name, q + 1, 0x80);
+            goto done;
+        }
+    }
+    strncpy(name, p, 0x80);
+
+done:
+    local.flags = arg->flags;
+    char* n = name;
+    int result = 0x11;
+    int r = 0;
+
+    switch (type) {
+    case 3: {
+        Lock lock(&lbl_80494910);
+        strcpy(path, lbl_8059C598);
+        if (n[0] == '/')
+            path[2] = 0;
+        strncat(path, n, 0x80);
+        r = fn_8001FAD8(path);
+        Lock* lp = &lock;
+        lp->release();
+        break;
+    }
+    case 4: {
+        ((Drive*)&local)->value = arg->path[2] - '0';
+        Lock lock(&lbl_80494910);
+        strcpy(path, lbl_8059C58C);
+        path[0] = ((Drive*)&local)->value + 'B';
+        if (n[0] == '/')
+            path[2] = 0;
+        strncat(path, n, 0x80);
+        r = fn_8001F7C4(path);
+        Lock* lp = &lock;
+        lp->release();
+        break;
+    }
+    }
+
+    if (r >= 0)
+        result = 0;
+    if (r < 0)
+        r = 0;
+
+    arg->r8 = r;
+    arg->rC = 0;
+    arg->flags.res = result;
+    return result;
+}
+}
+
+namespace jj_8001C9EC {
+
+extern "C" {
+void OSReport(const char*, ...);
+char* strcpy(char*, const char*);
+char* strncat(char*, const char*, unsigned long);
+int fn_803C374C(const char*, const char*, int);
+int fn_803C3CB8(int);
+void fn_803C3828(int);
+void fn_803C3920(int, void*, int, unsigned int*);
+extern OSMutex lbl_80494910;
+extern char lbl_8059C58C[4];
+extern char lbl_8059C590[2];
+extern char lbl_8059C594[3];
+extern const char* lbl_80421198[10];
+}
+
+struct Arg {
+    const char* path;
+    unsigned char pad4[4];
+    int size;
+    void* data;
+    void* pool;
+    unsigned char pad14;
+    unsigned char drive;
+};
+
+struct Lock {
+    OSMutex* mutex;
+    bool locked : 8;
+    Lock(OSMutex* m, bool l = true) {
+        mutex = m;
+        locked = l;
+        if (locked) OSLockMutex(mutex);
+    }
+    void release() {
+        if (locked) OSUnlockMutex(mutex);
+    }
+};
+
+extern "C" int fn_8001C9EC(Arg* arg) {
+    Lock lock(&lbl_80494910);
+    char path[0x80];
+    void* p;
+    unsigned char drive;
+    int result;
+    int found;
+    const char* name;
+    void* pool;
+    int sz;
+    int h;
+    unsigned int outSize;
+
+    name = arg->path;
+    pool = arg->pool;
+    drive = arg->drive;
+    result = 1;
+    found = 0;
+
+    strcpy(path, lbl_8059C58C);
+    path[0] = drive + 0x42;
+    if (*name == '/') path[2] = 0;
+    strncat(path, name, 0x80);
+    h = fn_803C374C(name, lbl_8059C590, 0);
+    if (h != 0) {
+        found = 1;
+        sz = fn_803C3CB8(h);
+        if (sz > 0) {
+            unsigned long aligned = (sz + 0x1F) & ~0x1F;
+            if (aligned != 0) {
+                p = gfMemoryPool::alloc(pool, aligned, 0x20);
+                if (p == 0) {
+                    OSReport(lbl_80421198[2], lbl_8059C594, name, sz);
+                    result = 4;
+                } else {
+                    fn_803C3920(h, p, sz, &outSize);
+                    if (outSize >= (unsigned int)sz) {
+                        int frame;
+                        if (g_GameGlobal != 0) {
+                            frame = (int)g_GameGlobal->getGameFrame();
+                        } else {
+                            frame = 0;
+                        }
+                        OSReport(lbl_80421198[0], lbl_8059C594, name, outSize, p, frame);
+                        arg->size = sz;
+                        result = 0;
+                        arg->data = p;
+                    } else {
+                        OSReport(lbl_80421198[3], lbl_8059C594, name);
+                        gfHeapManager::free(p);
+                        result = 2;
+                        gfErrorCheck::check();
+                    }
+                }
+            }
+        }
+    }
+    if (found) {
+        fn_803C3828(h);
+    } else {
+        OSReport(lbl_80421198[1], lbl_8059C594, name);
+    }
+    Lock* lp = &lock;
+    lp->release();
+    return result;
+}
+}
+
+namespace jj_8001E2F8 {
+extern "C" {
+void OSLockMutex(void*);
+void OSUnlockMutex(void*);
+void OSReport(const char*, ...);
+int fn_8001B7F8(const char*);
+int fn_8001B8E0(int, int);
+int fn_8001E510(void*, int);
+int fn_8001E630(void*);
+int fn_8020AD88(char*, int, int*);
+void fn_8020D38C(char*);
+char* strcat(char*, const char*);
+unsigned int strlen(const char*);
+int strncmp(const char*, const char*, unsigned int);
+char* strncpy(char*, const char*, int);
+extern char lbl_80421340[0x15];
+extern char lbl_80494910[0x18];
+extern char lbl_8059C57C[5];
+}
+struct S {
+    const char* p;
+    int a, b, c, d;
+    unsigned r : 8;
+    unsigned x : 8;
+    unsigned y : 16;
+};
+struct B { unsigned char pad[0x15]; unsigned char x : 8; };
+struct Guard {
+    void* mutex;
+    unsigned char flag : 8;
+};
+
+extern "C" int fn_8001E2F8(S* self) {
+    int out;
+    int r;
+    Guard g;
+    Guard* p = &g;
+    S l;
+    char buf[128];
+    char s176[128];
+    char s30[128];
+    int t = fn_8001B7F8(self->p);
+    const char* s = self->p;
+    unsigned int n = strlen(s);
+    const char* q = s;
+    unsigned int i;
+    for (i = 0; i < n; i++) {
+        if (*q == ':') {
+            strncpy(buf, q + 1, 128);
+            goto done;
+        }
+        q++;
+    }
+    strncpy(buf, s, 128);
+done:
+    r = 5;
+    ((int*)&l)[0] = ((int*)self)[0];
+    ((int*)&l)[1] = ((int*)self)[1];
+    ((int*)&l)[2] = ((int*)self)[2];
+    ((int*)&l)[3] = ((int*)self)[3];
+    ((int*)&l)[4] = ((int*)self)[4];
+    ((int*)&l)[5] = ((int*)self)[5];
+    l.p = buf;
+    switch (t) {
+    case 2: {
+        p->flag = 1;
+        p->mutex = lbl_80494910;
+        if (p->flag != 0) OSLockMutex(p->mutex);
+        const char* name = l.p;
+        s30[0] = 0;
+        int result = 0x12;
+        if (strncmp(name, lbl_8059C57C, 4) == 0) {
+            strcat(s30, name);
+        } else {
+            fn_8020D38C(s176);
+            strncpy(s30, s176, 0x40);
+            strcat(s30, name);
+        }
+        int rv = fn_8020AD88(s30, 0, &out);
+        if (rv != 0) {
+            fn_8001B8E0(rv, 0);
+            OSReport(lbl_80421340, s30);
+        } else {
+            result = 0;
+        }
+        if (p->flag != 0) OSUnlockMutex(p->mutex);
+        r = result;
+        break;
+    }
+    case 3:
+        r = fn_8001E630(&l);
+        break;
+    case 4: {
+        int d = ((const unsigned char*)self->p)[2] - '0';
+        ((B*)&l)->x = d;
+        r = fn_8001E510(&l, d);
+        break;
+    }
+    }
+    self->r = r;
+    return r;
+}
+}
+
+namespace jj_8001DD0C {
+extern "C" {
+int fn_8001B7F8(const char*);
+extern OSMutex lbl_80494910;
+extern char lbl_8059C58C[4];
+extern char lbl_8059C598[4];
+extern char lbl_8059C5A8[5];
+}
+struct S {
+    const char* p;
+    int a, b, c, d;
+    unsigned r : 8;
+    unsigned x : 8;
+    unsigned y : 16;
+};
+struct B { unsigned char pad[0x15]; unsigned char x : 8; };
+extern "C" int fn_8001DF68(S*);
+extern "C" int fn_8001E10C(char*, S*);
+struct Lock {
+    OSMutex* mutex;
+    bool locked : 8;
+    Lock(OSMutex* m, bool l = true) {
+        mutex = m;
+        locked = l;
+        if (locked) OSLockMutex(mutex);
+    }
+    void release() {
+        if (locked) OSUnlockMutex(mutex);
+    }
+};
+extern "C" void fn_8001DD0C(S* self) {
+    char buf[128];
+    char sdPath[128];
+    char vfPath[128];
+    int t = fn_8001B7F8(self->p);
+    const char* s = self->p;
+    unsigned int n = strlen(s);
+    const char* q = s;
+    for (unsigned int i = 0; i < n; i++) {
+        if (*q == ':') {
+            strncpy(buf, q + 1, 128);
+            goto done;
+        }
+        q++;
+    }
+    strncpy(buf, s, 128);
+done:
+    S l;
+    ((int*)&l)[0] = ((int*)self)[0];
+    ((int*)&l)[1] = ((int*)self)[1];
+    ((int*)&l)[2] = ((int*)self)[2];
+    ((int*)&l)[3] = ((int*)self)[3];
+    ((int*)&l)[4] = ((int*)self)[4];
+    ((int*)&l)[5] = ((int*)self)[5];
+    l.p = buf;
+    int r = 5;
+    switch (t) {
+    case 1: break;
+    case 2: r = fn_8001DF68(&l); break;
+    case 3: {
+        Lock lock(&lbl_80494910);
+        const char* path = l.p;
+        strcpy(sdPath, lbl_8059C598);
+        if (path[0] == '/') sdPath[2] = 0;
+        strncat(sdPath, path, 128);
+        strncat(sdPath, lbl_8059C5A8, 128);
+        int result = fn_8001E10C(sdPath, &l);
+        Lock* lp = &lock;
+        lp->release();
+        r = result;
+        break;
+    }
+    case 4: {
+        ((B*)&l)->x = ((const unsigned char*)self->p)[2] - '0';
+        Lock lock(&lbl_80494910);
+        unsigned char drive = ((B*)&l)->x;
+        const char* path = l.p;
+        strcpy(vfPath, lbl_8059C58C);
+        vfPath[0] = drive + 'B';
+        if (path[0] == '/') vfPath[2] = 0;
+        strncat(vfPath, path, 128);
+        strncat(vfPath, lbl_8059C5A8, 128);
+        int result = fn_8001E10C(vfPath, &l);
+        Lock* lp = &lock;
+        lp->release();
+        r = result;
+        break;
+    }
+    }
+    self->r = r;
+}
+}
+
+namespace jj_8001EC10 {
+
+extern "C" {
+int fn_8001B7F8(const char*);
+void fn_8001B9E8(int);
+int fn_8020A870(const char*);
+void fn_8020D38C(char*);
+int fn_803C3A48(const char*);
+void fn_803EBE4C();
+extern OSMutex lbl_80494910;
+extern char lbl_8059C57C[5];
+extern char lbl_8059C58C[4];
+extern char lbl_8059C598[4];
+extern char lbl_80421490[];
+}
+
+struct Flags {
+    unsigned r : 8;
+    unsigned x : 8;
+    unsigned y : 16;
+};
+struct S {
+    const char* p;
+    int a, b, c, d;
+    Flags flags;
+};
+struct B {
+    unsigned char pad[0x15];
+    unsigned char x : 8;
+};
+struct Lock {
+    OSMutex* mutex;
+    bool locked : 8;
+    Lock(OSMutex* m, bool l = true) {
+        mutex = m;
+        locked = l;
+        if (locked) OSLockMutex(mutex);
+    }
+    void release() {
+        if (locked) OSUnlockMutex(mutex);
+    }
+};
+
+extern "C" int fn_8001EC10(S* self) {
+    char name[128];
+    char tmp[128];
+    char nandPath[128];
+    char vfPath[128];
+    char sdPath[128];
+    S local;
+    int type = fn_8001B7F8(self->p);
+    const char* s = self->p;
+    unsigned int n = strlen(s);
+    const char* q = s;
+    for (unsigned int i = 0; i < n; i++) {
+        if (*q == ':') {
+            strncpy(name, q + 1, 128);
+            goto copied;
+        }
+        q++;
+    }
+    strncpy(name, s, 128);
+copied:
+    local.flags = self->flags;
+    const char* path = name;
+    int status = 7;
+    switch (type) {
+    case 2: {
+        Lock lock(&lbl_80494910);
+        nandPath[0] = 0;
+        if (strncmp(path, lbl_8059C57C, 4) == 0) {
+            strcat(nandPath, path);
+        } else {
+            fn_8020D38C(tmp);
+            strncpy(nandPath, tmp, 64);
+            strcat(nandPath, path);
+        }
+        type = fn_8020A870(nandPath);
+        if (type != 0 && type != -12) {
+            OSReport(lbl_80421490, type, nandPath);
+            fn_8001B9E8(type);
+            status = 7;
+        } else {
+            status = 0;
+        }
+        Lock* lp = &lock;
+        lp->release();
+        break;
+    }
+    case 4: {
+        ((B*)&local)->x = (unsigned char)self->p[2] - '0';
+        strcpy(vfPath, lbl_8059C58C);
+        vfPath[0] = ((B*)&local)->x + 'B';
+        if (path[0] == '/') vfPath[2] = 0;
+        strncat(vfPath, path, 128);
+        int rv = fn_803C3A48(vfPath);
+        if (rv != 0) {
+            fn_8001B9E8(rv);
+            status = 7;
+        } else {
+            status = 0;
+        }
+        break;
+    }
+    case 3: {
+        status = 7;
+        strcpy(sdPath, lbl_8059C598);
+        if (path[0] == '/') sdPath[2] = 0;
+        strncat(sdPath, path, 128);
+        if (FARemove(sdPath) != 0) {
+            fn_803EBE4C();
+        } else {
+            status = 0;
+        }
+        break;
+    }
+    }
+    self->flags.r = status;
+    return status;
+}
+}
+
+namespace jj_8001F0D4 {
+extern "C" {
+unsigned int strlen(const char*);
+char* strncpy(char*, const char*, unsigned int);
+char* strcat(char*, const char*);
+int fn_8001B7F8(const char*);
+int fn_8001F390(void*);
+int fn_8001F4B0(void*);
+int fn_801F5F08(const char*);
+int fn_801F6210(int, void*);
+extern int lbl_8059C530;
+extern char* lbl_804211C0[];
+extern char lbl_8059C56C[4];
+}
+struct S {
+    const char* p;
+    int a, b, c, d;
+    unsigned r : 8;
+    unsigned x : 8;
+    unsigned y : 16;
+};
+struct B { unsigned char pad[0x15]; unsigned char x : 8; };
+extern "C" int fn_8001F0D4(S* self) {
+    char name[128];
+    char localized[128];
+    char path[128];
+    int info[16];
+    int type = fn_8001B7F8(self->p);
+    const char* s = self->p;
+    unsigned int n = strlen(s);
+    const char* q = s;
+    for (unsigned int i = 0; i < n; i++) {
+        if (*q == ':') {
+            strncpy(name, q + 1, 128);
+            goto copied;
+        }
+        q++;
+    }
+    strncpy(name, s, 128);
+copied:
+    S local;
+    ((int*)&local)[0] = ((int*)self)[0];
+    ((int*)&local)[1] = ((int*)self)[1];
+    ((int*)&local)[2] = ((int*)self)[2];
+    ((int*)&local)[3] = ((int*)self)[3];
+    ((int*)&local)[4] = ((int*)self)[4];
+    ((int*)&local)[5] = ((int*)self)[5];
+    local.p = name;
+    local.b = 0;
+    int status = 17;
+    if (type == 2) goto nand;
+    if (type < 2) {
+        if (type == 0) goto common;
+        if (type >= 0) goto common;
+        goto done;
+    }
+    if (type == 4) goto vf;
+    if (type >= 4) goto done;
+    goto sd;
+common: {
+        status = 17;
+        int size;
+        int length;
+        const char* p = local.p;
+        fn_8001B7F8(p);
+        unsigned int len = strlen(p);
+        const char* t = p;
+        for (unsigned int i = 0; i < len; i++) {
+            if (*t == ':') {
+                strncpy(path, t + 1, 128);
+                goto copied2;
+            }
+            t++;
+        }
+        strncpy(path, p, 128);
+copied2:
+        length = strlen(path);
+        const char* end = path + length;
+        for (int i = length; i != 0; i--) {
+            if (*end == '.') {
+                strncpy(localized, path, length);
+                localized[length] = 0;
+                strcat(localized, lbl_804211C0[lbl_8059C530]);
+                strcat(localized, path + length);
+                goto localized_done;
+            }
+            end--;
+            length--;
+        }
+        strncpy(localized, path, 128);
+        strcat(localized, lbl_8059C56C);
+localized_done:
+        size = -1;
+        int file = fn_801F5F08(localized);
+        if (file < 0) file = fn_801F5F08(path);
+        if (file >= 0) {
+            fn_801F6210(file, info);
+            size = (info[13] + 31) & ~31;
+        }
+        if (size >= 0) status = 0;
+        goto done;
+    }
+    nand: status = fn_8001F390(&local); goto done;
+    sd: status = gfFileIO::checkFileSD((gfFileIORequest*)&local); goto done;
+    vf:
+        ((B*)&local)->x = ((const unsigned char*)self->p)[2] - '0';
+        status = fn_8001F4B0(&local);
+        goto done;
+    done:
+    self->r = status;
+    if (status == 0) self->b = local.b;
+    return status;
+}
+}
+

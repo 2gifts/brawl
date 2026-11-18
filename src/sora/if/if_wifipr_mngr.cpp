@@ -1,3 +1,5 @@
+#include <gf/gf_file_io_handle.h>
+#include <gm/gm_global.h>
 #include <StaticAssert.h>
 #include <gf/gf_3d_scene.h>
 #include <if/if_wifi_intr_menu.h>
@@ -280,3 +282,163 @@ void IfWifiprMngr::openJoinFriendDlg(const wchar_t* name) {
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
 unsigned char lbl_805A02F8[0x8] __attribute__((aligned(4))) = { 0 };
 unsigned char g_IfWifiprMngr[0x8] __attribute__((aligned(4))) = { 0 };
+
+// TODO: clean up, give variables real names
+extern "C" void fn_800FD470(void*);
+
+extern "C" void fn_800FCC7C(void* self) {
+    fn_800FD470(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
+}
+
+extern "C" void fn_800DA9CC(void*);
+
+extern "C" void fn_800FCDF8(void* self) {
+    fn_800DA9CC(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x40));
+}
+
+extern "C" void fn_800FD4F0(void*);
+
+extern "C" void fn_800FCE00(void* self) {
+    fn_800FD4F0(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
+}
+
+extern "C" void fn_800FD508(void*);
+
+extern "C" void fn_800FCE08(void* self) {
+    fn_800FD508(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
+}
+
+extern "C" void fn_800FBF90(void*);
+
+extern "C" void fn_800FD108(void* self) {
+    fn_800FBF90(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x38));
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800FC3D8 {
+extern "C" {
+void fn_800FC3D8(int *p) {
+    *p = 0;
+}
+}
+}
+
+namespace jj_800FCC84 {
+struct Inner {
+    int a;
+    int b;
+    int c;
+    int d;
+};
+
+struct Outer {
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int f;
+    Inner* g;
+};
+
+extern "C" int fn_800FCC84(Outer* o) {
+    return o->g->d;
+}
+}
+
+namespace jj_800FD0F0 {
+extern "C" void fn_800FBDF4(void*, void*, int);
+
+extern "C" void fn_800FD0F0(void* self, void* other) {
+    fn_800FBDF4(*(void**)((char*)self + 0x38), other, 0);
+}
+}
+
+namespace jj_800FD0FC {
+extern "C" unsigned char fn_800FD0FC(void *arg0) {
+    return *(unsigned char *)((unsigned char *)*(void **)((unsigned char *)arg0 + 0x38) + 0x1c);
+}
+}
+
+namespace jj_800FC3E4 {
+extern "C" {
+void __dt__14gfFileIOHandleFv(void* p, int flag);
+void __dl__FPv(void* p);
+
+void* fn_800FC3E4(void* p, int n) {
+    if (p) {
+        __dt__14gfFileIOHandleFv(p, 0);
+        if (n > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+}
+
+namespace jj_800FC290 {
+extern "C" {
+
+extern void* g_IfWifiprMngr;
+void fn_800FC840(void*);
+void Destroy__Q34nw4r3g3d6G3dObjFv(void*);
+void fn_800FC3E4(void*);
+void __destroy_arr(void*, void (*)(void*), unsigned long, unsigned long);
+void __dl__FPv(void*);
+
+void fn_800FC290(void) {
+    void* p = g_IfWifiprMngr;
+    if (p != 0) {
+        fn_800FC840(p);
+        Destroy__Q34nw4r3g3d6G3dObjFv(*(void**)((char*)p + 0x14));
+        *(void**)((char*)p + 0x14) = 0;
+        __destroy_arr((char*)p + 0x54, fn_800FC3E4, 4, 5);
+        __dl__FPv(p);
+    }
+    g_IfWifiprMngr = 0;
+}
+
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800FC43C {
+struct FileHolder { u8 flags; u8 pad[7]; void* res8; void* resC; void* res10; u8 pad14[0x34]; void* p48; void* p4C; u8 pad50[4]; gfFileIOHandle h54,h58,h5c,h60,h64; };
+extern "C" { void fn_800FC43C(FileHolder*, int); }
+#pragma push
+#pragma opt_propagation off
+#pragma opt_lifetimes off
+void fn_800FC43C(FileHolder* self, int arg1) {
+    u32 sp10, spC;
+    self->h54.read("/info/info_wifi_practice.brres", (HeapType)9, arg1);
+    self->h58.read("/info/cmnwindow/wifi_notice_wnd.brres", (HeapType)9, arg1);
+    u8* rec = (u8*)g_GameGlobal->getGlobalRecordMenuDatap();
+    gfFileIOHandle* h5c = &self->h5c;
+    const char* name = ((rec[0x28] >> 7) & 1) ? "/info/defaultcamera/InfoWide.brres" : "/info/defaultcamera/Info.brres";
+    h5c->read(name, (HeapType)9, arg1);
+    self->h60.read("/menu/msg/wifipr_info.msbin", (HeapType)9, arg1);
+    self->h64.read("/menu/msg/wifi_common.msbin", (HeapType)9, arg1);
+    if (arg1 == 0) {
+        u32 sp8 = 0, r31;
+        if(self->h54.getReturnStatus()==0x15) r31=0;
+        else {r31=(u32)self->h54.getBuffer();self->h54.release();}
+        if(r31){sp8=r31;nw4r::g3d::ResFile::Init(&sp8);} self->res8=(void*)sp8;
+        spC=0;
+        if(self->h58.getReturnStatus()==0x15)r31=0;
+        else{r31=(u32)self->h58.getBuffer();self->h58.release();}
+        if(r31){spC=r31;nw4r::g3d::ResFile::Init(&spC);} self->resC=(void*)spC;
+        sp10=0;
+        if(self->h5c.getReturnStatus()==0x15)r31=0;
+        else{r31=(u32)self->h5c.getBuffer();self->h5c.release();}
+        if(r31){sp10=r31;nw4r::g3d::ResFile::Init(&sp10);} self->res10=(void*)sp10;
+        if(self->h60.getReturnStatus()==0x15)r31=0;
+        else{r31=(u32)self->h60.getBuffer();self->h60.release();} self->p48=(void*)r31;
+        if(self->h64.getReturnStatus()==0x15)r31=0;
+        else{r31=(u32)self->h64.getBuffer();self->h64.release();} self->p4C=(void*)r31;
+        self->flags|=0x80;
+    }
+}
+#pragma pop
+}
+

@@ -222,3 +222,50 @@ int pdm_bpb_InitVolumeWithFSINFOSector(PF2_BPB* p_bpb, u8* buf, u32* p_free_coun
     }
     return 0;
 }
+
+// TODO: clean up, give variables real names
+extern void fn_803D797C(void);
+
+void fn_803D72BC(void) {
+    fn_803D797C();
+}
+
+// TODO: clean up, give variables real names
+extern int fn_803D8AFC(int);
+extern int fn_803D899C(int);
+
+int fn_803D7168(char *arg0) {
+    int result;
+
+    result = fn_803D8AFC(*(int *)(arg0 + 0x1FBC));
+    if (result != 0) {
+        if (result == 0x15) {
+            int t = fn_803D899C(*(int *)(arg0 + 0x1FBC));
+            *(int *)((char*)&lbl_805644C0 + 0x44) = t;
+            *(int *)(arg0 + 0x1F84) = t;
+            return 0x1000;
+        }
+        return -1;
+    }
+    return 0;
+}
+
+extern int fn_803D8B64(int, int, unsigned int, unsigned int, unsigned short, int);
+extern int fn_803D899C(int);
+
+int fn_803D71D4(char *arg0, int a, unsigned int offset, unsigned int length, int last) {
+    int result;
+
+    result = fn_803D8B64(*(int *)(arg0 + 0x1FBC), a, offset, length, *(unsigned short *)arg0, last);
+    if (result != 0) {
+        if (result == 0x15) {
+            int t = fn_803D899C(*(int *)(arg0 + 0x1FBC));
+            *(int *)((char*)&lbl_805644C0 + 0x44) = t;
+            *(int *)(arg0 + 0x1F84) = t;
+            return 0x1000;
+        }
+        return -1;
+    }
+    return 0;
+}
+

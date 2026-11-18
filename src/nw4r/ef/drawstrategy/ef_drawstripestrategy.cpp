@@ -1,3 +1,4 @@
+#include <types.h>
 // nw4r ef_drawstripestrategy.cpp (main.dol 0x8017B400-0x8017E24C). Partially reconstructed.
 #include <nw4r/ef.h>
 
@@ -323,3 +324,7 @@ void DrawStripeStrategy::DrawStripe(AheadContextStripe* pContext, int param,
 
 } // namespace ef
 } // namespace nw4r
+
+// TODO: clean up, give variables real names
+extern "C" void fn_8017BC34(void) {}
+

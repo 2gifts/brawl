@@ -64,3 +64,26 @@ int pfd_sddrv_is_media_insert(void) {
     }
     return 0;
 }
+
+// TODO: clean up, give variables real names
+extern char lbl_8041F3B8[];
+
+struct fn_803EE8E0_obj {
+    void *unk0;
+    int unk4;
+};
+
+int fn_803EE8E0(struct fn_803EE8E0_obj *self, int arg) {
+    self->unk4 = arg;
+    self->unk0 = lbl_8041F3B8;
+    return 0;
+}
+
+
+int fn_803EE5A4(int arg0) {
+    if (arg0 == 0) {
+        return 1;
+    }
+    return ((int*)&lbl_80599680)[4] ? 0 : 6;
+}
+

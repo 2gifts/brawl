@@ -155,3 +155,20 @@ OSMessage PopDecodedTextureSet(u32 flags) {
     }
     return nullptr;
 }
+
+// TODO: clean up, give variables real names
+extern "C" s32 fn_8007E3A4(void) {
+    return 0x1380;
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8007E3C8 {
+extern "C" {
+extern int lbl_805A0208;
+
+void fn_8007E3C8(void) {
+    lbl_805A0208 = 0;
+}
+}
+}
+

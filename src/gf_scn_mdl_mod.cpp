@@ -71,3 +71,64 @@ void ScnMdlMod::EnableNodeFlag(s8* flags, u32* nodeIds, int numNodeIds) {
     }
     flags[maxIndex] = 2;
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_8004755C(void) {}
+
+extern "C" void fn_80047FC8(void) {}
+
+// TODO: clean up, give variables real names
+namespace jj_8004810C {
+extern "C" {
+
+extern unsigned char lbl_8040ABD8[];
+
+unsigned char* fn_8004810C(void) {
+    return lbl_8040ABD8;
+}
+
+}
+}
+
+namespace jj_80047C0C {
+extern "C" int fn_80047C0C(void* self, int off)
+{
+    return (signed char)((unsigned char*)self)[off] >= 2;
+}
+}
+
+namespace jj_800480DC {
+class Inner {
+public:
+    virtual void f0();
+    virtual void f1();
+    virtual void f2();
+    virtual char* f3();
+};
+
+extern "C" char* fn_800480DC(Inner* self) {
+    return self->f3() + 4;
+}
+}
+
+namespace jj_8004805C {
+#pragma optimization_level 1
+
+extern "C" {
+extern unsigned char lbl_8040ABD8[0x10];
+extern unsigned char lbl_8040ABC0[0x18];
+extern unsigned char lbl_8040AB90[0x10];
+extern unsigned char lbl_8040AB80[0x10];
+extern unsigned char lbl_8040AA68[0x10];
+
+int fn_8004805C(void* unused, unsigned int* p) {
+    if (*p == (unsigned int)lbl_8040ABD8) return 1;
+    unsigned int v = *p;
+    if (v == (unsigned int)lbl_8040ABC0) return 1;
+    if (v == (unsigned int)lbl_8040AB90) return 1;
+    if (v == (unsigned int)lbl_8040AB80) return 1;
+    return (unsigned int)__cntlzw((unsigned int)lbl_8040AA68 - v) >> 5;
+}
+}
+}
+

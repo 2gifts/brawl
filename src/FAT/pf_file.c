@@ -313,3 +313,11 @@ int fn_803E5B8C(void* buf, u32 size, u32 count, PF2_FILE* file, u32* count_writt
     PF_exitCritical(&p_vol->critical);
     return err;
 }
+
+// TODO: clean up, give variables real names
+extern int fn_803E9814(void);
+
+int fn_803E3610(void) {
+    return fn_803E9814();
+}
+

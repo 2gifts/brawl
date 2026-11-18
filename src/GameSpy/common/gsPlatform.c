@@ -4,6 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <GameSpy/common/gsPlatform.h>
+#include <GameSpy/common/gsCore.h>
+#include <revolution/OS/OSMutex.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
 gsPlatformData lbl_80534638 = { 0 };
@@ -381,3 +383,107 @@ void gsifree(void* ptr) {
         lbl_80534638.freeCB(ptr);
     }
 }
+
+// TODO: clean up, give variables real names
+void fn_8035D248(GSICriticalSection* theCrit) {
+    OSInitMutex((OSMutex*)theCrit);
+}
+
+void fn_8035D24C(GSICriticalSection* theCrit) {
+    OSLockMutex((OSMutex*)theCrit);
+}
+
+void fn_8035D250(GSICriticalSection* theCrit) {
+    OSUnlockMutex((OSMutex*)theCrit);
+}
+
+void fn_8035D254(GSICriticalSection* theCrit) {}
+
+void fn_8035D770(void) {
+}
+
+// TODO: clean up, give variables real names
+s32 fn_8035DA30(s32 arg0, s32 arg1) {
+    u32 value, product;
+    u16 high;
+    u32 range;
+    range = arg1 - arg0;
+    if (range != 0) {
+        value = lbl_8059F598;
+        high = value >> 16;
+        value &= 0xffff;
+        product = high * 0x41A7;
+        value *= 0x41A7;
+        value += (product << 16) & 0x7FFF0000;
+        if (value > 0x7FFFFFFF) {
+            value &= 0x7FFFFFFF;
+            value++;
+        }
+        value += product >> 15;
+        if (value > 0x7FFFFFFF) {
+            value &= 0x7FFFFFFF;
+            value++;
+        }
+        lbl_8059F598 = value;
+        product = value % range;
+        return product + arg0;
+    }
+    return arg0;
+}
+
+// TODO: clean up, give variables real names
+/* jj_8035DAA4 */
+extern u8 lbl_805A4980[4];
+extern u8 lbl_805A4984[4];
+extern u8 lbl_805A4988[8];
+static inline void readChunk(u8 *src, u8 *buf, s32 len) {
+    s32 i;
+    for (i = 0; i < ((len < 3) ? len : 3); i++) {
+        buf[i] = src[i];
+    }
+    for (; i < 3; i++) {
+        buf[i] = 0;
+    }
+}
+void fn_8035DAA4(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
+    u8 *table;
+    u8 *start;
+    u8 *lim;
+    s32 len;
+    u8 c;
+    u8 buf[3];
+    start = arg1;
+    len = arg2;
+    switch (arg3) {
+    case 1: table = lbl_805A4984; break;
+    case 2: table = lbl_805A4988; break;
+    default: table = lbl_805A4980; break;
+    }
+    while (len > 0) {
+        readChunk(arg0, buf, len);
+        arg1[0] = buf[0] >> 2;
+        arg1[1] = ((buf[1] >> 4) | ((buf[0] & 3) << 4)) & 0x3F;
+        arg1[2] = ((buf[2] >> 6) | ((buf[1] & 0xF) << 2)) & 0x3F;
+        arg1[3] = buf[2] & 0x3F;
+        arg0 += 3;
+        len -= 3;
+        arg1 += 4;
+    }
+    lim = arg1;
+    if (arg2 % 3 == 1) lim = arg1 - 2;
+    else if (arg2 % 3 == 2) lim = arg1 - 1;
+    *arg1 = 0;
+    while (arg1 > start) {
+        arg1--;
+        if (arg1 >= lim) *arg1 = table[2];
+        else {
+            c = *arg1;
+            if ((s8)c <= 0x19) *arg1 = c + 0x41;
+            else if ((s8)c <= 0x33) *arg1 = c + 0x47;
+            else if ((s8)c <= 0x3D) *arg1 = c - 4;
+            else if ((s8)c == 0x3E) *arg1 = table[0];
+            else if ((s8)c == 0x3F) *arg1 = table[1];
+        }
+    }
+}
+

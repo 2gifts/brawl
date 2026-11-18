@@ -1,3 +1,5 @@
+#include <snd/snd_system.h>
+#include <revolution/OS/OSError.h>
 #include <cm/cm_camera_controller.h>
 #include <cm/cm_controller_photo.h>
 #include <gf/gf_pad_system.h>
@@ -200,3 +202,310 @@ void IfPhoto::getMediaState(IfSnapSaveMedia* media, int kind) {
     media->m_status = status;
     media->m_free = size;
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_800F1010(void) {}
+
+extern "C" u32 fn_800F01B8(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x40);
+}
+
+extern "C" u32 fn_800F1750(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x48);
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800F1774 {
+// fn_800F1774: returns the global sound system pointer/handle (sda21-relative load).
+
+extern int g_sndSystem;
+
+extern "C" int fn_800F1774(void) {
+    return g_sndSystem;
+}
+}
+
+namespace jj_800F1758 {
+extern "C" int fn_800F1758(const unsigned int *p)
+{
+    return (p[3] >> 12) & 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800EFC8C {
+extern "C" {
+
+void exit__6gfTaskFv(void*);
+void fn_800B8EDC(void*, void*);
+void fn_800B8A0C(void*, int);
+void __dl__FPv(void*);
+extern char lbl_8045B824[];
+
+struct Part {
+    char padding[0x5C];
+    virtual void method(int);
+};
+
+void* fn_800EFC8C(void* arg0, int arg1) {
+    if (arg0 != 0) {
+        char* base = (char*)arg0;
+        void* task = *(void**)(base + 0x5C);
+        *(char**)(base + 0x74) = lbl_8045B824;
+        if (task != 0) {
+            exit__6gfTaskFv(task);
+            *(void**)(base + 0x5C) = 0;
+        }
+        fn_800B8EDC(*(void**)(base + 0x30), *(void**)(base + 0x4));
+        int i = 0;
+        Part** cur = (Part**)arg0;
+        do {
+            Part* p = cur[1];
+            if (p != 0) {
+                if (p != 0) {
+                    p->method(1);
+                }
+                cur[1] = 0;
+            }
+            i++;
+            cur++;
+        } while (i < 11);
+        if (*(void**)(base + 0x30) != 0) {
+            fn_800B8A0C(*(void**)(base + 0x30), 1);
+            *(void**)(base + 0x30) = 0;
+        }
+        if (arg1 > 0) {
+            __dl__FPv(arg0);
+        }
+    }
+    return arg0;
+}
+
+}
+}
+
+namespace jj_800F00D4 {
+extern "C" {
+void* getInstance__15gfTaskSchedulerFv();
+void* getTask__15gfTaskSchedulerFPCc(void*, const char*);
+void* getCameraController__16CameraControllerFQ216CameraController4Kind(void*, int);
+void changeInput__16CameraControllerFQ216CameraController4Kind(void*, int);
+void* __dynamic_cast(void*, long, const void*, const void*, long);
+void fn_800A9620(void*, s32);
+void fn_800A8DA8(void*, s32);
+void fn_800A709C(void*, s32);
+void fn_800F1014(void*);
+extern char lbl_8059E3A0;
+extern char lbl_8059DEC0;
+extern char __RTTI__18gfCameraController;
+
+void fn_800F00D4(void* arg0, s8 arg1, s32 arg2, s32 arg3, s32 arg4) {
+    char* self = (char*)arg0;
+    char* task = (char*)getTask__15gfTaskSchedulerFPCc(getInstance__15gfTaskSchedulerFv(), &lbl_8059E3A0);
+    *(s32*)(self + 0x70) = 1;
+    *(s32*)(self + 0x50) = *(s32*)(task + 0x40);
+    *(s8*)(self + 0x64) = 1;
+    char* cam = (char*)__dynamic_cast(getCameraController__16CameraControllerFQ216CameraController4Kind(task, 7), 4, &lbl_8059DEC0, &__RTTI__18gfCameraController, 0);
+    if (*(s32*)(cam + 0x60) <= 0) {
+        changeInput__16CameraControllerFQ216CameraController4Kind(task, 7);
+        fn_800A9620(cam, arg4);
+        fn_800A8DA8(cam, 0);
+        if (arg3 >= 0) {
+            *(s32*)(cam + 0x40) = arg3;
+            fn_800A709C(cam, arg3);
+        }
+    }
+    *(s8*)(self + 0x48) = arg1;
+    *(s32*)(self + 0x4C) = arg2;
+    fn_800F1014(arg0);
+    *(s32*)(self + 0x34) = 1;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800F14C0 {
+
+struct Raw { unsigned int w[16]; };
+struct Self {
+    char pad0[0x34];
+    int result;
+    int a[2];
+    int b[2];
+    char pad48[0x18];
+    int delay;
+    bool toggle;
+    char pad65[0xb];
+    int state;
+};
+extern "C" {
+void* fn_800F00AC();
+void fn_800F0250(Raw*, void*);
+void fn_800F09D0(void*, int*, int);
+int fn_800F09AC(void*);
+int fn_800F01B8(void*);
+void* fn_800F1750(void*);
+void* __dynamic_cast(void*, int, void*, void*, int);
+void fn_800A8BB0(void*, Raw*, int);
+int fn_800F09C4(void*);
+int fn_800F0A2C(void*);
+int fn_800F09B8(void*);
+int fn_800F0CD8(void*);
+int fn_800F1758(Raw*);
+int fn_800F0308(void*, int);
+void fn_800F05CC(void*, bool);
+int fn_800F0A08(void*, int*, int);
+void fn_800F1764(void*);
+sndSystem* fn_800F1774();
+void fn_800F0954(void*);
+extern char lbl_8059DEC0, __RTTI__18gfCameraController;
+extern char lbl_8045B7E8[];
+}
+inline Raw getPad(Self* self) {
+    Raw r;
+    fn_800F0250(&r, self);
+    return r;
+}
+extern "C" int fn_800F14C0(Self* self) {
+    void* obj = fn_800F00AC();
+    void* camera = 0;
+    Raw pad = getPad(self);
+    fn_800F09D0(self, self->b, 1);
+    if (fn_800F09AC(self) && fn_800F01B8(obj) == 7) {
+        camera = __dynamic_cast(fn_800F1750(obj), 4, &lbl_8059DEC0, &__RTTI__18gfCameraController, 0);
+        fn_800A8BB0(camera, &pad, 0);
+    }
+    if (--self->delay < 0) {
+        if (fn_800F09C4(self) && fn_800F0A2C(self)) {
+            self->state = 3;
+            return self->result;
+        }
+        if (fn_800F09B8(self) && fn_800F0CD8(self)) {
+            self->state = 4;
+            return self->result;
+        }
+        if (fn_800F1758(&pad)) {
+            self->state = 2;
+            return self->result;
+        }
+        if (fn_800F09AC(self)) {
+            if (fn_800F0308(self, 1)) {
+                self->toggle = !self->toggle;
+                fn_800F05CC(self, self->toggle);
+            }
+            if ((fn_800F0A08(self, self->a, 1) || fn_800F0A08(self, self->b, 1)) && fn_800F0308(self, 0)) {
+                if (camera) fn_800F1764(camera);
+                fn_800F1774()->playSE((SndID)4, -1, 0, 0, -1);
+                OSReport(lbl_8045B7E8);
+                fn_800F0954(self);
+                return 2;
+            }
+        }
+    }
+    fn_800F05CC(self, self->toggle);
+    return self->result;
+}
+}
+
+namespace jj_800F05CC {
+
+
+extern unsigned char lbl_805A25AC[4];
+extern unsigned char lbl_805A25B0[4];
+
+class Object_vptr_0 {
+public:
+    virtual void slot0();
+    virtual void slot1();
+    virtual void slot2();
+    virtual void slot3();
+    virtual void slot4();
+    virtual void slot5();
+    virtual void slot6();
+    virtual void slot7();
+    virtual void slot8();
+    virtual void slot9();
+    virtual void slot10();
+    virtual void slot11(int, void*);
+    virtual void slot12(int);
+
+    char pad[0xe0];
+    int count;
+};
+
+struct Item {
+    char pad[0x10];
+    void* value;
+};
+
+struct Self {
+    Object_vptr_0* object;
+    Item* items[11];
+    char pad[0x18];
+    unsigned char port;
+    char pad2[0x23];
+    int flags;
+};
+
+struct Vec2 {
+    float x, y;
+
+    Vec2() {}
+    Vec2(const Vec2& other) {
+        x = other.x;
+        y = other.y;
+    }
+};
+
+struct PadCopy {
+    int words[6];
+    Vec2 vectors[3];
+    unsigned char b0, b1, b2, b3, b4, b5, b6, b7, b8;
+    int last;
+};
+
+static inline gfPadStatus getSysPad(int port) {
+    gfPadStatus status;
+    g_gfPadSystem->getSysPadStatus(port, &status);
+    return status;
+}
+
+extern "C" void fn_800F05CC(Self* self, int arg) {
+    Object_vptr_0* object = self->object;
+    while (object->count != 0) {
+        if (object->count != 0)
+            object->slot12(object->count - 1);
+    }
+
+    if (arg) {
+        self->object->slot11(self->object->count, self->items[0]->value);
+
+        if ((self->flags & 1) || (self->flags & 2)) {
+            gfPadStatus raw;
+            g_gfPadSystem->getSysPadStatus(self->port, &raw);
+            gfPadStatus copy = raw;
+            PadCopy status(*(PadCopy*)&copy);
+            int index;
+            if (status.last >= 0 && status.last < 4)
+                index = lbl_805A25AC[status.last];
+            else
+                index = 5;
+            self->object->slot11(self->object->count, self->items[index]->value);
+        }
+
+        if (self->flags & 4) {
+            gfPadStatus raw;
+            g_gfPadSystem->getSysPadStatus(self->port, &raw);
+            gfPadStatus copy = raw;
+            PadCopy status(*(PadCopy*)&copy);
+            int index;
+            if (status.last >= 0 && status.last < 4)
+                index = lbl_805A25B0[status.last];
+            else
+                index = 10;
+            self->object->slot11(self->object->count, self->items[index]->value);
+        }
+    }
+}
+}
+

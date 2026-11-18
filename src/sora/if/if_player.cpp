@@ -2326,3 +2326,468 @@ void IfPlayer::setApealCommentBalloonPos(const nw4r::math::VEC3* pos) {
         m_balloonCallback.m_pos = *pos;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800E407C {
+struct Dispatcher {
+    virtual void f0();
+    virtual void f1();
+    virtual void f2();
+    virtual void f3();
+    virtual void f4();
+    virtual void f5();
+    virtual void f6();
+    virtual void f7();
+    virtual void f8();
+    virtual void f9();
+    virtual void f10();
+    virtual void f11();
+    virtual void f12();
+    virtual void f13(void* arg);
+};
+
+extern "C" Dispatcher* lbl_805A02DC;
+
+extern "C" void fn_800E407C(char* self) {
+    int i = 2;
+    char* p = self + 8;
+    do {
+        lbl_805A02DC->f13(*(void**)(*(char**)(p + 0x28) + 0x10));
+        i++;
+        p += 4;
+    } while (i < 6);
+    p = self + 0x18;
+    int j = 6;
+    do {
+        lbl_805A02DC->f13(*(void**)(*(char**)(p + 0x28) + 0x10));
+        j++;
+        p += 4;
+    } while (j < 0x18);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800E3FB0 {
+
+extern float lbl_805A2448;
+extern float lbl_805A23B0;
+
+class AnmChrSlots {
+public:
+    virtual void s08();
+    virtual void s0C();
+    virtual void s10();
+    virtual void s14();
+    virtual void s18();
+    virtual void s1C();
+    virtual float s20();
+    virtual void s24();
+    virtual void setFrame(float);
+};
+
+class Owner {
+public:
+    char pad0[0x8];
+    MuObject* m_arr[14];
+};
+
+extern "C" void* fn_800E3FB0(Owner* self) {
+        MuObject** p;
+    MuObject* first = self->m_arr[11];
+    if (((AnmChrSlots*)first->m_modelAnim->m_anmObjChrRes)->s20() >= lbl_805A2448) {
+        int i = 2;
+        p = self->m_arr;
+        while (i < 6) {
+            ((AnmChrSlots*)p[10]->m_modelAnim->m_anmObjChrRes)->setFrame(lbl_805A23B0);
+            p++;
+            i++;
+        }
+        p = self->m_arr;
+        i = 2;
+        while (i < 6) {
+            p[10]->setFrameNode(lbl_805A23B0);
+            i++;
+            p++;
+        }
+        return NULL;
+    }
+    return self->m_arr[3];
+}
+}
+
+namespace jj_800E3820 {
+class Animation { public: virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3(); virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7(); virtual void setFrame(float); };
+struct ModelAnimation { char pad[0xC]; Animation* animation; };
+struct MuObject { char pad[0x14]; ModelAnimation* modelAnimation; };
+struct Sub { char pad[0x10]; int field18; char pad1[0xC]; MuObject* objects[6]; };
+struct State { char pad0[0x8]; Sub sub; char pad2[0xEC]; float field12C; int field130; int field134; };
+extern float lbl_805A23B0;
+extern "C" void setFrameNode__8MuObjectFf(MuObject*, float);
+extern "C" int fn_800B5854(MuObject*, int, int, int, int);
+extern "C" void fn_800E1588(State*, int, int, int);
+extern "C" void fn_800E3820(State* self, int mode) {
+    self->field130 = 0;
+    if (mode != 1) { float frame = lbl_805A23B0; self->field134 = 0; self->field12C = frame; }
+    MuObject** p;
+    int i;
+    i = 2;
+    p = (MuObject**)((char*)self + 8);
+    while (i < 6) { MuObject* obj = *(MuObject**)((char*)p + 40); obj->modelAnimation->animation->setFrame(lbl_805A23B0); p++; i++; }
+    i = 2;
+    p = self->sub.objects - 8;
+    while (i < 6) { MuObject* obj = p[10]; setFrameNode__8MuObjectFf(obj, lbl_805A23B0); p++; i++; }
+    i = 2;
+    p = self->sub.objects - 8;
+    while (i < 6) { MuObject* obj = p[10]; fn_800B5854(obj, 1, 0x10, 1, 1); p++; i++; }
+    fn_800E1588(self, self->sub.field18, 0, 0);
+}
+}
+
+namespace jj_800E370C {
+class Object_vptr_0 {
+public:
+ virtual void slot0(); virtual void slot1(); virtual void slot2(); virtual void slot3();
+ virtual void slot4(); virtual void slot5(); virtual void slot6(); virtual void slot7();
+ virtual void slot8(float);
+};
+struct State {
+ char pad[0x18];
+ unsigned int field18;
+ unsigned int field1C;
+ char pad2[8];
+ MuObject* objects[6];
+};
+extern float lbl_805A23B0;
+extern float lbl_805A23C0;
+extern float lbl_805A23E4;
+extern "C" void fn_800E1588(State*, unsigned int, int, int);
+extern "C" void fn_800E370C(State* self) {
+ MuObject** p;
+ int i;
+ i = 2;
+ p = self->objects - 8;
+ do {
+  ((Object_vptr_0*)p[10]->m_modelAnim->m_anmObjChrRes)->slot8(lbl_805A23B0);
+  i++; p++;
+ } while (i < 6);
+ i = 2;
+ p = self->objects - 8;
+ do {
+  p[10]->setFrameNode(lbl_805A23B0);
+  i++; p++;
+ } while (i < 6);
+ if (self->field1C != self->field18) {
+  i = 2;
+  p = self->objects - 8;
+  do {
+   p[10]->setFrameNode(lbl_805A23E4);
+   i++; p++;
+  } while (i < 6);
+  i = 2;
+  p = self->objects - 8;
+  do {
+   ((Object_vptr_0*)p[10]->m_modelAnim->m_anmObjChrRes)->slot8(lbl_805A23C0);
+   i++; p++;
+  } while (i < 6);
+ } else {
+  fn_800E1588(self, self->field18, 1, 0);
+ }
+}
+}
+
+namespace jj_800E3A90 {
+class Object_vptr_0 {
+public:
+ virtual void slot0(); virtual void slot1(); virtual void slot2(); virtual void slot3();
+ virtual void slot4(); virtual void slot5(); virtual void slot6(); virtual void slot7();
+ virtual void slot8(f32);
+};
+extern f32 lbl_805A23E4;
+extern f32 lbl_805A23C0;
+extern "C" int fn_800B5854(void*, int, int, int, int);
+extern "C" void fn_800B6838(MuObject*, const Vec3f*);
+extern "C" void fn_800E1840(void*, u32, int);
+extern "C" void fn_800E3A90(u8* self) {
+ u8* p;
+ u8* pos;
+ s32 i;
+ i = 2;
+ p = self + 8;
+ do {
+  fn_800B5854(*(MuObject**)(p + 0x28), 0, 0x10, 0, 0);
+  i++; p += 4;
+ } while (i < 6);
+ p = self;
+ pos = self + 0xFC;
+ short n = 0;
+ while (n < 4) {
+  fn_800B6838(*(MuObject**)(p + 0x30), (const Vec3f*)pos);
+  n++; pos += 0xC; p += 4;
+ }
+ if (*(u32*)(self + 0x1C) != *(u32*)(self + 0x18)) {
+  p = self + 8;
+  i = 2;
+  do {
+   (*(MuObject**)(p + 0x28))->setFrameNode(lbl_805A23E4);
+   i++; p += 4;
+  } while (i < 6);
+  p = self + 8;
+  i = 2;
+  do {
+   ((Object_vptr_0*)(*(char**)(*(char**)(*(char**)(p + 0x28) + 0x14) + 0xC)))->slot8(lbl_805A23C0);
+   i++; p += 4;
+  } while (i < 6);
+ }
+ fn_800E1840(self, *(u32*)(self + 0x18), 0);
+}
+}
+
+namespace jj_800E3E64 {
+
+
+class Object_vptr_0 {
+public:
+    virtual void slot0();
+    virtual void slot1();
+    virtual void slot2();
+    virtual void slot3();
+    virtual void slot4();
+    virtual void slot5();
+    virtual void slot6();
+    virtual void slot7();
+    virtual void slot8(f32);
+};
+
+extern f32 lbl_805A23B0;
+extern f32 lbl_805A23B4;
+extern f32 lbl_805A23C0;
+
+extern "C" void fn_800B6838(MuObject*, const Vec3f*);
+extern "C" void fn_800E1588(void*, u32, s32, s32);
+
+extern "C" void fn_800E3E64(u8* self) {
+    s32 i;
+    u8* f;
+    u8* e;
+    u8* c;
+    u8* d;
+    u8* b;
+    u8* a;
+
+    i = 2;
+    a = self + 8;
+    do {
+        ((Object_vptr_0*)(*(char**)(*(char**)(*(char**)(a + 0x28) + 0x14) + 0xC)))->slot8(lbl_805A23B0);
+        i++;
+        a += 4;
+    } while (i < 6);
+
+    b = self + 8;
+    i = 2;
+    do {
+        ((MuObject*)(*(char**)(b + 0x28)))->setFrameNode(lbl_805A23B0);
+        i++;
+        b += 4;
+    } while (i < 6);
+
+    c = self;
+    d = self + 0xFC;
+    for (i = 0; i < 4; i++, c += 4, d += 0xC) {
+        fn_800B6838(*(MuObject**)(c + 0x30), (const Vec3f*)d);
+    }
+
+    i = 2;
+    e = self + 8;
+    do {
+        ((MuObject*)(*(char**)(e + 0x28)))->setFrameNode(lbl_805A23B4);
+        i++;
+        e += 4;
+    } while (i < 6);
+
+    i = 2;
+    f = self + 8;
+    do {
+        ((Object_vptr_0*)(*(char**)(*(char**)(*(char**)(f + 0x28) + 0x14) + 0xC)))->slot8(lbl_805A23C0);
+        i++;
+        f += 4;
+    } while (i < 6);
+
+    i = *(u32*)(self + 0x18);
+    if ((u32)i == (*(u32*)(self + 0x1C) = (u32)i)) {
+        fn_800E1588(self, i, 1, 0);
+    }
+    *(u32*)(self + 0x18) = i;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800E4FD0 {
+class Object_vptr_0 {
+public:
+virtual void slot0(); virtual void slot1(); virtual void slot2(); virtual void slot3();
+virtual void slot4(); virtual void slot5(); virtual void slot6(); virtual void slot7();
+virtual void slot8(float); virtual void slot9(); virtual void slot10();
+virtual void slot11(int,int); virtual void slot12(); virtual void slot13(int);
+char pad[0xE0]; int value;
+};
+struct Frame { char pad[8]; Object_vptr_0* animation; };
+struct Child { char pad[0x10]; int handle; Frame* frame; };
+struct Object { char pad[0xC4]; Child* child; char pad1[0x2B0-0xC8]; int mode; };
+extern const double lbl_805A23B8;
+extern "C" {
+extern Object_vptr_0* lbl_805A02E0;
+extern float lbl_805A23B0, lbl_805A23C0, lbl_805A244C, lbl_805A2454, lbl_805A2458;
+extern float lbl_804088A0[], lbl_804088B0[];
+void fn_800B6F6C(void*,const float*);
+void fn_800B6838(void*,const float*,float,float,float,float);
+void fn_800E4FD0(Object* self,int arg1,int arg2) {
+float stack[6];
+Child* child=self->child;
+int mode=self->mode;
+lbl_805A02E0->slot13(child->handle);
+if(mode!=0) {
+float scale;
+if(mode==1) scale=lbl_805A23B0; else scale=lbl_805A244C;
+stack[0]=lbl_805A23B0; stack[1]=lbl_805A23B0; stack[2]=scale;
+fn_800B6F6C(child,&stack[0]);
+unsigned char flag=((unsigned char*)g_GameGlobal->getGlobalRecordMenuDatap())[0x28];
+float* values=((flag>>7)&1)?lbl_804088B0:lbl_804088A0;
+float base;
+if(mode==1) base=values[0]; else base=values[1];
+stack[3]=base;
+float spacing;
+if(arg2>1) spacing=lbl_805A2454*(float)(arg2-1); else spacing=lbl_805A23B0;
+float index=(float)arg1;
+float sum=values[2]+values[3];
+float end=sum*lbl_805A2458;
+float offset=end-spacing*lbl_805A2458;
+stack[4]=offset+lbl_805A2454*index;
+stack[5]=lbl_805A23B0;
+fn_800B6838(child,&stack[3],lbl_805A2454,index,offset,end);
+lbl_805A02E0->slot11(lbl_805A02E0->value,child->handle);
+child->frame->animation->slot8(lbl_805A23C0);
+}
+}
+}
+}
+
+namespace jj_800E5174 {
+
+class Anim {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void setRate(float rate);
+};
+
+class Vt {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11(void* a, void* b);
+    virtual void v12();
+    virtual void v13(void* a);
+    char pad[0xe0];
+    void* fE4;
+};
+
+struct Inner {
+    char pad0[0xc];
+    Anim* a;
+    char pad1[4];
+    Anim* b;
+};
+
+struct MuHolder {
+    char pad[0x14];
+    Inner* inner;
+};
+
+struct Sub {
+    char pad[0x10];
+    void* p10;
+};
+
+class Self {
+public:
+    char pad0[0x1c];
+    s32 f1C;
+    char pad1[0xc8 - 0x20];
+    MuObject* objC8;
+    Sub* pCC[4];
+    char pad2[0xf8 - 0xdc];
+    Vt* vtF8;
+    char pad3[0x354 - 0xfc];
+    s32 f354;
+    char pad4[0x3a0 - 0x358];
+    u8 b3A0;
+    char pad5[3];
+    s32 f3A4;
+};
+
+extern "C" {
+extern Vt* lbl_805A02E0;
+extern const float lbl_805A23B0;
+extern const float lbl_805A23C0;
+extern const float lbl_805A23F0;
+extern const double lbl_805A23B8;
+void fn_800B798C(MuObject* obj, float f);
+void fn_800E5318(Self* self, s32 v);
+}
+
+extern "C" void fn_800E5174(Self* self, s32 arg1) {
+    s32 i;
+    Vt* r30;
+    self->f354 = arg1;
+    Vt* r29 = self->vtF8;
+    MuObject* r28 = self->objC8;
+    Sub** p;
+    lbl_805A02E0->v13(r29);
+    if (arg1 != 0) {
+        i = 0x29;
+        p = (Sub**)((char*)self + 0xa4);
+        r30 = self->vtF8;
+        do {
+            r30->v13(p[10]->p10);
+            i++;
+            p++;
+        } while (i < 0x2d);
+        f32 f31;
+        switch (arg1) {
+        case 1:
+            if (self->b3A0 == 0) {
+                f31 = lbl_805A23B0;
+            } else {
+                f31 = lbl_805A23C0;
+                r28->setFrameNode((f32)self->f3A4 - f31);
+                fn_800B798C(r28, (f32)self->f3A4 - lbl_805A23C0);
+                ((MuHolder*)r28)->inner->a->setRate(lbl_805A23B0);
+                ((MuHolder*)r28)->inner->b->setRate(lbl_805A23B0);
+            }
+            break;
+        case 2:
+            fn_800E5318(self, self->f1C);
+            f31 = lbl_805A23F0;
+            break;
+        }
+        self->objC8->setFrameVisible(f31);
+        lbl_805A02E0->v11(lbl_805A02E0->fE4, r29);
+    }
+}
+}
+

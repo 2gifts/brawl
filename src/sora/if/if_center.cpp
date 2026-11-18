@@ -1,3 +1,5 @@
+#include <cstdio>
+#include <gf/gf_model.h>
 #include <if/if_center.h>
 #include <mu/mu_msg.h>
 #include <mu/mu_object.h>
@@ -533,3 +535,388 @@ void IfCenter::dispKumiteKills(int kills) {
     obj->m_modelAnim->m_anmObjChrRes->SetUpdateRate(0.0f);
     m_group->Insert(m_group->sceneItemsCount, group);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800DE9B4 {
+class gfModelAnimation {
+public:
+    void setUpdateRate(float rate);
+};
+
+extern "C" void fn_800B753C(void* self, float rate);
+extern const float lbl_805A2368;
+extern const float lbl_805A2374;
+
+class Obj {
+public:
+    virtual void s00();
+    virtual void s01();
+    virtual void s02();
+    virtual void s03();
+    virtual void s04();
+    virtual void s05();
+    virtual void s06();
+    virtual void s07();
+    virtual void s08();
+    virtual void s09();
+    virtual void s10();
+    virtual void s11(void*, void*);
+    virtual void s12();
+    virtual void s13(void*);
+};
+
+extern "C" void fn_800DE9B4(void* arg0) {
+    char* base = (char*)arg0;
+    int i;
+    void* anim = *(void**)(base + 0x4C);
+    ((gfModelAnimation*)*(void**)((char*)anim + 0x14))->setUpdateRate(lbl_805A2368);
+    fn_800B753C(anim, lbl_805A2374);
+    char* p = base + 0x34;
+    for (i = 0xD; i < 0x18; i++, p += 4) {
+        void* e = *(void**)(p + 0x10);
+        if (e != 0) {
+            Obj* o = *(Obj**)(base + 0x8);
+            o->s13(*(void**)((char*)e + 0x10));
+        }
+    }
+    Obj* o = *(Obj**)(base + 0x8);
+    o->s11(*(void**)((char*)o + 0xE4), *(void**)((char*)anim + 0x10));
+}
+}
+
+namespace jj_800DEAE4 {
+extern "C" void setUpdateRate__16gfModelAnimationFf(void*, float);
+extern "C" void fn_800B753C(void*, float);
+extern const float lbl_805A2368;
+extern const float lbl_805A2374;
+
+struct Obj2 {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10();
+    virtual void v13(void*, void*);
+    virtual void v14();
+    virtual void v15(void*);
+    char pad[0xE4 - 4];
+    void* e4;
+};
+struct S { char pad[8]; Obj2* o; };
+struct T { char pad[0x10]; void* p10; void* anim; };
+struct E { char pad[0x10]; void* p10; };
+
+extern "C" void fn_800DEAE4(S* self) {
+    int i;
+    T* t = *(T**)((char*)self + 0x50);
+    setUpdateRate__16gfModelAnimationFf(t->anim, lbl_805A2368);
+    fn_800B753C(t, lbl_805A2374);
+    E** p = (E**)((char*)self + 0x34);
+    for (i = 13; i < 24; i++) {
+        E* e = p[4];
+        if (e) {
+            self->o->v15(e->p10);
+        }
+        p++;
+    }
+    Obj2* o = self->o;
+    o->v13(o->e4, t->p10);
+}
+}
+
+namespace jj_800DEE60 {
+
+
+extern "C" void fn_800B753C(void*, float);
+extern const float lbl_805A2368;
+extern const float lbl_805A2374;
+
+class Target {
+public:
+    virtual void s0();
+    virtual void s1();
+    virtual void s2();
+    virtual void s3();
+    virtual void s4();
+    virtual void s5();
+    virtual void s6();
+    virtual void s7();
+    virtual void s8();
+    virtual void s9();
+    virtual void s10();
+    virtual void s11(void*, void*);
+    virtual void s12();
+    virtual void s13(void*);
+
+    char pad[0xE0];
+    void* field_E4;
+};
+
+extern "C" void fn_800DEE60(void* arg0) {
+    char* base = (char*)arg0;
+    int i;
+    void* anim = *(void**)(base + 0x5C);
+
+    ((gfModelAnimation*)*(void**)((char*)anim + 0x14))->setUpdateRate(lbl_805A2368);
+    fn_800B753C(anim, lbl_805A2374);
+
+    char* p = base + 0x34;
+    for (i = 0xD; i < 0x18; i++, p += 4) {
+        void* entry = *(void**)(p + 0x10);
+        if (entry != 0) {
+            Target* target = *(Target**)(base + 0x8);
+            target->s13(*(void**)((char*)entry + 0x10));
+        }
+    }
+
+    Target* target = *(Target**)(base + 0x8);
+    target->s11(target->field_E4, *(void**)((char*)anim + 0x10));
+}
+}
+
+namespace jj_800DEF4C {
+
+
+class Controller {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11(void*, void*);
+    virtual void v12();
+    virtual void v13(void*);
+
+    char pad[0xE4 - 4];
+    void* fieldE4;
+};
+
+struct Self {
+    char pad0[0x08];
+    Controller* controller;
+    char pad1[0x60 - 0x0C];
+    void* model;
+};
+
+extern "C" void fn_800B753C(void*, float);
+extern const float lbl_805A2368;
+extern const float lbl_805A2374;
+
+extern "C" void fn_800DEF4C(Self* self) {
+    int i;
+    void* model = self->model;
+    char* entry;
+
+    ((gfModelAnimation*)*(void**)((char*)model + 0x14))->setUpdateRate(lbl_805A2368);
+    fn_800B753C(model, lbl_805A2374);
+
+    entry = (char*)self + 0x34;
+    i = 0xD;
+    do {
+        void* item = *(void**)(entry + 0x10);
+        if (item != 0) {
+            self->controller->v13(*(void**)((char*)item + 0x10));
+        }
+        ++i;
+        entry += 4;
+    } while (i < 0x18);
+
+    self->controller->v11(self->controller->fieldE4, *(void**)((char*)model + 0x10));
+}
+}
+
+namespace jj_800DF038 {
+class Target {
+public:
+    virtual void s0();
+    virtual void s1();
+    virtual void s2();
+    virtual void s3();
+    virtual void s4();
+    virtual void s5();
+    virtual void s6();
+    virtual void s7();
+    virtual void s8();
+    virtual void s9();
+    virtual void s10();
+    virtual void s11(void*, void*);
+    virtual void s12();
+    virtual void s13(void*);
+};
+
+extern "C" void setUpdateRate__16gfModelAnimationFf(void*, float);
+extern "C" void fn_800B753C(void*, float);
+extern const float lbl_805A2368;
+extern const float lbl_805A2374;
+
+extern "C" void fn_800DF038(void* arg0) {
+    float rate = lbl_805A2368;
+    int i;
+    char* model = (char*)*(void**)((char*)arg0 + 0x64);
+    setUpdateRate__16gfModelAnimationFf(*(void**)(model + 0x14), rate);
+    fn_800B753C(model, lbl_805A2374);
+
+    void** p = (void**)((char*)arg0 + 0x34);
+    for (i = 0xD; i < 0x18; i++, p++) {
+        if (p[4] != 0) {
+            Target* t = *(Target**)((char*)arg0 + 0x8);
+            t->s13(((void**)p[4])[4]);
+        }
+    }
+
+    Target* t = *(Target**)((char*)arg0 + 0x8);
+    t->s11(*(void**)((char*)t + 0xE4), *(void**)(model + 0x10));
+}
+}
+
+namespace jj_800DF168 {
+extern "C" void fn_800B753C(void*, float);
+extern "C" void setUpdateRate__16gfModelAnimationFf(void*, float);
+
+extern const float lbl_805A2368;
+extern const float lbl_805A2374;
+
+class Target {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11(int, void*);
+    virtual void v12();
+    virtual void v13(void*);
+    virtual void v14();
+    virtual void v15();
+
+    char pad[0xE4 - 4];
+    int f_e4;
+};
+
+struct Item {
+    char pad[0x10];
+    void* data;
+};
+
+struct Model {
+    char pad[0x10];
+    void* f10;
+    void* animation;
+};
+
+struct Ctx {
+    char pad0[8];
+    Target* target;
+    char pad1[0x68 - 0x0C];
+    Model* model;
+};
+
+extern "C" void fn_800DF168(Ctx* self) {
+    int i;
+    Model* m = self->model;
+    setUpdateRate__16gfModelAnimationFf(m->animation, lbl_805A2368);
+    fn_800B753C(m, lbl_805A2374);
+
+    char* p = (char*)self + 0x34;
+    for (i = 13; i < 24; i++, p += 4) {
+        Item* it = *(Item**)(p + 0x10);
+        if (it != 0) {
+            self->target->v13(it->data);
+        }
+    }
+
+    self->target->v11(self->target->f_e4, m->f10);
+}
+}
+
+namespace jj_800DED0C {
+extern "C" void setUpdateRate__16gfModelAnimationFf(void*, float);
+extern "C" void fn_800B753C(void*, float);
+extern const float lbl_805A2368;
+extern const float lbl_805A2374;
+
+struct V {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11(int, void*);
+    virtual void v12();
+    virtual void v13(void*);
+    char pad[0xe0];
+    int e4;
+};
+
+struct Ent { char p[0x10]; void* v10; };
+struct Obj { char p[0x10]; void* v10; void* v14; };
+
+extern "C" void fn_800DED0C(void* s) {
+    char* self = (char*)s;
+    int i;
+    Obj* o = *(Obj**)(self + 0x58);
+    setUpdateRate__16gfModelAnimationFf(o->v14, lbl_805A2368);
+    fn_800B753C(o, lbl_805A2374);
+    Ent** p = (Ent**)(self + 0x34);
+    for (i = 13; i < 24; i++, p++) {
+        Ent* e = p[4];
+        if (e) {
+            (*(V**)(self + 8))->v13(e->v10);
+        }
+    }
+    V* b = *(V**)(self + 8);
+    b->v11(b->e4, o->v10);
+    *(unsigned char*)(self + 0x174) = 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800DD960 {
+struct Entry { const char* name; unsigned char begin, end, kind; };
+struct Owner { char pad[0x10]; MuObject* objects[1]; };
+extern "C" {
+extern char lbl_8059E220[6];
+void fn_800B20B0(MuObject*, int);
+void fn_800B21C4(MuObject*, int);
+}
+extern "C" void fn_800DD960(Owner* self, Entry* entry, int count, nw4r::g3d::ResFile* res) {
+    char buf[0x40];
+    int n;
+    Owner* slot;
+    Entry* p = entry;
+    int i;
+    int j;
+    for (i = 0; i < count; i++, p++) {
+        n = 1;
+        if (p->begin < p->end)
+            n = p->end - p->begin;
+        sprintf(buf, lbl_8059E220, p->name);
+        for (j = 0; j < n; j++) {
+            slot = (Owner*)((char*)self + (p->begin + j) * 4);
+            slot->objects[0] = MuObject::create(res, p->name, p->kind, 0, (HeapType)0x28);
+            fn_800B20B0(slot->objects[0], 1);
+            fn_800B21C4(slot->objects[0], 1);
+            slot->objects[0]->changeAnimN(buf);
+            *(int*)((char*)slot->objects[0]->m_sceneModel + 0x118) = 8;
+        }
+    }
+}
+}
+

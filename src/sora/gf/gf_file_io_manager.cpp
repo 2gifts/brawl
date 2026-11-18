@@ -67,3 +67,21 @@ void gfFileIOManager::setSyncMode(bool enable) {
         OSUnlockMutex(&m_queue2->m_mtx);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_80022DE4 {
+class ipSwitch {
+public:
+    static ipSwitch* getInstance();
+    u8 pad[0x18];
+    void* m_18;
+};
+
+extern "C" void fn_8004B780(void*, void*);
+extern "C" void* lbl_8059FFF0;
+
+extern "C" void fn_80022DE4() {
+    fn_8004B780(ipSwitch::getInstance()->m_18, &lbl_8059FFF0);
+}
+}
+

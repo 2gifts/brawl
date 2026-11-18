@@ -195,3 +195,154 @@ extern "C" void fn_80291DE8(float *dst, const float *src) {
     dst[47] = src[47];
 }
 } // namespace jj_fn_80291DE8
+
+// TODO: clean up, give variables real names
+extern "C" void fn_80290AC0(void) {}
+
+extern "C" void fn_802915BC(void* self, unsigned char value) {
+    *(unsigned char*)((unsigned char*)self + 0x0) = value;
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80291270 {
+extern "C" int fn_80291270(int arg0, int arg1, int arg2) {
+    return (arg2 << 4) + (arg1 << 2) + arg0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80290AC4 {
+extern const float lbl_805A3E00;
+extern "C" void fn_80290AC4(float *p)
+{
+    float arr[16] __attribute__((aligned(16)));
+    float zero = lbl_805A3E00;
+    p[0] = zero;
+    p[1] = zero;
+    p[2] = zero;
+    p[3] = zero;
+    p[4] = zero;
+    p[5] = zero;
+    p[6] = zero;
+    p[7] = zero;
+    p[8] = zero;
+    p[9] = zero;
+    p[10] = zero;
+    p[11] = zero;
+    p[12] = zero;
+    p[13] = zero;
+    p[14] = zero;
+    p[15] = zero;
+    p[16] = zero;
+    p[17] = zero;
+    p[18] = zero;
+    p[19] = zero;
+    p[20] = zero;
+    p[21] = zero;
+    p[22] = zero;
+    p[23] = zero;
+    p[24] = zero;
+    p[25] = zero;
+    p[26] = zero;
+    p[27] = zero;
+    p[28] = zero;
+    p[29] = zero;
+    p[30] = zero;
+    p[31] = zero;
+    p[32] = zero;
+    p[33] = zero;
+    p[34] = zero;
+    p[35] = zero;
+    p[36] = zero;
+    p[37] = zero;
+    p[38] = zero;
+    p[39] = zero;
+    p[40] = zero;
+    p[41] = zero;
+    p[42] = zero;
+    p[43] = zero;
+    p[44] = zero;
+    p[45] = zero;
+    p[46] = zero;
+    p[47] = zero;
+    arr[15] = zero;
+    arr[14] = zero;
+    arr[13] = zero;
+    arr[12] = zero;
+    arr[11] = zero;
+    arr[10] = zero;
+    arr[9] = zero;
+    arr[8] = zero;
+    arr[7] = zero;
+    arr[6] = zero;
+    arr[5] = zero;
+    arr[4] = zero;
+    arr[3] = zero;
+    arr[2] = zero;
+    arr[1] = zero;
+    arr[0] = zero;
+}
+}
+
+namespace jj_80291C70 {
+typedef struct hkMath {
+    f32 unk0;
+} hkMath;
+
+typedef struct Block {
+    f32 v[48];
+} __attribute__((aligned(16))) Block;
+
+extern f32 lbl_805A3E04;
+
+extern void fn_80291DE8(void *dst, const void *src);
+extern void fn_8029211C(void *a, void *b, void *c, void *d);
+extern void fn_802921B0(void *a, const void *b);
+extern void fn_80284614(void *dst, const void *src);
+extern void fn_80290AC0(void *p);
+extern void fn_80284240(void *out, const void *a, const void *b);
+extern void fn_8029193C(void *dst, const void *src);
+extern void fn_80283EB4(void *dst, const void *src);
+extern void fn_80284670(void *dst, const void *src);
+extern hkMath *fn_80291270(void *base, s32 i, s32 j);
+extern f32 max2f__6hkMathFff(f32 a, f32 b);
+
+extern "C" void fn_80291C70(u8 *arg0, u8 *base, void *arg2, void *arg3, void **arg4)
+{
+    Block t260, t1A0, tE0, t20;
+    s32 i;
+    hkMath *a, *b;
+    u8 flag;
+
+    fn_80291DE8(&t260, base + 0x240);
+    fn_80291DE8(&t1A0, base + 0x300);
+    flag = *arg0;
+    fn_8029211C(arg2, &flag, &t260, &t1A0);
+    fn_802921B0(arg2, arg3);
+    fn_80284614(base, arg3);
+    fn_80290AC0(&tE0);
+    fn_80284240(&tE0, base, *arg4);
+    fn_8029193C(base + 0xC0, &t260);
+    fn_80283EB4(base + 0xC0, &tE0);
+
+    i = 0;
+    do {
+        a = fn_80291270(base + 0xC0, i, i);
+        b = fn_80291270(base + 0x150, i, i);
+        a->unk0 = max2f__6hkMathFff(a->unk0, lbl_805A3E04);
+        {
+            f32 threshold = lbl_805A3E04;
+            b->unk0 = max2f__6hkMathFff(b->unk0, threshold);
+        }
+        i++;
+    } while (i < 3);
+
+    fn_80290AC0(&t20);
+    fn_8029193C(&t20, base + 0xC0);
+    fn_80284670(base + 0xC0, &t20);
+    fn_80284240(base + 0x180, base + 0xC0, &t1A0);
+    fn_8029193C(arg3, base + 0x300);
+    *arg4 = base + 0x180;
+}
+}
+

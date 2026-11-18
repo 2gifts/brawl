@@ -1,3 +1,4 @@
+#include <types.h>
 #include <nw4r/snd.h>
 #include <nw4r/ut.h>
 
@@ -189,3 +190,7 @@ void MemorySoundArchive::MemoryFileStream::Seek(s32 offset, u32 origin) {
 
 } // namespace snd
 } // namespace nw4r
+
+// TODO: clean up, give variables real names
+extern "C" void fn_801C1050(void) {}
+

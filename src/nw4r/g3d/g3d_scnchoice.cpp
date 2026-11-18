@@ -1,3 +1,4 @@
+#include <types.h>
 #include <nw4r/g3d.h>
 
 #include <algorithm>
@@ -156,3 +157,45 @@ void ScnChoice::G3dProc(u32 task, u32 param, void* pInfo) {
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
 unsigned char gpCullingFrustum__Q24nw4r3g3d[0x8] __attribute__((aligned(4))) = { 0 };
+
+// TODO: clean up, give variables real names
+namespace jj_801B3C74 {
+extern "C" {
+
+extern unsigned char lbl_8040ABE8[0x10];
+
+unsigned char *fn_801B3C74(void) {
+    return lbl_8040ABE8;
+}
+
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_801B3440 {
+extern "C" void* fn_80204E5C(void*, unsigned int);
+extern "C" void fn_801AC13C(void*, int, int, int);
+extern "C" int lbl_80466410[];
+
+extern "C" void* fn_801B3440(void* arg0, int* arg1, int arg2) {
+    void* result = 0;
+    unsigned int size = (unsigned int)(arg2 * 4 + 0xEF) & 0xFFFFFFFC;
+
+    if (arg1 != 0) {
+        *arg1 = (int)size;
+    }
+    if (arg0 != 0) {
+        result = fn_80204E5C(arg0, size);
+        if (result == 0) {
+            return 0;
+        }
+        if (result != 0) {
+            fn_801AC13C(result, (int)arg0, (int)((char*)result + 0xEC), arg2);
+            *(int*)result = (int)lbl_80466410;
+            *(int*)((char*)result + 0xE8) = 0;
+        }
+    }
+    return result;
+}
+}
+

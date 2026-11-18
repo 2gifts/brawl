@@ -1,3 +1,4 @@
+#include <gf/gf_task.h>
 #include <gf/gf_heap_manager.h>
 #include <gf/gf_sys_recorder2.h>
 #include <mu/mu_notice_wnd.h>
@@ -182,3 +183,123 @@ int muWifiDataLoadTask::mainStepDoneMain(muWifiDataLoadTask* task) {
     }
     return task->m_step;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800DACB0 {
+extern "C" {
+void fn_80030F98(void* a, int b);
+
+void fn_800DACB0(void* p)
+{
+    fn_80030F98(*(void**)((char*)p + 0x60), 0x2b);
+}
+}
+}
+
+namespace jj_800DAD80 {
+extern "C" {
+int fn_800BEEB8(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12);
+}
+
+struct Fn5CObj {
+    u8 pad0[0x40];
+    int m40;
+    int m44;
+    int m48;
+    int m4C;
+    int m50;
+    int m54;
+    int m58;
+    int m5C;
+};
+
+extern "C" void fn_800DAD80(Fn5CObj* self) {
+    if (self->m5C == 0) {
+        self->m5C = fn_800BEEB8(1, self->m4C, 0x44, self->m40, self->m44, self->m58, 0, 0x2A, 0x2B, 0, 0, 0xF0);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800DAC20 {
+struct Menu {
+    unsigned char padding[0x50];
+    union {
+        int state;
+        unsigned int stateIndex;
+    };
+    int previousState;
+};
+
+typedef void (*EnterFn)(Menu*);
+typedef int (*UpdateFn)(Menu*);
+struct StateEntry {
+    EnterFn enter;
+    UpdateFn update;
+};
+
+extern "C" {
+extern const StateEntry lbl_80408550[];
+
+void fn_800DAC20(Menu* self) {
+    if (self->previousState != self->state) {
+        if (lbl_80408550[self->stateIndex].enter)
+            lbl_80408550[self->stateIndex].enter(self);
+        self->previousState = self->state;
+    }
+    if (lbl_80408550[self->stateIndex].update)
+        self->state = lbl_80408550[self->stateIndex].update(self);
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800DADF8 {
+struct Task : gfTask {
+    char pad[0xc0];
+    unsigned char flag;
+    char pad2[3];
+    int mode;
+};
+struct State {
+    char pad[0x48];
+    int field48;
+    char pad2[4];
+    int result;
+    char pad3[8];
+    Task* task;
+};
+extern "C" int fn_800DADF8(State* self) {
+    int result;
+    int status;
+    Task* task = self->task;
+    if (task == 0) {
+        status = 0;
+    } else if (task->mode != 3) {
+        status = 1;
+    } else {
+        status = 3;
+        if (task->flag != 0) status = 2;
+    }
+    switch (status) {
+    case 1:
+        result = self->result;
+        break;
+    case 2:
+        result = 2;
+        break;
+    case 3:
+        result = 4;
+        self->field48 = 1;
+        break;
+    }
+    if (result != self->result) {
+        if (self->task != 0) {
+            self->task->exit();
+            self->task = 0;
+        }
+    }
+    return result;
+}
+}
+

@@ -1,3 +1,7 @@
+#include <revolution/MTX/mtx.h>
+#include <revolution/GX/GXHardware.h>
+#include <gm/gm_global.h>
+#include <gf/gf_camera.h>
 #include <gf/gf_3d_scene.h>
 #include <gf/gf_heap_manager.h>
 #include <nw4r/g3d/g3d_scnroot.h>
@@ -413,3 +417,514 @@ void gfSceneRoot::blendLightColor(f32 ratio, nw4r::g3d::LightObj* from, nw4r::g3
 void gfSceneRoot::processFixCamera() {
     gfLoupe::setup();
 }
+
+// TODO: clean up, give variables real names
+namespace jj_8000CEDC {
+extern "C" {
+void fn_8000CEDC(int *p) {
+    *p = 0;
+}
+}
+}
+
+namespace jj_8000D518 {
+struct Inner {
+    unsigned char pad[0x38];
+    unsigned short value;
+};
+
+struct Outer {
+    unsigned char pad[0x20];
+    Inner *inner;
+};
+
+extern "C" unsigned short fn_8000D518(Outer *arg0) {
+    return arg0->inner->value;
+}
+}
+
+namespace jj_8000D524 {
+extern "C" unsigned short fn_8000D524(void *arg)
+{
+    return *(unsigned short *)((char *)*(void **)((char *)arg + 0x20) + 0x3c);
+}
+}
+
+namespace jj_8000CEE8 {
+// Release a heap block when requested, preserving its pointer.
+extern "C" void __dl__FPv(void*);
+
+extern "C" {
+void* fn_8000CEE8(void* arg0, int arg1) {
+    if (arg0 != 0 && arg1 > 0) {
+        __dl__FPv(arg0);
+    }
+    return arg0;
+}
+}
+}
+
+namespace jj_8000D1B8 {
+class Class_8042B6D0 {
+public:
+    virtual void fn_8004805C();
+    virtual void fn_8004781C();
+    virtual void fn_80046A28();
+    virtual void fn_8004810C();
+    virtual void fn_800480DC();
+    virtual void fn_801AB1C4();
+    virtual void fn_801B269C();
+    virtual void fn_801B26E4();
+    virtual void fn_801AAFDC();
+    virtual void fn_801AAFE8();
+    virtual void fn_801AB290();
+    virtual void fn_801B2EEC();
+    virtual void fn_801B3050();
+    virtual int fn_801B3248(int arg);
+};
+
+struct Entry {
+    Class_8042B6D0* obj;
+    char pad[0x0a - 4];
+    unsigned short cnt;
+    char pad2[0x18 - 0x0c];
+};
+
+struct Owner {
+    char pad[0x390];
+    Entry table[16];
+};
+
+extern "C" int fn_8000D1B8(Owner* self, int idx, int arg) {
+    int ret = 0;
+    Class_8042B6D0* obj = self->table[idx].obj;
+    if (obj != 0) {
+        int r = obj->fn_801B3248(arg);
+        ret = r;
+        if (r != 0) {
+            self->table[idx].cnt = self->table[idx].cnt - 1;
+        }
+    }
+    return ret;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8001038C {
+extern "C" {
+void fn_801A7550(void*, void*);
+void fn_801A7558(void*);
+void fn_801A7A5C(void*, float, float, float, float, float, float);
+void fn_801A7ABC(void*, float, float, float, float);
+void fn_801A7B58(void*, float, float);
+void fn_801A8048(void*);
+void fn_801A80CC(void*);
+void fn_801A8194(void*);
+void fn_801A81B8(void*);
+void fn_8001025C(s32*);
+void fn_801EC158(void*);
+void fn_801F51DC(void*, unsigned int);
+void fn_801EFB10();
+void fn_801EF280(int, int);
+void fn_801EFB44(int, int, int, int, int);
+void fn_801F52E4(int);
+void fn_801F54D0(float, float);
+void GXSetZMode(int, int, int);
+void GXBegin(int, int, int);
+extern f32 lbl_805A1324, lbl_805A1330, lbl_805A1360, lbl_805A1384, lbl_805A1388;
+}
+extern "C" void fn_8001038C(s32 arg0, s32 arg1) {
+    Mtx sp10;
+    u8 sp40[0x110];
+    s32 spC;
+    s32 sp8;
+    f32 temp_f31;
+    f32 temp_f30;
+    fn_801A7550(&spC, &sp40);
+    fn_801A7558(&spC);
+    fn_801A7A5C(&spC, lbl_805A1324, (f32)arg1, lbl_805A1324, (f32)arg0, lbl_805A1330, lbl_805A1384);
+    fn_801A7ABC(&spC, lbl_805A1324, lbl_805A1324, (f32)arg0, (f32)arg1);
+    fn_801A7B58(&spC, lbl_805A1324, lbl_805A1388);
+    fn_801A8048(&spC);
+    fn_801A80CC(&spC);
+    fn_801A8194(&spC);
+    fn_801A81B8(&spC);
+    sp8 = 0;
+    fn_8001025C(&sp8);
+    GXSetZMode(0, 7, 0);
+    fn_801EC158(&sp10);
+    fn_801F51DC(&sp10, 0);
+    fn_801EFB10();
+    fn_801EF280(9, 1);
+    fn_801EFB44(7, 9, 1, 4, 0);
+    temp_f31 = (f32)arg1;
+    temp_f30 = (f32)arg0;
+    fn_801F52E4(0);
+    fn_801F54D0(lbl_805A1330, lbl_805A1324);
+    GXBegin(0x98, 7, 4);
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = lbl_805A1360;
+    WGPIPE.f = temp_f30;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = lbl_805A1360;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = temp_f31;
+    WGPIPE.f = lbl_805A1360;
+    WGPIPE.f = temp_f30;
+    WGPIPE.f = temp_f31;
+    WGPIPE.f = lbl_805A1360;
+}
+}
+
+namespace jj_80010598 {
+extern "C" {
+void fn_801A7550(void*, void*);
+void fn_801A7558(void*);
+void fn_801A7A5C(void*, float, float, float, float, float, float);
+void fn_801A7ABC(void*, float, float, float, float);
+void fn_801A8048(void*);
+void fn_801A80CC(void*);
+void fn_801A8194(void*);
+void fn_801A81B8(void*);
+void fn_8001025C(s32*);
+void GXSetZCompLoc(int);
+void GXSetZMode(int, int, int);
+void fn_801F471C(int);
+void fn_801F55EC(int);
+void fn_801F51DC(void*, unsigned int);
+void fn_801EFB10();
+void fn_801EF280(int, int);
+void fn_801EFB44(int, int, int, int, int);
+void fn_801F52E4(int);
+void GXBegin(int, int, int);
+extern f32 lbl_805A1324, lbl_805A1330, lbl_805A138C;
+}
+extern "C" void fn_80010598(s32 arg0, s32 arg1) {
+    Matrix sp10(true);
+    u8 sp40[0x110];
+    s32 spC;
+    s32 sp8;
+    f32 temp_f31;
+    f32 temp_f30;
+    fn_801A7550(&spC, &sp40);
+    fn_801A7558(&spC);
+    fn_801A7A5C(&spC, lbl_805A1324, (f32)arg1, lbl_805A1324, (f32)arg0, lbl_805A1324, lbl_805A1330);
+    fn_801A7ABC(&spC, lbl_805A1324, lbl_805A1324, (f32)arg0, (f32)arg1);
+    fn_801A8048(&spC);
+    fn_801A80CC(&spC);
+    fn_801A8194(&spC);
+    fn_801A81B8(&spC);
+    sp8 = 0;
+    fn_8001025C(&sp8);
+    GXSetZCompLoc(1);
+    GXSetZMode(1, 7, 1);
+    fn_801F471C(0);
+    fn_801F55EC(1);
+    sp10.setIdentity();
+    fn_801F51DC(&sp10, 0);
+    fn_801EFB10();
+    fn_801EF280(9, 1);
+    fn_801EFB44(7, 9, 1, 4, 0);
+    temp_f31 = (f32)arg1;
+    temp_f30 = (f32)arg0;
+    fn_801F52E4(0);
+    GXBegin(0x98, 7, 4);
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = lbl_805A138C;
+    WGPIPE.f = temp_f30;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = lbl_805A138C;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = temp_f31;
+    WGPIPE.f = lbl_805A138C;
+    WGPIPE.f = temp_f30;
+    WGPIPE.f = temp_f31;
+    WGPIPE.f = lbl_805A138C;
+    fn_801F471C(1);
+}
+}
+
+namespace jj_800107A8 {
+
+
+extern "C" {
+
+void fn_801A7550(void* self, void* value);
+void fn_801A7558(void* self);
+void fn_801A7A5C(void* self, float f1, float f2, float f3, float f4, float f5, float f6);
+void fn_801A7ABC(void* self, float f1, float f2, float f3, float f4);
+void fn_801A7B58(void* self, float f1, float f2);
+void fn_801A8048(void* self);
+void fn_801A80CC(void* self);
+void fn_801A8194(void* self);
+void fn_801A81B8(void* self);
+void fn_801F54D0(float x, float y);
+void fn_8001025C(s32* p);
+void fn_801EC158(void* p);
+void fn_801F51DC(void* p, unsigned int v);
+void fn_801EFB10(void);
+void fn_801EF280(int, int);
+void fn_801EFB44(int, int, int, int, int);
+void fn_801F52E4(int);
+void GXSetZMode(int, int, int);
+void GXSetLineWidth(int, int);
+void GXBegin(int, int, int);
+
+extern f32 lbl_805A1324;
+extern f32 lbl_805A1330;
+extern f32 lbl_805A135C;
+extern f32 lbl_805A1380;
+
+}
+
+extern "C" void fn_800107A8(s32 arg0, s32 arg1) {
+    Mtx sp10;
+    u8 sp40[0x110];
+    s32 spC;
+    s32 sp8;
+    f32 temp_f31;
+    f32 temp_f30;
+
+    fn_801A7550(&spC, &sp40);
+    fn_801A7558(&spC);
+    fn_801A7A5C(&spC, lbl_805A1324, (f32)arg1, lbl_805A1324, (f32)arg0, lbl_805A1324, lbl_805A1330);
+    fn_801A7ABC(&spC, lbl_805A1324, lbl_805A1324, (f32)arg0, (f32)arg1);
+    fn_801A7B58(&spC, lbl_805A1324, lbl_805A1380);
+    fn_801A8048(&spC);
+    fn_801A80CC(&spC);
+    fn_801A8194(&spC);
+    fn_801A81B8(&spC);
+    fn_801F54D0(lbl_805A1330, lbl_805A1324);
+    sp8 = 0;
+    fn_8001025C(&sp8);
+    GXSetZMode(1, 7, 1);
+    fn_801EC158(&sp10);
+    fn_801F51DC(&sp10, 0);
+    fn_801EFB10();
+    fn_801EF280(9, 1);
+    fn_801EFB44(7, 9, 1, 4, 0);
+    GXSetLineWidth(0x18, 0);
+    temp_f31 = (f32)arg1;
+    temp_f30 = (f32)arg0;
+    fn_801F52E4(0);
+    GXBegin(0xB0, 7, 5);
+    WGPIPE.f = lbl_805A135C;
+    WGPIPE.f = lbl_805A135C;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = temp_f30;
+    WGPIPE.f = lbl_805A135C;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = temp_f30;
+    WGPIPE.f = temp_f31;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = lbl_805A135C;
+    WGPIPE.f = temp_f31;
+    WGPIPE.f = lbl_805A1324;
+    WGPIPE.f = lbl_805A135C;
+    WGPIPE.f = lbl_805A135C;
+    WGPIPE.f = lbl_805A1324;
+}
+}
+
+namespace jj_8000D8A8 {
+
+extern f32 lbl_805A1330;
+
+class Class_8042B6D0 {
+public:
+    virtual void fn_8004805C();
+    virtual void fn_8004781C();
+    virtual void fn_80046A28();
+    virtual void fn_8004810C();
+    virtual void fn_800480DC();
+    virtual void fn_801AB1C4();
+    virtual void fn_801B269C();
+    virtual void fn_801B26E4(float);
+    virtual void fn_801AAFDC();
+    virtual void fn_801AAFE8();
+};
+
+struct Entry {
+    char pad[4];
+    u8 flags;
+    char pad2[2];
+    u8 current, previous, count, value;
+    char pad3;
+};
+
+struct Object {
+    char pad[0x54];
+    Class_8042B6D0* a;
+    char pad2[4];
+    Class_8042B6D0* b;
+    Class_8042B6D0* c;
+    char pad3[4];
+    Entry entries[10];
+};
+
+extern "C" void fn_8000D8A8(Object* self) {
+    if (!((*((u8*)g_gfSceneRoot + 0x464) >> 1) & 1)) {
+        if (!((*((u8*)g_gfSceneRoot + 0x465) >> 3) & 1)) {
+            Class_8042B6D0* p = self->c;
+            if (!p) {
+                p = self->a;
+                if (p) {
+                    float rate = lbl_805A1330 / (float)g_GameGlobal->getSlowRate();
+                    float motionRatio = g_GameGlobal->m_stageData->m_motionRatio;
+                    float speed = rate * motionRatio;
+                    speed *= g_GameGlobal->m_stageData->m_motionSubRatio;
+                    p->fn_801B26E4(speed);
+                    p->fn_801AAFE8();
+                }
+            } else if (p) {
+                float rate = lbl_805A1330 / (float)g_GameGlobal->getSlowRate();
+                float motionRatio = g_GameGlobal->m_stageData->m_motionRatio;
+                float speed = rate * motionRatio;
+                speed *= g_GameGlobal->m_stageData->m_motionSubRatio;
+                p->fn_801B26E4(speed);
+                p->fn_801AAFE8();
+            }
+        }
+
+        Class_8042B6D0* p = self->b;
+        float f = lbl_805A1330;
+        if (p) {
+            float motionRatio = g_GameGlobal->m_stageData->m_motionRatio;
+            float speed = f * motionRatio;
+            speed *= g_GameGlobal->m_stageData->m_motionSubRatio;
+            p->fn_801B26E4(speed);
+            p->fn_801AAFE8();
+        }
+    }
+
+    for (int i = 0; i < 10; i++) {
+        Entry* e = &self->entries[i];
+        if ((e->flags >> 7) & 1) {
+            if (e->current != e->previous)
+                e->count++;
+            if (e->count > 3) {
+                e->count = 0;
+                e->previous = e->current;
+            }
+            if (e->current != e->previous) {
+                if (e->current > e->previous)
+                    e->value = e->count;
+                else
+                    e->value = 4 - e->count;
+            } else {
+                e->value = 0;
+            }
+        }
+    }
+}
+}
+
+namespace jj_8000E214 {
+class Class_80466320;
+class Class_80466278 {
+public:
+virtual void fn_801AC270(); virtual void fn_801AB9D8(); virtual void fn_801AC1AC(); virtual void fn_801AC328(); virtual void fn_801AC2F8(); virtual void fn_801AB788(); virtual void fn_801AAC9C(); virtual void fn_801AAE34(); virtual void fn_801AAFDC(); virtual void fn_801AAFE8(); virtual void fn_801AAA70(); virtual void fn_801ABE70(unsigned int, Class_80466320*); virtual void fn_801ABFFC(unsigned int);
+char pad[0xe0]; unsigned int count;
+};
+class Class_80466320 {
+public:
+virtual void fn_801ADE54(); virtual void fn_801AC4A8(); virtual void fn_801AD064(); virtual void fn_801ADEEC(); virtual void fn_801ADEBC(); virtual void fn_801AB788(); virtual void fn_801AAC9C(); virtual void fn_801AAE34(); virtual void fn_801AAFDC(); virtual void fn_801AAFE8(); virtual void fn_801AAA70(); virtual void fn_801ABE70(unsigned int, void*); virtual void fn_801ABFFC(unsigned int);
+char pad[0xe0]; unsigned int count;
+};
+struct Layer { Class_80466278* a; Class_80466320* b; char pad[5]; unsigned char flags; unsigned short active; char tail[8]; };
+struct Capture { unsigned char enabled; signed char index; };
+struct Root { char pad0[0x64]; union { int state; struct { signed int high : 8; unsigned int low : 24; } bits; }; char pad68[0x324]; Layer layers[9]; char flags; char flags2; char pad466[2]; gfSceneRootEventList events; char pad46c[0x8c]; Capture capture[9]; };
+struct Dimensions { char pad[0x34]; unsigned short w; unsigned short h; };
+struct Entry { unsigned char index; char pad[3]; void* item; };
+struct Queue { unsigned char count; char pad[3]; Entry entries[1]; };
+extern Queue lbl_80494E00; extern void* lbl_805A0110; extern void* g_efScreen;
+extern "C" {
+void fn_801F55EC(int); void fn_8000F4F0(Root*); void fn_8000EB1C(Root*); void fn_8000FD34(int); Dimensions* fn_80023AC8(); void fn_80010598(unsigned short, unsigned short); void fn_801ACBEC(Class_80466278*); void fn_801ACC64(Class_80466278*); void fn_801ACD50(Class_80466278*); void fn_801A12AC(int); void fn_801ACE98(Class_80466278*); void fn_8005AD04(); void fn_8005B838(void*, int); void fn_8005DC24(void*, unsigned char); void fn_801F0AF0(); void fn_80025314();
+}
+extern "C" void fn_8000E214(Root* self) {
+    gfCopyEFBMgr* copy = gfCopyEFBMgr::getInstance();
+    fn_801F55EC(0);
+    self->layers[6].flags &= ~0x10;
+    self->layers[3].flags &= ~0x10;
+    gfCopyEFBMgr* current = gfCopyEFBMgr::getInstance();
+    if (current) {
+        switch (*(unsigned char*)((char*)current + 0x68)) {
+        case 1: self->layers[6].flags |= 0x10; break;
+        case 2: self->layers[3].flags |= 0x10; break;
+        }
+    }
+    if ((self->flags >> 6) & 1) fn_8000F4F0(self);
+    self->events.notify(0);
+    fn_8000EB1C(self);
+    self->events.notify(0);
+    for (unsigned int i = 0; i < 9; i++) {
+        Layer* layer = &self->layers[(unsigned char)i];
+        if ((unsigned char)i == 8 && self->bits.high)
+            fn_8000FD34(self->state >> 24);
+        if (layer->active) {
+            if (copy && (unsigned char)i == 6) {
+                Dimensions* d = fn_80023AC8();
+                fn_80010598(d->w, d->h);
+            }
+            if ((layer->flags >> 6) & 1) {
+                Dimensions* d = fn_80023AC8();
+                fn_80010598(d->w, d->h);
+            }
+            if (((layer->flags >> 7) & 1) && layer->b->count) {
+                layer->a->fn_801ABE70(layer->a->count, layer->b);
+                fn_801ACBEC(layer->a);
+                fn_801ACC64(layer->a);
+                fn_801ACD50(layer->a);
+                fn_801A12AC(0x7ff);
+                fn_801ACE98(layer->a);
+                Class_80466278* a = layer->a;
+                while (a->count) {
+                    if (a->count) a->fn_801ABFFC(a->count - 1);
+                }
+            }
+        }
+        if ((layer->flags >> 5) & 1) {
+            if ((unsigned char)i == 0) {
+                if (!lbl_805A0110) fn_8005AD04();
+                fn_8005B838(lbl_805A0110, 0);
+            } else if ((unsigned char)i == 4) {
+                if (!lbl_805A0110) fn_8005AD04();
+                fn_8005B838(lbl_805A0110, 1);
+            } else if ((unsigned char)i == 7) {
+                if (!lbl_805A0110) fn_8005AD04();
+                fn_8005B838(lbl_805A0110, 2);
+            }
+        }
+        if (((layer->flags >> 4) & 1) && copy && !((self->flags2 >> 5) & 1)) {
+            unsigned int color = *(unsigned int*)((char*)copy + 0x6c);
+            GXSetZMode(0, GX_LEQUAL, 0);
+            fn_801F0AF0();
+            GXColor c = *(GXColor*)&color;
+            copy->drawCopyEFB(0, &c);
+            GXSetZMode(1, GX_LEQUAL, 1);
+        }
+        fn_8005DC24(g_efScreen, (unsigned char)i);
+        if (self->capture[(unsigned char)i].enabled &&
+            self->capture[(unsigned char)i].index >= 0 && copy)
+            copy->getEFB(self->capture[(unsigned char)i].index);
+        if ((unsigned char)i == 0) fn_80025314();
+    }
+    Queue* entry;
+    Queue* queue = &lbl_80494E00;
+    if (queue->count) {
+        entry = queue;
+        unsigned int i = 0;
+        while (i < queue->count) {
+            Class_80466320* b = self->layers[entry->entries[0].index].b;
+            b->fn_801ABE70(b->count, entry->entries[0].item);
+            entry = (Queue*)((char*)entry + 8);
+            i++;
+        }
+        queue->count = 0;
+    }
+    ((gfCamera*)gfCameraManager::getManager())->setGX();
+}
+}
+

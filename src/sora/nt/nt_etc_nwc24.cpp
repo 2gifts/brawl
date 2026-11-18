@@ -537,3 +537,7 @@ bool nteWiiConnect24::sendMails(u32 count, NWC24MsgObj** messages) {
     }
     return true;
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_8014CD5C(void) {}
+

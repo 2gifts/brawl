@@ -1,3 +1,4 @@
+#include <string.h>
 #include <cstring>
 #include <gf/gf_archive.h>
 #include <gf/gf_archive_db.h>
@@ -428,3 +429,89 @@ bool utArchiveManager::isExistEffect(u32 resourceId) {
 }
 
 utArchiveEventObserverNull lbl_805A00C0;
+
+// TODO: clean up, give variables real names
+namespace jj_8004570C {
+
+extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long size, int heap);
+extern "C" gfArchive* __ct__9gfArchiveFv(gfArchive* self);
+
+struct ArchiveLoadNode {
+    char pad0[8];
+    s16 unk8;
+    char padA[2];
+    s32 unkC;
+    s32 unk10;
+    gfArchive* unk14;
+};
+
+struct ArchiveLoader {
+    char pad0[4];
+    gfArchiveDatabase* db;
+    char pad8[8];
+    utList freeList;
+    char pad1c[0xC];
+    utList usedList;
+};
+
+extern "C" s32 fn_8004570C(ArchiveLoader* self, void* data, s32 size, Heaps::HeapType heap) {
+    ArchiveLoadNode* node = (ArchiveLoadNode*)self->freeList.getNode(0);
+    if (node != nullptr) {
+        self->freeList.remove((utListNode*)node);
+        gfArchive* p = (gfArchive*)__nw__FUlQ25Heaps8HeapType(sizeof(gfArchive), heap);
+        gfArchive* arc = p;
+        if (p != nullptr) {
+            arc = __ct__9gfArchiveFv(p);
+        }
+        arc->setFileImage(data, size, heap);
+        node->unkC = 0xFFFF;
+        node->unk10 = 0xFFFF;
+        node->unk14 = nullptr;
+        node->unk8 = 1;
+        node->unkC = self->db->add(arc, false);
+        node->unk14 = arc;
+        self->usedList.addTail((utListNode*)node);
+        return node->unkC;
+    }
+    return 0xFFFF;
+}
+}
+
+namespace jj_80045240 {
+#pragma opt_loop_invariants off
+struct Str { unsigned int flags; unsigned int unused; char* ptr; };
+extern "C" void fn_800146F0(Str*, void*);
+extern "C" void fn_80014480(Str*, void*);
+extern "C" void __dl__FPv(void*);
+extern "C" void* fn_80045240(void* self, utList* list, void* key) {
+    utListNode* node = list->getNode(0);
+    while (node) {
+        Str a, b;
+        fn_800146F0(&a, *(char**)((char*)node + 0x14) + 0x28);
+        fn_800146F0(&b, key);
+        unsigned int flag = b.flags >> 31;
+        const char* bp;
+        const char* ap;
+        if (flag == 0) bp = (char*)&b + 1; else bp = b.ptr;
+        if ((a.flags >> 31) == 0) ap = (char*)&a + 1; else ap = a.ptr;
+        bool equal = strcmp(ap, bp) == 0;
+        if (flag) __dl__FPv(b.ptr);
+        if (a.flags >> 31) __dl__FPv(a.ptr);
+        if (equal) {
+            Str c, d;
+            fn_80014480(&c, *(char**)((char*)node + 0x14) + 0x28);
+            fn_80014480(&d, key);
+            flag = d.flags >> 31;
+            if (flag == 0) bp = (char*)&d + 1; else bp = d.ptr;
+            if ((c.flags >> 31) == 0) ap = (char*)&c + 1; else ap = c.ptr;
+            equal = strcmp(ap, bp) == 0;
+            if (flag) __dl__FPv(d.ptr);
+            if (c.flags >> 31) __dl__FPv(c.ptr);
+            if (equal) return node;
+        }
+        node = node->m_next;
+    }
+    return 0;
+}
+}
+

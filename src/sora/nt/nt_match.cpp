@@ -1,3 +1,7 @@
+#include <ip/ip_switch.h>
+#include <revolution/OS/OSMutex.h>
+#include <nt/nt_send.h>
+#include <revolution/OS/OSThread.h>
 #include <mu/wifi/mu_wifi_interface.h>
 #include <nt/network.h>
 #include <nt/nt_match.h>
@@ -431,3 +435,795 @@ int NtMatching::searchFriendID(u32 aid) {
     aidInfo->m_friendAIDIndex = index;
     return index;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_8014BF68 {
+extern "C" void netReport__FPCce(const char*, ...);
+extern char lbl_8045F7A8[];
+
+extern "C" void fn_8014BF68(char* arg0, int arg1) {
+    char* base = lbl_8045F7A8;
+    int temp_r0;
+    if (arg1 != 0) {
+        temp_r0 = *(int*)(arg0 + 0x34A4);
+        if (temp_r0 != 0) {
+            netReport__FPCce(base + 0xABC, temp_r0);
+            *(int*)(arg0 + 0x34A4) = arg1;
+            return;
+        }
+    } else {
+        temp_r0 = *(int*)(arg0 + 0x34A4);
+        if (temp_r0 == 0) {
+            return;
+        }
+    }
+    *(int*)(arg0 + 0x34A4) = arg1;
+    if (arg1 != 0) {
+        netReport__FPCce(base + 0xAF4);
+        return;
+    }
+    netReport__FPCce(base + 0x7AC);
+}
+}
+
+namespace jj_80149BC0 {
+extern "C" {
+extern char lbl_80460CF0[];
+extern unsigned char __vt__8NtBuffer[];
+extern char* lbl_805A0434;
+void fn_80025A74(void*);
+void free__13gfHeapManagerFPv(void*);
+void __dl__FPv(void*);
+
+struct NB { virtual void f0(); virtual void f1(); virtual void f2(); };
+void* fn_80149BC0(void* self, int flag) {
+    if (self) {
+        char* p = (char*)self;
+        *(void**)p = lbl_80460CF0;
+        fn_80025A74(*(void**)(lbl_805A0434 + 0x353c));
+        void* b = *(void**)(p + 0x3538);
+        if (b) {
+            free__13gfHeapManagerFPv(b);
+            *(void**)(lbl_805A0434 + 0x3538) = 0;
+        }
+        lbl_805A0434 = 0;
+        NB* n = (NB*)(p + 0x33b8);
+        if (n) {
+            *(void**)(p + 0x33b8) = __vt__8NtBuffer;
+            n->f2();
+        }
+        if (flag > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return self;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_801474A0 {
+typedef unsigned long long u64;
+
+struct FriendData {
+    unsigned int data[3];
+};
+
+struct NetworkState {
+    char pad[0x3440];
+    u64 id;
+};
+
+extern "C" void* getInstance__12ntFriendInfoFv();
+extern "C" void* fn_8014CB40(void*);
+extern "C" int fn_80350CB4(void*, u64);
+extern "C" void fn_80351A08(FriendData*, u64);
+extern "C" char* getFriendInfo__12ntFriendInfoFv(void*);
+extern "C" int fn_80351C70(FriendData*, FriendData*);
+extern "C" void netReport__FPCce(const char*, ...);
+
+extern char lbl_8045F7B8[];
+extern char lbl_8045F7DC[];
+
+extern "C" int fn_801474A0(NetworkState* self, u64 id, bool* found, bool* own) {
+    *found = false;
+    *own = false;
+
+    if (fn_80350CB4(fn_8014CB40(getInstance__12ntFriendInfoFv()), id) == 0) {
+        return 0;
+    }
+
+    if (id == self->id) {
+        netReport__FPCce(lbl_8045F7B8);
+        *own = true;
+    }
+
+    FriendData data;
+    fn_80351A08(&data, id);
+
+    FriendData* entry = (FriendData*)(
+        getFriendInfo__12ntFriendInfoFv(getInstance__12ntFriendInfoFv()) + 0x50
+    );
+
+    for (int i = 0; i < 64; ++i, ++entry) {
+        if (fn_80351C70(entry, &data) == 1) {
+            netReport__FPCce(lbl_8045F7DC);
+            *found = true;
+            break;
+        }
+    }
+
+    return 1;
+}
+}
+
+namespace jj_80149AA0 {
+extern "C" {
+extern unsigned char __vt__8NtBuffer[];
+extern char lbl_80460CF0[];
+extern char* lbl_805A0434;
+extern char lbl_8059E7C0;
+void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int, unsigned long);
+void* create__12gfMemoryPoolFPvUlPCc(void*, unsigned long, const char*);
+
+void* fn_80149AA0(void* arg0) {
+    char* p = (char*)arg0;
+    *(s32*)(p + 0x04) = 0;
+    *(void**)(p + 0x00) = lbl_80460CF0;
+    *(u8*)(p + 0x11) = 0;
+    *(s32*)(p + 0x94) = 0;
+    *(s32*)(p + 0x98) = 0;
+    *(void**)(p + 0x33b8) = __vt__8NtBuffer;
+    *(s32*)(p + 0x33bc) = 0;
+    *(s32*)(p + 0x33c0) = 0;
+    *(u8*)(p + 0x33c4) = 0;
+    *(s32*)(p + 0x33c8) = 0;
+    *(u8*)(p + 0x33cc) = 0;
+    *(u8*)(p + 0x33cd) = 1;
+    *(u8*)(p + 0x33ce) = 0;
+    *(u8*)(p + 0x33f4) = 0;
+    *(u8*)(p + 0x33f5) = 0;
+    *(u8*)(p + 0x33f6) = 0;
+    *(s32*)(p + 0x3404) = 0;
+    *(s32*)(p + 0x3408) = 0;
+    *(s32*)(p + 0x340c) = 0;
+    *(u8*)(p + 0x3410) = 0;
+    *(u8*)(p + 0x3411) = 0;
+    *(u8*)(p + 0x3412) = 0;
+    *(u8*)(p + 0x3413) = 0;
+    *(s32*)(p + 0x341c) = 0;
+    *(s32*)(p + 0x3418) = 0;
+    *(s8*)(p + 0x3420) = -1;
+    *(s8*)(p + 0x3421) = -1;
+    *(u16*)(p + 0x3422) = 0x1c20;
+    *(u16*)(p + 0x3424) = 0;
+    *(s32*)(p + 0x3428) = 0;
+    *(s32*)(p + 0x342c) = 0;
+    *(s32*)(p + 0x3430) = 0;
+    *(s32*)(p + 0x3434) = 0;
+    *(u8*)(p + 0x343c) = 0;
+    *(s32*)(p + 0x3444) = 0;
+    *(s32*)(p + 0x3440) = 0;
+    *(s32*)(p + 0x3448) = 0;
+    *(s32*)(p + 0x3498) = 0;
+    *(s32*)(p + 0x349c) = 0;
+    *(s32*)(p + 0x34a0) = 0;
+    *(s32*)(p + 0x34a4) = 0;
+    *(u8*)(p + 0x34ac) &= 0xFFFFFF00;
+
+    lbl_805A0434 = p;
+
+    void* heap = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(6, 0x20000);
+    *(void**)(p + 0x3538) = heap;
+    *(void**)(p + 0x353c) = create__12gfMemoryPoolFPvUlPCc(heap, 0x20000, &lbl_8059E7C0);
+
+    return arg0;
+}
+}
+}
+
+namespace jj_80147784 {
+
+extern "C" {
+extern OSMutex lbl_8049EC30;
+s32 fn_801475A4(void* self, s32 a, u64 id, s32 b);
+int fn_801483A4(u64 id);
+void fn_80147C9C(void* self, s32 idx);
+void** getInstance__12ntFriendInfoFv(void);
+void* memset(void* p, int c, unsigned int n);
+}
+
+struct FriendSelf {
+    u8 pad0[0x3410];
+    u8 unk3410;
+    u8 pad3411;
+    u8 unk3412;
+    u8 pad3413[0x3418 - 0x3413];
+    u32 unk3418;
+    u32 unk341C;
+    s8 unk3420;
+};
+
+extern "C" s32 fn_80147784(FriendSelf* self, u64 id, s32 flag) {
+    s8 idx;
+    s32 t;
+    s32 res;
+    u8 r;
+    unsigned char* base;
+    unsigned char* p;
+    unsigned char* q;
+
+    if (flag != 0) {
+        OSLockMutex(&lbl_8049EC30);
+        res = fn_801475A4(self, -1, id, 1);
+        OSUnlockMutex(&lbl_8049EC30);
+        return res;
+    }
+
+    OSLockMutex(&lbl_8049EC30);
+    r = fn_801483A4(id);
+    self->unk3420 = r;
+    idx = (s8)r;
+    if (idx >= 0) {
+        self->unk341C = (u32)id;
+        self->unk3418 = (u32)(id >> 32);
+        self->unk3410 = 1;
+        q = (unsigned char*)*getInstance__12ntFriendInfoFv() + (idx * 4);
+        q[0x350] = 0;
+        q[0x351] = 0;
+        q[0x352] = 0;
+        q[0x353] = 0;
+        t = self->unk3420;
+        base = (unsigned char*)*getInstance__12ntFriendInfoFv() + t * 0x89;
+        p = base + 0x581;
+        memset(p, 0, 10);
+        memset(p + 10, 0, 10);
+        memset(p + 0x3B, 0, 0x4C);
+        memset(p + 0x32, 0, 8);
+        p[0x3A] = 0;
+        p[0x87] = 0;
+        p[0x88] = 0;
+        fn_80147C9C(self, self->unk3420);
+        self->unk3412 = 1;
+    }
+    OSUnlockMutex(&lbl_8049EC30);
+    return self->unk3420;
+}
+}
+
+namespace jj_80149EF8 {
+class BufferSlots { public: virtual void slot0(); virtual void slot1(); virtual void freeBuffer(); };
+extern "C" {
+extern unsigned char __vt__8NtBuffer[];
+void __dl__FPv(void*);
+extern char lbl_8045F7A8[];
+extern NtSend* lbl_805A03D4;
+void netReport__FPCce(const char*, ...);
+}
+extern "C" void fn_80149EF8(u8* self) {
+    char* base = lbl_8045F7A8;
+    if (self[0x11] == 0) return;
+    if (lbl_805A03D4 != 0) {
+        lbl_805A03D4->destroy();
+        u8* s = (u8*)lbl_805A03D4;
+        if (s != 0) {
+            BufferSlots* b = (BufferSlots*)(s + 0x40);
+            if (b != 0) {
+                *(void**)(s + 0x40) = __vt__8NtBuffer;
+                b->freeBuffer();
+            }
+            b = (BufferSlots*)(s + 0x24);
+            if (b != 0) {
+                *(void**)(s + 0x24) = __vt__8NtBuffer;
+                b->freeBuffer();
+            }
+            __dl__FPv(s);
+        }
+        lbl_805A03D4 = 0;
+    }
+    if (self[0x33CD] == 0) {
+        netReport__FPCce(base + 0xBB8);
+        if (self[0x11] == 0) {
+            self[0x33CD] = 1;
+        } else if (self[0x33CC] == 0) {
+            self[0x33CC] = 1;
+            OSResumeThread((OSThread*)(self + 0xA0));
+            netReport__FPCce(base + 0xB28);
+        }
+        while (self[0x33CD] == 0) {
+            OSSleepTicks((s64)((OS_BUS_CLOCK_SPEED / 4) / 1000) * 16);
+        }
+        netReport__FPCce(base + 0xBF0);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80148664 {
+extern "C" {
+void OSLockMutex(void*);
+void OSUnlockMutex(void*);
+void OSSleepTicks(int, unsigned int);
+void netReport__FPCce(const char*, ...);
+int fn_8033A7DC(void);
+int fn_8033A798(void*, void*);
+unsigned char fn_800C851C(void);
+unsigned char fn_8033A77C(void*);
+void* memcpy(void*, const void*, unsigned long);
+extern int gUnk805a03d8;
+extern int g_NtAIDBitmap;
+extern int g_muWifiInterfaceTask;
+extern char lbl_8045F7A8[];
+extern unsigned char lbl_8049EC30[];
+extern unsigned char lbl_805A03D0;
+extern void* lbl_805A0434;
+extern unsigned char lbl_805A0414;
+extern unsigned char lbl_805A0410;
+extern signed char lbl_8059E742;
+}
+
+struct Bits7C {
+    unsigned char hi : 2;
+    unsigned char mid : 4;
+    unsigned char lo : 2;
+};
+
+extern "C" void fn_80148664(int arg0, int arg1, int arg2, int arg3, int arg4) {
+    unsigned char lowBits;
+    unsigned char oldFlag;
+    void* buf;
+    char* base = lbl_8045F7A8;
+
+    while (lbl_805A03D0 != 0 && *(unsigned char*)((char*)lbl_805A0434 + 0x33CC) == 0) {
+        OSSleepTicks(0, (*(unsigned int*)0x800000F8 >> 2) / 1000);
+    }
+    if (gUnk805a03d8 != 7) {
+        if (arg1 != 0) {
+            netReport__FPCce(base + 0x380, arg3);
+        } else {
+            netReport__FPCce(base + 0x3B0, arg3, arg4);
+        }
+        if (arg0 != 0) {
+            netReport__FPCce(base + 0x3F0);
+        }
+        OSLockMutex(lbl_8049EC30);
+        int v = fn_8033A7DC();
+        void* p = lbl_805A0434;
+        *(int*)((char*)p + 0x3404) = v;
+        int len = fn_8033A798(&buf, p);
+        oldFlag = lbl_805A0414;
+        lbl_805A0414 = len;
+        memcpy(&lbl_805A0410, buf, len);
+        int bitmap = fn_8033A7DC();
+        g_NtAIDBitmap = bitmap;
+        lowBits = bitmap;
+        int task = g_muWifiInterfaceTask;
+        unsigned char idx = fn_800C851C();
+        if (idx == 0xFF) {
+            idx = 4;
+        }
+        unsigned char* obj = (unsigned char*)(task + idx * 0x218);
+        ((Bits7C*)(obj + 0xC7))->mid = lowBits;
+        lbl_8059E742 = fn_8033A77C(obj);
+        netReport__FPCce(base + 0x2E0, lbl_805A0414, g_NtAIDBitmap);
+        if (oldFlag > lbl_805A0414 && lbl_805A0414 == 1) {
+            netReport__FPCce(base + 0x304);
+        }
+        *(unsigned char*)((char*)lbl_805A0434 + 0x34AA) |= 1 << arg3;
+        OSUnlockMutex(lbl_8049EC30);
+    }
+}
+}
+
+namespace jj_80149644 {
+extern "C" {
+struct ntFriendInfo;
+void** getInstance__12ntFriendInfoFv(ntFriendInfo* self);
+void netReport__FPCce(const char*, ...);
+void fn_800C8F68(const char*, ...);
+void fn_80146FCC(int);
+void fn_8014B130(int);
+void fn_801473AC(void);
+extern char lbl_8045F7A8[];
+extern int lbl_805A03E8;
+extern int lbl_805A03F4;
+extern int g_NtMatchingStatus;
+
+int fn_80149644(char* self) {
+    char* base = lbl_8045F7A8;
+    char* p = (char*)*getInstance__12ntFriendInfoFv((ntFriendInfo*)self) + 0x4f0;
+    if (p != 0) {
+        p[0x87] = 1;
+        self[0x33f4] = 1;
+    }
+    if (*(int*)(self + 0x34a4) != 0) {
+        *(int*)(self + 0x34a4) = 0;
+        netReport__FPCce(base + 0x7ac);
+    }
+    *(int*)(self + 0x3428) = 0;
+    *(int*)(self + 0x342c) = 0;
+    *(int*)(self + 0x34a4) = 0;
+    *(int*)(self + 0x3430) = 0;
+    *(int*)(self + 0x3434) = 0;
+    int v;
+    switch (lbl_805A03F4) {
+    case 2: case 3: case 4: case 5: case 6: case 7:
+        v = 1; break;
+    default:
+        v = 0; break;
+    }
+    if (v == 0) {
+        int w;
+        switch (lbl_805A03E8) {
+        case 7: {
+            int u;
+            switch (lbl_805A03F4) {
+            case 2: case 3: case 4: case 5: case 6: case 7:
+                u = 1; break;
+            default:
+                u = 0; break;
+            }
+            if (u == 0) goto L;
+            w = 1;
+            break;
+        }
+        case 2: case 3: case 6: case 14:
+            w = 1; break;
+        default:
+        L:
+            w = 0; break;
+        }
+        if (w == 0) fn_801473AC();
+    }
+    switch (g_NtMatchingStatus) {
+    case 5: case 10:
+        return 1;
+    case 7: case 8: case 9: case 12:
+        fn_80146FCC(10);
+        return 1;
+    default:
+        netReport__FPCce(base + 0xa84);
+        fn_800C8F68(base + 0xaa0);
+        fn_8014B130(6);
+        return 0;
+    }
+}
+}
+}
+
+namespace jj_80148810 {
+extern "C" {
+void OSLockMutex(void*);
+void OSUnlockMutex(void*);
+void OSSleepTicks(int, unsigned int);
+void netReport__FPCce(const char*, ...);
+void fn_8033A50C(void*, int);
+void fn_8034E57C(void*);
+void fn_80148664();
+void fn_801489D4();
+void* getInstance__12ntFriendInfoFv();
+void fn_8014CB40();
+unsigned long long fn_80351964();
+void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+void* fn_80157200(void*, int);
+void fn_801578C4();
+void fn_80146FCC(int);
+void* fn_8014C180();
+void fn_8014C26C(void*, int, int);
+void fn_800D221C(int, int);
+extern unsigned char lbl_805A03D0;
+extern void* lbl_805A0434;
+extern int gUnk805a03d8;
+extern int g_muWifiInterfaceTask;
+extern char lbl_8045F7A8[];
+extern unsigned char lbl_8049EC30[];
+extern int lbl_805A0430;
+}
+
+extern "C" void fn_80148810(int arg0, int arg1) {
+    char* base = lbl_8045F7A8;
+    while (lbl_805A03D0 != 0 && *(unsigned char*)((char*)lbl_805A0434 + 0x33CC) == 0) {
+        OSSleepTicks(0, (*(unsigned int*)0x800000F8 >> 2) / 1000);
+    }
+    if (gUnk805a03d8 != 7) {
+        OSLockMutex(lbl_8049EC30);
+        netReport__FPCce(base + 0x408, arg0);
+        if (arg0 == 0) {
+            netReport__FPCce(base + 0x420, arg1);
+            *(int*)((char*)lbl_805A0434 + 0x3448) = arg1;
+            fn_8033A50C((void*)fn_80148664, 0);
+            fn_8034E57C((void*)fn_801489D4);
+            unsigned long long* obj = (unsigned long long*)((char*)lbl_805A0434 + 0x3440);
+            getInstance__12ntFriendInfoFv();
+            fn_8014CB40();
+            unsigned long long v = fn_80351964();
+            *obj = v;
+            netReport__FPCce(base + 0x440, (unsigned int)v, (unsigned int)(v >> 32), (unsigned int)v);
+            void* p = __nw__FUlQ25Heaps8HeapType(0x380, 6);
+            if (p != 0) {
+                p = fn_80157200(p, 6);
+            }
+            lbl_805A0430 = (int)p;
+            fn_801578C4();
+            fn_80146FCC(4);
+            if (*(unsigned char*)((char*)lbl_805A0434 + 0x343C) != 0) {
+                int w = gUnk805a03d8;
+                int flag = 0;
+                if (w >= 3 && w <= 6) {
+                    flag = 1;
+                }
+                if (flag != 0) {
+                    void* q = __nw__FUlQ25Heaps8HeapType(0x48, 6);
+                    if (q != 0) {
+                        q = fn_8014C180();
+                    }
+                    if (q != 0) {
+                        fn_8014C26C(q, 6, 1);
+                    }
+                }
+            }
+            fn_800D221C(g_muWifiInterfaceTask, 1);
+        } else {
+            netReport__FPCce(base + 0x45C);
+        }
+        OSUnlockMutex(lbl_8049EC30);
+    }
+}
+}
+
+namespace jj_80149C70 {
+class BufferDispatch { public: virtual void f0(); virtual void alloc(unsigned int, Heaps::HeapType); };
+extern "C" {
+void fn_80146FCC(int);
+void fn_801473AC();
+void* fn_8014B364(void*);
+extern int lbl_805A03E0, lbl_805A03E8, lbl_805A03F4;
+extern unsigned char lbl_805A03E4, lbl_805A0438;
+extern OSMutex lbl_8049EC78, lbl_8049EC30, lbl_8049EC48;
+extern NtSend* lbl_805A03D4;
+extern unsigned char __vt__8NtBuffer[];
+void* __nw__FUlQ25Heaps8HeapType(unsigned int, Heaps::HeapType);
+}
+extern "C" void fn_80149C70(unsigned char* self, int arg1) {
+    fn_80146FCC(0);
+    lbl_805A03E0 = 0;
+    self[0x33ce] = 0;
+    *(int*)(self+0x94) = 0;
+    *(int*)(self+0x98) = 0;
+    lbl_805A03E4 = 0;
+    self[0x33cc] = 0;
+    lbl_805A0438 = 0;
+    *(int*)(self+0x3444) = 0;
+    *(int*)(self+0x3440) = 0;
+    *(int*)(self+0x3408) = 0;
+    *(int*)(self+0x3448) = 0;
+    self[0x343c] = 0;
+    self[0x33f4] = 0;
+    self[0x33f5] = 0;
+    self[0x33f6] = 0;
+    *(int*)(self+0x340c) = 0;
+    self[0x3410] = 0;
+    self[0x3411] = 0;
+    *(int*)(self+0x341c) = 0;
+    *(int*)(self+0x3418) = 0;
+    *(signed char*)(self+0x3420) = -1;
+    *(signed char*)(self+0x3421) = -1;
+    *(int*)(self+0x3494) = 100;
+    *(int*)(self+0x349c) = 0;
+    *(int*)(self+0x34a0) = 0;
+    *(int*)(self+0x3428) = 0;
+    *(int*)(self+0x342c) = 0;
+    *(int*)(self+0x34a4) = 0;
+    *(int*)(self+0x3430) = 0;
+    *(int*)(self+0x3434) = 0;
+    int v;
+    switch (lbl_805A03F4) {
+    case 2: case 3: case 4: case 5: case 6: case 7: v = 1; break;
+    default: v = 0; break;
+    }
+    if (v == 0) {
+        int w;
+        switch (lbl_805A03E8) {
+        case 7: {
+            int u;
+            switch (lbl_805A03F4) {
+            case 2: case 3: case 4: case 5: case 6: case 7: u = 1; break;
+            default: u = 0; break;
+            }
+            if (u == 0) goto L;
+            w = 1; break;
+        }
+        case 2: case 3: case 6: case 14: w = 1; break;
+        default:
+        L: w = 0; break;
+        }
+        if (w == 0) fn_801473AC();
+    }
+    ((BufferDispatch*)(self+0x33b8))->alloc(0x8000, (Heaps::HeapType)6);
+    OSInitMutex(&lbl_8049EC78);
+    OSInitMutex(&lbl_8049EC30);
+    OSInitMutex(&lbl_8049EC48);
+    if (arg1 != 0) {
+        memset(self+0x3b8, 0x55, 0x3000);
+        memset(self+0xa0, 0, 0x318);
+        OSCreateThread((OSThread*)(self+0xa0), fn_8014B364, 0, self+0x33b8, 0x3000, 11, 1);
+        OSResumeThread((OSThread*)(self+0xa0));
+        self[0x11] = 1;
+        self[0x33cd] = 0;
+    }
+    unsigned char* p = (unsigned char*)__nw__FUlQ25Heaps8HeapType(0x54, (Heaps::HeapType)6);
+    if (p) {
+        *(void**)(p+0x24) = __vt__8NtBuffer;
+        *(int*)(p+0x28) = 0;
+        *(int*)(p+0x2c) = 0;
+        p[0x30] = 0;
+        *(int*)(p+0x34) = 0;
+        *(void**)(p+0x40) = __vt__8NtBuffer;
+        *(int*)(p+0x44) = 0;
+        *(int*)(p+0x48) = 0;
+        p[0x4c] = 0;
+        *(int*)(p+0x50) = 0;
+    }
+    lbl_805A03D4 = (NtSend*)p;
+    lbl_805A03D4->create();
+    memset(self+0x12, 0, 0x40);
+    memset(self+0x52, 0, 0x40);
+}
+}
+
+namespace jj_8014A0F4 {
+
+
+extern unsigned char* lbl_805A0434;
+extern int gUnk805a03d8;
+extern char lbl_804603B8[];
+
+extern "C" unsigned long long fn_8014FEB4();
+extern "C" int fn_80336928(void*, int);
+extern "C" int fn_803369C0();
+extern "C" void fn_8014A3A0();
+extern "C" void fn_801475A4(void*, int, int, int, int);
+extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+extern "C" void* fn_8014C180(void*);
+extern "C" void fn_8014C26C(void*, int, int);
+extern "C" void fn_8014C964(void*);
+extern "C" void fn_8014C970(void*);
+extern "C" void fn_8014CB1C(void*, int);
+extern "C" void fn_803369F0(void*);
+extern "C" void fn_80148210();
+extern "C" void fn_80148280();
+extern "C" void fn_801482C8();
+extern "C" void fn_80339E98(int, void (*)(), int, void (*)(), int, void (*)(), int);
+
+inline int checkState(int v) {
+    int flag = 0;
+    if (v >= 3 && v <= 6) {
+        flag++;
+    }
+    return flag;
+}
+
+extern "C" void fn_8014A0F4() {
+    if (lbl_805A0434[0x33f4]) {
+        unsigned char* p = *(unsigned char**)ntFriendInfo::getInstance() + 0x4f0;
+        unsigned long long v = fn_8014FEB4();
+
+        p[0x32] = v >> 56;
+        p[0x33] = v >> 48;
+        p[0x34] = v >> 40;
+        p[0x35] = v >> 32;
+        p[0x36] = v >> 24;
+        p[0x37] = v >> 16;
+        p[0x38] = v >> 8;
+        p[0x39] = v;
+
+        int result = fn_80336928(p, 0x89);
+        if (((unsigned int)(-result | result) >> 31) != 0) {
+            lbl_805A0434[0x33f4] = 0;
+            netReport(lbl_804603B8);
+        }
+    }
+
+    if (*(int*)ipSwitch::getInstance() != 1) {
+        for (int i = 0; i < 2; i++) {
+            fn_8014A3A0();
+        }
+
+        if (lbl_805A0434[0x3410] && fn_803369C0()) {
+            fn_801475A4(
+                lbl_805A0434,
+                *(signed char*)(lbl_805A0434 + 0x3420),
+                *(int*)(lbl_805A0434 + 0x3418),
+                *(int*)(lbl_805A0434 + 0x341c),
+                0
+            );
+            lbl_805A0434[0x3410] = 0;
+
+            if (lbl_805A0434[0x3412]) {
+                if (checkState(gUnk805a03d8)) {
+                    void* p = __nw__FUlQ25Heaps8HeapType(0x48, 6);
+                    if (p) {
+                        p = fn_8014C180(p);
+                    }
+                    if (p) {
+                        fn_8014C26C(p, 6, 1);
+                    }
+                }
+                lbl_805A0434[0x3412] = 0;
+            }
+        }
+
+        if (lbl_805A0434[0x3411] && fn_803369C0()) {
+            int index = *(signed char*)(lbl_805A0434 + 0x3421);
+            char* info = (char*)ntFriendInfo::getInstance()->getFriendInfo();
+
+            fn_8014C964(ntFriendInfo::getInstance());
+            fn_803369F0(info + index * 12 + 0x50);
+            *(index * 4 + info + 0x350) = 0;
+            fn_8014CB1C(ntFriendInfo::getInstance(), 1);
+            fn_8014C970(ntFriendInfo::getInstance());
+            fn_80339E98(0, fn_80148210, 0, fn_80148280, 0, fn_801482C8, 0);
+            lbl_805A0434[0x3411] = 0;
+
+            if (lbl_805A0434[0x3412]) {
+                if (checkState(gUnk805a03d8)) {
+                    void* p = __nw__FUlQ25Heaps8HeapType(0x48, 6);
+                    if (p) {
+                        p = fn_8014C180(p);
+                    }
+                    if (p) {
+                        fn_8014C26C(p, 6, 1);
+                    }
+                }
+                lbl_805A0434[0x3412] = 0;
+            }
+        }
+    }
+}
+}
+
+namespace jj_8014792C {
+extern "C" {
+int fn_803368A0(char*, int);
+int fn_8035129C(void*);
+int fn_803F6150(const void*, const void*, unsigned long);
+void fn_80339E98(int, void (*)(int,int), int, void (*)(), int, void (*)(), int);
+void fn_80148210(int,int);
+void fn_80148280();
+void fn_801482C8();
+}
+extern char lbl_8045F890[];
+extern "C" void fn_8014792C(void* arg) {
+    unsigned char* self = (unsigned char*)arg;
+    unsigned char oldOrder[64];
+    unsigned char newOrder[64];
+    netReport(lbl_8045F890);
+    char* info = (char*)ntFriendInfo::getInstance()->getFriendInfo();
+    *(int*)(self + 0x3408) = fn_803368A0(info + 0x50, 64);
+    memset(self + 0x12, 0, 64);
+    char* entry = info + 0x50;
+    for (int i = 0; i < 64; i++, entry += 12) {
+        if (fn_8035129C(entry)) self[0x12 + i] = 1;
+    }
+    memcpy(oldOrder, info + 0x27c1, 64);
+    for (int i = 0; i < 64; i++) {
+        unsigned char n = oldOrder[i] - 1;
+        if (n >= 64) oldOrder[i] = 0;
+        else if (self[0x12 + n] == 0) oldOrder[i] = 0;
+        else if (self[0x12 + n] != 1) oldOrder[i] = 0;
+        else self[0x12 + n] = 2;
+    }
+    unsigned char count = 0;
+    memset(newOrder, 0, 64);
+    for (int i = 0; i < 64; i++) {
+        if (oldOrder[i]) newOrder[count++] = oldOrder[i];
+    }
+    for (int i = 0; i < 64; i++) {
+        if (self[0x12 + i] == 1) newOrder[count++] = i + 1;
+    }
+    if (fn_803F6150(newOrder, info + 0x27c1, 64)) memcpy(info + 0x27c1, newOrder, 64);
+    memcpy(self + 0x52, info + 0x27c1, 64);
+    fn_80339E98(0, fn_80148210, 0, fn_80148280, 0, fn_801482C8, 0);
+}
+}
+

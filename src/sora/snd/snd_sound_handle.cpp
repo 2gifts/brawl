@@ -120,3 +120,228 @@ void Doubutsugo::StartDirect(const s16* words) {
 bool Doubutsugo::IsAvailable() {
     return unk0 != 0;
 }
+
+// TODO: clean up, give variables real names
+extern "C" unsigned char fn_803EF1C8(void* self) {
+    return *(unsigned char*)((unsigned char*)self + 0x3a);
+}
+
+// TODO: clean up, give variables real names
+namespace jj_803EF038 {
+extern "C" void fn_803EF038(int *arg0) {
+    *arg0 = 0;
+}
+}
+
+namespace jj_803EF1D0 {
+extern void fn_801CBFB0(void*, void*, int, int, int, int);
+
+extern "C" void fn_803EF1D0(int* a) {
+    fn_801CBFB0((void*)(*a + 0xC), a + 2, 0x69, 0, 0, 0);
+}
+}
+
+namespace jj_803EF188 {
+extern void fn_801C92E4(int);
+extern void fn_803EF640(void);
+
+extern "C" void fn_803EF188(int *arg0) {
+    if (*arg0 != 0) {
+        fn_803EF640();
+        fn_801C92E4(*arg0);
+    }
+}
+}
+
+namespace jj_803EEFCC {
+extern void __construct_array(void*, void (*)(void*), void (*)(void*), unsigned long, int);
+extern void fn_803EF038(void*);
+extern void fn_80072FD4(void*, int);
+extern int lbl_805A12C8;
+
+typedef struct Obj {
+    u32 unk0;
+    u32 unk4;
+    u8 arr[0x31];
+    u8 unk39;
+    u8 unk3A;
+} Obj;
+
+extern "C" void* fn_803EEFCC(void* arg0) {
+    Obj* self = (Obj*)arg0;
+    self->unk4 = 0;
+    __construct_array(self->arr, (void (*)(void*))fn_803EF038, (void (*)(void*))fn_80072FD4, 4, 2);
+    self->unk39 = 0;
+    self->unk3A = 0;
+    lbl_805A12C8 = (int)self;
+    self->unk0 = 0;
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_803EF044 {
+typedef struct Owner {
+    char pad[0x30];
+    u32 count;
+} Owner;
+
+typedef struct Object {
+    Owner* owner;
+    char rest[12];
+} Object;
+
+extern int fn_801C8B20(Owner*);
+extern void* fn_801C96A8(Owner*, int);
+extern void fn_801CAD90(void*, int);
+extern void fn_801CA7E8(void*);
+extern void* fn_80072FD4(void*, int);
+extern void __destroy_arr(void*, void (*)(void*, int), unsigned long, unsigned long);
+extern void __dl__FPv(void*);
+extern int lbl_805A12C8;
+
+extern "C" Object* fn_803EF044(Object* self, int flag) {
+    u32 i;
+    void* p;
+    if (self) {
+        if (fn_801C8B20(self->owner)) {
+            for (i = 0; i < self->owner->count; i++) {
+                fn_801CAD90(fn_801C96A8(self->owner, i), 0);
+            }
+        }
+        self->owner = 0;
+        lbl_805A12C8 = 0;
+        __destroy_arr((char*)self + 8, (void (*)(void*, int))fn_80072FD4, 4, 2);
+        p = (char*)self + 4;
+        if (p) {
+            fn_801CA7E8(p);
+        }
+        if (flag > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_803EF4A8 {
+typedef unsigned char u8;
+
+extern float lbl_805A4B04;
+extern float lbl_805A4B0C;
+extern float lbl_805A4B10;
+
+extern "C" void fn_803EF4A8(u8 *arg0, int arg1) {
+    float f;
+
+    switch (arg1) {
+    case 0xD0:
+        *(int *)(arg0 + 0x7C) = 0;
+        *(int *)(arg0 + 0x78) = *(int *)(arg0 + 0x78) + 1;
+        break;
+    case 0xD1:
+        break;
+    case 0xD2:
+        arg0[0x3A] = 1;
+        arg0[0x38] = 0;
+        *(int *)(arg0 + 0x78) = 0;
+        *(int *)(arg0 + 0x7C) = 0;
+        break;
+    case 0xD4:
+        break;
+    case 0xDC:
+        *(int *)(arg0 + 0x3C) = 0;
+        break;
+    case 0xDD:
+        *(int *)(arg0 + 0x3C) = 0;
+        break;
+    case 0xDE:
+        *(int *)(arg0 + 0x3C) = 0;
+        break;
+    case 0xFA:
+        *(int *)(arg0 + 0x60) = 0xFA;
+        break;
+    case 0xFB:
+        *(int *)(arg0 + 0x60) = 0xFB;
+        break;
+    case 0xFC:
+        *(int *)(arg0 + 0x60) = 0xFC;
+        break;
+    case 0xFD:
+        *(int *)(arg0 + 0x60) = 0xFD;
+        return;
+    case 0x104:
+        f = lbl_805A4B04;
+        *(float *)(arg0 + 0x14) = f;
+        *(float *)(arg0 + 0x28) = f;
+        break;
+    case 0x105:
+        f = lbl_805A4B0C;
+        *(float *)(arg0 + 0x14) = f;
+        *(float *)(arg0 + 0x28) = f;
+        break;
+    case 0x106:
+        f = lbl_805A4B10;
+        *(float *)(arg0 + 0x14) = f;
+        *(float *)(arg0 + 0x28) = f;
+        break;
+    case 0x12B:
+        break;
+    }
+
+    if (arg1 >= 0xE6 && arg1 <= 0xF1) {
+        *(int *)(arg0 + 0x40) = arg1 - 0xE5;
+        *(int *)(arg0 + 0x44) = 1;
+    }
+    if (arg1 >= 0x12C && arg1 <= 0x16B) {
+        *(int *)(arg0 + 0x48) = arg1 - 0x12C;
+    }
+}
+}
+
+namespace jj_803EFEA4 {
+extern int fn_803EFA54(void *, int, int);
+extern "C" int fn_803EFEA4(void *a, int b, int c, int d) {
+ int r;
+ switch(b) {
+ case 0xBE: case 0xCB: case 0xCC: case 0xD1: r=fn_803EFA54(a,c,d); break;
+ default: r=fn_803EFA54(a,b,c); break;
+ }
+ if(r == -1) {
+ r=fn_803EFA54(a,c,d);
+ if(r == -1) {
+ r=0xD1;
+ switch(b) {
+ case 0x72: r=0; break;
+ case 0x73: r=0x3C; break;
+ case 0x74: r=7; break;
+ case 0x75: r=0x39; break;
+ case 0x76: r=3; break;
+ case 0x77: r=0x1B; break;
+ case 0x78: r=0x2F; break;
+ case 0x79: r=0x1B; break;
+ case 0x7A: r=1; break;
+ case 0x7B: r=0x33; break;
+ case 0x7C: r=7; break;
+ case 0x7D: r=0x28; break;
+ case 0x7E: r=0x20; break;
+ case 0x7F: r=0x2C; break;
+ case 0x80: r=4; break;
+ case 0x81: r=0x41; break;
+ case 0x83: r=0x28; break;
+ case 0x84: r=0xC; break;
+ case 0x85: r=0x11; break;
+ case 0x86: r=2; break;
+ case 0x87: r=0x3C; break;
+ case 0x88: r=2; break;
+ case 0x89: r=7; break;
+ case 0x8A: r=1; break;
+ case 0x8B: r=0x34; break;
+ }
+ }
+ }
+ return r;
+}
+}
+

@@ -20,7 +20,7 @@ public:
     static mvMoviePlayer* getInstance();
     // HYPOTHESIS: the three numbers after the path (all callers pass 0, 0, 0).
     void openMovie(const char* path, int unk1, int unk2, int unk3);
-    bool isOpened();
+    u8 isOpened();
     void loadLastFrameInfo();
     bool isLoadedLastFrameInfo();
     void closeLastFrameInfo();
@@ -33,7 +33,7 @@ public:
     int drawFrame(int x, int y, int width, int height);     // plays a frame, returns the frame
     void play();
     void prepare(int unk);
-    bool isPause() const;
+    s8 isPause() const;
     void setPause();
     void resetPause();
     void setLastFrame();

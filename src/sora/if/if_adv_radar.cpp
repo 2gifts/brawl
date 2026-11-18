@@ -66,3 +66,36 @@ void IfAdvRadar::hide() {
         group->Remove(unk4);
     }
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_8010EDA8(void*);
+
+extern "C" void fn_8010EFCC(void* self) {
+    fn_8010EDA8(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0xf0));
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8010ECB8 {
+typedef unsigned int u32;
+
+struct GameData {
+    char pad[0x6d0];
+    signed char flags[1];
+};
+
+struct GameGlobal {
+    char pad[0x30];
+    GameData* p;
+};
+
+extern "C" GameGlobal* g_GameGlobal;
+extern "C" u32 getStepIndex__19adventureStaticDataFUl(u32);
+
+extern "C" bool fn_8010ECB8(u32 arg) {
+    u32 idx = getStepIndex__19adventureStaticDataFUl(arg | 0x2a000100);
+    int value = g_GameGlobal->p->flags[idx >> 3];
+    int mask = 1 << (idx & 7);
+    return (value & mask) != 0;
+}
+}
+

@@ -80,6 +80,15 @@ public:
     // gfSysRecorder2); size is the size of the buffer on entry and of the data on return.
     bool getSaveData(void** data, int* size);
     void setDirtyFlag(bool dirty);
+    // HYPOTHESIS: the Wi-Fi account data inside the save data.
+    DWCAccUserData* getUserData();
+    static bool isSaveNeeded();
+    static u32 getSaveSize();
+    static bool getSaveHeader(void** data);
+    static void lock();
+    static void unlock();
+    bool isModified();
+    bool resetData();
 };
 // TODO size assertion
 

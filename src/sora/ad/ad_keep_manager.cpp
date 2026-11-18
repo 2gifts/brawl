@@ -375,3 +375,123 @@ bool adKeepManager::isNanaDeadFlag(u32 index) {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_8015A138 {
+struct Holder {
+    char pad[0x24];
+    unsigned int flags;
+};
+
+struct Arg0 {
+    char pad[4];
+    Holder* holder;
+};
+
+extern "C" void fn_8015A138(Arg0* arg0, int arg1, int arg2) {
+    if (arg1) {
+        arg0->holder->flags &= 0xFFFFEFFF;
+        arg0->holder->flags &= 0xFFFFDFFF;
+        arg0->holder->flags |= 0x4000;
+        arg0->holder->flags |= 0x8000;
+    } else {
+        arg0->holder->flags |= 0x1000;
+        arg0->holder->flags |= 0x2000;
+        arg0->holder->flags &= 0xFFFFBFFF;
+        arg0->holder->flags &= 0xFFFF7FFF;
+    }
+    arg0->holder->flags &= 0xFFFEFFFF;
+    arg0->holder->flags &= 0xFFFDFFFF;
+    arg0->holder->flags &= 0xFFFBFFFF;
+    arg0->holder->flags &= 0xFFF7FFFF;
+    arg0->holder->flags &= 0xFFEFFFFF;
+    arg0->holder->flags &= 0xFFDFFFFF;
+    arg0->holder->flags &= 0xFFBFFFFF;
+    arg0->holder->flags &= 0xFF7FFFFF;
+    switch (arg2) {
+    case 0:
+        arg0->holder->flags |= 0x10000;
+        return;
+    case 1:
+        arg0->holder->flags |= 0x20000;
+        return;
+    case 2:
+        if (arg1) {
+            arg0->holder->flags |= 0x80000;
+            return;
+        }
+        arg0->holder->flags |= 0x40000;
+        return;
+    case 3:
+        if (arg1) {
+            arg0->holder->flags |= 0x200000;
+            return;
+        }
+        arg0->holder->flags |= 0x100000;
+        return;
+    case 4:
+        if (arg1) {
+            arg0->holder->flags |= 0x800000;
+            return;
+        }
+        arg0->holder->flags |= 0x400000;
+        return;
+    default:
+        arg0->holder->flags |= 0x20000;
+        return;
+    }
+}
+}
+
+namespace jj_8015A434 {
+struct Entry {
+    int kind;
+    int value;
+    u8 count;
+    bool keep;
+};
+
+struct Table {
+    u8 unk00[0x14];
+    Entry* entries;
+    u32 unk18;
+    u32 count;
+};
+
+extern "C" void fn_8015A434(void* arg0, Entry* arg1) {
+    Table* self = static_cast<Table*>(arg0);
+    u32 off;
+    Entry* base;
+    Entry* cur;
+    u32 i;
+    i = 0;
+    off = 0;
+    u32 n = self->count;
+
+    for (; i < n; i++) {
+        base = self->entries;
+        cur = (Entry*)((u8*)base + off);
+        if (arg1->kind == cur->kind && arg1->value == cur->value) {
+            Entry* hit = base + i;
+            hit->count++;
+            return;
+        }
+        off += 12;
+    }
+
+    if (i < 0xFF) {
+        self->entries[i] = *arg1;
+        self->entries[i].count = 1;
+        self->count++;
+        return;
+    }
+
+    for (u32 k = 0; k < 254; k++) {
+        self->entries[k] = self->entries[k + 1];
+    }
+
+    self->entries[254] = *arg1;
+    self->entries[254].count = 1;
+}
+}
+

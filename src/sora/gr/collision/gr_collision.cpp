@@ -775,3 +775,183 @@ void grCollision::copyVtxToPrev() {
 }
 
 grCollisionList g_grCollisionList;
+
+// TODO: clean up, give variables real names
+namespace jj_80111C70 {
+union C {
+    u32 w;
+    u16 h[2];
+};
+
+extern "C" C fn_80111C70(const s32* arg0, s32 arg1) {
+    C c;
+    c.w = 0xFFFFu;
+    c.h[0] = *(const u16*)arg0;
+    c.h[1] = (u16)(((u32)arg1 - (u32)arg0[5]) / 18u);
+    return c;
+}
+}
+
+namespace jj_80110C78 {
+extern "C" void* fn_80110C78(void* arg0, u32 arg1, u32 arg2, u32 arg3) {
+    u16 count = *(u16*)((u8*)arg0 + 6);
+    void* entry;
+    s32 offset = 0;
+    for (u32 i = 0; i < count; i++) {
+        void* base = *(void**)((u8*)arg0 + 0x18);
+        entry = (void*)((u8*)base + offset);
+        if (*(u32*)((u8*)entry + 0x58) == arg1 &&
+            *(u16*)((u8*)entry + 0x4E) == arg2 &&
+            *(u16*)((u8*)entry + 0x50) == arg3) {
+            return (void*)entry;
+        }
+        offset += 0x60;
+    }
+    return 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8011112C {
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+
+extern float lbl_805A2910;
+
+struct Vec2 {
+    float x, y;
+
+    Vec2() {
+        x = lbl_805A2910;
+        y = lbl_805A2910;
+    }
+};
+
+struct Box {
+    u32 a, b, c, d;
+};
+
+struct Item {
+    u8 pad0[0x10];
+    Box box;
+    u8 pad20[0x34];
+    u8 flags;
+    u8 pad55[0xB];
+};
+
+struct Object {
+    u8 pad0[6];
+    u16 count;
+    u8 pad8[0x10];
+    Item* items;
+};
+
+extern "C" int fn_80041D64(Box*, Box*);
+extern "C" void fn_80111458(Object*, Item*, Item*);
+
+inline void run(Object* arg) {
+    u32 i;
+    int offset;
+    Object* self;
+    u32 j;
+    int innerOffset;
+    Item* b;
+    Item* a;
+    Vec2 unused;
+
+    self = arg;
+    i = 0;
+    offset = 0;
+
+    for (; i < self->count; offset += 0x60, ++i) {
+        a = (Item*)((u8*)self->items + offset);
+        if (((a->flags >> 6) & 1) && (a->flags & 1)) {
+            Box box = a->box;
+            j = i + 1;
+            innerOffset = j * 0x60;
+
+            for (; j < self->count; innerOffset += 0x60, ++j) {
+                b = (Item*)((u8*)self->items + innerOffset);
+                if (((b->flags >> 6) & 1) && (b->flags & 1) &&
+                    fn_80041D64(&box, &b->box)) {
+                    fn_80111458(self, a, b);
+                }
+            }
+        }
+    }
+}
+
+extern "C" void fn_8011112C(Object* self) {
+    run(self);
+}
+}
+
+namespace jj_8011135C {
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+
+struct Box {
+    u32 a, b, c, d;
+};
+
+struct Item {
+    u8 pad0[0x10];
+    Box box;
+    u8 pad20[0x34];
+    u8 flags;
+    u8 pad55[0xB];
+};
+
+struct Object {
+    u8 pad0[6];
+    u16 count;
+    u8 pad8[0x10];
+    Item* items;
+    Box box;
+};
+
+extern "C" int fn_80041D64(Box*, Box*);
+extern "C" void fn_80111458(Object*, Item*, Item*);
+
+extern "C" void fn_8011135C(void* arg0, void* arg1) {
+    Object* self = (Object*)arg0;
+    Object* other = (Object*)arg1;
+    u32 j;
+    Box* boxB;
+    Item* b;
+    Item* a;
+    int innerOffset;
+
+    if (fn_80041D64(&self->box, &other->box)) {
+        int offset;
+        u16 count;
+        u32 i;
+        count = other->count;
+        i = 0;
+        offset = 0;
+        while (i < count) {
+            b = (Item*)((u8*)other->items + offset);
+            if (((b->flags >> 6) & 1) && (b->flags & 1) &&
+                fn_80041D64(&self->box, &b->box)) {
+                boxB = &b->box;
+                j = 0;
+                innerOffset = 0;
+                while (j < self->count) {
+                    a = (Item*)((u8*)self->items + innerOffset);
+                    if (((a->flags >> 6) & 1) && (a->flags & 1) &&
+                        fn_80041D64(&a->box, boxB)) {
+                        fn_80111458(self, a, b);
+                    }
+                    innerOffset += 0x60;
+                    j++;
+                }
+            }
+            offset += 0x60;
+            i++;
+        }
+    }
+}
+}
+

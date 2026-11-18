@@ -1,3 +1,4 @@
+#include <ec/ec_trace_mgr.h>
 #include <ec/ec_mgr.h>
 #include <gf/gf_heap_manager.h>
 #include <revolution/MTX/mtx.h>
@@ -673,3 +674,305 @@ workFound:
         fn_80062D08(work, fn_80134524(groundModule->getCollStatus(0), 3));
     }
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_8005F814(void);
+
+extern "C" void fn_8005F7FC(void) {
+    fn_8005F814();
+}
+
+extern "C" void fn_80061510(void) {}
+
+__declspec(section ".ctors") extern void* const fn_80061510_ctor = (void*)fn_80061510;
+
+// TODO: clean up, give variables real names
+namespace jj_8005F194 {
+extern "C" int fn_8005F194(u8* self, s32 arg1) {
+    u32 i = 0;
+    u32 low = ((u32)arg1 << 16) >> 16;
+    s32 off = 0;
+    u8* found;
+
+    for (; i < *(u32*)(self + 0x5C); i++) {
+        u8* tbl = *(u8**)(self + 0x58);
+        u8* e = tbl + off;
+        if (*(u32*)e != 0 && (u32)(arg1 >> 16) == *(u32*)(e + 0x10)) {
+            found = tbl + i * 0x18;
+            goto done;
+        }
+        off += 0x18;
+    }
+    found = 0;
+done:
+    if (found != 0) {
+        u8* p = *(u8**)(found + 0xC);
+        p += low << 4;
+        if (p[0x1C] & 1) return 1;
+    }
+    return 0;
+}
+}
+
+namespace jj_8005F220 {
+extern "C" bool fn_8005F220(void* self, s32 arg1) {
+    u32 count = *(u32*)((char*)self + 0x5C);
+    u32 i;
+    u32 low = (u32)arg1 & 0xFFFF;
+    s32 off;
+    void* found;
+
+    i = 0;
+    off = 0;
+
+    for (; i < count; i++) {
+        u32* base = *(u32**)((char*)self + 0x58);
+        char* entry = (char*)base + off;
+        if (*(s32*)entry != 0 &&
+            (u32)(arg1 >> 16) == (u32)*(s32*)(entry + 0x10)) {
+            found = (char*)base + i * 0x18;
+            goto done;
+        }
+        off += 0x18;
+    }
+
+    found = NULL;
+
+done:
+    if (found != NULL) {
+        u8* inner = *(u8**)((char*)found + 0xC);
+        u8 val = *(u8*)(inner + (low << 4) + 0x1C);
+        if (val & 2) {
+            return true;
+        }
+    }
+    return false;
+}
+}
+
+namespace jj_8005F2AC {
+extern "C" bool fn_8005F2AC(void* self, s32 arg1) {
+    u32 count = *(u32*)((char*)self + 0x5C);
+    u32 i;
+    u32 low = (u32)arg1 & 0xFFFF;
+    s32 off;
+    void* found;
+    i = 0;
+    off = 0;
+    for (; i < count; i++) {
+        u32* base = *(u32**)((char*)self + 0x58);
+        char* entry = (char*)base + off;
+        if (*(s32*)entry != 0 &&
+            (u32)(arg1 >> 16) == (u32)*(s32*)(entry + 0x10)) {
+            found = (char*)base + i * 0x18;
+            goto done;
+        }
+        off += 0x18;
+    }
+    found = NULL;
+done:
+    if (found != NULL) {
+        u8* inner = *(u8**)((char*)found + 0xC);
+        u8 val = *(u8*)(inner + (low << 4) + 0x1C);
+        if (val & 4) return true;
+    }
+    return false;
+}
+}
+
+namespace jj_800607C8 {
+typedef unsigned long u32;
+
+struct Entry {
+    char pad[0x44];
+    int model;
+    char pad48[0x34];
+    u32 key;
+    u32 tail;
+};
+
+extern Entry* lbl_805A0164;
+
+class EcMgr {
+public:
+    char pad[0x60];
+    Entry* entries;
+    char pad64[8];
+    int active;
+    u32 first;
+    u32 last;
+
+    Entry* find(u32 key) {
+        if (key && active) {
+            Entry* entry = lbl_805A0164;
+            if (entry && entry->key == key)
+                return entry;
+
+            entry = &entries[first];
+            for (u32 i = first; i <= last; ++i, ++entry) {
+                if (entry->key == key) {
+                    lbl_805A0164 = entry;
+                    return entry;
+                }
+            }
+        }
+        return 0;
+    }
+};
+
+extern "C" int fn_800607C8(EcMgr* self, u32 key) {
+    Entry* entry = self->find(key);
+    return !entry ? 0 : entry->model;
+}
+}
+
+namespace jj_80060858 {
+typedef unsigned long u32;
+
+struct Entry {
+    char pad[0x48];
+    int model;
+    char pad4C[0x30];
+    u32 key;
+    u32 tail;
+};
+
+extern Entry* lbl_805A0164;
+
+class EcMgr {
+public:
+    char pad[0x60];
+    Entry* entries;
+    char pad64[8];
+    int active;
+    u32 first;
+    u32 last;
+
+    Entry* find(u32 key) {
+        if (key && active) {
+            Entry* entry = lbl_805A0164;
+            if (entry && entry->key == key)
+                return entry;
+
+            entry = &entries[first];
+            for (u32 i = first; i <= last; ++i, ++entry) {
+                if (entry->key == key) {
+                    lbl_805A0164 = entry;
+                    return entry;
+                }
+            }
+        }
+        return 0;
+    }
+};
+
+extern "C" int fn_80060858(EcMgr* self, u32 key) {
+    Entry* entry = self->find(key);
+    return !entry ? 0 : entry->model;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80061160 {
+
+struct Tbl1 { u32 v[134]; };
+struct Tbl2 { const char* v[134]; };
+
+struct Entry {
+    u32 active;
+    u8 pad04[4];
+    void* p8;
+    u8 pad0C[4];
+    u32 id;
+    u8 pad14[4];
+};
+
+struct Owner {
+    u8 pad00[0x58];
+    Entry* entries;
+    u32 count;
+    u8 pad60[0x21];
+    u8 kind;
+    u8 pad82[2];
+    u32 slot[4];
+};
+
+static inline Entry* findEntry(Owner* self, u32 id) {
+    for (u32 i = 0; i < self->count; i++) {
+        if (self->entries[i].active && self->entries[i].id == id)
+            return &self->entries[i];
+    }
+    return 0;
+}
+
+extern "C" {
+extern const Tbl1 lbl_80407198;
+extern const Tbl2 lbl_804073B0;
+extern void* g_GameGlobal;
+u32 fn_8004E958(void* p);
+void* fn_8018D3F0(void* a, const char* b);
+
+void fn_80061160(Owner* self, u32 a1, s32 a2, u32 a3, u32 a4, u32 a5, u32 a6, u8 a7, f32 f) {
+    Tbl1 ids = lbl_80407198;
+    Tbl2 names = lbl_804073B0;
+
+    if (a2 >= 1) {
+        u32 idx = a2 - 1;
+        if (idx < 0x86) {
+            Entry* found = findEntry(self, ids.v[idx]);
+            if (found) {
+                u32 sp10 = (u32)fn_8018D3F0(found->p8, names.v[idx]);
+                u32* pSp10 = &sp10;
+                if (sp10 != 0) {
+                    u32 flag = 0;
+                    if (a2 >= 0x55 && a2 <= 0x59) {
+                        flag = 1;
+                    } else if (a2 >= 0x5F && a2 <= 0x63) {
+                        flag = 1;
+                    } else if (a2 >= 0x69 && a2 <= 0x6D) {
+                        flag = 1;
+                    } else if (a2 >= 0x73 && a2 <= 0x77) {
+                        flag = 1;
+                    } else {
+                        switch (a2) {
+                        case 0xA:
+                        case 0xB:
+                        case 0x10:
+                        case 0x1E:
+                        case 0x1F:
+                        case 0x20:
+                        case 0x22:
+                        case 0x23:
+                        case 0x25:
+                        case 0x28:
+                        case 0x2B:
+                        case 0x2E:
+                        case 0x31:
+                        case 0x34:
+                        case 0x37:
+                        case 0x3A:
+                        case 0x3D:
+                        case 0x40:
+                        case 0x43:
+                        case 0x46:
+                        case 0x49:
+                        case 0x4C:
+                        case 0x4F:
+                        case 0x7B:
+                        case 0x82:
+                            flag = 1;
+                            break;
+                        }
+                    }
+                    ((ecTraceMgr*)((u8*)self + 0x98))->start(a1, (u32)pSp10, a3, a4, a5, self->slot[self->kind], a6, a7, flag, f);
+                    return;
+                }
+            }
+        }
+    }
+    fn_8004E958(g_GameGlobal);
+    ((ecTraceMgr*)((u8*)self + 0x98))->start(a1, a3, a4, a5, self->slot[self->kind], a6, a7, 0, f);
+}
+}
+}
+

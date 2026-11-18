@@ -59,7 +59,8 @@ struct NtBase {
 #endif
     static bool isParent() __attribute__((never_inline));
     static bool isParentInit();
-    static void setSIDPlayer(u8 station, u8 count);
+    // HYPOTHESIS: returns the total of the player counts.
+    static int setSIDPlayer(u8 station, u8 count);
     const char* getErrorStr(s32 error);
     static void initStaticWork();
     static void clearErrorStatus();

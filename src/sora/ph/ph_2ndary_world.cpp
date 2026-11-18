@@ -1,3 +1,6 @@
+#include <nw4r/math/math_types.h>
+#include <mt/mt_common.h>
+#include <types.h>
 #include <gf/gf_area_manager.h>
 #include <gr/collision/gr_collision.h>
 #include <gr/collision/gr_collision_collection.h>
@@ -246,3 +249,435 @@ void ph2ndaryWorld::getWindArray() {
         unk14 = 1;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_8008674C {
+
+struct Rect {
+    f32 left;
+    f32 top;
+    f32 right;
+    f32 bottom;
+};
+
+struct Node {
+    Rect rect;
+    u8 pad[10];
+    s16 flag;
+};
+
+struct Obj {
+    u8 pad[16];
+    Node* node;
+};
+
+extern "C" void fn_8011728C(Node*, int, int);
+
+extern "C" void fn_8008674C(Obj* self, const Vec2f* a, const Vec2f* b) {
+    register f32 t0, t1, t2, by, ay, bx, ax;
+    Rect rect;
+
+    bx = b->m_x;
+    ax = a->m_x;
+    by = b->m_y;
+    ay = a->m_y;
+    asm { ps_sub t0, ax, bx }
+    asm { ps_sub t1, ax, bx }
+    asm { ps_sub t2, ay, by }
+    asm { ps_sel t0, t0, bx, ax }
+    asm { ps_sel t1, t1, ax, bx }
+    asm { ps_sel t2, t2, by, ay }
+    rect.left = t0;
+    rect.top = t2;
+    rect.right = t1;
+    asm { ps_sub t0, ay, by }
+    asm { ps_sel t0, t0, ay, by }
+    rect.bottom = t0;
+
+    self->node->flag = 0;
+    __memcpy(&self->node->rect, &rect, sizeof(rect));
+    fn_8011728C(self->node, 0, 0);
+}
+}
+
+namespace jj_80086694 {
+struct RectF { float l, t, r, b; };
+struct RectI { int l, t, r, b; };
+struct Buf { RectF rect; char pad[10]; short flag; };
+struct Outer { char pad[16]; Buf* buf; };
+extern "C" void fn_8011728C(Buf*, int, int);
+
+static inline void makeRect(RectF& r, const Vec2f& a, const Vec2f& b) {
+    register float t0, t2, t1, t3, ax, bx, by, ay;
+    bx = b.m_x;
+    ax = a.m_x;
+    by = b.m_y;
+    ay = a.m_y;
+    asm { ps_sub t0, bx, ax }
+    asm { ps_sub t1, bx, ax }
+    asm { ps_sub t2, by, ay }
+    asm { ps_sel t0, t0, ax, bx }
+    asm { ps_sub t3, by, ay }
+    asm { ps_sel t2, t2, ay, by }
+    asm { ps_sel t1, t1, bx, ax }
+    asm { ps_sel t3, t3, by, ay }
+    r.l = t0;
+    r.t = t2;
+    r.r = t1;
+    r.b = t3;
+}
+
+extern "C" void fn_80086694(Outer* self, const Vec2f* pos, const float* radius) {
+    self->buf->flag = 0;
+    Vec2f b(pos->m_x + *radius, pos->m_y - *radius);
+    Vec2f a(pos->m_x - *radius, pos->m_y + *radius);
+    RectF r;
+    makeRect(r, a, b);
+    *(RectI*)&self->buf->rect = *(RectI*)&r;
+    fn_8011728C(self->buf, 0, 0);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800831AC {
+
+
+struct Block48 {
+    u32 w[12];
+};
+
+struct FTElement {
+    u32 pad[13];
+    nw4r::math::VEC3 pos;
+    nw4r::math::VEC3 normal;
+    u32 pad2[36];
+    Block48 data;
+};
+
+extern "C" void fn_801EC868(void* pIn, void* pOut, f32 x, f32 y, f32 z);
+
+extern "C" void fn_800831AC(s32 unused, s32 i, s32 j, FTElement*** pArr) {
+    s32 oj = j << 2;
+    s32 oi = i << 2;
+    nw4r::math::VEC3 posI, posJ;
+    Block48 buf;
+
+    s32 off;
+    s32 k = 1;
+
+    posI.x = (*pArr)[i]->pos.x;
+    posI.y = (*pArr)[i]->pos.y;
+    posI.z = (*pArr)[i]->pos.z;
+    posJ.x = (*pArr)[j]->pos.x;
+    posJ.y = (*pArr)[j]->pos.y;
+    posJ.z = (*pArr)[j]->pos.z;
+
+    nw4r::math::VEC3 diff;
+    diff = posJ - posI;
+
+    off = 4;
+    do {
+        FTElement* src = *reinterpret_cast<FTElement**>(
+            reinterpret_cast<u8*>(*pArr) + oi + off);
+        fn_801EC868(&src->data, &buf, diff.x, diff.y, diff.z);
+
+        FTElement* dst = *reinterpret_cast<FTElement**>(
+            reinterpret_cast<u8*>(*pArr) + oj + off);
+        dst->data = buf;
+
+        (*reinterpret_cast<FTElement**>(
+            reinterpret_cast<u8*>(oj + reinterpret_cast<u32>(*pArr)) + off))->pos =
+            (*reinterpret_cast<FTElement**>(
+                reinterpret_cast<u8*>(*pArr) + oi + off))->pos + diff;
+        (*reinterpret_cast<FTElement**>(
+            reinterpret_cast<u8*>(oj + reinterpret_cast<u32>(*pArr)) + off))->normal =
+            (*reinterpret_cast<FTElement**>(
+                reinterpret_cast<u8*>(*pArr) + oi + off))->normal + diff;
+        ++k;
+        off += 4;
+    } while (k < 3);
+}
+}
+
+namespace jj_80088FB8 {
+using namespace nw4r::math;
+struct A {
+    char pad00[0x34];
+    VEC3 pos;
+    VEC3 prev;
+    char pad4c[0x30];
+    float radius;
+    char pad80[0x38];
+    float weight;
+};
+struct B {
+    char pad00[0x74];
+    float scale;
+    char pad78[4];
+    float radius;
+    char pad80[0xbc];
+    MTX34 matrix;
+    char pad16c[0x40];
+    VEC3 offset;
+    VEC3 pos;
+};
+extern "C" {
+extern const float lbl_805A1BB8;
+void fn_801EC158(MTX34*);
+void fn_801EC868(const MTX34*, MTX34*, float, float, float);
+void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
+float fn_801ED04C(const VEC3*);
+void fn_801ED008(const VEC3*, VEC3*);
+int fn_80088FB8(void*, A* a, B* b) {
+    int result = 0;
+    if (lbl_805A1BB8 != a->weight && b != 0) {
+        MTX34 identity, translation, combined;
+        fn_801EC158(&identity);
+        fn_801EC868(&identity, &translation, b->offset.x, b->offset.y, b->offset.z);
+        fn_801EC1B8(&b->matrix, &translation, &combined);
+        b->pos.x = combined._03;
+        float r1 = b->radius;
+        r1 *= b->scale;
+        b->pos.y = combined._13;
+        b->pos.z = combined._23;
+        VEC3 delta = a->pos - a->prev;
+        float length = fn_801ED04C(&delta);
+        float r2 = a->radius;
+        float sum = r1 + r2;
+        int active = 1;
+        int i = 0;
+        while (active) {
+            if (i > 3) break;
+            VEC3 diff = a->pos - b->pos;
+            if (fn_801ED04C(&diff) < sum) {
+                fn_801ED008(&diff, &diff);
+                a->pos = b->pos + diff * (r1 + r2);
+                VEC3 move;
+                VEC3Sub(&move, &a->pos, &a->prev);
+                if (length < fn_801ED04C(&move)) {
+                    fn_801ED008(&move, &move);
+                    a->pos = a->prev + move * length;
+                } else {
+                    active = 0;
+                }
+                result = 1;
+            } else {
+                active = 0;
+            }
+            ++i;
+        }
+    }
+    return result;
+}
+}
+}
+
+namespace jj_800835B4 {
+
+using namespace nw4r::math;
+
+struct Node;
+struct Link { Node* parent; Node* child; };
+struct Node {
+    char pad0[0x34];
+    VEC3 position;
+    VEC3 previous;
+    char pad4c[0x34];
+    float length;
+    char pad84[0x2c];
+    float weight;
+    char padb4[0x114];
+    VEC3 velocity;
+    float damping;
+    VEC3 acceleration;
+    float factor;
+    char pad1e8[0x10];
+    Link* parent;
+};
+
+extern "C" float fn_801ED04C(const VEC3*);
+extern "C" void fn_801ED008(const VEC3*, VEC3*);
+extern const float lbl_805A1BB8;
+extern const float lbl_805A1BBC;
+extern const float lbl_805A1BD0;
+extern const float lbl_805A1BD4;
+extern const float lbl_805A1BD8;
+extern const float lbl_805A1BDC;
+extern const float lbl_805A1BE0;
+extern const float lbl_805A1BE4;
+extern const float lbl_805A1BE8;
+
+extern "C" void fn_800835B4(void* self, Node* node, int arg2, int arg3)
+{
+    if (lbl_805A1BB8 != node->weight && node->parent != 0) {
+        VEC3 previous = node->previous;
+        VEC3 position = node->position;
+        if (arg2 == 0) {
+            if (arg3 != 0) {
+                position += node->velocity;
+                position += node->acceleration * node->factor;
+                node->velocity += node->acceleration * lbl_805A1BD0;
+                node->velocity *= node->damping;
+            }
+        } else {
+            float scale = lbl_805A1BD4;
+            float accelerationScale = lbl_805A1BD8;
+            if (lbl_805A1BB8 != node->length) {
+                if (node->length >= lbl_805A1BDC) {
+                    scale *= mtSqrtf(lbl_805A1BBC + (node->length - lbl_805A1BDC) / lbl_805A1BE0);
+                    if (scale > lbl_805A1BE4)
+                        scale = lbl_805A1BE4;
+                } else {
+                    scale *= mtSqrtf(lbl_805A1BBC - (lbl_805A1BDC - node->length) / lbl_805A1BE8);
+                }
+            }
+            position += node->velocity;
+            position += node->acceleration * scale;
+            node->velocity += node->acceleration * accelerationScale;
+            node->velocity *= node->damping;
+        }
+        VEC3 direction = position - previous;
+        if (lbl_805A1BB8 != fn_801ED04C(&direction))
+            fn_801ED008(&direction, &direction);
+        previous = position - direction * node->length;
+        node->position.x = position.x;
+        node->previous = previous;
+        node->position.y = position.y;
+        node->position.z = position.z;
+    }
+    if (node->parent != 0)
+        fn_800835B4(self, node->parent->parent, arg2, arg3);
+}
+}
+
+namespace jj_8008A750 {
+using namespace nw4r::math;
+struct Node;
+struct Link { Node* parent; Node* child; };
+struct Node {
+    char pad00[0xDC];
+    MTX34 matrix;
+    MTX34 world;
+    char pad13C[0xBC];
+    Link* parent;
+    Link** children;
+    int childCount;
+};
+extern "C" void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
+extern "C" void fn_8008A750(void* arg0, Node* node, MTX34 input) {
+    int j, k;
+    Node *child, *grand;
+    int oi, oj, ok, i;
+    if (node->parent)
+        fn_801EC1B8(&input, &node->world, &node->matrix);
+    else
+        node->matrix = input;
+    i = 0;
+    oi = 0;
+    for (; i < node->childCount; oi += 4, ++i) {
+        Link* link = *(Link**)((char*)node->children + oi);
+        if (link) {
+            child = link->child;
+            MTX34 m = node->matrix;
+            if (child->parent)
+                fn_801EC1B8(&m, &child->world, &child->matrix);
+            else
+                child->matrix = m;
+            j = 0;
+            oj = 0;
+            for (; j < child->childCount; oj += 4, ++j) {
+                Link* link2 = *(Link**)((char*)child->children + oj);
+                if (link2) {
+                    grand = link2->child;
+                    MTX34 m2 = child->matrix;
+                    if (grand->parent)
+                        fn_801EC1B8(&m2, &grand->world, &grand->matrix);
+                    else
+                        grand->matrix = m2;
+                    k = 0;
+                    ok = 0;
+                    for (; k < grand->childCount; ok += 4, ++k) {
+                        Link* link3 = *(Link**)((char*)grand->children + ok);
+                        if (link3) {
+                            Node* next = link3->child;
+                            fn_8008A750(arg0, next, grand->matrix);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+}
+
+namespace jj_8008A3CC {
+using namespace nw4r::math;
+
+struct Node;
+struct Link { Node* parent; Node* child; };
+struct Node {
+    char pad00[0xDC];
+    MTX34 matrix;
+    MTX34 world;
+    char pad13C[0xBC];
+    Link* parent;
+    Link** children;
+    int childCount;
+};
+
+extern "C" {
+void fn_801EC41C(const MTX34*, MTX34*);
+void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
+}
+
+extern "C" void fn_8008A3CC(void* arg0, Node* node) {
+    int j;
+    Node* child;
+    Node* grand;
+    int offI;
+    int offJ;
+    int i;
+    int k;
+    int offK;
+    if (node->parent != 0) {
+        MTX34 parent = node->parent->parent->matrix;
+        MTX34 inverse;
+        fn_801EC41C(&parent, &inverse);
+        MTX34 combined;
+        fn_801EC1B8(&inverse, &node->matrix, &combined);
+        node->world = combined;
+    }
+    i = 0;
+    offI = 0;
+    for (; i < node->childCount; offI += 4, ++i) {
+        child = (*(Link**)((char*)node->children + offI))->child;
+        if (child->parent != 0) {
+            MTX34 combined;
+            MTX34 inverse;
+            MTX34 parent = child->parent->parent->matrix;
+            fn_801EC41C(&parent, &inverse);
+            fn_801EC1B8(&inverse, &child->matrix, &combined);
+            child->world = combined;
+        }
+        j = 0;
+        offJ = 0;
+        for (; j < child->childCount; offJ += 4, ++j) {
+            grand = (*(Link**)((char*)child->children + offJ))->child;
+            if (grand->parent != 0) {
+                MTX34 combined;
+                MTX34 inverse;
+                MTX34 parent = grand->parent->parent->matrix;
+                fn_801EC41C(&parent, &inverse);
+                fn_801EC1B8(&inverse, &grand->matrix, &combined);
+                grand->world = combined;
+            }
+            k = 0;
+            offK = 0;
+            for (; k < grand->childCount; offK += 4, ++k) {
+                fn_8008A3CC(arg0, (*(Link**)((char*)grand->children + offK))->child);
+            }
+        }
+    }
+}
+}
+

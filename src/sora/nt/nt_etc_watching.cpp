@@ -1,3 +1,5 @@
+#include <gf/gf_thread.h>
+#include <gf/gf_heap_manager.h>
 #include <gf/gf_crypto_aes.h>
 #include <nt/nt_etc_watching.h>
 #include <nt/nt_net_report.h>
@@ -85,3 +87,386 @@ void nteWatching::notifySBSEndProc(s32 arg, s32 code) {
         m_unk398 = 1;
     }
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_80155E84(void*);
+
+extern "C" void fn_801571F0(void* self) {
+    fn_80155E84(reinterpret_cast<u8*>(self) - 0x340);
+}
+
+extern "C" void fn_80155F08(void*);
+
+extern "C" void fn_801571F8(void* self) {
+    fn_80155F08(reinterpret_cast<u8*>(self) - 0x344);
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80157048 {
+typedef unsigned char u8;
+typedef int s32;
+
+struct Slot {
+    s32 key;
+    s32 cnt;
+};
+
+extern "C" s32 fn_80157048(s32 unused, u8* data) {
+    Slot slots[7];
+    s32 i;
+    s32 idx;
+    u8 key;
+    s32* p;
+    s32 val;
+    
+    for (i = 0; i < 7; i++) {
+        slots[i].key = -1;
+        slots[i].cnt = 0;
+    }
+    
+    for (i = 0; i < 7; i++) {
+        if (data[0x25] <= 1) {
+            key = data[0x24];
+            p = (s32*)&slots[0].key;
+            for (idx = 0; idx < 7; idx++) {
+                val = *p;
+                if (val < 0) {
+                    slots[idx].key = key;
+                    slots[idx].cnt = 1;
+                    break;
+                } else if ((s32)key == val) {
+                    slots[idx].cnt++;
+                    break;
+                }
+                p += 2;
+            }
+        }
+        data += 0x2AC;
+    }
+    
+    s32 ret = 0;
+    for (i = 0; i < 7; i++) {
+        if (slots[i].key >= 0 && ret < slots[i].cnt) {
+            ret = slots[idx].cnt;
+        }
+    }
+    return ret;
+}
+}
+
+namespace jj_80155C50 {
+
+extern "C" {
+extern char lbl_80461718[];
+int fn_80155F54(void* self, void** out1, int* out2);
+void* fn_80037DD0();
+void* fn_80037E64(void* self, int flag);
+int fn_80037F04(void* self, void* a, int b, int c);
+void netReport__FPCce(const char* fmt, ...);
+void* __nw__FUlQ25Heaps8HeapType(unsigned long size, int heap);
+}
+
+inline bool terminated(u8* thread) {
+    return OSIsThreadTerminated((OSThread*)(thread + 8)) == 1;
+}
+
+extern "C" int fn_80155C50(void* arg0) {
+    char* base = lbl_80461718;
+    u8* self = (u8*)arg0;
+    void* heap;
+    int r;
+
+    if (terminated(self)) {
+        return 0;
+    }
+    if (*(int*)(self + 0x350) != 0x64) {
+        return 0;
+    }
+    netReport__FPCce(base + 0x2F4);
+    if (*(void**)(self + 0x39c) == 0) {
+        void* spC = 0;
+        int sp8 = 0;
+        if (fn_80155F54(self, &spC, &sp8) != 0) {
+            heap = __nw__FUlQ25Heaps8HeapType(0x388, *(int*)(self + 0x354));
+            if (heap != 0) {
+                heap = fn_80037DD0();
+            }
+            *(void**)(self + 0x39c) = heap;
+            netReport__FPCce(base + 0x30C, heap);
+            heap = *(void**)(self + 0x39c);
+            if (heap != 0) {
+                *(u8*)((u8*)heap + 0x380) = 1;
+                r = fn_80037F04(*(void**)(self + 0x39c), spC, sp8, *(int*)(self + 0x354));
+                if (r != 0) {
+                    netReport__FPCce(base + 0x33C, spC, sp8, *(int*)(self + 0x354));
+                    while (*(u8*)((u8*)*(void**)(self + 0x39c) + 0x370) == 0) {
+                        OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                    }
+                }
+                netReport__FPCce(base + 0x390);
+                if (*(int*)((u8*)*(void**)(self + 0x39c) + 0x374) != 0) {
+                    netReport__FPCce(base + 0x3B4);
+                    fn_80037E64(*(void**)(self + 0x39c), 1);
+                    *(void**)(self + 0x39c) = 0;
+                }
+                if (spC != 0) {
+                    gfHeapManager::free(spC);
+                }
+            }
+        }
+    }
+    *(int*)(self + 0x350) = 0;
+    OSResumeThread((OSThread*)(self + 8));
+    return 1;
+}
+}
+
+namespace jj_80156164 {
+extern "C" {
+
+extern unsigned char lbl_80461718[];
+
+struct SwObj {
+    int type;
+    int pad4;
+    void** vt;
+    int unkC;
+    int unk10;
+};
+
+struct SwInst {
+    char pad[0x18];
+    int unk18;
+};
+
+struct Class_80454F64_base { char pad[0x8]; };
+class Class_80454F64 : public Class_80454F64_base {
+public:
+    virtual void fn_800A6A94(int);
+};
+
+struct Class_80461670_base { char pad[0x8]; };
+class Class_80461670 : public Class_80461670_base {
+public:
+    virtual void fn_80152F34();
+};
+
+struct Class_80461684_base { char pad[0x8]; };
+class Class_80461684 : public Class_80461684_base {
+public:
+    virtual void fn_80152DC8();
+};
+
+struct Class_80461698_base { char pad[0x8]; };
+class Class_80461698 : public Class_80461698_base {
+public:
+    virtual void fn_80152BDC();
+};
+
+struct Class_804616AC_base { char pad[0x8]; };
+class Class_804616AC : public Class_804616AC_base {
+public:
+    virtual void fn_801529F0();
+};
+
+struct Class_80466494_base { char pad[0x8]; };
+class Class_80466494 : public Class_80466494_base {
+public:
+    virtual void fn_801B48D8();
+};
+
+struct Class_80466B80_base { char pad[0x8]; };
+class Class_80466B80 : public Class_80466B80_base {
+public:
+    virtual void fn_801C8A68();
+};
+
+struct Class_80466D44_base { char pad[0x8]; };
+class Class_80466D44 : public Class_80466D44_base {
+public:
+    virtual void fn_801D03F8();
+};
+
+struct Class_80488350_base { char pad[0x8]; };
+class Class_80488350 : public Class_80488350_base {
+public:
+    virtual void fn_802EB3A0();
+};
+
+unsigned char fn_801541DC(void*);
+void* fn_801541F0(void*, int);
+void fn_80153488(void*);
+void fn_80153498(void*, int);
+int fn_80153504(void*, int);
+SwObj* fn_80153818(void*, int);
+void* getInstance__8ipSwitchFv(void);
+int fn_8004B278(int, void*, int);
+void netReport__FPCce(const char*, ...);
+
+int fn_80156164(void* self, void* arg1) {
+    char buf[0x10];
+    char* base = (char*)lbl_80461718;
+    int q;
+    SwObj* obj;
+    unsigned int ok;
+    int v;
+    int a;
+    int t;
+
+    t = fn_801541DC(arg1);
+    if ((unsigned char)t != 1) {
+        netReport__FPCce((const char*)(base + 0x484), t);
+        return 0;
+    }
+
+    fn_80153488(buf);
+    v = (int)fn_801541F0(arg1, 0);
+    if (fn_80153504(buf, v) == 0) {
+        netReport__FPCce((const char*)(base + 0x4C8));
+        fn_80153498(buf, -1);
+        return 0;
+    }
+
+    obj = fn_80153818(buf, *(int*)((char*)self + 0x354));
+    if (obj == 0) {
+        netReport__FPCce((const char*)(base + 0x500));
+        fn_80153498(buf, -1);
+        return 0;
+    }
+
+    ok = 0;
+    t = obj->type;
+    if (t != 2) {
+        netReport__FPCce((const char*)(base + 0x514), t);
+    } else {
+        q = obj->unkC + 0x34;
+        a = obj->unk10;
+        {
+            SwInst* inst = (SwInst*)getInstance__8ipSwitchFv();
+            if (fn_8004B278(inst->unk18, (void*)q, a) != 0) {
+                ok = 1;
+            } else {
+                netReport__FPCce((const char*)(base + 0x544));
+            }
+        }
+
+        if (ok == 1) {
+            char* s = (char*)self;
+            char* p = (char*)q + 0x18;
+            unsigned char i;
+            s[0x35C] = ((unsigned char)p[0x8] >> 2) & 0x3F;
+            s[0x35D] = ((unsigned char)p[0x9] >> 2) & 7;
+            *(unsigned short*)&s[0x35E] = *(unsigned short*)&p[0x1A];
+            s[0x386] = p[0x13];
+
+            for (i = 0; i < 7; i++) {
+                s[0x360 + i] = p[0x98 + i * 0x5C];
+                s[0x367 + i] = p[0x9E + i * 0x5C];
+                s[0x36E + i] = p[0xA3 + i * 0x5C];
+                s[0x375 + i] = p[0x99 + i * 0x5C];
+                s[0x37C + i] = p[0x9A + i * 0x5C];
+            }
+
+            *(unsigned short*)&s[0x384] = 0;
+        }
+    }
+
+    if (obj != 0) {
+        ((Class_80454F64*)obj)->fn_800A6A94(1);
+    }
+
+    fn_80153498(buf, -1);
+    return ok;
+}
+
+}
+}
+
+namespace jj_80155F54 {
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef unsigned long long u64;
+
+extern "C" {
+    void* getInstance__8ipSwitchFv(void);
+    void netReport__FPCce(const char*, ...);
+    void fn_8004B23C(void*, void**, int*);
+    void fn_8004C050(int);
+    u8 fn_8014F8E8(void);
+    void fn_80152B5C(void*, int);
+    void fn_80152BDC(void*, int);
+    void fn_80152C4C(void*, int, int);
+    void fn_80153488(void*);
+    void fn_80153498(void*, int);
+    void fn_80153610(void*, void*, u64, int, int, int);
+    void fn_80153E2C(void*, int);
+    void fn_80153E3C(void*, int);
+    void fn_80153EC4(void*, void*);
+    int fn_80153810(void*);
+    int fn_80154018(void*);
+    int fn_80154104(void*, int);
+    void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUll(int, int, int);
+    u64 OSGetTime(void);
+    extern char lbl_80461718[];
+}
+
+extern "C" int fn_80155F54(void* arg0, void** arg1, int* arg2) {
+    const char* base = lbl_80461718;
+    int spC = 0;
+    int sp8 = 0;
+    char sp10[8];
+    char sp18[0x14];
+    char sp2C[0xB4];
+    u8* inst;
+    u16 lim;
+    int type;
+    void* heap;
+
+    inst = (u8*)getInstance__8ipSwitchFv();
+    if (((u8*)*(void**)(inst + 0x18))[0x3B] != 0) {
+        netReport__FPCce(base + 0x408);
+        return 0;
+    }
+    inst = (u8*)getInstance__8ipSwitchFv();
+    fn_8004B23C(*(void**)(inst + 0x18), (void**)&spC, &sp8);
+    fn_8004C050(spC);
+    lim = (u16)((u8)fn_8014F8E8() * 0xE10 + 0x168);
+    if (*(u16*)(*(u8**)(*(u8**)((u8*)getInstance__8ipSwitchFv() + 0x18) + 0x24) + 6) > lim) {
+        netReport__FPCce(base + 0x438);
+        return 0;
+    }
+    fn_80152B5C(sp18, 0x2A);
+    fn_80152C4C(sp18, spC, sp8);
+    fn_80153488(sp10);
+    {
+        u64 t = OSGetTime();
+        fn_80153610(sp10, sp18, t, 0x2A, 0, 0);
+    }
+    fn_80153E2C(sp2C, 0x2A);
+    if (fn_80154104(sp2C, fn_80153810(sp10)) == 0) {
+        netReport__FPCce(base + 0x458);
+        fn_80153E3C(sp2C, -1);
+        fn_80153498(sp10, -1);
+        fn_80152BDC(sp18, -1);
+        return 0;
+    }
+    type = fn_80154018(sp2C);
+    heap = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUll(0x2A, type, 0x20);
+    if (heap == 0) {
+        netReport__FPCce(base + 0x470);
+        fn_80153E3C(sp2C, -1);
+        fn_80153498(sp10, -1);
+        fn_80152BDC(sp18, -1);
+        return 0;
+    }
+    fn_80153EC4(sp2C, heap);
+    *arg2 = type;
+    *arg1 = heap;
+    fn_80153E3C(sp2C, -1);
+    fn_80153498(sp10, -1);
+    fn_80152BDC(sp18, -1);
+    return 1;
+}
+}
+

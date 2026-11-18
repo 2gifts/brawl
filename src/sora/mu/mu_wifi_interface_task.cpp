@@ -2929,3 +2929,360 @@ extern "C" void fn_800C9430(muWifiInterfaceTask* self, int arg1) {
         }
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800D2AD0 {
+struct FriendInfo;
+extern "C" FriendInfo* getInstance__12ntFriendInfoFv();
+extern "C" void fn_8014CB1C(void*, int);
+extern "C" u8 fn_800C851C();
+struct Copy160 { u8 bytes[160]; };
+struct FriendData { u8 pad[0x450]; u8 names[4][40]; };
+struct FriendInfo { FriendData* data; };
+extern "C" void fn_800D2AD0(u8* self, const u8* src, int index) {
+    u8* dst = getInstance__12ntFriendInfoFv()->data->names[index];
+    int count = 20;
+    memset(dst, 0, 40);
+    while (--count >= 0) {
+        u32 value = (dst[0] = src[0]) | (dst[1] = src[1]);
+        src += 2;
+        dst += 2;
+        if (value == 0) break;
+    }
+    fn_8014CB1C(getInstance__12ntFriendInfoFv(), 1);
+    u8 slot = fn_800C851C();
+    if (slot == 255) slot = 4;
+    *(Copy160*)(self + slot * 0x218 + 0x1A8) = *(Copy160*)(getInstance__12ntFriendInfoFv()->data->names);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800D5A7C {
+extern "C" u8 fn_800C851C();
+extern "C" int fn_800C8524();
+extern "C" u8 fn_800C8548();
+extern "C" void fn_80146878(void*, int);
+extern "C" void netReport__FPCce(const char*, ...);
+extern char g_Network[];
+extern char lbl_80457158[];
+struct FccWord { u32 top : 8; u32 rest : 24; };
+struct Entry { char pad[0x218]; };
+struct Parent { char pad[0x70]; Entry entries[5]; };
+static inline s32 getId(char* ent) {
+    u32 w = *(u32*)(ent + 0x78);
+    return (s32)((w << 24) | ((w >> 8) & 0x800000)) >> 24;
+}
+extern "C" void fn_800D5A7C(char* self) {
+    char* base = lbl_80457158;
+    char* ent;
+    u8 idx;
+    u8 local;
+    u8 raw;
+    s32 st;
+    if ((*(s32*)(self + 0xFCC) >> 24) != 1) return;
+    if (fn_800C8524() != 0) return;
+    idx = fn_800C8548();
+    if (idx == 0xFF) ent = 0;
+    else ent = (char*)&((Parent*)self)->entries[idx];
+    if (ent == 0) return;
+    if (!((ent[0x210] >> 7) & 1)) return;
+    s32 id = getId(ent);
+    if (id != *(s32*)(self + 0x6C)) {
+        netReport__FPCce(base + 0x1BE0);
+        netReport__FPCce(base + 0x1C24, getId(ent), *(s32*)(self + 0x6C));
+        fn_80146878(g_Network, 1);
+        return;
+    }
+    local = fn_800C851C();
+    if (local == 0xFF) local = 4;
+    idx = fn_800C8548();
+    if (idx == 0xFF) {
+        u8 alt = fn_800C851C();
+        if (alt == 0xFF) alt = 4;
+        ent = self + alt * 0x218 + 0x70;
+    } else {
+        ent = (char*)&((Parent*)self)->entries[idx];
+        if (!(((u8)ent[0x78] >> 7) & 1)) {
+            u8 alt = fn_800C851C();
+            if (alt == 0xFF) alt = 4;
+            ent = self + alt * 0x218 + 0x70;
+        }
+    }
+    raw = (ent + local)[0x68];
+    st = raw;
+    if (st == 1) {
+        ((FccWord*)(self + 0xFCC))->top = 4;
+        netReport__FPCce(base + 0x1D88, st);
+        return;
+    }
+    if (st == 4) {
+        netReport__FPCce(base + 0x1DC0, st);
+        fn_80146878(g_Network, 1);
+        return;
+    }
+    netReport__FPCce(base + 0x1DF8, st);
+}
+}
+
+namespace jj_800D7C0C {
+extern "C" u8 fn_800C8548();
+extern "C" u8 fn_800C851C();
+
+struct Entry {
+    u8 pad0[0x68];
+    u8 states[4];
+    u8 pad1[0xC];
+    u8 active : 1;
+    u8 flags : 7;
+    u8 player;
+    u8 pad2[0x218 - 0x7A];
+};
+
+struct Parent {
+    u8 pad[0x70];
+    Entry entries[5];
+};
+
+inline u8 localIdx() {
+    u8 l = fn_800C851C();
+    if (l == 0xFF)
+        l = 4;
+    return l;
+}
+
+extern "C" s32 fn_800D7C0C(void* self, s32 slot, s32 flag) {
+    Parent* parent = (Parent*)self;
+    Entry* e;
+    u8* q;
+    s32 cond = (*((u8*)self + 0xFCA) >> 5) & 1;
+    u8 player;
+
+    if (cond == 0) {
+        u8 idx = fn_800C8548();
+        if (idx == 0xFF)
+            e = 0;
+        else
+            e = &parent->entries[idx];
+
+        if (e == 0)
+            e = &parent->entries[localIdx()];
+
+        player = e->player;
+        s32 v;
+        if (player >= 4)
+            v = 0;
+        else {
+            u8 s = fn_800C8548();
+            Entry* t;
+            if (s == 0xFF)
+                t = &parent->entries[localIdx()];
+            else {
+                t = &parent->entries[s];
+                if (!t->active)
+                    t = &parent->entries[localIdx()];
+            }
+            v = (t->states[player] - 1) == 0;
+        }
+
+        u8 pick = v ? e->player : 0xFF;
+        cond = (pick == localIdx());
+    }
+
+    if (!cond)
+        return 0;
+
+    int off;
+    u8* p;
+    if (flag != 0) {
+        off = slot * 8;
+        p = (u8*)self + off;
+        q = p + 0x4C;
+        if (p[0x4C] != 0xFF)
+            return 0;
+    } else {
+        u8 local = localIdx();
+        off = slot * 8;
+        p = (u8*)self + off;
+        q = p + 0x4C;
+        if (p[0x4C] != local || !((p[0x51] >> 7) & 1))
+            return 0;
+    }
+
+    ((u8*)self + off)[0x4C] = 0xFF;
+    ((u8*)self + off)[0x4D] = 0;
+    *(u32*)((u32)self + off + 0x50) &= 0xFFFFFF;
+    ((u8*)self + off)[0x4E] = 0;
+    ((u8*)self + off)[0x4F] = 0;
+    ((u8*)self + off)[0x51] =
+        (u8)((((u8*)self + off)[0x51] & ~0x80) | ((flag << 7) & 0x80));
+
+    if (flag != 0)
+        *q = localIdx();
+
+    return 1;
+}
+}
+
+namespace jj_800CA18C {
+typedef unsigned char u8;
+typedef signed int s32;
+
+extern "C" u8 fn_800C8548();
+extern "C" u8 fn_800C851C();
+
+struct Entry {
+    u8 pad0[0x68];
+    u8 states[4];
+    u8 pad1[0xC];
+    u8 active : 1;
+    u8 flags : 7;
+    u8 unk79;
+    u8 pad2[0x218 - 0x7A];
+
+    bool isActive() const { return active != 0; }
+};
+
+struct Parent {
+    u8 pad[0x70];
+    Entry entries[5];
+};
+
+struct EntryView {
+    u8 pad[0x70];
+    u8 data[0x1A8];
+
+    u8* getData() { return data; }
+};
+
+inline u8 localIdx() {
+    u8 l = fn_800C851C();
+    if (l == 0xFF)
+        l = 4;
+    return l;
+}
+
+inline Entry* getLocal(void* self) {
+    return (Entry*)((unsigned int)self + localIdx() * 0x218 + 0x70);
+}
+
+inline u8* getSelectedOrNull(u8* self) {
+    unsigned int idx = fn_800C8548();
+    if (idx == 0xFF)
+        return 0;
+    return (u8*)((unsigned int)self + idx * 0x218 + 0x70);
+}
+
+inline Entry* getSelectedA(u8* self) {
+    u8 index = fn_800C8548();
+    if (index == 0xFF)
+        return getLocal(self);
+
+    Entry* entry = (Entry*)((unsigned int)self + index * 0x218 + 0x70);
+    u8 active = entry->active;
+    if (active == 0)
+        return getLocal(self);
+    return entry;
+}
+
+inline u8* getSelected(u8* self) {
+    u8 idx = fn_800C8548();
+    if (idx == 0xFF)
+        return (u8*)getLocal(self);
+
+    u8* p = self + idx * 0x218;
+    u8* entry = p + 0x70;
+    if (!((p[0xE8] >> 7) & 1))
+        return (u8*)getLocal(self);
+    return entry;
+}
+
+extern "C" int fn_800CA18C(void* self) {
+    u8 r31;
+    u8* e;
+    int sub;
+    u8 player;
+    u8* slot;
+    u8* flag;
+    int i;
+    int count;
+    u8* base = (u8*)self;
+
+    flag = base + 0x51;
+    slot = base;
+    count = 0;
+    i = 0;
+
+    do {
+        int isLocal;
+        if (i < 0 || i >= 4) {
+            isLocal = 0;
+        } else {
+            u8 idx = localIdx();
+            isLocal = 0;
+            if (slot[0x4C] == idx && !((*flag >> 7) & 1))
+                isLocal = 1;
+        }
+
+        if (isLocal) {
+            if (!((*flag >> 7) & 1))
+                count++;
+        } else {
+            player = slot[0x4C];
+            sub = slot[0x4D];
+            int cond = (base[0xFCA] >> 5) & 1;
+
+            if (cond == 0) {
+                e = getSelectedOrNull(base);
+
+                if (e == 0)
+                    e = (u8*)getLocal(base);
+
+                r31 = e[0x79];
+                int v;
+                if (r31 >= 4) {
+                    v = 0;
+                } else {
+                    Entry* t = getSelectedA(base);
+                    v = (t->states[r31] == 1);
+                }
+
+                u8 pick = v ? e[0x79] : 0xFF;
+                cond = (pick == localIdx());
+            }
+
+            u8 result;
+            if (cond != 0 && ((*flag >> 7) & 1)) {
+                result = 0;
+            } else if (player == 4) {
+                result = 0;
+            } else if (player > 4) {
+                result = 0;
+            } else {
+                u8* g = getSelected(base);
+                int v2;
+                if ((g + player)[0x68] != 1) {
+                    v2 = 0;
+                } else {
+                    s32 w = *(s32*)(g + 0x84 + player * 0x18 + sub * 8);
+                    v2 = ((w >> 24) == 1);
+                }
+
+                if (v2)
+                    result = (base + player * 0x218)[0xC5];
+                else
+                    result = 0;
+            }
+
+            if (result)
+                count++;
+        }
+
+        i++;
+        slot += 8;
+        flag += 8;
+    } while (i < 4);
+
+    return count;
+}
+}
+

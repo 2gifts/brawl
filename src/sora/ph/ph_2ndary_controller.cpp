@@ -1,3 +1,8 @@
+#include <nw4r/math/math_types.h>
+#include <nw4r/ut/ut_algorithm.h>
+#include <mt/mt_common.h>
+#include <math.h>
+#include <types.h>
 // Brawl physics wrapper translation unit ph_2ndary_controller.o (main.dol 0x8008AC5C-0x80095FC4).
 // Not yet decompiled. Functions in address order with their map names:
 //   0x8008AC5C   140  __ct
@@ -356,3 +361,238 @@ void ph2ndaryController::initNode(nw4r::math::MTX34* matrices, nw4r::g3d::ResMdl
 void ph2ndary2Controller::applyFeedback(f32 scale, int a, nw4r::g3d::ResMdl resMdl, Vec3f* position) {
     m_controller[1]->applyFeedback(scale, a, resMdl, position);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_80095990 {
+struct Entry {
+    char pad0[0xB0];
+    float value;
+    char padB4[0x110];
+    unsigned char marked;
+};
+struct Context {
+    Entry** entries;
+    int count;
+    char pad8[0x4D];
+    unsigned char reverse;
+    char pad56[6];
+    unsigned char active;
+    unsigned char empty;
+};
+extern const float lbl_805A1CA8;
+extern "C" void fn_80095990(Context* self, int* __restrict count) {
+    switch (self->reverse) {
+    case 0: {
+        self->active = 1;
+        int remaining = *count;
+        for (int i = 0; i < self->count; ++i) {
+            if (remaining > 0) {
+                Entry* entry = self->entries[i];
+                if (lbl_805A1CA8 != entry->value && entry->marked == 0) {
+                    --remaining;
+                    entry->marked = 1;
+                    if (remaining == 0) return;
+                }
+            }
+        }
+        if (remaining == *count) self->empty = 1;
+    break;
+    }
+    default: {
+        self->active = 1;
+        int remaining = *count;
+        for (int i = self->count - 1; i >= 0; --i) {
+            if (remaining > 0) {
+                Entry* entry = self->entries[i];
+                if (lbl_805A1CA8 != entry->value && entry->marked == 0) {
+                    --remaining;
+                    entry->marked = 1;
+                    if (remaining == 0) return;
+                }
+            }
+        }
+        if (remaining == *count) self->empty = 1;
+    }
+    }
+}
+}
+
+namespace jj_8008AD64 {
+typedef unsigned char u8;
+
+struct Item { char pad[0x1d4]; float val; };
+struct Obj {
+    Item** items;
+    int count;
+    char pad[0x4];
+    u8 unkC;
+    char pad2[0x54 - 0xd];
+    u8 unk54;
+};
+struct Self {
+    Obj* a;
+    Obj* b;
+    u8 unk8;
+    u8 unk9;
+    u8 unkA;
+};
+
+extern "C" void fn_8009A8EC(Obj*, Obj*);
+extern "C" void fn_8009ACA0(Obj*, Obj*);
+extern float lbl_805A1C98;
+extern float lbl_805A1C9C;
+
+extern "C" void fn_8008AD64(Self* self) {
+    if (self->unk8 == 0) {
+        if (self->unkA == 0) {
+            fn_8009A8EC(self->a, self->b);
+            float lo = lbl_805A1C98;
+            float hi = lbl_805A1C9C;
+            for (int i = 0; i < self->b->count; i++) {
+                self->b->items[i]->val = lo +
+                    ((float)i * (hi - lo)) / (float)self->b->count;
+            }
+        } else {
+            fn_8009ACA0(self->a, self->b);
+        }
+        self->b->unk54 = 1;
+    } else if (self->unkA == 0) {
+        fn_8009A8EC(self->b, self->a);
+    } else {
+        fn_8009ACA0(self->b, self->a);
+    }
+    self->unk8 ^= 1;
+    self->a->unkC = 0;
+    self->b->unkC = 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80092250 {
+extern "C" {
+void fn_800937B8(void*, int);
+void fn_8009BD44(void*, void*, void*);
+void fn_801EC158(void*);
+void fn_801EC868(void*, void*, float, float, float);
+}
+
+struct V3 {
+    float x, y, z;
+};
+
+struct Pair {
+    V3 b, a;
+};
+
+struct Blk {
+    unsigned int w[12];
+};
+
+extern "C" void fn_80092250(char* self) {
+    Blk blk;
+    float f98[12];
+    float f68[12];
+    float f38[12];
+    Pair v;
+    unsigned int* q;
+    unsigned int* q2;
+    int cnt;
+
+    q = *(unsigned int**)(*(char**)self);
+    blk = *(Blk*)(q + 0x37);
+    fn_8009BD44(&blk, f98, f68);
+
+    cnt = *(int*)(self + 4);
+    q2 = ((unsigned int**)(*(char**)self))[cnt - 1];
+    v.a.x = f98[3];
+    v.a.y = f98[7];
+    v.a.z = f98[11];
+
+    blk = *(Blk*)(q2 + 0x37);
+    fn_8009BD44(&blk, f98, f68);
+
+    v.b.x = f98[3];
+    v.b.y = f98[7];
+    v.b.z = f98[11];
+
+    Pair p = v;
+    fn_801EC158(f38);
+    fn_801EC868(f38, self + 0x68, p.a.x, p.a.y, p.a.z);
+    fn_801EC868(f38, self + 0x98, p.b.x, p.b.y, p.b.z);
+    fn_800937B8(self, 1);
+}
+}
+
+namespace jj_80091F28 {
+
+extern const float lbl_805A1CA8;
+extern const float lbl_805A1CDC;
+
+struct Node {
+    char pad0[0x34];
+    nw4r::math::VEC3 previous;
+    nw4r::math::VEC3 position;
+    char pad4c[0x34];
+    float limit;
+    char pad84[0x2c];
+    float value;
+};
+
+struct Object {
+    Node** nodes;
+    int count;
+    char pad08[0x3b];
+    unsigned char active;
+    char pad44[0x11];
+    unsigned char flag;
+    char pad56[0xa];
+    float value;
+};
+
+extern "C" void fn_80091F28(Object* self) {
+    self->value = self->nodes[1]->value;
+
+    if (self->flag == 0) {
+        for (int i = (int)((unsigned)self->count - self->active - 1U);
+             i >= 0; --i) {
+            self->nodes[i]->value = lbl_805A1CA8;
+        }
+    } else {
+        if (self->active <= self->count && self->active >= 2) {
+            nw4r::math::VEC3 delta;
+            delta = self->nodes[self->active - 1]->position
+                  - self->nodes[self->active - 2]->position;
+
+            float sq = delta.z * delta.z
+                     + (delta.x * delta.x + delta.y * delta.y);
+            float length;
+            if ((float)fabs(sq) <= lbl_805A1CDC) {
+                length = lbl_805A1CA8;
+            } else {
+                length = sq * rsqrtf(sq);
+            }
+
+            Node* preceding = self->nodes[self->active - 2];
+            if (length < preceding->limit) {
+                delta = preceding->previous
+                      - self->nodes[self->active - 1]->position;
+                nw4r::math::VEC3Add(
+                    &self->nodes[self->active - 1]->position,
+                    &self->nodes[self->active - 1]->position,
+                    &delta);
+                nw4r::math::VEC3Add(
+                    &self->nodes[self->active - 1]->previous,
+                    &self->nodes[self->active - 1]->previous,
+                    &delta);
+            }
+        }
+
+        int i = self->active;
+        while (i < self->count) {
+            self->nodes[i]->value = lbl_805A1CA8;
+            ++i;
+        }
+    }
+}
+}
+

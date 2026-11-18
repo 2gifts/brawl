@@ -1,3 +1,6 @@
+#include <revolution/GX/GXGeometry.h>
+#include <nw4r/math/math_types.h>
+#include <types.h>
 // nw4r ef_drawsmoothstripestrategy.cpp (main.dol 0x8017E24C-0x80182760). Partially reconstructed.
 #include <nw4r/ef.h>
 
@@ -245,3 +248,124 @@ void DrawSmoothStripeStrategy::CalcAhead_ParticleBoth_Origin(
 
 } // namespace ef
 } // namespace nw4r
+
+// TODO: clean up, give variables real names
+extern "C" void fn_8017F894(void) {}
+
+// TODO: clean up, give variables real names
+namespace jj_8017EDB8 {
+
+extern "C" void fn_8017EDB8(nw4r::math::VEC3* pOut, const nw4r::math::VEC3* pA,
+                            const nw4r::math::VEC3* pB) {
+    nw4r::math::VEC3Add(pOut, pA, pB);
+}
+}
+
+namespace jj_8018058C {
+extern "C" void fn_8018058C(unsigned int* dst, const unsigned int* src) {
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    dst[3] = src[3];
+    dst[4] = src[4];
+    dst[5] = src[5];
+    *reinterpret_cast<float*>(dst + 6) = *reinterpret_cast<const float*>(src + 6);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_801811DC {
+
+extern "C" {
+void fn_80162384(float*, float*, float);
+void fn_801805C8(void*, void*, int, int);
+void fn_801808C0(void*, void*, int, int);
+void fn_80180C74(void*, void*, int, int);
+
+extern const float lbl_805A3074;
+extern const float lbl_805A3078;
+extern const float lbl_805A30A4;
+extern const float lbl_805A30A8;
+extern const double lbl_805A3098;
+}
+
+struct Pair {
+    float x;
+    float y;
+};
+
+inline void setCirclePoint(Pair* p, int i, float step, float k) {
+    float fi = (float)i;
+    fn_80162384(&p->y, &p->x, k * (step * fi));
+}
+
+struct Inner {
+    unsigned char pad[0x140];
+    unsigned char count;
+    unsigned char pad2;
+    unsigned char mode;
+};
+
+struct Obj {
+    unsigned char pad[0x24];
+    Inner* inner;
+};
+
+struct Node {
+    Obj* obj;
+    unsigned char pad[0xd0];
+    Pair* arr;
+};
+
+extern "C" void fn_801811DC(void* a0, Node* a1, int a2, int a3) {
+    Inner* in = a1->obj->inner;
+    int n = in->count;
+
+    if (n >= 3) {
+        Pair* p;
+        Pair* arr = (Pair*)__alloca((n + 1) * 8);
+
+        if (arr) {
+            float fn_ = (float)n;
+            float f29 = lbl_805A30A4 / fn_;
+            arr[0].x = lbl_805A3078;
+            arr[0].y = lbl_805A3074;
+            p = arr + 1;
+            int i;
+
+            for (i = 1; i < n; p++, i++) {
+                setCirclePoint(p, i, f29, lbl_805A30A8);
+            }
+
+            arr[n].x = lbl_805A3078;
+            arr[n].y = lbl_805A3074;
+            a1->arr = arr;
+
+            switch (in->mode & 7) {
+            case 0:
+            default:
+                GXSetCullMode(GX_CULL_FRONT);
+                fn_801805C8(a0, a1, a2, a3);
+                GXSetCullMode(GX_CULL_BACK);
+                fn_801805C8(a0, a1, a2, a3);
+                break;
+
+            case 1:
+                GXSetCullMode(GX_CULL_FRONT);
+                fn_801808C0(a0, a1, a2, a3);
+                GXSetCullMode(GX_CULL_BACK);
+                fn_801808C0(a0, a1, a2, a3);
+                break;
+
+            case 2:
+                GXSetCullMode(GX_CULL_FRONT);
+                fn_80180C74(a0, a1, a2, a3);
+                GXSetCullMode(GX_CULL_BACK);
+                fn_80180C74(a0, a1, a2, a3);
+                break;
+            }
+        }
+    }
+}
+}
+

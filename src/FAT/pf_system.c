@@ -79,3 +79,13 @@ void fn_803EBBE0(s32* date, s32* time) {
     time[1] = cal.min;
     time[2] = cal.sec;
 }
+
+// TODO: clean up, give variables real names
+void fn_803EBBD8(void) {}
+
+int fn_803EC27C();
+
+void fn_803EBBDC(void) {
+    fn_803EC27C();
+}
+

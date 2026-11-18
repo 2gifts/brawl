@@ -1072,3 +1072,11 @@ static OSTime DWCi_Auth_DateTimeToOSTime(const char* datetime)
     server_time.usec = 0;
     return OSCalendarTimeToTicks(&server_time);
 }
+
+// TODO: clean up, give variables real names
+extern char lbl_80534200[0x1B0];
+
+char *fn_80352BE0(void) {
+    return lbl_80534200;
+}
+

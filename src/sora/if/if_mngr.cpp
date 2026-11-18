@@ -1,3 +1,5 @@
+#include <gf/gf_heap_manager.h>
+#include <gm/gm_global.h>
 #include <gf/gf_resource_loader.h>
 #include <gf/gf_task.h>
 #include <if/if_center.h>
@@ -533,3 +535,408 @@ void IfMngr::initHeartSwap() {
         }
     }
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_800FED80(void*);
+
+extern "C" void fn_800DCDD4(void* self) {
+    fn_800FED80(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x74));
+}
+
+extern "C" void fn_801052DC(void*);
+
+extern "C" void fn_800DCDFC(void* self) {
+    fn_801052DC(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x78));
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800DCA50 {
+struct S {
+    char unk_0[0x70];
+    int unk_70;
+};
+
+struct T {
+    char unk_0[0x70];
+    S* unk_70;
+};
+
+extern "C" int fn_800DCA50(T *t) {
+    return t->unk_70->unk_70;
+}
+}
+
+namespace jj_800DCD94 {
+extern "C" {
+unsigned int fn_800DCD94(void* p) {
+    int* obj = *(int**)((char*)p + 0x74);
+    unsigned int x = *(int*)((char*)obj + 0x110);
+    unsigned int r = (1 - x) | (x - 1);
+    return r >> 31;
+}
+}
+}
+
+namespace jj_800DCEA8 {
+typedef unsigned int u32;
+typedef unsigned char u8;
+
+struct Data {
+    u32 a, b, c, d, e;
+};
+
+extern "C" {
+void fn_801092E0(void* obj, Data* data);
+
+void fn_800DCEA8(u8* self, const Data* src) {
+    if (*(void**)(self + 0x94) != 0) {
+        Data data = *src;
+        fn_801092E0(*(void**)(self + 0x94), &data);
+    }
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800DC2E0 {
+extern "C" {
+
+void Destroy__Q34nw4r3g3d6G3dObjFv(void*);
+void exit__6gfTaskFv(void*);
+void fn_8000D7B8(void*);
+void fn_800DFC08(void);
+void fn_80108DE4(void);
+void fn_80108A04(void*, int);
+extern void* g_gfSceneRoot;
+
+struct Pad0x8 { char pad[0x8]; };
+struct Iface0x8 : Pad0x8 { virtual void foo(int) = 0; };
+
+struct Pad0x74 { char pad[0x74]; };
+struct Iface0x74 : Pad0x74 { virtual void foo(int) = 0; };
+
+struct Pad0xCC { char pad[0xCC]; };
+struct Iface0xCC : Pad0xCC { virtual void foo(int) = 0; };
+
+struct Pad0x124 { char pad[0x124]; };
+struct Iface0x124 : Pad0x124 { virtual void foo(int) = 0; };
+
+struct Pad0x1E0 { char pad[0x1E0]; };
+struct Iface0x1E0 : Pad0x1E0 { virtual void foo(int) = 0; };
+
+struct Pad0x300 { char pad[0x300]; };
+struct Iface0x300 : Pad0x300 { virtual void foo(int) = 0; };
+
+struct Pad0x5D4 { char pad[0x5D4]; };
+struct Iface0x5D4 : Pad0x5D4 { virtual void foo(int) = 0; };
+
+void fn_800DC2E0(void* arg0) {
+    char* self = (char*)arg0;
+
+    // f44
+    Iface0x1E0* p44 = *(Iface0x1E0**)(self + 0x44);
+    if (p44) {
+        if (p44) {
+            p44->foo(1);
+        }
+        *(Iface0x1E0**)(self + 0x44) = 0;
+    }
+
+    // Loop over 7 entries at offset 0x4C
+    char* q = self;
+    for (int i = 0; i < 7; i++) {
+        Iface0x5D4* p = *(Iface0x5D4**)(q + 0x4C);
+        if (p) {
+            if (p) {
+                p->foo(1);
+            }
+            *(Iface0x5D4**)(q + 0x4C) = 0;
+        }
+        q += 4;
+    }
+
+    fn_800DFC08();
+
+    // f70
+    Iface0x74* p70 = *(Iface0x74**)(self + 0x70);
+    if (p70) {
+        if (p70) {
+            p70->foo(1);
+        }
+        *(Iface0x74**)(self + 0x70) = 0;
+    }
+
+    // f74
+    Iface0x124* p74 = *(Iface0x124**)(self + 0x74);
+    if (p74) {
+        if (p74) {
+            p74->foo(1);
+        }
+        *(Iface0x124**)(self + 0x74) = 0;
+    }
+
+    // f78
+    Iface0x300* p78 = *(Iface0x300**)(self + 0x78);
+    if (p78) {
+        if (p78) {
+            p78->foo(1);
+        }
+        *(Iface0x300**)(self + 0x78) = 0;
+    }
+
+    // f94
+    if (*(void**)(self + 0x94)) {
+        fn_80108DE4();
+        fn_80108A04(*(void**)(self + 0x94), 1);
+        *(void**)(self + 0x94) = 0;
+    }
+
+    // f8C
+    Iface0xCC* p8C = *(Iface0xCC**)(self + 0x8C);
+    if (p8C) {
+        if (p8C) {
+            p8C->foo(1);
+        }
+        *(Iface0xCC**)(self + 0x8C) = 0;
+        *(void**)(self + 0xAC) = 0;
+    }
+
+    // fB0
+    void* pB0 = *(void**)(self + 0xB0);
+    if (pB0) {
+        exit__6gfTaskFv(pB0);
+        *(void**)(self + 0xB0) = 0;
+    }
+
+    // f9C
+    void* p9C = *(void**)(self + 0x9C);
+    if (p9C) {
+        exit__6gfTaskFv(p9C);
+        *(void**)(self + 0x9C) = 0;
+    }
+
+    // fB8
+    Iface0x8* pB8 = *(Iface0x8**)(self + 0xB8);
+    if (pB8) {
+        if (pB8) {
+            pB8->foo(1);
+        }
+        *(Iface0x8**)(self + 0xB8) = 0;
+    }
+
+    // g_gfSceneRoot
+    fn_8000D7B8(g_gfSceneRoot);
+
+    // fA0
+    void* pA0 = *(void**)(self + 0xA0);
+    if (pA0) {
+        exit__6gfTaskFv(pA0);
+        *(void**)(self + 0xA0) = 0;
+    }
+
+    // fA4
+    void* pA4 = *(void**)(self + 0xA4);
+    if (pA4) {
+        exit__6gfTaskFv(pA4);
+        *(void**)(self + 0xA4) = 0;
+    }
+
+    // f8
+    void* p8 = *(void**)(self + 0x8);
+    if (p8) {
+        Destroy__Q34nw4r3g3d6G3dObjFv(p8);
+        *(void**)(self + 0x8) = 0;
+    }
+
+    // fC
+    void* pC = *(void**)(self + 0xC);
+    if (pC) {
+        Destroy__Q34nw4r3g3d6G3dObjFv(pC);
+        *(void**)(self + 0xC) = 0;
+    }
+
+    // f10
+    void* p10 = *(void**)(self + 0x10);
+    if (p10) {
+        Destroy__Q34nw4r3g3d6G3dObjFv(p10);
+        *(void**)(self + 0x10) = 0;
+    }
+
+    // f14
+    void* p14 = *(void**)(self + 0x14);
+    if (p14) {
+        Destroy__Q34nw4r3g3d6G3dObjFv(p14);
+        *(void**)(self + 0x14) = 0;
+    }
+
+    // f18
+    void* p18 = *(void**)(self + 0x18);
+    if (p18) {
+        Destroy__Q34nw4r3g3d6G3dObjFv(p18);
+        *(void**)(self + 0x18) = 0;
+    }
+}
+
+}
+}
+
+namespace jj_800DBF08 {
+
+
+extern "C" {
+void* fn_801B3440(void*, int, int);
+void* fn_801AB6CC(void*, int, int);
+void* fn_800DD528(void*);
+void fn_800DD6E4(void*, void*, void*, int, int);
+void fn_800DDAEC(void*, int);
+void fn_800DFAB4(void*, int);
+void* fn_800DFCB4(void*, int);
+void fn_800E023C(void*, unsigned char, int, void*, void*);
+void* fn_800EFBC0(void*);
+void fn_800EFD70(void*, void*, void*, int, void*, int);
+void* fn_800FE850(void*);
+void fn_800FEA90(void*, void*);
+void* fn_801048EC(void*);
+void fn_80104AA4(void*, void*, int, int, int, int);
+void fn_80108D1C(void*);
+void* fn_8010890C(void*);
+void fn_80108AE0(void*, void*);
+void* fn_800FBB18(void*);
+void fn_800FBC38(void*, void*, int);
+void fn_801971D0(void*, void*);
+void fn_8000D6DC(void*, void*);
+
+extern void* g_gfSceneRoot;
+extern const int lbl_80408580[];
+
+void fn_800DBF08(char* self, const unsigned char* arg2) {
+    void* spC = 0;
+    void* sp8;
+    char* p;
+    int i;
+
+    void* allocator = gfHeapManager::getMEMAllocator(Heaps::InfoInstance);
+    *(void**)(self + 0x18) = fn_801B3440(allocator, 0, 2);
+    *(void**)(self + 8) = fn_801AB6CC(allocator, 0, 0x20);
+
+    if (!(*(unsigned char*)(self + 0xa8))) {
+        *(void**)(self + 0xc) = fn_801AB6CC(allocator, 0, 6);
+    }
+
+    if ((unsigned)((arg2[8] >> 2) & 0x3f) == 8) {
+        *(void**)(self + 0x10) = fn_801AB6CC(allocator, 0, 1);
+    }
+
+    *(void**)(self + 0x14) = fn_801AB6CC(allocator, 0, 6);
+
+    void* obj = operator new(0x1e4, Heaps::InfoInstance);
+    if (obj) {
+        obj = fn_800DD528(obj);
+    }
+
+    *(void**)(self + 0x44) = obj;
+    fn_800DD6E4(obj, self + 0x1c, self + 0x20,
+                 *(int*)(self + 0x48), lbl_80408580[*(int*)(self + 4)]);
+
+    if (*(int*)(self + 4) == 7 ||
+        (unsigned)((arg2[8] >> 2) & 0x3f) == 8) {
+        void* x = *(void**)(self + 0x44);
+        int a = 2;
+        if (*(int*)(self + 4) == 7) {
+            a = 1;
+        }
+        fn_800DDAEC(x, a);
+    }
+
+    int count = 0;
+    if (arg2[0x99] != 3 && arg2[0x99] != 4) count = 1;
+    if (arg2[0xf5] != 3 && arg2[0xf5] != 4) count++;
+    if (arg2[0x151] != 3 && arg2[0x151] != 4) count++;
+    if (arg2[0x1ad] != 3 && arg2[0x1ad] != 4) count++;
+    if (arg2[0x209] != 3 && arg2[0x209] != 4) count++;
+    if (arg2[0x265] != 3 && arg2[0x265] != 4) count++;
+    if (arg2[0x2c1] != 3 && arg2[0x2c1] != 4) count++;
+
+    fn_800DFAB4(self + 0x1c, count);
+
+    int bits = (arg2[9] >> 2) & 7;
+    *(int*)(self + 0xb4) = bits >= 4 ? bits : 4;
+
+    p = self;
+    for (i = 0; i < *(int*)(self + 0xb4); i++) {
+        void* obj2 = operator new(0x5d8, Heaps::InfoInstance);
+        if (obj2) {
+            obj2 = fn_800DFCB4(obj2, i);
+        }
+        unsigned char flags = arg2[9];
+        *(void**)(p + 0x4c) = obj2;
+        unsigned char value = arg2[0x13];
+        fn_800E023C(obj2, (flags >> 5) & 7, value,
+                    self + 0x1c, self + 0x24);
+        p += 4;
+    }
+
+    if (*(int*)(self + 0x30)) {
+        void* obj3 = operator new(0x78, Heaps::InfoInstance);
+        if (obj3) {
+            obj3 = fn_800EFBC0(obj3);
+        }
+        *(void**)(self + 0x70) = obj3;
+        fn_800EFD70(obj3, self + 0x1c, self + 0x30,
+                    *(int*)(self + 0x90), self + 0x3c,
+                    *(int*)(self + 0xbc));
+    }
+
+    if (*(int*)(self + 0x34)) {
+        void* obj4 = operator new(0x128, Heaps::InfoInstance);
+        if (obj4) {
+            obj4 = fn_800FE850(obj4);
+        }
+        *(void**)(self + 0x74) = obj4;
+        fn_800FEA90(obj4, self + 0x34);
+    }
+
+    if (*(int*)(self + 0x38)) {
+        void* obj5 = operator new(0x304, Heaps::InfoInstance);
+        if (obj5) {
+            obj5 = fn_801048EC(obj5);
+        }
+        *(void**)(self + 0x78) = obj5;
+        fn_80104AA4(obj5, self + 0x38, *(int*)(self + 0x7c),
+                    *(int*)(self + 0x80), *(int*)(self + 0x84),
+                    *(int*)(self + 0x88));
+    }
+
+    if (*(int*)(self + 0x40)) {
+        fn_80108D1C(self + 0x40);
+        void* obj6 = fn_8010890C(*(void**)(self + 0x98));
+        *(void**)(self + 0x94) = obj6;
+        fn_80108AE0(obj6, self + 0x40);
+    }
+
+    if (*(unsigned char*)(self + 0xa8)) {
+        void* obj7 = operator new(0xd0, Heaps::InfoInstance);
+        if (obj7) {
+            obj7 = fn_800FBB18(obj7);
+        }
+        *(void**)(self + 0x8c) = obj7;
+        fn_800FBC38(obj7, self + 0x1c, *(int*)(self + 0x90));
+    }
+
+    unsigned char* rec =
+        (unsigned char*)g_GameGlobal->getGlobalRecordMenuDatap();
+    if ((rec[0x28] >> 7) & 1) {
+        spC = ((nw4r::g3d::ResFile*)(self + 0x2c))
+                  ->GetResAnmScn(0).ptr();
+    } else {
+        spC = ((nw4r::g3d::ResFile*)(self + 0x28))
+                  ->GetResAnmScn(0).ptr();
+    }
+
+    sp8 = spC;
+    fn_801971D0(&spC, &sp8);
+    fn_8000D6DC(g_gfSceneRoot, &spC);
+}
+}
+}
+

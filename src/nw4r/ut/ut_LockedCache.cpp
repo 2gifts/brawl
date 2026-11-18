@@ -1,3 +1,4 @@
+#include <types.h>
 #include <nw4r/ut.h>
 
 namespace nw4r {
@@ -102,3 +103,11 @@ void StoreData(void* pDst, void* pSrc, u32 size) {
 } // namespace LC
 } // namespace ut
 } // namespace nw4r
+
+// TODO: clean up, give variables real names
+extern "C" void fn_801D7998(void);
+
+extern "C" void fn_8015D8B8(void) {
+    fn_801D7998();
+}
+

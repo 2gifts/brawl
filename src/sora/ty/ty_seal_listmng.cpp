@@ -1,3 +1,4 @@
+#include <gm/gm_global.h>
 #include <ty/ty_seal_listmng.h>
 #include <types.h>
 
@@ -113,3 +114,178 @@ u32 tySealListDataManager::getPutCharaNo(u32 id, u32 index) {
     }
     return 62;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800AD8F8 {
+extern "C" {
+void readRequest__14gfFileIOHandleFPCcQ25Heaps8HeapTypeii(void* self, const char* name, int heap, int a, int b);
+extern char lbl_80455180[];
+
+int fn_800AD8F8(unsigned char* arg0) {
+    if (arg0[0x3EA8] != 0) {
+        return 0;
+    }
+    arg0[0x3EA8] = 0;
+    arg0[0x3EB0] = 0;
+    readRequest__14gfFileIOHandleFPCcQ25Heaps8HeapTypeii(arg0 + 0x3EAC, lbl_80455180, 0x2b, 0, 0);
+    return 1;
+}
+}
+}
+
+namespace jj_800AD87C {
+extern "C" {
+void* getBuffer__14gfFileIOHandleCFv(void*);
+void free__13gfHeapManagerFPv(void*);
+void release__14gfFileIOHandleFv(void*);
+void __dt__14gfFileIOHandleFv(void*, int);
+void __dl__FPv(void*);
+}
+
+extern "C" void* fn_800AD87C(char* self, int flag) {
+    if (self) {
+        unsigned char flagByte = self[0x3EB0];
+        if (flagByte == 0) {
+            free__13gfHeapManagerFPv(getBuffer__14gfFileIOHandleCFv(self + 0x3EAC));
+            release__14gfFileIOHandleFv(self + 0x3EAC);
+        }
+        __dt__14gfFileIOHandleFv(self + 0x3EAC, -1);
+        if (flag > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800AEC70 {
+struct GG { char pad[0x30]; char* p30; };
+extern GG* g_GameGlobal;
+extern "C" void fn_80052BCC(unsigned short, unsigned short);
+extern "C" void fn_80052C24(unsigned short, int);
+
+extern "C" void fn_800AEC70(char* self) {
+    char* p = self;
+    int off = 0;
+    unsigned i = 0;
+    for (; i < *(unsigned*)(self + 0x2ef4); i++) {
+        fn_80052BCC(*(unsigned*)(*(char**)self + off), *(unsigned short*)(p + 0x14));
+        fn_80052C24(*(unsigned*)(*(char**)self + off), (unsigned char)(self + i)[0x2724] == 0);
+        p += 2;
+        off += 0x64;
+    }
+    char* q = g_GameGlobal->p30;
+    q[0x4924] |= 8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800AE200 {
+extern "C" u8 fn_8004EAC8(u8**);
+
+struct Entry {
+    u8 pad0[0x29];
+    u8 mask;
+    u8 pad2A[2];
+    int kind;
+    u8 pad30[0x34];
+};
+
+struct Context {
+    Entry* entries;
+    u8 pad4[8];
+    u32 selectedCount;
+    u32 count;
+    u8 pad14[0x7D0];
+    int indices[1000];
+    u32 selected[1000];
+    u8 flags[1000];
+    u8 states[1000];
+    u8 pad2EF4[0xC];
+    u32 mask;
+};
+
+extern "C" u32 fn_800AE200(Context* self, int mode, int skip) {
+    u32 n = 0;
+    switch (mode) {
+    case 0: {
+        int* src = (int*)self;
+        u32* dst = (u32*)self;
+        for (u32 i = 0; i < self->count; ++src, ++i) {
+            int k = self->entries[src[0x7E4 / 4]].kind;
+            if (k == 0 || (k >= 6 && k <= 0x17) ||
+                (k >= 0x1C && k <= 0x1D) ||
+                (k >= 0x2F && k <= 0x45 && k != 0x35 && k != 0x37)) {
+                dst[0x1784 / 4] = i;
+                ++dst;
+                ++n;
+            }
+        }
+        break;
+    }
+    case 1: {
+        int* src = (int*)self;
+        u32* dst = (u32*)self;
+        for (u32 i = 0; i < self->count; ++src, ++i) {
+            int k = self->entries[src[0x7E4 / 4]].kind;
+            if (k == 1 || (k >= 0x18 && k <= 0x1B) || k == 0x35 || k == 0x37) {
+                dst[0x1784 / 4] = i;
+                ++dst;
+                ++n;
+            }
+        }
+        break;
+    }
+    case 2: {
+        int* src = (int*)self;
+        u32* dst = (u32*)self;
+        for (u32 i = 0; i < self->count; ++src, ++i) {
+            int k = self->entries[src[0x7E4 / 4]].kind;
+            if (!(k == 0 || (k >= 6 && k <= 0x17) ||
+                (k >= 0x1C && k <= 0x1D) ||
+                (k >= 0x2F && k <= 0x45 && k != 0x35 && k != 0x37)) &&
+                !(k == 1 || (k >= 0x18 && k <= 0x1B) || k == 0x35 || k == 0x37)) {
+                dst[0x1784 / 4] = i;
+                ++dst;
+                ++n;
+            }
+        }
+        break;
+    }
+    case 3: {
+        int* src = (int*)self;
+        u32* dst = (u32*)self;
+        for (u32 i = 0; i < self->count; ++src, ++i) {
+            if (self->flags[src[0x7E4 / 4]]) {
+                dst[0x1784 / 4] = i;
+                ++dst;
+                ++n;
+            }
+        }
+        break;
+    }
+    }
+    if (skip == 0) {
+        if (fn_8004EAC8((u8**)g_GameGlobal) == 0)
+            self->mask = 1;
+        else
+            self->mask = 2;
+        u32* src = (u32*)self;
+        u32* dst = (u32*)self;
+        for (u32 i = 0, end = n; i < end; ++src, ++i) {
+            u32 selected = src[0x1784 / 4];
+            int index = self->indices[selected];
+            if (self->states[index] == 1 && (self->mask & self->entries[index].mask)) {
+                dst[0x1784 / 4] = selected;
+                ++dst;
+            } else {
+                --n;
+            }
+        }
+    }
+    self->selectedCount = n;
+    return n;
+}
+}
+

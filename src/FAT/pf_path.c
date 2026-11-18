@@ -223,3 +223,54 @@ s32 PFPATH_putShortName(u8* pDirEntry, const s8* short_name, u8 attr) {
     }
     return 0;
 }
+
+// TODO: clean up, give variables real names
+s32 fn_803E7B4C(s8* buf) {
+    s32 i = 0;
+    s32 count = 0;
+    
+    while (buf[i] != 0) {
+        if (i == 8) {
+            if (buf[i] != 0x20 || buf[i+1] != 0x20 || buf[i+2] != 0x20) {
+                count++;
+            }
+        }
+        
+        if (buf[i] != 0x20) {
+            count++;
+        }
+        
+        i++;
+    }
+    return count;
+}
+
+// TODO: clean up, give variables real names
+/* jj_803E799C */
+void fn_803E799C(char *src, char *dst, int flags)
+{
+    int lower = flags & 8;
+    char c;
+    int i;
+    int end;
+    for (i = 0; i < 8; i++) {
+        c = src[i];
+        if (!c || c == '.') break;
+        if (lower && c >= 'A' && c <= 'Z')
+            dst[i] = c + 0x20;
+        else
+            dst[i] = c;
+    }
+    if (src[i] == '.') dst[i++] = '.';
+    end = i + 3;
+    for (; i < end; i++) {
+        c = src[i];
+        if (!c) break;
+        if ((flags & 16) && c >= 'A' && c <= 'Z')
+            dst[i] = c + 0x20;
+        else
+            dst[i] = c;
+    }
+    dst[i] = 0;
+}
+

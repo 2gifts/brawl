@@ -81,3 +81,13 @@ void IfWifiprCenter::dispMsg(int msgId) {
 void IfWifiprCenter::startBeginMeleeAnim() {
     m_object->changeAnimN(1, 0x10, true, false);
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_800FD448(void) {}
+
+extern "C" void fn_800B6310(void*);
+
+extern "C" void fn_800FD508(void* self) {
+    fn_800B6310(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x0));
+}
+

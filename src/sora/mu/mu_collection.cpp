@@ -1,3 +1,5 @@
+#include <nw4r/g3d/g3d_resfile.h>
+#include <types.h>
 #include <mu/mu_collection.h>
 #include <mu/mu_recorder.h>
 #include <gf/gf_heap_manager.h>
@@ -1503,3 +1505,135 @@ muCollection::Summary::Decoded muCollection::Summary::decodeJpeg(Heaps::HeapType
     GXInvalidateTexAll();
     return result;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800C39D8 {
+struct Stuct1 {
+    char pad[0x110];
+    void* resource;
+    char pad2[0x23C];
+    int flag;
+};
+
+extern "C" {
+
+int fn_800390C8(void*);
+
+int fn_800C39D8(const Stuct1* p) {
+    int result = 0;
+    if (p->flag == 0 && fn_800390C8(p->resource)) {
+        result = 1;
+    }
+    return result;
+}
+
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800C7324 {
+extern "C" int fn_80260730(void*, void*, int, unsigned char, int,
+                           unsigned int, void*);
+extern "C" void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUll(void*, int,
+                                                              unsigned long);
+extern "C" void free__13gfHeapManagerFPv(void*);
+extern "C" void fn_801D76BC(void*, unsigned int);
+extern "C" int fn_802608BC(void*, void*, unsigned int, void*, unsigned int,
+                           unsigned char, int, unsigned int);
+extern "C" void fn_801D7718(const void*, unsigned int);
+extern "C" void fn_801F3194(void);
+
+extern "C" void fn_800C7324(void* arg0, void* arg1, void* heap, int depth,
+                            int heapType) {
+    char work[0x1C00];
+    unsigned int info[3];
+    void* infoOut = info;
+    unsigned int* output = (unsigned int*)arg0;
+    void* buffer;
+    void* file = *(void**)((char*)arg1 + 0x10);
+    void* data;
+    int size;
+    data = *(void**)((char*)file + 8);
+    size = *(int*)((char*)file + 4);
+    unsigned int allocSize;
+
+    fn_80260730(work, data, (unsigned int)size, 6, depth, 0, infoOut);
+    allocSize = info[2];
+    output[0] = 0;
+    buffer = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUll(
+        heap, (int)allocSize, 0x20);
+    if (output[0] != 0) {
+        free__13gfHeapManagerFPv((void*)output[0]);
+    }
+    output[0] = (unsigned int)buffer;
+    output[1] = info[0];
+    output[2] = info[1];
+    fn_801D76BC(buffer, allocSize);
+    fn_802608BC(work, data, size, (void*)output[0], allocSize, 6, depth, 0);
+    fn_801D7718((const void*)output[0], allocSize);
+    fn_801F3194();
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800C35CC {
+class Object50 { char pad[0x50]; public: virtual ~Object50(); };
+inline void cleanup(void* &buffer, Object50* &object) {
+ if (object) { delete object; object = 0; }
+ if (buffer) gfHeapManager::free(buffer);
+ buffer = 0;
+}
+extern "C" {
+extern char lbl_80456FF0[];
+extern char lbl_80457030[];
+extern char lbl_8059E148;
+void fn_800C1B3C(void*, s32, nw4r::g3d::ResFile, nw4r::g3d::ResFile, s32, s32, s32, s32, s32, u8, u8, char*);
+void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+void* fn_80038984(void*, s32);
+char* strcat(char*, const char*);
+void __construct_array(void*, void (*)(void*), void (*)(void*), unsigned long, int);
+void fn_800C37B0(void*);
+void fn_800C37CC(void*);
+}
+extern "C" void* fn_800C35CC(void* self, s32 mode, nw4r::g3d::ResFile arg2, nw4r::g3d::ResFile arg3,
+ s32 a, s32 b, s32 c, s32 d, s32 arg_sp8, u8 arg_spC, u8 arg_sp10) {
+ char* p = (char*)self;
+ s32 mappedMode;
+ switch (mode) {
+ case 1: mappedMode = 2; break;
+ case 2: mappedMode = 3; break;
+ case 3: mappedMode = 4; break;
+ default: mappedMode = 0; break;
+ }
+ fn_800C1B3C(self, mappedMode, arg2, arg3, a,b,c,d,arg_sp8,arg_spC,arg_sp10,lbl_80456FF0);
+ *(char**)(p + 0x3C) = lbl_80457030;
+ void* child = __nw__FUlQ25Heaps8HeapType(0x194, *(s32*)(p + 0x44));
+ if (child != 0) child = fn_80038984(child, *(s32*)(p + 0x44));
+ *(void**)(p + 0x110) = child;
+ *(u8*)(p + 0x114) = 0;
+ *(s32*)(p + 0x118) = mode;
+ *(u8*)(p + 0x11C) = 0;
+ strcat(p + 0x11C, &lbl_8059E148);
+ *(u8*)(p + 0x15D) = 0;
+ strcat(p + 0x15D, &lbl_8059E148);
+ *(s32*)(p + 0x1A0) = 0;
+ *(s32*)(p + 0x1A4) = 0;
+ *(u8*)(p + 0x1A8) = 0;
+ strcat(p + 0x1A8, &lbl_8059E148);
+ *(s32*)(p + 0x1EC) = 0;
+ *(s32*)(p + 0x1F8) = 0;
+ cleanup(*(void**)(p + 0x1EC), *(Object50**)(p + 0x1F8));
+ *(s32*)(p + 0x1FC) = 0;
+ *(s32*)(p + 0x200) = 0;
+ *(u8*)(p + 0x204) = 0;
+ strcat(p + 0x204, &lbl_8059E148);
+ *(s32*)(p + 0x248) = 0;
+ *(void**)(p + 0x34C) = p + 0x24C;
+ *(s32*)(p + 0x350) = 0;
+ *(s32*)(p + 0x354) = 2;
+ __construct_array(p + 0x358, fn_800C37B0, fn_800C37CC, 0x14, 2);
+ *(u8*)(p + 0x2C) &= ~2;
+ return self;
+}
+}
+

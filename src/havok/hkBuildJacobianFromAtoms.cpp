@@ -1,3 +1,4 @@
+#include <types.h>
 // Havok translation unit hkBuildJacobianFromAtoms.o (main.dol 0x80289D0C-0x8028D8A0): the jacobian builders of the
 // constraint atoms, each after its atom's numSolverResults.
 // Not yet decompiled. Functions in address order:
@@ -188,3 +189,184 @@ int hkSoftContactModifierConstraintAtom::numSolverResults() const {
 int hkMassChangerModifierConstraintAtom::numSolverResults() const {
     return 0;
 }
+
+// TODO: clean up, give variables real names
+extern "C" int fn_8028A52C(void) {
+    return 3;
+}
+
+extern "C" int fn_8028A6F0(void) {
+    return 1;
+}
+
+extern "C" int fn_8028A7A0(void) {
+    return 0x1;
+}
+
+extern "C" int fn_8028D5C8(void) {
+    return 0;
+}
+
+extern "C" int fn_8028D898(void) {
+    return 0;
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8028A91C {
+struct Vec4 { f32 x, y, z, w; };
+struct Marker { u32 tag; u8 kind; u8 pad[3]; };
+struct Buffer { u32 x0; u32 x4; struct Marker *cursor; };
+struct A { char pad0[2]; u8 flag; u8 idx; f32 t; };
+struct B { char pad[0x44]; void *ptr; };
+struct C { char pad[0x30]; struct Vec4 v; };
+struct Local { struct Vec4 a; struct Vec4 b; f32 s; void *p; };
+
+extern f32 lbl_805A3D90;
+extern void fn_8028E080(struct Local *loc, struct B *b, struct Buffer *e);
+
+extern "C" void fn_8028A91C(struct A *a, struct B *b, struct C *c, struct Vec4 *d, struct Buffer *e) {
+    f32 d3, d2, d1, d0, c3, c2, c1, c0, t;
+    if (a->flag != 0 && (t = a->t) > lbl_805A3D90) {
+        struct Local loc __attribute__((aligned(16)));
+        struct Vec4 *v = d + a->idx;
+        void *p;
+        c0 = c->v.x;
+        c1 = c->v.y;
+        c2 = c->v.z;
+        c3 = c->v.w;
+        d0 = v->x;
+        d1 = v->y;
+        d2 = v->z;
+        d3 = v->w;
+        p = b->ptr;
+        loc.a.x = c0;
+        loc.a.y = c1;
+        loc.a.z = c2;
+        loc.a.w = c3;
+        loc.b.x = d0;
+        loc.b.y = d1;
+        loc.b.z = d2;
+        loc.b.w = d3;
+        loc.s = t;
+        loc.p = p;
+        fn_8028E080(&loc, b, e);
+        return;
+    }
+    {
+        struct Marker *m = e->cursor;
+        m->tag = 0x13020008;
+        m->kind = 1;
+        e->cursor = m + 1;
+    }
+}
+}
+
+namespace jj_8028AD28 {
+typedef struct Vec4 { float x, y, z, w; } Vec4;
+typedef struct Triangle { Vec4 b, a, c; } __attribute__((aligned(16))) Triangle;
+extern const unsigned char lbl_8040F958[12];
+extern void fn_8028D8C0(Triangle *, void *, void *);
+
+extern "C" void fn_8028AD28(unsigned char *ctx, void *arg2, const void *arg3,
+                 const void *arg4, void *arg5, int i)
+{
+    Triangle t;
+    const unsigned char *base = lbl_8040F958;
+    for (i = ctx[2]; i < ctx[2] + ctx[3]; ++i) {
+        const Vec4 *a, *b, *c;
+        b = (const Vec4 *)((const char *)arg3 + ((const unsigned char *)(i + (unsigned int)base))[1]);
+        c = (const Vec4 *)((const char *)arg4 + ((const unsigned char *)(i + (unsigned int)base))[2]);
+        a = (const Vec4 *)((const char *)arg3 + base[i]);
+        t.a.x = a->x; t.a.y = a->y; t.a.z = a->z; t.a.w = a->w;
+        t.b.x = b->x; t.b.y = b->y; t.b.z = b->z; t.b.w = b->w;
+        t.c.x = c->x; t.c.y = c->y; t.c.z = c->z; t.c.w = c->w;
+        fn_8028D8C0(&t, arg2, arg5);
+    }
+}
+}
+
+namespace jj_8028D474 {
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef float f32;
+
+typedef struct Blob {
+    f32 f0, f4, f8, fC, f10, f14, f18, f1C, f20, f24;
+    u32 v28, v2C, v30, v34;
+    f32 f38, f3C;
+    u32 v40, v44, v48, v4C, v50;
+} Blob;
+
+typedef struct Node {
+    u16 kind;
+    u16 pad2;
+    u16 id;
+    u16 pad6;
+    struct Node *next;
+} Node;
+
+typedef struct Context {
+    u32 a, b, c;
+} Context;
+
+extern void fn_80295148(void *);
+extern void fn_80293CBC(Node *, Blob *, Context *);
+extern void fn_80288BC8(Node *, u16, Blob *, Context *);
+
+static inline void copy_blob(Blob *dst, const Blob *src)
+{
+    dst->f0 = src->f0;
+    dst->f4 = src->f4;
+    dst->f8 = src->f8;
+    dst->fC = src->fC;
+    dst->f10 = src->f10;
+    dst->f14 = src->f14;
+    dst->f18 = src->f18;
+    dst->f1C = src->f1C;
+    dst->f20 = src->f20;
+    dst->f24 = src->f24;
+    dst->v28 = src->v28;
+    dst->v2C = src->v2C;
+    dst->v30 = src->v30;
+    dst->v34 = src->v34;
+    dst->f38 = src->f38;
+    dst->f3C = src->f3C;
+    dst->v40 = src->v40;
+    dst->v44 = src->v44;
+    dst->v48 = src->v48;
+    dst->v4C = src->v4C;
+    dst->v50 = src->v50;
+}
+
+static inline signed char is_kind(Node *p)
+{
+    return p->kind == 0x16;
+}
+
+extern "C" void fn_8028D474(Node * __restrict self, const Blob *src,
+                 void *a, void *b, Context *ctx)
+{
+    Blob local __attribute__((aligned(16)));
+    Node *p;
+    u16 id;
+
+    ctx->c -= 0x18;
+    copy_blob(&local, src);
+    p = self->next;
+
+    while ((int)p->kind >= 0x17) {
+        p = p->next;
+    }
+
+    fn_80295148((char *)p + 8);
+    p = self->next;
+    id = self->id;
+
+    if (is_kind(p)) {
+        fn_80293CBC(p, &local, ctx);
+    } else {
+        fn_80288BC8(p, id, &local, ctx);
+    }
+}
+}
+

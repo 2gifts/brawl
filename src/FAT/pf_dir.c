@@ -246,3 +246,94 @@ int PFDIR_mkdir(PF_STR* p_path) {
     PF_exitCritical(&p_vol->critical);
     return err;
 }
+
+// TODO: clean up, give variables real names
+/* jj_803DADEC */
+extern s32 fn_803E2414(void *, void *, s32, void *);
+
+typedef struct Fn803DADECCopy {
+    u32 words[0x90];
+} Fn803DADECCopy;
+
+void *fn_803DADEC(void *arg0, void *arg1) {
+    u8 *walk = (u8 *)arg0;
+    u8 *candidate = (u8 *)arg0 + 0xE3C;
+    u8 *freeEntry = 0;
+    int i;
+
+    for (i = 0; i < 3; i++) {
+        if (!(*(u32 *)(walk + 0xE3C) & 1) ||
+            (((*(u32 *)(walk + 0xE3C) & 1) &&
+              ((*(u32 *)(walk + 0xE3C) == 0) & 2)))) {
+            if (freeEntry == 0)
+                freeEntry = candidate;
+        } else if (*(u32 *)((u8 *)arg1 + 0x22C) == *(u32 *)(walk + 0x10A8) &&
+                   *(u32 *)((u8 *)arg1 + 0x238) == *(u32 *)(walk + 0x10B4) &&
+                   *(u16 *)((u8 *)arg1 + 0x23C) == *(u16 *)(walk + 0x10B8)) {
+            return (u8 *)arg0 + i * 0x280 + 0xE3C;
+        }
+        walk += 0x280;
+        candidate += 0x280;
+    }
+
+    if (freeEntry == 0)
+        return 0;
+
+    *(u32 *)freeEntry = 3;
+    *(u16 *)(freeEntry + 4) = 0;
+    *(Fn803DADECCopy *)(freeEntry + 0x40) = *(Fn803DADECCopy *)arg1;
+    fn_803E2414(freeEntry + 8, 0, *(s32 *)((u8 *)arg1 + 0x22C), freeEntry + 0x274);
+    return freeEntry;
+}
+
+/* jj_803DABBC */
+typedef struct Disk { char pad[0x20]; u8 shift; char pad21[0x17]; u32 size; char pad3c[0x1f70]; u16 flags; } Disk;
+typedef struct Inner { u32 flags; char pad04[0x30]; void *ptr; char pad38[0x22c]; u32 offset; Disk *disk; } Inner;
+typedef struct A { u32 a, b, c; } A;
+typedef struct B { u32 a, b, c, d; } B;
+typedef struct Obj { u32 flags, pad; Inner *inner; A x; u32 pad18; B y; } Obj;
+
+extern void fn_803E46AC(Obj *, u32);
+extern int fn_803E4668(Obj *);
+extern int fn_803E1458(void *, u32, u32, int *);
+extern int fn_803E1494(void *, u32, u32, int *, u32 *);
+
+int fn_803DABBC(Obj *obj, u32 len, u32 *out) {
+    int spC;
+    u32 count;
+    int result;
+    Disk *disk;
+    B y;
+    A x;
+    *out = 0;
+    if (!(obj->inner->flags & 1) || !(obj->inner->flags & 2)) return 0x26;
+    disk = obj == 0 ? 0 : obj->inner->disk;
+    y = obj->y;
+    x = obj->x;
+    obj->inner->ptr = &obj->x;
+    spC = -1;
+    if (disk->flags & 4) {
+        if (disk->size + 0x10000 != 0xffff && disk->size == 0) return 6;
+    }
+    fn_803E46AC(obj, obj->inner->offset + len);
+    if (obj->y.a + 0x10000 == 0xffff) { *out = 0; return 0x25; }
+    result = fn_803E1458((char *)obj->inner + 4, obj->y.c, len, &spC);
+    if (result) {
+        obj->y = y;
+        obj->x = x;
+        return result;
+    }
+    count = 0;
+    result = fn_803E1494((char *)obj->inner + 4, obj->y.c, len, &spC, &count);
+    obj->y = y;
+    obj->x = x;
+    if (result) return result;
+    if ((u32)(spC + 0x10000) == 0xffffU) {
+        fn_803E4668(obj);
+        return 0x1C;
+    }
+    count <<= disk->shift;
+    *out = len < count ? len : count;
+    return 0;
+}
+

@@ -270,3 +270,206 @@ void nteFileDataReplay::setData(void* data, u32 size) {
     }
 }
 
+
+// TODO: clean up, give variables real names
+extern "C" u32 fn_80153810(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
+}
+
+extern "C" u32 fn_80154278(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x10);
+}
+
+extern "C" u32 fn_80154280(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0xc);
+}
+
+extern "C" u32 fn_80154294(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0xc);
+}
+
+extern "C" u32 fn_801542A8(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0xc);
+}
+
+extern "C" u32 fn_801542BC(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0xc);
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80154288 {
+extern "C" void* fn_80154288(void* arg0) {
+    return *reinterpret_cast<unsigned char**>(static_cast<unsigned char*>(arg0) + 0x10) + 0x34;
+}
+}
+
+namespace jj_8015429C {
+extern "C" void* fn_8015429C(void* arg0) {
+    unsigned char* p = *reinterpret_cast<unsigned char**>(static_cast<unsigned char*>(arg0) + 0x10);
+    return p + 0x34;
+}
+}
+
+namespace jj_801542B0 {
+extern "C" void* fn_801542B0(void* object) {
+    return *reinterpret_cast<unsigned char**>(static_cast<char*>(object) + 0x10) + 0x34;
+}
+}
+
+namespace jj_80153488 {
+extern "C" void fn_80153488(int* arg0) {
+    arg0[0] = 0;
+    *(unsigned char*)(arg0 + 1) = 0;
+}
+}
+
+namespace jj_80153498 {
+
+extern "C" void __dl__FPv(void*);
+
+struct Fn80153498Obj {
+    void* unk0;
+    u8 unk4;
+};
+
+extern "C" void* fn_80153498(Fn80153498Obj* p, int flag) {
+    if (p != NULL) {
+        if (p->unk4 != 0) {
+            void* ptr = p->unk0;
+            if (ptr != NULL) {
+                gfHeapManager::free(ptr);
+            }
+        }
+        if (flag > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+
+namespace jj_80152BDC {
+extern "C" {
+extern char lbl_80461690[];
+void __dl__FPv(void*);
+void* fn_80152BDC(void* self, int flag) {
+    if (self) {
+        void* ptr = *(void**)((char*)self + 0xC);
+        *(void**)((char*)self + 0x8) = lbl_80461690;
+        if (ptr) {
+            gfHeapManager::free(ptr);
+        }
+        if (flag > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80153504 {
+extern "C" void free__13gfHeapManagerFPv(void*);
+extern "C" u32 NETCalcCRC32(void* p, s32 size);
+
+extern "C" s32 fn_80153504(u8* arg0, u8* arg1) {
+    if (arg0[4] != 0) {
+        void* p = *(void**)arg0;
+        if (p != 0) free__13gfHeapManagerFPv(p);
+    }
+    arg0[4] = 0;
+    *(u32*)arg0 = 0;
+    s32 v = 0;
+    if (arg1 == 0) {
+        v = 0;
+    } else {
+        if (arg1[0x17] != 0xdb) {
+            v = 0;
+        } else if (arg1[0x15] >= 4) {
+            v = 0;
+        } else if (arg1[0x16] >= 4) {
+            v = 0;
+        } else {
+            u32 size = *(u32*)(arg1 + 0x1C);
+            if (size >= 0x80000) {
+                v = 0;
+            } else {
+                u32 old = *(u32*)(arg1 + 0x10);
+                *(u32*)(arg1 + 0x10) = 0xDEADBEEF;
+                u32 crc = NETCalcCRC32(arg1, (s32)(size + 0x20));
+                *(u32*)(arg1 + 0x10) = old;
+                v = (s32)((u32)__cntlzw(crc - old) >> 5);
+            }
+        }
+    }
+    if (v == 0) return 0;
+    *(void**)arg0 = arg1;
+    return 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80153610 {
+struct Object_vptr_8_base { u32 kind; u32 pad; };
+class Object_vptr_8 : public Object_vptr_8_base {
+public:
+virtual void slot0();
+virtual void* slot1();
+virtual u32 slot2();
+};
+struct Hdr { u64 time; u64 id; u32 crc; u8 flags; u8 kind; u8 b16; u8 b17; u32 size; u32 csize; };
+struct Holder { Hdr* buf; u8 owned; };
+extern "C" {
+u64 fn_8014FEB4();
+u8 getLanguage__10GameGlobalFv(GameGlobal*);
+u8 fn_8004EAC8(GameGlobal*);
+u32 fn_80204FC8(void*, u32, void*, void*, int);
+u32 NETCalcCRC32(void*, u32);
+int fn_80153610(Holder* self, Object_vptr_8* src, u64 id, Heaps::HeapType heap, u8 b, void* work) {
+Hdr* h;
+GameGlobal* g;
+if (self->owned) {
+if (self->buf) gfHeapManager::free(self->buf);
+self->owned = 0;
+}
+self->buf = 0;
+if (!src) return 0;
+void* data = src->slot1();
+u32 size = src->slot2();
+if (!data || !size) return 0;
+self->buf = (Hdr*)gfHeapManager::alloc(heap, size + 0x20, 0x20);
+if (!self->buf) return 0;
+void* w = work;
+if (!work) {
+w = gfHeapManager::alloc(heap, 0x2400, 0x20);
+if (!w) {
+gfHeapManager::free(self->buf);
+self->buf = 0;
+return 0;
+}
+}
+self->owned = 1;
+h = self->buf;
+u8* dst = (u8*)self->buf + 0x20;
+h->time = fn_8014FEB4();
+g = g_GameGlobal;
+u8 lang = getLanguage__10GameGlobalFv(g);
+u8 hi = fn_8004EAC8(g);
+h->flags = (hi << 5) | lang;
+h->kind = src->kind;
+h->b16 = b;
+h->id = id;
+h->size = size;
+h->b17 = 0xdb;
+u32 cs = fn_80204FC8(data, size, dst, w, 1);
+if (!cs) { cs = size; memcpy(dst, data, size); }
+h->csize = cs;
+h->crc = 0xDEADBEEF;
+h->crc = NETCalcCRC32(h, cs + 0x20);
+if (!work && w) gfHeapManager::free(w);
+return 1;
+}
+}
+}
+

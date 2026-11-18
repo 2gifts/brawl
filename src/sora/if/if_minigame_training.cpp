@@ -566,3 +566,80 @@ void IfMinigameTraining::curPosProcQuit(IfMinigameTraining* training) {
         training->m_quit = true;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_801049E8 {
+class MenuObject {
+    char padding[0x5C];
+
+public:
+    virtual void method(int);
+};
+
+extern "C" {
+extern char lbl_8045D040[];
+void fn_800B8A0C(void*, int);
+void __dl__FPv(void*);
+
+void* fn_801049E8(char* arg0, int arg1) {
+    if (arg0 != 0) {
+        int i = 0;
+        MenuObject** cur = (MenuObject**)arg0;
+        *(char**)(arg0 + 0x300) = lbl_8045D040;
+        do {
+            MenuObject* p = cur[1];
+            if (p != 0) {
+                if (p != 0) {
+                    p->method(1);
+                }
+                cur[1] = 0;
+            }
+            i++;
+            cur++;
+        } while (i < 2);
+
+        if (*(void**)(arg0 + 0xC) != 0) {
+            fn_800B8A0C(*(void**)(arg0 + 0xC), 1);
+            *(void**)(arg0 + 0xC) = 0;
+        }
+
+        if (arg1 > 0) {
+            __dl__FPv(arg0);
+        }
+    }
+    return arg0;
+}
+}
+}
+
+namespace jj_80104AA4 {
+
+extern "C" {
+void fn_80104B6C(void* self, void* table, u32 count, u32 arg, u32 prio);
+void fn_80104C60(void* self, void* data);
+}
+
+extern char lbl_80409218[];
+extern char lbl_8045D008[];
+
+extern "C" void fn_80104AA4(void* self, u32 arg1, void* arg2, u32 arg3, u8* arg4, u32 arg5) {
+    fn_80104B6C(self, lbl_80409218, 2, arg1, 0xC0);
+    fn_80104C60(self, arg2);
+
+    u32 count = 0;
+    {
+        utRelocate rel(arg4, arg5);
+        s32* src = (s32*)rel.getPublicAddress(lbl_8045D008);
+        u32* dst = (u32*)self;
+        while (*src >= 0) {
+            u32 v = *src++;
+            count++;
+            dst[59] = v;
+            dst++;
+        }
+    }
+    *(u32*)((u8*)self + 0x2EC) = count;
+    *(u32*)((u8*)self + 0x10) = arg3;
+}
+}
+

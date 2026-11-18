@@ -379,3 +379,167 @@ void IfWifiprPlayer::main() {
         }
     }
 }
+
+// TODO: clean up, give variables real names
+extern "C" void fn_800FD648(void* self, u32 value) {
+    *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x14) = value;
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800FD8E0 {
+struct Entry {
+    void (*f0)(void*);
+    int (*f4)(void*);
+};
+
+extern Entry lbl_804090F0[];
+
+struct Self {
+    char pad[8];
+    int state;
+};
+
+extern "C" void fn_800FD8E0(Self* self) {
+    int old = self->state;
+    if (lbl_804090F0[old].f4 != 0) {
+        self->state = lbl_804090F0[old].f4(self);
+    }
+    if (self->state != old) {
+        if (lbl_804090F0[self->state].f0 != 0) {
+            lbl_804090F0[self->state].f0(self);
+        }
+    }
+}
+}
+
+namespace jj_800FD698 {
+extern "C" char lbl_8045C768[];
+
+struct Child {
+    u8 pad[0x5C];
+    virtual ~Child();
+};
+
+struct Obj {
+    u8 pad0[0xC];
+    Child* m_c[1];
+    u8 pad10[0xC];
+    void* m_1c;
+};
+
+extern "C" Obj* fn_800FD698(Obj* p, s32 flags) {
+    if (p != nullptr) {
+        p->m_1c = lbl_8045C768;
+        for (u32 i = 0; i < 1; i++) {
+            if (p->m_c[i]) {
+                delete p->m_c[i];
+                p->m_c[i] = nullptr;
+            }
+        }
+        if (flags > 0) {
+            ::operator delete(p);
+        }
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800FDDD4 {
+
+extern "C" {
+int sprintf(char*, const char*, ...);
+int fn_800B61C0(MuObject* obj);
+void fn_800B5854(MuObject* obj, int a, int b, int c, int d);
+void Pushback__Q34nw4r3g3d6ScnMdlFPvPvPc(void*, void*, char*);
+}
+
+extern char lbl_8059E518[8];
+extern nw4r::g3d::ScnMdl* lbl_805A030C;
+extern float lbl_805A2728;
+extern float lbl_805A2740;
+
+class VCall {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void vf5();
+    virtual void vf6();
+    virtual void vf7();
+    virtual void vf8(float f);
+    virtual void vf9();
+    virtual void vf10(void* a, void* b);
+    virtual void vf11(void* a, void* b);
+    virtual void vf12();
+    virtual void vf13(void* a);
+    char pad4[0xE0];
+    void* unkE4;
+};
+
+struct SelfObj {
+    s32 unk0;
+    u8 unk4;
+    s32 unk8;
+    MuObject* unkC;
+    s32 unk10;
+    VCall* unk14;
+};
+
+extern "C" int fn_800FDDD4(SelfObj* self) {
+    switch (self->unk10) {
+    case 2: {
+        char sp10[8];
+        if (fn_800B61C0(self->unkC)) {
+            MuObject* obj = self->unkC;
+            void* r30 = obj->m_sceneModel;
+            if (self->unk0 == 0) {
+                ((VCall*)lbl_805A030C)->vf13(r30);
+            } else {
+                self->unk14->vf13(r30);
+            }
+            r30 = obj->m_sceneModel;
+            if (self->unk0 == 0) {
+                sprintf(sp10, lbl_8059E518, self->unk4 + 1);
+                Pushback__Q34nw4r3g3d6ScnMdlFPvPvPc(lbl_805A030C, r30, sp10);
+            } else {
+                self->unk14->vf11(self->unk14->unkE4, r30);
+            }
+            fn_800B5854(obj, 3, 3, 1, 0);
+            obj->setFrameTex(lbl_805A2740 + (float)(s32)self->unk4);
+            ((VCall*)obj->m_modelAnim->m_anmObjTexPatRes)->vf8(lbl_805A2728);
+            self->unk10 = 3;
+        }
+        break;
+    }
+    case 3: {
+        char sp8[8];
+        if (fn_800B61C0(self->unkC)) {
+            MuObject* obj = self->unkC;
+            void* r30 = obj->m_sceneModel;
+            if (self->unk0 == 0) {
+                ((VCall*)lbl_805A030C)->vf13(r30);
+            } else {
+                self->unk14->vf13(r30);
+            }
+            r30 = obj->m_sceneModel;
+            if (self->unk0 == 0) {
+                sprintf(sp8, lbl_8059E518, self->unk4 + 1);
+                Pushback__Q34nw4r3g3d6ScnMdlFPvPvPc(lbl_805A030C, r30, sp8);
+            } else {
+                self->unk14->vf11(self->unk14->unkE4, r30);
+            }
+            fn_800B5854(obj, 4, 3, 1, 0);
+            obj->setFrameTex(lbl_805A2740 + (float)(s32)self->unk4);
+            ((VCall*)obj->m_modelAnim->m_anmObjTexPatRes)->vf8(lbl_805A2728);
+            self->unk10 = 4;
+        }
+        break;
+    }
+    }
+    return self->unk8;
+}
+}
+

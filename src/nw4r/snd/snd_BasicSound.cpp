@@ -1,3 +1,4 @@
+#include <types.h>
 #include <nw4r/snd.h>
 
 #include <climits>
@@ -438,3 +439,15 @@ void BasicSound::SetId(u32 id) {
 } // namespace detail
 } // namespace snd
 } // namespace nw4r
+
+// TODO: clean up, give variables real names
+namespace jj_801BD2C8 {
+extern "C" int fn_801BD2C8(void* arg0) {
+    int b;
+    int a;
+    a = *(int*)((char*)arg0 + 0x4C);
+    b = *(int*)((char*)arg0 + 0x50);
+    return a <= b ? 0 : a - b;
+}
+}
+

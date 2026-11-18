@@ -1,3 +1,4 @@
+#include <sr/sr_common.h>
 #include <gf/gf_heap_manager.h>
 #include <gm/gm_global.h>
 #include <ms/ms_message.h>
@@ -195,3 +196,294 @@ void muNoticeWndTask::setNoButtonLabel(void* msgData, int msgId) {
         printText(3, text, length, 2);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800BFCE8 {
+extern "C" {
+void fn_800BFCE8(void *arg0) {
+    *(int*)((char*)arg0 + 0x114) = 0;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800BFF34 {
+
+struct Resource {
+    char pad[0x3c];
+    int nameOffset;
+
+    const char* name() const {
+        return nameOffset ? (const char*)this + nameOffset : 0;
+    }
+};
+
+struct Anim {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void setFrame(float);
+};
+
+struct AnimSet {
+    char pad[0x0c];
+    Anim* node;
+};
+
+struct MuObject {
+    char pad[8];
+    Resource* resource;
+    char pad0c[8];
+    AnimSet* animations;
+};
+
+extern "C" {
+extern char lbl_8059E0E8[6];
+extern const float lbl_805A22B0;
+extern const float lbl_805A22BC;
+void changeNodeAnimN__8MuObjectFPCc(void* obj, const char* name);
+void setFrameNode__8MuObjectFf(void* obj, float frame);
+
+void fn_800BFF34(void* arg) {
+    MuObject* obj = *(MuObject**)((char*)arg + 0x40);
+    char buf[0x40];
+    sprintf(buf, lbl_8059E0E8, obj->resource->name());
+    changeNodeAnimN__8MuObjectFPCc(obj, buf);
+    setFrameNode__8MuObjectFf(obj, lbl_805A22B0);
+    obj->animations->node->setFrame(lbl_805A22BC);
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800BEEB8 {
+
+extern "C" {
+extern char lbl_805A22A8[8];
+extern char lbl_8059E0D8;
+
+void* fn_800BF204(void* self);
+void fn_800B96E8(void* p, int v);
+void fn_800BF380(void* self, void* entries, int count, void* resFile, int prio, int heap);
+void fn_800BF4BC(void* self, Heaps::HeapType a, int b, unsigned char c, unsigned char d);
+void* fn_800B9640(void);
+void* fn_800B9678(void);
+unsigned long strlen(const char* s);
+void fn_800BF850(void* self, int id, const char* str, int len, int flag);
+
+void* fn_800BEEB8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, Heaps::HeapType arg7,
+                  int argSp8, unsigned char argSpC, unsigned char argSp10, unsigned char argSp14)
+{
+    char* s1;
+    char* s2;
+    unsigned long len1;
+    unsigned long len2;
+    char* self = (char*)operator new(0x12C, arg7);
+    if (self != 0) {
+        self = (char*)fn_800BF204(self);
+    }
+    *(int*)(self + 0xFC) = arg0;
+    *(int*)(self + 0x4C) = arg1;
+    *(int*)(self + 0x50) = arg2;
+    *(int*)(self + 0x110) = arg6;
+    *(int*)(self + 0x44) = arg4;
+    fn_800B96E8(self + 0x54, argSp14);
+    fn_800BF380(self, lbl_805A22A8, 1, (void*)arg3, arg5, argSp8);
+    fn_800BF4BC(self, arg7, argSp8, argSpC, argSp10);
+
+    s1 = (char*)fn_800B9640();
+    s2 = (char*)fn_800B9678();
+    len1 = strlen(s1);
+    len2 = strlen(s2);
+
+    switch (*(int*)(self + 0xFC)) {
+    case 1:
+        fn_800BF850(self, 2, s1, (int)len1, 2);
+        fn_800BF850(self, 3, s2, (int)len2, 2);
+        break;
+    case 2:
+        fn_800BF850(self, 4, s1, (int)len1, 2);
+        break;
+    default:
+        ((MuMsg*)*(void**)(self + 0x48))->printf(2, &lbl_8059E0D8);
+        ((MuMsg*)*(void**)(self + 0x48))->printf(3, &lbl_8059E0D8);
+        break;
+    }
+    return self;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800BF048 {
+
+extern "C" {
+extern char lbl_805A22A8[8];
+extern char lbl_8059E0D8;
+
+void* fn_800BF204(void* self);
+void fn_800B96E8(void* p, int v);
+void fn_800BF380(void* self, void* entries, int count, void* resFile, int prio, int heap);
+void fn_800BF4BC(void* self, Heaps::HeapType a, int b, unsigned char c, unsigned char d);
+void* fn_800B9640(void);
+void* fn_800B9678(void);
+unsigned long strlen(const char* s);
+void fn_800BF850(void* self, int id, const char* str, int len, int flag);
+void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int heap, unsigned long size);
+void* memcpy(void* d, const void* s, unsigned long n);
+
+void* fn_800BF048(int arg0, void* arg1, unsigned long arg2, int arg3, int arg4, int arg5, int arg6,
+                  Heaps::HeapType arg7, int argSp8, unsigned char argSpC, unsigned char argSp10,
+                  unsigned char argSp14)
+{
+    char* s1;
+    char* s2;
+    unsigned long len1;
+    unsigned long len2;
+    char* self = (char*)operator new(0x12C, arg7);
+    if (self != 0) {
+        self = (char*)fn_800BF204(self);
+    }
+    *(int*)(self + 0xFC) = arg0;
+    *(int*)(self + 0x4C) = 0;
+    *(int*)(self + 0x50) = 0;
+    if (arg1 != 0) {
+        void* p = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(argSp8, arg2);
+        *(void**)(self + 0x118) = p;
+        memcpy(p, arg1, arg2);
+        *(unsigned long*)(self + 0x11C) = arg2;
+    }
+    *(int*)(self + 0x110) = arg6;
+    *(int*)(self + 0x44) = arg4;
+    fn_800B96E8(self + 0x54, argSp14);
+    fn_800BF380(self, lbl_805A22A8, 1, (void*)arg3, arg5, argSp8);
+    fn_800BF4BC(self, arg7, argSp8, argSpC, argSp10);
+
+    s1 = (char*)fn_800B9640();
+    s2 = (char*)fn_800B9678();
+    len1 = strlen(s1);
+    len2 = strlen(s2);
+
+    switch (*(int*)(self + 0xFC)) {
+    case 1:
+        fn_800BF850(self, 2, s1, (int)len1, 2);
+        fn_800BF850(self, 3, s2, (int)len2, 2);
+        break;
+    case 2:
+        fn_800BF850(self, 4, s1, (int)len1, 2);
+        break;
+    default:
+        ((MuMsg*)*(void**)(self + 0x48))->printf(2, &lbl_8059E0D8);
+        ((MuMsg*)*(void**)(self + 0x48))->printf(3, &lbl_8059E0D8);
+        break;
+    }
+    return self;
+}
+}
+}
+
+namespace jj_800BFCF4 {
+extern "C" {
+void fn_800B9F90(void* out, void* a, int flag);
+int fn_800BA1FC(int arg0);
+void setFrameMatCol__8MuObjectFf(void* obj, float frame);
+void playSE__9sndSystemF5SndIDiiii(void* th, int sndID, int a1, int a2, int a3, int a4);
+extern void* g_sndSystem;
+extern const float lbl_805A22B0;
+extern const float lbl_805A22BC;
+}
+
+struct PadStat {
+    int w[16];
+};
+
+struct Self {
+    char pad[0x40];
+    void* f40;
+    char pad44[0x10];
+    int f54;
+    char pad58[8];
+    unsigned int f60;
+    char pad64[0x98];
+    int ffc;
+    unsigned char byte100;
+    char pad101[3];
+    int f104;
+    char pad108[8];
+    int f110;
+    int f114;
+    char pad118[0xc];
+    int f124;
+};
+
+extern "C" int fn_800BFCF4(Self* self) {
+    unsigned int flags60;
+    PadStat status;
+    PadStat result;
+    fn_800B9F90(&result, &self->f54, 0);
+    status = result;
+    int cnt = self->f110;
+    if (cnt < 0)
+        return self->f104;
+    int newv = self->f114 + 1;
+    self->f114 = newv;
+    if (newv < cnt)
+        return self->f104;
+    if (self->ffc == 1) {
+        flags60 = self->f60;
+        if ((flags60 & 1) && self->byte100 == 0) {
+            float f = lbl_805A22B0;
+            setFrameMatCol__8MuObjectFf(self->f40, f);
+            self->byte100 = 1;
+            playSE__9sndSystemF5SndIDiiii(g_sndSystem, 0, -1, 0, 0, -1);
+        }
+        if ((flags60 & 2) && self->byte100 != 0) {
+            float f = lbl_805A22BC;
+            setFrameMatCol__8MuObjectFf(self->f40, f);
+            self->byte100 = 0;
+            playSE__9sndSystemF5SndIDiiii(g_sndSystem, 0, -1, 0, 0, -1);
+        }
+    }
+    unsigned int flags;
+    int ffc = self->ffc;
+    if (ffc == 3)
+        return self->f104;
+    flags = status.w[3];
+    if ((flags & 0x1100) || (flags & 0x200)) {
+        int sndid;
+        unsigned char pad25;
+        if (ffc == 1) {
+            if (flags & 0x200) {
+                pad25 = 0;
+                sndid = 2;
+            } else {
+                pad25 = self->byte100;
+                if (pad25 != 0) {
+                    sndid = 0x13;
+                } else {
+                    sndid = 1;
+                }
+            }
+        } else {
+            pad25 = 0;
+            sndid = ((flags >> 9) & 1) + 1;
+        }
+        playSE__9sndSystemF5SndIDiiii(g_sndSystem, sndid, 0x10000, 0, 0, -1);
+        self->byte100 = pad25;
+        if (pad25 != 0) {
+            int r = fn_800BA1FC(0x1300);
+            self->f124 = r;
+            if (r < 0)
+                self->f124 = 0;
+        }
+        return 2;
+    }
+    return self->f104;
+}
+}
+

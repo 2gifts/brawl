@@ -244,3 +244,9 @@ int _UCS2CharToUTF8String(UCS2Char theUCS2Char, UTF8String theUTF8String) {
     theUTF8String[2] = (char)(UTF8_FOLLOW_BYTE_TAG | (theUCS2Char & UTF8_FOLLOW_BYTE_MASK));
     return 3;
 }
+
+// TODO: clean up, give variables real names
+void fn_80362F4C(void* elem) {
+}
+
+void fn_80362F50(void* attr) {}
