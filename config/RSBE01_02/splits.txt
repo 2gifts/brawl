@@ -245,8 +245,17 @@ sora/gf/gf_task_scheduler.cpp:
 	.text       start:0x8002E09C end:0x8002F188
 	.sbss       start:0x805A0068 end:0x805A006C
 
+sora/gf/gf_unk_8002F188.cpp:
+	.text       start:0x8002F188 end:0x8002F5B8
+	.sdata2     start:0x805A1570 end:0x805A15A0
+
 sora/gf/gf_thread.cpp:
 	.text       start:0x8002F5B8 end:0x8002F6F4
+
+sora/gf/gf_copy_efb_mgr.cpp:
+	.text       start:0x8002F6F4 end:0x80030340
+	.sbss       start:0x805A0070 end:0x805A0078
+	.sdata2     start:0x805A15A0 end:0x805A15E0
 
 sora/gf/gf_shutdown_manager.cpp:
 	.text       start:0x80030340 end:0x80030548
@@ -585,6 +594,10 @@ sora/snd/snd_load_thread.cpp:
 	.data       start:0x80454580 end:0x804545B0
 	.sdata      start:0x8059DB88 end:0x8059DB90
 
+sora/snd/snd_heap_sys.cpp:
+	.text       start:0x80079EB8 end:0x8007AD48
+	.data       start:0x804545B0 end:0x80454618
+
 sora/snd/snd_doubutsugo_task.cpp:
 	.text       start:0x8007AD48 end:0x8007B0B4
 	.data       start:0x80454618 end:0x804546B0
@@ -680,6 +693,10 @@ sora/cm/cm_quake.cpp:
 	.data       start:0x80454C78 end:0x80454CC0
 	.sbss       start:0x805A0280 end:0x805A0288
 	.sdata2     start:0x805A1DC8 end:0x805A1DE8
+
+sora/cm/cm_unk_8009E3D0.cpp:
+	.text       start:0x8009E3D0 end:0x8009EC5C
+	.sdata2     start:0x805A1DE8 end:0x805A1E30
 
 sora/cm/cm_subject.cpp:
 	.text       start:0x8009EC5C end:0x8009F560
@@ -794,7 +811,9 @@ sora/mu/mu_menuroot.cpp:
 	.sdata      start:0x8059DF18 end:0x8059DF20
 
 sora/mu/mu_object.cpp:
-	.text       start:0x800B2394 end:0x800B7AA4
+	.text       start:0x800B08A8 end:0x800B8930
+	.data       start:0x80455D18 end:0x80455E10
+	.sdata      start:0x8059DF20 end:0x8059DF48
 	.sdata2     start:0x805A2200 end:0x805A2210
 
 sora/mu/mu_msg.cpp:
@@ -1057,6 +1076,11 @@ sora/if/if_stgedit_mngr.cpp:
 	.data       start:0x8045D840 end:0x8045D8A0
 	.sbss       start:0x805A0350 end:0x805A0360
 
+sora/if/if_unk_8010F960.cpp:
+	.text       start:0x8010F960 end:0x80110720
+	.data       start:0x8045D8A0 end:0x8045D948
+	.sdata2     start:0x805A28E8 end:0x805A2908
+
 sora/gr/collision/gr_collision_data.cpp:
 	.text       start:0x80110720 end:0x80110748
 
@@ -1102,6 +1126,13 @@ sora/gr/collision/gr_collision_shape_circle.cpp:
 	.text       start:0x801330B8 end:0x8013344C
 	.data       start:0x8045DAF0 end:0x8045DB54
 	.sdata2     start:0x805A2A30 end:0x805A2A3C
+
+sora/gr/collision/gr_collision_status.cpp:
+	.text       start:0x8013344C end:0x8013804C
+	.ctors      start:0x80406550 end:0x80406554
+	.data       start:0x8045DB58 end:0x8045DBB8
+	.bss        start:0x8049E588 end:0x8049E5A0
+	.sdata2     start:0x805A2A40 end:0x805A2A80
 
 sora/gr/collision/gr_collision_raycheck.cpp:
 	.text       start:0x8013804C end:0x801385AC
@@ -1155,6 +1186,13 @@ sora/nt/nt_send.cpp:
 	.text       start:0x8013D490 end:0x8013D8A8
 	.data       start:0x8045E000 end:0x8045E018
 	.sbss       start:0x805A0388 end:0x805A038C
+
+sora/nt/nt_shared.cpp:
+	.text       start:0x8013D8A8 end:0x80143ACC
+	.data       start:0x8045E018 end:0x8045E7E8
+	.sdata      start:0x8059E720 end:0x8059E740
+	.sbss       start:0x805A0390 end:0x805A03B0
+	.sdata2     start:0x805A2AC8 end:0x805A2B50
 
 sora/nt/nt_tr.cpp:
 	.text       start:0x80143ACC end:0x80146278
@@ -2017,7 +2055,7 @@ RVL_SDK/os/OSAlloc.c:
 	.sbss       start:0x805A0680 end:0x805A0690
 
 RVL_SDK/os/OSArena.c:
-	.text       start:0x801D712C end:0x801D71C0
+	.text       start:0x801D712C end:0x801D71F4
 	.sdata      start:0x8059E9B8 end:0x8059E9C0
 	.sbss       start:0x805A0690 end:0x805A0698
 
@@ -2065,6 +2103,9 @@ RVL_SDK/os/OSInterrupt.c:
 	.data       start:0x80468950 end:0x80468980
 	.sbss       start:0x805A06C0 end:0x805A06D4
 
+RVL_SDK/os/OSLink_part1.c:
+	.text       start:0x801DD694 end:0x801DE07C
+
 RVL_SDK/os/OSLink.c:
 	.text       start:0x801DE07C end:0x801DE094
 
@@ -2077,6 +2118,9 @@ RVL_SDK/os/OSMemory.c:
 
 RVL_SDK/os/OSMutex.c:
 	.text       start:0x801DEB7C end:0x801DEE80
+
+RVL_SDK/os/OSMutex_part2.c:
+	.text       start:0x801DEE80 end:0x801DEF64
 
 RVL_SDK/os/OSReboot.c:
 	.text       start:0x801DEF64 end:0x801DEFE4
@@ -2140,7 +2184,7 @@ RVL_SDK/os/OSNet.c:
 	.data       start:0x80474C40 end:0x80474CE8
 
 RVL_SDK/os/OSNandbootInfo.c:
-	.text       start:0x801E3494 end:0x801E369C
+	.text       start:0x801E3494 end:0x801E38A8
 	.data       start:0x80474DA8 end:0x80474DC4
 
 RVL_SDK/os/OSPlayTime.c:
@@ -2165,6 +2209,9 @@ RVL_SDK/exi/EXIBios.c:
 RVL_SDK/exi/EXIUart.c:
 	.text       start:0x801E5A88 end:0x801E5DBC
 	.sbss       start:0x805A0770 end:0x805A0780
+
+RVL_SDK/exi/EXIUart_part2.c:
+	.text       start:0x801E5DBC end:0x801E5F48
 
 RVL_SDK/si/SIBios.c:
 	.text       start:0x801E5F48 end:0x801E74C8
@@ -2321,6 +2368,9 @@ RVL_SDK/dvd/dvderror.c:
 RVL_SDK/dvd/dvdidutils.c:
 	.text       start:0x801FC228 end:0x801FC318
 
+RVL_SDK/dvd/dvdidutils_part2.c:
+	.text       start:0x801FC318 end:0x801FC3A0
+
 RVL_SDK/dvd/dvdFatal.c:
 	.text       start:0x801FC3A0 end:0x801FC4DC
 	.rodata     start:0x8040D420 end:0x8040D440
@@ -2379,8 +2429,14 @@ RVL_SDK/ax/AXOut.c:
 	.bss        start:0x804E7BE0 end:0x804E89E0
 	.sbss       start:0x805A0A98 end:0x805A0AD8
 
+RVL_SDK/ax/AXSPB.c:
+	.text       start:0x80201264 end:0x80201EF8
+
 RVL_SDK/ax/AXVPB.c:
 	.text       start:0x80201EF8 end:0x80201F38
+
+RVL_SDK/ax/AXVPB_part2.c:
+	.text       start:0x80201F38 end:0x802025D4
 
 RVL_SDK/ax/AXProf.c:
 	.text       start:0x802025D4 end:0x80202614
@@ -2576,6 +2632,9 @@ RVL_SDK/wpad/WPADEncrypt.c:
 	.data       start:0x8047CEC0 end:0x8047E1E8
 	.sbss       start:0x805A0C98 end:0x805A0C9C
 
+RVL_SDK/wpad/WPADMem.c:
+	.text       start:0x802249C4 end:0x8022550C
+
 RVL_SDK/wpad/debug_msg.c:
 	.text       start:0x8022550C end:0x8022555C
 
@@ -2655,6 +2714,9 @@ RVL_SDK/bte/btu_task1.c:
 	.bss        start:0x805297D0 end:0x80529854
 	.sdata      start:0x8059EDE8 end:0x8059EDF0
 	.sbss       start:0x805A0D28 end:0x805A0D30
+
+RVL_SDK/bte/bd.c:
+	.text       start:0x80232034 end:0x80232108
 
 RVL_SDK/bte/bta_sys_main.c:
 	.text       start:0x80232108 end:0x802325A0
@@ -4331,6 +4393,10 @@ DWC/dwctransport.c:
 	.sdata      start:0x8059F1B0 end:0x8059F1B8
 	.sbss       start:0x805A0FB0 end:0x805A0FB8
 
+DWC/dwci_np_util.c:
+	.text       start:0x8034F020 end:0x8034F7A8
+	.bss        start:0x80534008 end:0x80534030
+
 DWC/dwci_np_math.c:
 	.text       start:0x8034F7A8 end:0x80350BBC
 
@@ -4794,10 +4860,52 @@ FAT/sd_host.c:
 	.sbss       start:0x805A1230 end:0x805A1250
 
 RVL_SDK/rfl/rfl_manager_unk.c:
-	extab       start:0x8000926C end:0x80009274
-	extabindex  start:0x8000C13C end:0x8000C148
-	.text       start:0x803CD270 end:0x803CD484
+	extab       start:0x8000924C end:0x80009274
+	extabindex  start:0x8000C10C end:0x8000C148
+	.text       start:0x803CCAC0 end:0x803CD484
 	.data       start:0x80492F50 end:0x80492F60
+	.sdata      start:0x8059FEA0 end:0x8059FEA8
+	.sbss       start:0x805A1250 end:0x805A1260
+
+RVL_SDK/rfl/rfl_loader.c:
+	extab       start:0x80009274 end:0x80009314
+	extabindex  start:0x8000C148 end:0x8000C238
+	.text       start:0x803CD484 end:0x803CE640
+	.rodata     start:0x8041AC88 end:0x8041AD18
+	.sdata      start:0x8059FEA8 end:0x8059FEB0
+
+RVL_SDK/rfl/rfl_unk_803CE640.c:
+	extab       start:0x80009314 end:0x8000936C
+	extabindex  start:0x8000C238 end:0x8000C2BC
+	.text       start:0x803CE640 end:0x803D0108
+	.sdata      start:0x8059FEB0 end:0x8059FEB8
+	.sdata2     start:0x805A49E8 end:0x805A49F0
+
+RVL_SDK/rfl/rfl_model.c:
+	extab       start:0x8000936C end:0x800093B4
+	extabindex  start:0x8000C2BC end:0x8000C328
+	.text       start:0x803D0108 end:0x803D18A8
+	.rodata     start:0x8041AD18 end:0x8041AE00
+	.sdata2     start:0x805A49F0 end:0x805A4A28
+
+RVL_SDK/rfl/rfl_maketex.c:
+	extab       start:0x800093B4 end:0x80009404
+	extabindex  start:0x8000C328 end:0x8000C3A0
+	.text       start:0x803D18A8 end:0x803D4848
+	.rodata     start:0x8041AE00 end:0x8041AEC0
+	.data       start:0x80492FC8 end:0x80492FD8
+	.sdata2     start:0x805A4A28 end:0x805A4AF0
+
+RVL_SDK/rfl/rfl_database.c:
+	extab       start:0x80009404 end:0x80009494
+	extabindex  start:0x8000C3A0 end:0x8000C478
+	.text       start:0x803D4848 end:0x803D5870
+
+RVL_SDK/rfl/rfl_middle_db.c:
+	extab       start:0x80009494 end:0x800094CC
+	extabindex  start:0x8000C478 end:0x8000C4CC
+	.text       start:0x803D5870 end:0x803D620C
+	.rodata     start:0x8041AEC0 end:0x8041B080
 
 FAT/pf_clib.c:
 	.text       start:0x803D620C end:0x803D66EC
@@ -4885,6 +4993,9 @@ sora/snd/snd_sound_handle.cpp:
 	.data       start:0x804937B8 end:0x80493D38
 	.sbss       start:0x805A12C8 end:0x805A12D0
 	.sdata2     start:0x805A4B00 end:0x805A4B68
+
+Runtime.PPCEABI.H/__start.c:
+	.init       start:0x80004000 end:0x80004338
 
 Runtime.PPCEABI.H/__mem.c:
 	.init       start:0x80004338 end:0x8000446C

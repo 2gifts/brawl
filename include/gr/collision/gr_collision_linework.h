@@ -40,6 +40,19 @@ public:
         m_unkD = false;
     }
 
+    // All three of the line, joint and collision are set (inlined as nested ifs).
+    bool isValid() const {
+        bool hasLineJoint = false;
+        bool valid = false;
+        if (m_collisionLine != NULL && m_collisionJoint != NULL) {
+            hasLineJoint = true;
+        }
+        if (hasLineJoint && m_collision != NULL) {
+            valid = true;
+        }
+        return valid;
+    }
+
     // HYPOTHESIS signatures for the members below: the map has no parameter types.
     void getPos0(Vec2f* out) const;
     void getPos1(Vec2f* out) const;

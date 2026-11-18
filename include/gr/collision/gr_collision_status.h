@@ -71,12 +71,15 @@ public:
     // 16
     int m_taskId;
     // 20
-    char _spacer2a[8];
+    Vec2f m_prevDownPos; // the down corner of the previous shape (measured when the shape is replaced)
     Vec2f m_unk1C; // role: reference point the cliff candidates are measured from (grCollisionTest::updateCliffInfo, testCliffCheck) (cluster C)
     char _spacer2c[16];
     // 52
     Vec2f m_cliffPos;
-    char _spacer2b[24];
+    Vec2f m_cliffRangeA; // setCliffRange: the first point
+    Vec2f m_cliffRangeB; // setCliffRange: the second point
+    float m_cliffRangeLen;
+    float m_cliffRangeEndY;
     // 84
     int m_cliffDir : 8;
     // 85
@@ -111,10 +114,10 @@ public:
     // 113
     bool m_enabled : 1;
     bool : 1;
-    bool : 1;
+    bool m_isRegistered : 1; // linked into the global status list
     bool m_isPassableGround : 1;
     bool m_cliffCheckOn : 1;
-    bool : 1;
+    bool m_isCliffHang : 1; // a ledge grab was entered with the manager
     bool : 1;
     bool m_isCalcLineMove : 1;
     // 114
@@ -158,7 +161,8 @@ public:
     char _spacer6[6];
     // 124
     u32 m_unk124 : 8; // HYPOTHESIS: update pass, 0 before and 1 during map correction (grCollisionManager)
-    u32 : 24;
+    u32 m_unk125 : 8;
+    u32 : 16;
     // 128
     grCollision* m_collision;
     // 132
@@ -213,6 +217,11 @@ public:
     void drawDebug();
     void drawDebugCliff();
     void setIgnoreLine(u32* lineId);
+    void clearTouchLine(TouchId touchId);
+    void clearLineWorks();
+    void setShapeKeepPrev(clRhombus2D* rhombus);
+    void setStGroundSimple();
+    grCollisionLineWork* getTouchLineWork(TouchId touchId);
 };
 static_assert(sizeof(grCollStatus) == 636, "Class is wrong size!");
 

@@ -99,7 +99,16 @@ class sndHeapSys
 public:
     sndHeapSys();       // 0x80079EB8
     ~sndHeapSys();      // 0x8007A1EC (called as __dt(heap, 1) by the sndSystem destructor)
-    char _0[0x258];
+    // One loaded sound group (20 bytes); the heap table starts after them.
+    struct sndHeapGroup {
+        s32 m_level;
+        u32 m_groupId;
+        u32 _8;
+        u32 _C;
+        u8 m_isLoaded;
+        char _11[3];
+    };
+    sndHeapGroup m_groups[30];
     nw4r::snd::SoundHeap m_heapArr[0xC];
     char _468[0xC];
     nw4r::snd::SoundHeap* m_heapAddresses[0xC];
@@ -120,6 +129,7 @@ public:
     void reserveFreeGroup();
     void freeGroup(int heapLevel);
     s32 isLoaded(SndGroupID groupId);
+    int findFreeLevel();
 };
 static_assert(sizeof(sndHeapSys) == 0x504, "Class is wrong size!");
 

@@ -120,6 +120,8 @@ public:
 
     static MuObject* createAlt(nw4r::g3d::ResFile* modelSource, const char* modelNode, int drawPriority, nw4r::g3d::ResFile* textureSource, Heaps::HeapType type);
 
+    void calcMatrix();
+
     void changeNodeAnimN(const char* animName);
     bool changeNodeAnimNIf(const char* animName);
     void changeVisAnimN(const char* animName);
@@ -1572,4 +1574,10 @@ void MuObject::setAnimName(MuAnimNameData* data, bool force) {
             }
         }
     }
+}
+
+void MuObject::calcMatrix() {
+    nw4r::g3d::ScnMdl* scnMdl = m_sceneModel;
+    scnMdl->SetScnObjOption(2, 0);
+    scnMdl->SetScnObjOption(5, 0);
 }
