@@ -1554,9 +1554,10 @@ void BaseItem::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* mod
     m_customizer->onNotifyEventLink(this, eventInfo, moduleAccesser, other, linkNo);
     switch (eventInfo->m_eventKind) {
     case 2: {
+        u32 taskId;
         soWorkManageModuleImpl* work = &v->workManage;
         if (linkNo == 4) {
-            u32 taskId = other->m_taskId;
+            taskId = other->m_taskId;
             if (taskId == work->getInt(Instance::Work::Int_Target_Task_Id)) {
                 work->setInt(-1, Instance::Work::Int_Target_Task_Id);
             }
