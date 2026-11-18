@@ -656,19 +656,22 @@ bool soModelModuleImpl::isVirtualNodeId(u32 nodeId) const {
 }
 
 void soModelModuleImpl::setUpMtx(u32 nodeId) {
+    u32 parentNodeId;
+    nw4r::g3d::ScnMdl* scnMdl;
+    nw4r::g3d::ScnMdl* mdl;
+    int i;
+    u32 parentId;
     if (isVirtualNodeId(nodeId) == true) {
-        u32 parentId;
-        int i;
         for (i = 0; i < m_virtualNodes->size(); i++) {
             if (m_virtualNodes->at(i).getNodeParent(nodeId, parentId) == true) {
                 break;
             }
         }
-        u32 parentNodeId = getRealNodeId(parentId);
+        parentNodeId = getRealNodeId(parentId);
         if (!m_isLockMtx && m_setUpState != SetUpState_Final) {
             setUpConstraintNodeMtx();
             if (m_nodeSetUpFlags[parentNodeId] != 1) {
-                nw4r::g3d::ScnMdl* scnMdl = m_scnMdl;
+                scnMdl = m_scnMdl;
                 m_nodeSetUpCursor = NULL;
                 reinterpret_cast<ScnMdlMod*>(scnMdl)->EnableNodeFlag(m_nodeSetUpFlags, parentNodeId);
                 fn_800471A4(scnMdl, 0, 0, m_nodeSetUpFlags, m_nodeScales, 0, 0, 0);
@@ -680,10 +683,10 @@ void soModelModuleImpl::setUpMtx(u32 nodeId) {
     } else if (!m_isLockMtx && m_setUpState != SetUpState_Final) {
         setUpConstraintNodeMtx();
         if (m_nodeSetUpFlags[nodeId] != 1) {
-            nw4r::g3d::ScnMdl* scnMdl = m_scnMdl;
+            mdl = m_scnMdl;
             m_nodeSetUpCursor = NULL;
-            reinterpret_cast<ScnMdlMod*>(scnMdl)->EnableNodeFlag(m_nodeSetUpFlags, nodeId);
-            fn_800471A4(scnMdl, 0, 0, m_nodeSetUpFlags, m_nodeScales, 0, 0, 0);
+            reinterpret_cast<ScnMdlMod*>(mdl)->EnableNodeFlag(m_nodeSetUpFlags, nodeId);
+            fn_800471A4(mdl, 0, 0, m_nodeSetUpFlags, m_nodeScales, 0, 0, 0);
             m_setUpState = SetUpState_Begin;
         }
     }

@@ -383,7 +383,7 @@ void __GXCleanGPFifo(void) {
         CPUFifo.rdPtr = GPFifo.rdPtr;
         CPUFifo.wrPtr = GPFifo.wrPtr;
         CPUFifo.count = GPFifo.count;
-        reg = __rlwimi(reg, (u32)GPFifo.wrPtr, 0, 3, 26);
+        reg = __rlwimi(reg, (u32)CPUFifo.wrPtr, 0, 3, 26);
         GX_PI_REG_WRITE_U32(0x14, reg);
         SC_CP_REG_ENABLE_SET_OVFLINT(gx->cpEnable, 1);
         SC_CP_REG_ENABLE_SET_UNFLINT(gx->cpEnable, 0);
