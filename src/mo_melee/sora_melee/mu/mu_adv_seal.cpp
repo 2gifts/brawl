@@ -107,10 +107,9 @@ void muAdvSealWinList::list_sort(int kind, int order) {
 
 bool muAdvSealWinList::add_seal_num(u32 id, int num) {
     if (num != 0) {
-        Item* item = m_items;
         int i;
-        for (i = 0; i < m_numItems; i++, item++) {
-            if (id == *item->m_data) {
+        for (i = 0; i < m_numItems; i++) {
+            if (id == *m_items[i].m_data) {
                 break;
             }
         }

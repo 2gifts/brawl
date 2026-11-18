@@ -192,16 +192,12 @@ void muReplayTask::initMsg() {
     fn_6_1ECC(this);
     m_work->m_msg->attachScnMdlSimple(0x11, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_work->m_objs[25]->m_sceneModel), 0, 0.0625f);
     m_work->m_msg->setFontColor(0x11, 0, 0, 0, 0xFF);
-    int i = 0;
-    int offset = 0;
-    do {
+    for (int i = 0; i < 4; i++) {
         u32 msgIndex = i + 0x12;
-        m_work->m_msg->attachScnMdlSimple(msgIndex, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_work->m_objs[26 + offset / 4]->m_sceneModel), 0, 0.0625f);
+        m_work->m_msg->attachScnMdlSimple(msgIndex, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_work->m_objs[i + 26]->m_sceneModel), 0, 0.0625f);
         m_work->m_msg->setFontColor(msgIndex, 0, 0, 0, 0xFF);
         m_work->m_msg->setAlignMode(msgIndex, MuMsg::Align_Center);
-        i++;
-        offset += 4;
-    } while (i < 4);
+    }
 }
 
 void muReplayTask::getMineLabel(muCollectionMsgBuf* buf) {
