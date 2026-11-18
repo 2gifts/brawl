@@ -168,11 +168,7 @@ void grGWLionKeeper::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             if (m_posWork != NULL) {
-                grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-                Vec3f* pos = &m_posWork[m_posIndex];
-                data->m_pos.m_x = pos->m_x;
-                data->m_pos.m_y = pos->m_y;
-                data->m_pos.m_z = pos->m_z;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_pos = m_posWork[m_posIndex];
             }
             Vec3f scale = m_scale * 0.9f;
             grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
