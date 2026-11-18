@@ -699,10 +699,11 @@ float grVillageGuest::getMotionFrameEye(u32 index) {
 void grVillageGuest::setEye(u32 eye) {
     if (m_eye != eye) {
         nw4r::g3d::ResTex tex;
+        nw4r::g3d::ResMdl model;
         nw4r::g3d::ResMat mat;
         nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
         if (scnMdl != NULL) {
-            nw4r::g3d::ResMdl model = scnMdl->m_resMdl;
+            model = scnMdl->m_resMdl;
             if (model.IsValid()) {
                 mat = model.GetResMat("e");
                 if (mat.IsValid()) {
@@ -748,10 +749,11 @@ void grVillageGuest::setEye(u32 eye) {
 void grVillageGuest::setMouth(u32 mouth) {
     if (m_mouth != mouth) {
         nw4r::g3d::ResTex tex;
+        nw4r::g3d::ResMdl model;
         nw4r::g3d::ResMat mat;
         nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
         if (scnMdl != NULL) {
-            nw4r::g3d::ResMdl model = scnMdl->m_resMdl;
+            model = scnMdl->m_resMdl;
             if (model.IsValid()) {
                 mat = model.GetResMat("m");
                 if (mat.IsValid()) {
@@ -994,18 +996,21 @@ grVillageGuestAyasiNeko::~grVillageGuestAyasiNeko() {
 void grVillageGuestAyasiNeko::updateFaceDetails(float deltaFrame) {
     if (m_eyeSet == 0) {
         nw4r::g3d::ResTex tex;
+        nw4r::g3d::ResMdl model;
         nw4r::g3d::ResMat mat;
         nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[0];
         if (scnMdl != NULL) {
-            nw4r::g3d::ResMdl model = scnMdl->m_resMdl;
+            model = scnMdl->m_resMdl;
             if (model.IsValid()) {
                 mat = model.GetResMat("f");
                 if (mat.IsValid()) {
-                    u32 face = (u32)(randf() * 8.0f);
-                    face = face ? face : 0;
-                    u32 pick = 7;
+                    int face = randf() * 8.0f;
+                    face = (u8)face ? face : 0;
+                    int pick;
                     if ((u8)face < 7) {
                         pick = face;
+                    } else {
+                        pick = 7;
                     }
                     switch ((u8)pick) {
                     case 0:
