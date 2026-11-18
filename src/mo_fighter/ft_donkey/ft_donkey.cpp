@@ -138,11 +138,12 @@ bool ftDonkey::activeArticle(wnDonkeyBarrelConga* weapon, soModuleAccesser* acc)
 
 // The drum sound article starts at the node 5 of the fighter, shaped by the four float works 0x21000005..8.
 bool ftDonkey::activeArticle1(wnDonkeySoundEffect* weapon, soModuleAccesser* acc) {
+    int founderTaskId;
     Fighter& fighter = dynamic_cast<Fighter&>(acc->getStageObject());
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(5, false);
     pos.m_z = 0.0f;
-    int founderTaskId = fighter.m_taskId;
     soWorkManageModule& work = acc->getWorkManageModule();
+    founderTaskId = fighter.m_taskId;
     weapon->activate(founderTaskId, fighter.getOwner()->getTeam(), &pos, work.getFloat(0x21000005), work.getFloat(0x21000006), work.getFloat(0x21000007), work.getFloat(0x21000008), work.isFlag(0x22000011));
     return false;
 }
