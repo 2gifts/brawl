@@ -142,9 +142,11 @@ void ftLogTransactor::processFixPosition(soModuleAccesser* moduleAccesser, ftOwn
             owner->addLogFloat(moveSpeed.length(), 0xc, 0);
         } else if (moduleAccesser->getSituationModule().getKind() == Situation_Air) {
             if (moveSpeed.m_y < 0.0f) {
-                owner->addLogFloat(__fabs(moveSpeed.m_y), 0xe, 0);
+                double wide = __fabs(moveSpeed.m_y);
+                owner->addLogFloat(wide, 0xe, 0);
             } else if (moveSpeed.m_y > 0.0f) {
-                owner->addLogFloat(__fabs(moveSpeed.m_y), 0xd, 0);
+                double wide = __fabs(moveSpeed.m_y);
+                owner->addLogFloat(wide, 0xd, 0);
             }
         }
     }

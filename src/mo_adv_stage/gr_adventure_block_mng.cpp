@@ -135,6 +135,7 @@ void grAdventureBlockMng::startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerT
     ykInitInfo info = { 0, 0, 0x10, 0, 0 };
     info.m_ground = this;
     info.m_node = ykDynamicCastScnMdl(m_sceneModels[0]);
+    Vec3f blockPos;
     Vec3f pos = getPos();
     info.m_pos = &pos;
     info.m_work = m_ykData;
@@ -150,7 +151,6 @@ void grAdventureBlockMng::startup(gfArchive* data, u32 unk1, gfSceneRoot::LayerT
     for (u32 i = 0; i < m_blockNum; i++) {
         if (m_blocks[i] != NULL) {
             nw4r::g3d::ResNode node = resMdl.GetResNode(m_blocks[i]->unk14C);
-            Vec3f blockPos;
             blockPos.m_x = node->m_translation.m_x;
             blockPos.m_y = node->m_translation.m_y;
             blockPos.m_z = node->m_translation.m_z;
