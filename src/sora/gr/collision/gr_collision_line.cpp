@@ -231,6 +231,15 @@ bool grCollisionLineWork::isLinkNext(const grCollisionLineWork* target) const {
     return result;
 }
 
+// True when the two lines share one of the low four direction bits.
+static inline bool sameDirFlag(const grCollisionLine* a, const grCollisionLine* b) {
+    bool r = false;
+    if (((a->m_unkE & b->m_unkE) & 0xF) != 0) {
+        r = true;
+    }
+    return r;
+}
+
 // Walks at most ten left links, staying on enabled lines that share an attribute bit with `target`.
 bool grCollisionLineWork::isLinkPrevSameDirFlag(grCollisionLineWork* target) const {
     bool result = false;
@@ -249,15 +258,10 @@ bool grCollisionLineWork::isLinkPrevSameDirFlag(grCollisionLineWork* target) con
         if (!active) {
             break;
         }
-        bool sameDir = false;
-        grCollisionLine* targetLine = target->m_collisionLine;
-        if (((next.m_collisionLine->m_unkE & targetLine->m_unkE) & 0xF) != 0) {
-            sameDir = true;
-        }
-        if (!sameDir) {
+        if (!sameDirFlag(next.m_collisionLine, target->m_collisionLine)) {
             break;
         }
-        if (next.m_collisionLine == targetLine) {
+        if (next.m_collisionLine == target->m_collisionLine) {
             result = true;
             break;
         }
@@ -283,15 +287,10 @@ bool grCollisionLineWork::isLinkNextSameDirFlag(grCollisionLineWork* target) con
         if (!active) {
             break;
         }
-        bool sameDir = false;
-        grCollisionLine* targetLine = target->m_collisionLine;
-        if (((next.m_collisionLine->m_unkE & targetLine->m_unkE) & 0xF) != 0) {
-            sameDir = true;
-        }
-        if (!sameDir) {
+        if (!sameDirFlag(next.m_collisionLine, target->m_collisionLine)) {
             break;
         }
-        if (next.m_collisionLine == targetLine) {
+        if (next.m_collisionLine == target->m_collisionLine) {
             result = true;
             break;
         }
