@@ -223,9 +223,11 @@ IfResetsanTask::~IfResetsanTask() {
 void IfResetsanTask::createModel(nw4r::g3d::ResFile* resFile, int priority) {
     const ModelDesc* desc = s_modelDesc;
     for (int j = 0; j < 1; j++, desc++) {
-        int num = 1;
+        int num;
         if (desc->m_start < desc->m_end) {
             num = desc->m_end - desc->m_start;
+        } else {
+            num = 1;
         }
         for (int i = 0; i < num; i++) {
             m_objects[desc->m_start + i] = MuObject::create(resFile, desc->m_name, desc->m_priority + priority, NULL, Heaps::FighterTechqniq);

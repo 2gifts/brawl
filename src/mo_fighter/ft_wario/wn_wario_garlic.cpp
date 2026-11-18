@@ -28,6 +28,7 @@ void wnWarioGarlic::activate(int founderTaskId, int resourceId, int team) {
     desc.flagsMidPair = 0;
     desc.flagsBit3 = 1;
     desc.flagsLow = 0;
-    desc.unk4DHigh = 0;
+    desc.flag4DBit7 = 0;
+    desc.flag4DBit6 = 0;
     Weapon::activate(&desc);
 }

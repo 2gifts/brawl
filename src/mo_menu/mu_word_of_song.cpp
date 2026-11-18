@@ -233,12 +233,13 @@ void muWordOfSongTask::skip() {
 
 // Sets the alpha of a word (0 - 1) in every material of its model.
 void muWordOfSongTask::setAlpha(int index, float alpha) {
+    nw4r::g3d::ScnMdl* scnMdl;
     m_entries[index].m_alpha = alpha;
     nw4r::g3d::ResMdl* mdl = &m_words[index]->m_resMdl;
     u32 count = GetResMatNumEntries__Q34nw4r3g3d6ResMdlCFv(mdl);
     float scaled = 255.0f * alpha;
     for (u32 i = 0; i < count; i++) {
-        nw4r::g3d::ScnMdl* scnMdl = m_words[index]->m_scnMdl;
+        scnMdl = m_words[index]->m_scnMdl;
         nw4r::g3d::ResMat mat = GetResMat__Q34nw4r3g3d6ResMdlCFi(mdl, i);
         nw4r::g3d::ScnMdl::CopiedMatAccess access(scnMdl, mat.ptr()->m_id);
         nw4r::g3d::ResMatChan chan = GetResMatChanEx__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFv(&access);

@@ -418,8 +418,9 @@ void stPlankton::createObjAshibaLeft() {
 }
 
 void stPlankton::createObjHanenbou() {
+    grPlanktonHanenbou* ground;
     for (u8 i = 0; i != 8; i++) {
-        grPlanktonHanenbou* ground = grPlanktonHanenbou::create(1, "kao", "grPlanktonHanenbou");
+        ground = grPlanktonHanenbou::create(1, "kao", "grPlanktonHanenbou");
         if (ground == NULL) {
             break;
         }
@@ -433,8 +434,9 @@ void stPlankton::createObjHanenbou() {
 }
 
 void stPlankton::createObjHamon() {
+    grPlanktonHamon* ground;
     for (u8 i = 0; i != 16; i++) {
-        grPlanktonHamon* ground = grPlanktonHamon::create(11, "StgPlanktonHamon", "grPlanktonHamon");
+        ground = grPlanktonHamon::create(11, "StgPlanktonHamon", "grPlanktonHamon");
         if (ground == NULL) {
             break;
         }
