@@ -58,6 +58,8 @@ void grHomerunLoopFloor::updateScroll(float deltaFrame) {
     case 1:
         m_state = 2;
         break;
+    case 2:
+        break;
     }
 }
 

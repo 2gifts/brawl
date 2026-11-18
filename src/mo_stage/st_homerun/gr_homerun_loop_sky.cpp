@@ -39,7 +39,7 @@ void grHomerunLoopSky::update(float deltaFrame) {
     }
 }
 
-// The four sky pieces (type 2 to 5) are 1500 units apart; each publishes its position to the stage (m_posSky).
+// The four sky pieces (type 2 to 5) are 3000 units apart; each publishes its position to the stage (m_posSky).
 void grHomerunLoopSky::updateScroll(float deltaFrame) {
     m_timer -= deltaFrame;
     if (m_timer < 0.0f) {
@@ -52,13 +52,13 @@ void grHomerunLoopSky::updateScroll(float deltaFrame) {
         getNodePosition(&m_pos, 0, m_nodeIndex);
         switch (m_type) {
         case 2:
-            m_pos.m_x -= 1500.0f;
+            m_pos.m_x -= 3000.0f;
             break;
         case 4:
-            m_pos.m_x += 1500.0f;
+            m_pos.m_x += 3000.0f;
             break;
         case 5:
-            m_pos.m_x += 3000.0f;
+            m_pos.m_x += 6000.0f;
             break;
         }
         switch (m_type) {
@@ -79,6 +79,8 @@ void grHomerunLoopSky::updateScroll(float deltaFrame) {
         // FALL-THROUGH
     case 1:
         m_state = 2;
+        break;
+    case 2:
         break;
     }
 }
@@ -151,10 +153,10 @@ void grHomerunLoopSky::fixposCallBack() {
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
+            Vec3f offset(0.0f, -250.0f, 250.0f);
             data[0].m_pos.m_x = m_pos.m_x;
             data[0].m_pos.m_y = m_pos.m_y;
             data[0].m_pos.m_z = m_pos.m_z;
-            Vec3f offset(0.0f, -250.0f, 250.0f);
             calcWorldCallBack->m_nodeCallbackDatas[0].m_offsetPos = offset;
         }
     }
