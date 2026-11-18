@@ -31,7 +31,8 @@ bool ftMarioTransactor::activeArticle(soArticle* article, soModuleAccesser* acc)
 bool ftMarioTransactor::activeArticle1(wnMarioFireball* weapon, soModuleAccesser* acc, u32 etcResId, int nodeId) {
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(nodeId, false);
     pos.m_z = acc->getGroundModule().getZ();
+    soTeamModule& team = acc->getTeamModule();
     int founderTaskId = acc->getStageObject().m_taskId;
-    weapon->activate(founderTaskId, etcResId, acc->getTeamModule().getTeam()->getNo(), &pos, 0, acc->getPostureModule().getLr());
+    weapon->activate(founderTaskId, etcResId, team.getTeam()->getNo(), &pos, 0, acc->getPostureModule().getLr());
     return false;
 }

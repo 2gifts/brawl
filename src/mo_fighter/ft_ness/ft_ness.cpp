@@ -513,10 +513,11 @@ bool ftNess::activeArticle(wnNessPKFire* weapon, soModuleAccesser* acc) {
 
 // PK Thunder: the head leaves from the hand and is linked to the fighter.
 bool ftNess::activeArticle1(wnNessPKThunder* weapon, soModuleAccesser* acc) {
+    s32 taskId;
     Fighter* founder = &dynamic_cast<Fighter&>(*acc->m_stageObject);
-    s32 taskId = founder->m_taskId;
     Vec3f pos = acc->getModelModule().getNodeGlobalPosition(0x2a, false);
     float lr = acc->getPostureModule().getLr();
+    taskId = founder->m_taskId;
     weapon->activate(taskId, founder->getOwner()->getTeam(), &pos, lr);
     acc->getLinkModule().link(6, weapon->m_taskId);
     return true;
