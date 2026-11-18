@@ -491,10 +491,7 @@ void muAdvNameTask::panelOnlyCtrl(int player, u32 buttons, gfPadStatus pad) {
             }
         }
         if ((buttons & 4) != 0) {
-            int rows = 4;
-            if (m_nameCount < 4) {
-                rows = m_nameCount;
-            }
+            int rows = m_nameCount < 4 ? m_nameCount : 4;
             if (cursor < rows) {
                 cursor = cursor + 1;
             }
