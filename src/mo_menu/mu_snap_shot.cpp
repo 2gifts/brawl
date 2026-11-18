@@ -199,8 +199,8 @@ void muSnapShotTask::controlBrowsingLoading() {
         m_work->m_state = 0;
     } else if (summary[0] != NULL) {
         if (summary[0]->m_jpeg != NULL && summary[0]->m_info != NULL) {
-            float frames[4] = {0.0f, 1.0f, 0.0f, 2.0f};
             MuObject* object = m_work->m_objs[24];
+            float frames[4] = {0.0f, 1.0f, 0.0f, 2.0f};
             u8 bits = reinterpret_cast<muSnapShotMenuBits*>(g_GameGlobal->getGlobalRecordMenuDatap())->m_flags;
             object->setFrameVisible(reinterpret_cast<float*>(reinterpret_cast<u8*>(frames) + ((bits >> 4) & 8))[summary[0]->m_info[0]]);
             muSnapShotJpeg* jpeg = &getWork()->m_jpeg;

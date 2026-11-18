@@ -683,6 +683,7 @@ static int compare(const void* a, const void* b) {
 // The records of the name tag as in muProcDiagram34pBase::dispValue; the three places of the ranking show the icon of
 // the character (or "-").
 void muProcDiagram4p::dispValue(MuDiagDataKind kind, int value, int line) {
+    MuObject* icon;
     const char* text;
     if (kind < MuDiagData_Unk24) {
         m_msg->printIndex(line + m_msgWnd + Msg_Title, muDiagGetDataTitleMsgID(kind));
@@ -704,7 +705,6 @@ void muProcDiagram4p::dispValue(MuDiagDataKind kind, int value, int line) {
         text = "-";
     } else {
         text = "";
-        MuObject* icon;
         switch (kind) {
         case MuDiagData_Unk24:
             icon = m_useCharIcons[0];

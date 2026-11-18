@@ -139,7 +139,7 @@ static s16 utf8charToVoiceLabel(const char* c) {
             return 0xCF;
         }
     } else if ((*c & 0xE0) != 0xC0 && (*c & 0xF0) == 0xE0) {
-        VoiceLabel* label = s_voiceLabels;
+        const VoiceLabel* label = s_voiceLabels;
         for (u32 i = 0; i < 231; i++, label++) {
             if (label->m_utf8[0] == (u8)c[0] && label->m_utf8[1] == (u8)c[1] && label->m_utf8[2] == (u8)c[2]) {
                 if (fn_8004D9E8(g_GameGlobal)) {
