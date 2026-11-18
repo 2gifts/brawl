@@ -78,8 +78,9 @@ struct muVCTrialText {
 
     muVCTrialText() : m_size(0) { }
     void append(const char* text, u32 size) {
+        char* dst = m_data + m_size;
         int used = m_size;
-        memcpy(m_data + used, text, size);
+        memcpy(dst, text, size);
         m_size = used + size;
     }
     void append(const muVCTrialMsgText& text) { append(text.m_text, text.m_size); }
@@ -613,7 +614,7 @@ void muVCTrialTask::decide() {
     if (!hasPad) {
         gfPadStatus remote;
         g_gfPadSystem->getSysPadStatus(4, &remote);
-        switch (getCurTitle().m_console) {
+        switch (sTitles[getCurTitleNo()].m_console) {
         case Console_NES:
         case Console_SNES:
             if (remote.m_error != 0) {
