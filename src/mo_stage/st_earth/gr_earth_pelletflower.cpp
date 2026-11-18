@@ -20,8 +20,8 @@
 #include <st_earth/gr_earth_hit.h>
 
 grEarthPelletFlower::grEarthPelletFlower(const char* taskName) : grEarth(taskName), m_snd() {
-    m_pelletData = NULL;
     m_motion = 6;
+    m_pelletData = NULL;
     m_frameCount = 0.0f;
     m_started = 0;
     m_hitData = NULL;
