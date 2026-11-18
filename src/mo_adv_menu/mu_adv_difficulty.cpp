@@ -143,9 +143,8 @@ void muAdvDifficultyTask::controllProc() {
     if (m_step == Step_Select) {
         u32 buttons[2];
         gfPadStatus pads[2];
-        u8* controller = reinterpret_cast<u8*>(this);
         for (int i = 0; i < 2; i++) {
-            buttons[i] = *reinterpret_cast<u32*>(controller + 0x64);
+            buttons[i] = m_controllers[i].m_trigger;
             g_gfPadSystem->getSysPadStatus(m_pad0, &pads[0]);
             if (m_pad1 >= 0) {
                 g_gfPadSystem->getSysPadStatus(m_pad1, &pads[1]);
@@ -174,7 +173,6 @@ void muAdvDifficultyTask::controllProc() {
                 m_step = Step_Selected;
                 m_isSelected = false;
             }
-            controller += 0xA8;
         }
     }
 }
