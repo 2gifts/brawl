@@ -376,153 +376,185 @@ void grGimmick::createSoundWork(u32 unk1, u32 unk2) {
     }
 }
 
-void grGimmick::changeNodeAnim(u32 index, u32 modelAnimIndex) {
-    if (m_modelAnims != NULL) {
-        gfModelAnimation* modelAnim = m_modelAnims[modelAnimIndex];
-        nw4r::g3d::ScnMdl* sceneModel = m_sceneModels[modelAnimIndex];
-        nw4r::g3d::ResMdl resMdl = static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl;
-        if (index < modelAnim->m_resFile.GetResAnmChrNumEntries()) {
-            int instanceSize;
-            nw4r::g3d::ResAnmChr anim = modelAnim->m_resFile.GetResAnmChr(index);
-            MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
-            if (anim.IsValid()) {
-                nw4r::g3d::AnmObjChrRes* anmObj = nw4r::g3d::AnmObjChrRes::Construct(allocator, &instanceSize, anim, resMdl, false);
-                if (anmObj != NULL) {
-                    anmObj->Bind(resMdl);
-                    if (modelAnim->m_anmObjChrRes != NULL) {
-                        modelAnim->m_anmObjChrRes->Destroy();
-                    }
-                    modelAnim->m_anmObjChrRes = anmObj;
+static inline void loadChrRes(gfModelAnimation* modelAnim, nw4r::g3d::ResMdl resMdl, u32 index) {
+    if (index < modelAnim->m_resFile.GetResAnmChrNumEntries()) {
+        int instanceSize;
+        nw4r::g3d::ResAnmChr anim = modelAnim->m_resFile.GetResAnmChr(index);
+        MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
+        if (anim.IsValid()) {
+            nw4r::g3d::AnmObjChrRes* anmObj = nw4r::g3d::AnmObjChrRes::Construct(allocator, &instanceSize, anim, resMdl, false);
+            if (anmObj != NULL) {
+                anmObj->Bind(resMdl);
+                if (modelAnim->m_anmObjChrRes != NULL) {
+                    modelAnim->m_anmObjChrRes->Destroy();
                 }
+                modelAnim->m_anmObjChrRes = anmObj;
             }
         }
+    }
+}
+
+static inline void loadChr(gfModelAnimation* modelAnim, nw4r::g3d::ScnMdl* sceneModel, u32 index) {
+    loadChrRes(modelAnim, static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl, index);
+}
+
+void grGimmick::changeNodeAnim(u32 index, u32 modelAnimIndex) {
+    if (m_modelAnims != NULL) {
+        loadChr(m_modelAnims[modelAnimIndex], m_sceneModels[modelAnimIndex], index);
         m_modelAnims[modelAnimIndex]->bindNodeAnim(m_sceneModels[modelAnimIndex]);
         m_modelAnims[modelAnimIndex]->setFrame(0.0f);
     }
 }
 
-void grGimmick::changeVisibleAnim(u32 index, u32 modelAnimIndex) {
-    if (m_modelAnims != NULL) {
-        gfModelAnimation* modelAnim = m_modelAnims[modelAnimIndex];
-        nw4r::g3d::ScnMdl* sceneModel = m_sceneModels[modelAnimIndex];
-        nw4r::g3d::ResMdl resMdl = static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl;
-        if (index < modelAnim->m_resFile.GetResAnmVisNumEntries()) {
-            int instanceSize;
-            nw4r::g3d::ResAnmVis anim = modelAnim->m_resFile.GetResAnmVis(index);
-            MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
-            if (anim.IsValid()) {
-                nw4r::g3d::AnmObjVisRes* anmObj = nw4r::g3d::AnmObjVisRes::Construct(allocator, &instanceSize, anim, resMdl);
-                if (anmObj != NULL) {
-                    anmObj->Bind(resMdl);
-                    if (modelAnim->m_anmObjVisRes != NULL) {
-                        modelAnim->m_anmObjVisRes->Destroy();
-                    }
-                    modelAnim->m_anmObjVisRes = anmObj;
+static inline void loadVisRes(gfModelAnimation* modelAnim, nw4r::g3d::ResMdl resMdl, u32 index) {
+    if (index < modelAnim->m_resFile.GetResAnmVisNumEntries()) {
+        int instanceSize;
+        nw4r::g3d::ResAnmVis anim = modelAnim->m_resFile.GetResAnmVis(index);
+        MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
+        if (anim.IsValid()) {
+            nw4r::g3d::AnmObjVisRes* anmObj = nw4r::g3d::AnmObjVisRes::Construct(allocator, &instanceSize, anim, resMdl);
+            if (anmObj != NULL) {
+                anmObj->Bind(resMdl);
+                if (modelAnim->m_anmObjVisRes != NULL) {
+                    modelAnim->m_anmObjVisRes->Destroy();
                 }
+                modelAnim->m_anmObjVisRes = anmObj;
             }
         }
+    }
+}
+
+static inline void loadVis(gfModelAnimation* modelAnim, nw4r::g3d::ScnMdl* sceneModel, u32 index) {
+    loadVisRes(modelAnim, static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl, index);
+}
+
+void grGimmick::changeVisibleAnim(u32 index, u32 modelAnimIndex) {
+    if (m_modelAnims != NULL) {
+        loadVis(m_modelAnims[modelAnimIndex], m_sceneModels[modelAnimIndex], index);
         m_modelAnims[modelAnimIndex]->bindVisibleAnim(m_sceneModels[modelAnimIndex]);
         m_modelAnims[modelAnimIndex]->setFrame(0.0f);
     }
 }
 
-void grGimmick::changeTexAnim(u32 index, u32 modelAnimIndex) {
-    if (m_modelAnims != NULL) {
-        gfModelAnimation* modelAnim = m_modelAnims[modelAnimIndex];
-        nw4r::g3d::ScnMdl* sceneModel = m_sceneModels[modelAnimIndex];
-        nw4r::g3d::ResMdl resMdl = static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl;
-        if (index < modelAnim->m_resFile.GetResAnmTexPatNumEntries()) {
-            int instanceSize;
-            nw4r::g3d::ResAnmTexPat anim = modelAnim->m_resFile.GetResAnmTexPat(index);
-            if (anim.IsValid()) {
-                MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
-                nw4r::g3d::AnmObjTexPatRes* anmObj = nw4r::g3d::AnmObjTexPatRes::Construct(allocator, &instanceSize, anim, resMdl, false);
-                if (anmObj != NULL) {
-                    anmObj->Bind(resMdl);
-                    if (modelAnim->m_anmObjTexPatRes != NULL) {
-                        modelAnim->m_anmObjTexPatRes->Destroy();
-                    }
-                    modelAnim->m_anmObjTexPatRes = anmObj;
+static inline void loadTexPatRes(gfModelAnimation* modelAnim, nw4r::g3d::ResMdl resMdl, u32 index) {
+    if (index < modelAnim->m_resFile.GetResAnmTexPatNumEntries()) {
+        int instanceSize;
+        nw4r::g3d::ResAnmTexPat anim = modelAnim->m_resFile.GetResAnmTexPat(index);
+        if (anim.IsValid()) {
+            MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
+            nw4r::g3d::AnmObjTexPatRes* anmObj = nw4r::g3d::AnmObjTexPatRes::Construct(allocator, &instanceSize, anim, resMdl, false);
+            if (anmObj != NULL) {
+                anmObj->Bind(resMdl);
+                if (modelAnim->m_anmObjTexPatRes != NULL) {
+                    modelAnim->m_anmObjTexPatRes->Destroy();
                 }
+                modelAnim->m_anmObjTexPatRes = anmObj;
             }
         }
+    }
+}
+
+static inline void loadTexPat(gfModelAnimation* modelAnim, nw4r::g3d::ScnMdl* sceneModel, u32 index) {
+    loadTexPatRes(modelAnim, static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl, index);
+}
+
+void grGimmick::changeTexAnim(u32 index, u32 modelAnimIndex) {
+    if (m_modelAnims != NULL) {
+        loadTexPat(m_modelAnims[modelAnimIndex], m_sceneModels[modelAnimIndex], index);
         m_modelAnims[modelAnimIndex]->bindTexAnim(m_sceneModels[modelAnimIndex]);
         m_modelAnims[modelAnimIndex]->setFrame(0.0f);
     }
 }
 
-void grGimmick::changeTexSrtAnim(u32 index, u32 modelAnimIndex) {
-    if (m_modelAnims != NULL) {
-        gfModelAnimation* modelAnim = m_modelAnims[modelAnimIndex];
-        nw4r::g3d::ScnMdl* sceneModel = m_sceneModels[modelAnimIndex];
-        nw4r::g3d::ResMdl resMdl = static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl;
-        if (index < modelAnim->m_resFile.GetResAnmTexSrtNumEntries()) {
-            int instanceSize;
-            nw4r::g3d::ResAnmTexSrt anim = modelAnim->m_resFile.GetResAnmTexSrt(index);
-            if (anim.IsValid()) {
-                MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
-                nw4r::g3d::AnmObjTexSrtRes* anmObj = nw4r::g3d::AnmObjTexSrtRes::Construct(allocator, &instanceSize, anim, resMdl, false);
-                if (anmObj != NULL) {
-                    anmObj->Bind(resMdl);
-                    if (modelAnim->m_anmObjTexSrtRes != NULL) {
-                        modelAnim->m_anmObjTexSrtRes->Destroy();
-                    }
-                    modelAnim->m_anmObjTexSrtRes = anmObj;
+static inline void loadTexSrtRes(gfModelAnimation* modelAnim, nw4r::g3d::ResMdl resMdl, u32 index) {
+    if (index < modelAnim->m_resFile.GetResAnmTexSrtNumEntries()) {
+        int instanceSize;
+        nw4r::g3d::ResAnmTexSrt anim = modelAnim->m_resFile.GetResAnmTexSrt(index);
+        if (anim.IsValid()) {
+            MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
+            nw4r::g3d::AnmObjTexSrtRes* anmObj = nw4r::g3d::AnmObjTexSrtRes::Construct(allocator, &instanceSize, anim, resMdl, false);
+            if (anmObj != NULL) {
+                anmObj->Bind(resMdl);
+                if (modelAnim->m_anmObjTexSrtRes != NULL) {
+                    modelAnim->m_anmObjTexSrtRes->Destroy();
                 }
+                modelAnim->m_anmObjTexSrtRes = anmObj;
             }
         }
+    }
+}
+
+static inline void loadTexSrt(gfModelAnimation* modelAnim, nw4r::g3d::ScnMdl* sceneModel, u32 index) {
+    loadTexSrtRes(modelAnim, static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl, index);
+}
+
+void grGimmick::changeTexSrtAnim(u32 index, u32 modelAnimIndex) {
+    if (m_modelAnims != NULL) {
+        loadTexSrt(m_modelAnims[modelAnimIndex], m_sceneModels[modelAnimIndex], index);
         m_modelAnims[modelAnimIndex]->bindTexSrtAnim(m_sceneModels[modelAnimIndex]);
         m_modelAnims[modelAnimIndex]->setFrame(0.0f);
     }
 }
 
-void grGimmick::changeMatColAnim(u32 index, u32 modelAnimIndex) {
-    if (m_modelAnims != NULL) {
-        gfModelAnimation* modelAnim = m_modelAnims[modelAnimIndex];
-        nw4r::g3d::ScnMdl* sceneModel = m_sceneModels[modelAnimIndex];
-        nw4r::g3d::ResMdl resMdl = static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl;
-        if (index < modelAnim->m_resFile.GetResAnmClrNumEntries()) {
-            int instanceSize;
-            nw4r::g3d::ResAnmClr anim = modelAnim->m_resFile.GetResAnmClr(index);
-            if (anim.IsValid()) {
-                MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
-                nw4r::g3d::AnmObjMatClrRes* anmObj = nw4r::g3d::AnmObjMatClrRes::Construct(allocator, &instanceSize, anim, resMdl, false);
-                if (anmObj != NULL) {
-                    anmObj->Bind(resMdl);
-                    if (modelAnim->m_anmObjMatClrRes != NULL) {
-                        modelAnim->m_anmObjMatClrRes->Destroy();
-                    }
-                    modelAnim->m_anmObjMatClrRes = anmObj;
+static inline void loadClrRes(gfModelAnimation* modelAnim, nw4r::g3d::ResMdl resMdl, u32 index) {
+    if (index < modelAnim->m_resFile.GetResAnmClrNumEntries()) {
+        int instanceSize;
+        nw4r::g3d::ResAnmClr anim = modelAnim->m_resFile.GetResAnmClr(index);
+        if (anim.IsValid()) {
+            MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
+            nw4r::g3d::AnmObjMatClrRes* anmObj = nw4r::g3d::AnmObjMatClrRes::Construct(allocator, &instanceSize, anim, resMdl, false);
+            if (anmObj != NULL) {
+                anmObj->Bind(resMdl);
+                if (modelAnim->m_anmObjMatClrRes != NULL) {
+                    modelAnim->m_anmObjMatClrRes->Destroy();
                 }
+                modelAnim->m_anmObjMatClrRes = anmObj;
             }
         }
+    }
+}
+
+static inline void loadClr(gfModelAnimation* modelAnim, nw4r::g3d::ScnMdl* sceneModel, u32 index) {
+    loadClrRes(modelAnim, static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl, index);
+}
+
+void grGimmick::changeMatColAnim(u32 index, u32 modelAnimIndex) {
+    if (m_modelAnims != NULL) {
+        loadClr(m_modelAnims[modelAnimIndex], m_sceneModels[modelAnimIndex], index);
         m_modelAnims[modelAnimIndex]->bindMatColAnim(m_sceneModels[modelAnimIndex]);
         m_modelAnims[modelAnimIndex]->setFrame(0.0f);
     }
 }
 
-void grGimmick::changeShapeAnim(u32 index, u32 modelAnimIndex) {
-    if (m_modelAnims != NULL) {
-        gfModelAnimation* modelAnim = m_modelAnims[modelAnimIndex];
-        nw4r::g3d::ScnMdl* sceneModel = m_sceneModels[modelAnimIndex];
-        nw4r::g3d::ResMdl resMdl = static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl;
-        if (index < modelAnim->m_resFile.GetResAnmShpNumEntries()) {
-            int instanceSize;
-            nw4r::g3d::ResAnmShp anim = modelAnim->m_resFile.GetResAnmShp(index);
-            if (anim.IsValid()) {
-                MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
-                nw4r::g3d::AnmObjShpRes* anmObj = nw4r::g3d::AnmObjShpRes::Construct(allocator, &instanceSize, anim, resMdl, false);
-                if (anmObj != NULL) {
-                    anmObj->Bind(resMdl);
-                    if (modelAnim->m_anmObjShpRes != NULL) {
-                        modelAnim->m_anmObjShpRes->Destroy();
-                    }
-                    modelAnim->m_anmObjShpRes = anmObj;
+static inline void loadShpRes(gfModelAnimation* modelAnim, nw4r::g3d::ResMdl resMdl, u32 index) {
+    if (index < modelAnim->m_resFile.GetResAnmShpNumEntries()) {
+        int instanceSize;
+        nw4r::g3d::ResAnmShp anim = modelAnim->m_resFile.GetResAnmShp(index);
+        if (anim.IsValid()) {
+            MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::StageInstance);
+            nw4r::g3d::AnmObjShpRes* anmObj = nw4r::g3d::AnmObjShpRes::Construct(allocator, &instanceSize, anim, resMdl, false);
+            if (anmObj != NULL) {
+                anmObj->Bind(resMdl);
+                if (modelAnim->m_anmObjShpRes != NULL) {
+                    anmObj->Destroy();
                 }
+                modelAnim->m_anmObjShpRes = anmObj;
             }
         }
+    }
+}
+
+static inline void loadShp(gfModelAnimation* modelAnim, nw4r::g3d::ScnMdl* sceneModel, u32 index) {
+    loadShpRes(modelAnim, static_cast<nw4r::g3d::ScnMdlSimple*>(sceneModel)->m_resMdl, index);
+}
+
+void grGimmick::changeShapeAnim(u32 index, u32 modelAnimIndex) {
+    if (m_modelAnims != NULL) {
+        m_modelAnims[modelAnimIndex]->unbindShapeAnim(m_sceneModels[0]);
+        loadShp(m_modelAnims[modelAnimIndex], m_sceneModels[modelAnimIndex], index);
         m_modelAnims[modelAnimIndex]->bindShapeAnim(m_sceneModels[modelAnimIndex]);
         m_modelAnims[modelAnimIndex]->setFrame(0.0f);
+        m_modelAnims[modelAnimIndex]->m_anmObjShpRes->SetUpdateRate(1.0f);
     }
 }
 
