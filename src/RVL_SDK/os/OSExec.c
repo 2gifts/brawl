@@ -1044,9 +1044,9 @@ static void fn_801DAF04(ESTitleId titleId, u32 argValue, char **argv) {
         OSPanic("OSExec.c", 2850, "");
     }
 
-    OS_LAUNCH_ARG = argValue;
-    OS_LAUNCH_ARG2 = 0;
-    OS_LAUNCH_APP_TYPE = appType;
+    *(u32 *)0x8000318C = argValue;
+    *(u32 *)0x80003190 = 0;
+    *(u8 *)0x80003186 = appType;
 
     if (titleId != 0) {
         sprintf(path, "/title/%08x/%08x", (u32)(titleId >> 32), (u32)titleId);
