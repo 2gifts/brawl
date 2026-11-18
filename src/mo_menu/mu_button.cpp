@@ -1093,12 +1093,12 @@ void muButtonTask::initStepButtonSelect(muButtonTask* task) {
     task->setButtonCursor(padKind, cursor);
     task->printExplByButtonCursor(cursor);
     task->m_work->m_objs[22]->setFrameVisible(0.0f);
-    cursor = task->m_work->m_cursor;
-    if (cursor == Cursor_Try || cursor == Cursor_Store) {
+    int sel = task->m_work->m_cursor;
+    if (sel == Cursor_Try || sel == Cursor_Store) {
         int actions[ListMax];
         int num = task->getFreeActions(padKind, actions);
         if (num > 0) {
-            int frame = cursor != Cursor_Try;
+            int frame = sel != Cursor_Try;
             if (!task->m_work->m_isListOpen) {
                 task->openActionList(0x1D, frame, actions, num);
             } else {
