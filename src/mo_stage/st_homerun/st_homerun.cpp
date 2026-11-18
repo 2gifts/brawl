@@ -1,3 +1,5 @@
+#define MT_VEC3F_ADD_OPERAND_ORDER_REGS // BYTES: register order of the paired-single vector sum (mt_vector.h)
+#define MT_VEC3F_SUB_FRESH_REGS // BYTES: the camera differences keep separate registers (mt_vector.h)
 #include <cm/cm_camera_controller.h>
 #include <ec/ec_mgr.h>
 #include <gf/gf_application.h>
@@ -1516,8 +1518,9 @@ void stHomerun::calcCameraParam(float t, Vec3f* out, Vec3f* eye, Vec3f* angle) {
         float len = nw4r::math::FSqrt(cosV * cosV + sinV * sinV);
         float s = nw4r::math::SinDeg(angle->m_x);
         float c = nw4r::math::CosDeg(angle->m_x);
+        float y = len * s;
         dir.m_z = sinV;
-        dir.m_y = (len * s) / c;
+        dir.m_y = y / c;
         dir.normalize();
         dir.m_x *= t;
         dir.m_y *= t;

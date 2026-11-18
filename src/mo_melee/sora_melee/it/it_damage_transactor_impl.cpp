@@ -28,7 +28,7 @@ static inline BaseItem& getItem(soModuleAccesser* moduleAccesser) {
 // The hit takes the damage off the item's hit points (work float 0x11000006, if it has any; flag 0x22000002 when they
 // run out) and raises the damage flags.
 void itDamageTransactorImpl::damageItem(int statusKind, soModuleAccesser* moduleAccesser, soDamageLog* damageLog, bool notifyItem) {
-    BaseItem* item = &getItem(moduleAccesser);
+    BaseItem* item = &dynamic_cast<BaseItem&>(moduleAccesser->getStageObject());
     soWorkManageModule& work = moduleAccesser->getWorkManageModule();
     if (item->onPreDamageCheck(statusKind, damageLog)) {
         work.onFlag(0x22000001);
