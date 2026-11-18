@@ -9,9 +9,11 @@
 class soModuleAccesser;
 
 class soGlowModuleImpl {
-    u8 unk4[0x24 - 4];
 public:
     soGlowModuleImpl(soModuleAccesser* acc);
     virtual ~soGlowModuleImpl();
+
+private:
+    u8 unk4[0x24 - 4];
 };
 static_assert(sizeof(soGlowModuleImpl) == 0x24, "Class is wrong size!");
