@@ -519,24 +519,27 @@ void muProcSoundTest::printBgmData() {
         data = m_msg->getMsgData(title->m_creditMsgIndex[1], &length);
         line = text + pos;
         memcpy(line, data, length);
-        line[length] = '\n';
-        pos += length + 1;
+        int len = length;
+        line[len] = '\n';
+        pos += len + 1;
     }
     if (title->m_creditMsgIndex[2] != -1) {
         m_msg->setMsgData(m_creditMsgData);
         data = m_msg->getMsgData(title->m_creditMsgIndex[2], &length);
         line = text + pos;
         memcpy(line, data, length);
-        line[length] = '\n';
-        pos += length + 1;
+        int len = length;
+        line[len] = '\n';
+        pos += len + 1;
     }
     if (title->m_creditMsgIndex[3] != -1) {
         m_msg->setMsgData(m_creditMsgData);
         data = m_msg->getMsgData(title->m_creditMsgIndex[3], &length);
         line = text + pos;
         memcpy(line, data, length);
-        line[length] = '\n';
-        pos += length + 1;
+        int len = length;
+        line[len] = '\n';
+        pos += len + 1;
     }
     if (title->m_creditMsgIndex[4] != -1) {
         m_msg->setMsgData(m_creditMsgData);
