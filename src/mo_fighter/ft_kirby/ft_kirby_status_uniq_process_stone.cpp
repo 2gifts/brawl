@@ -431,8 +431,9 @@ void ftKirbySpecialLw_ClearNormalBuffer(soModuleAccesser* moduleAccesser) {
     stone->m_current.m_normal = up;
     stone->m_current.m_angle = 0.0f;
     for (int i = 0; i < 4; i++) {
-        memcpy(&stone->m_average[i], stone, sizeof(ftKirbyStoneNormal));
-        memcpy(&stone->m_log[i], stone, sizeof(ftKirbyStoneNormal));
+        int off = i * sizeof(ftKirbyStoneNormal);
+        memcpy(reinterpret_cast<char*>(stone->m_average) + off, stone, sizeof(ftKirbyStoneNormal));
+        memcpy(reinterpret_cast<char*>(stone->m_log) + off, stone, sizeof(ftKirbyStoneNormal));
     }
 }
 
