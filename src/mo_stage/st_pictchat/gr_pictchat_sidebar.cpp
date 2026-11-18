@@ -188,12 +188,7 @@ void grPictchatSideBarLamp::updateCallBack(float deltaFrame) {
             default:
                 return;
             }
-            grNodeCallbackData* data;
-            Vec3f* pos = &m_posWork[index];
-            data = calcWorldCallBack->m_nodeCallbackDatas;
-            data->m_pos.m_x = pos->m_x;
-            data->m_pos.m_y = pos->m_y;
-            data->m_pos.m_z = pos->m_z;
+            calcWorldCallBack->m_nodeCallbackDatas[0].m_pos = m_posWork[index];
         }
     }
 }

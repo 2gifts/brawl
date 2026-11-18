@@ -22,8 +22,8 @@ static grEarthLeafMarker sMarkerA(0xFF, 0);
 static grEarthLeafMarker sMarkerB(0xFF, 1);
 
 grEarthLeaf::grEarthLeaf(const char* taskName) : grEarth(taskName), m_snd() {
-    m_stateDown = 0;
     m_type = 3;
+    m_stateDown = 0;
     m_stateReturn = 0;
     m_timerDown = 0.0f;
     m_downLimit = 0.0f;
