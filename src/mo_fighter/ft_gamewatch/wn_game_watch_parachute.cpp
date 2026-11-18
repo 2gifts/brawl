@@ -31,7 +31,8 @@ void wnGameWatchParachute::activate(int founderTaskId, int resourceId, int team,
     desc.flagsMidPair = 0;
     desc.flagsBit3 = 1;
     desc.flagsLow = 0;
-    desc.unk4D = (desc.unk4D & ~0xC0) | 0x40;
+    desc.unk4DHigh = 0;
+    desc.flag4DBit6 = 1;
     Weapon::activate(&desc);
 
     if (m_moduleAccesser->getModelModule().isRefFB())
