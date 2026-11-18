@@ -15,7 +15,7 @@ extern "C"
 #if defined(VERSION_R4QK01)
 #define DWC_MATCHING_VERSION 90U
 #else
-#define DWC_MATCHING_VERSION 3U
+#define DWC_MATCHING_VERSION 11U
 #endif
 #define DWC_MAX_CONNECTIONS  32
 #define DWC_MAX_MATCH_IDX_LIST 64
