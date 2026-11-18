@@ -653,14 +653,19 @@ const u8 muButtonTask::sListActions[ListMax] = { 0, 1, 2, 3, 4 };
 
 // Collects the actions of sListActions that no button has (a jump is not missing while the stick jumps).
 int muButtonTask::getFreeActions(int padKind, int* actions) {
-    const PadInfo* info = &sPadInfos[padKind];
-    int num = 0;
-    for (int i = 0; i < ListMax; i++) {
-        int action = sListActions[i];
+    int i;
+    int j;
+    int action;
+    int num;
+    const PadInfo* info;
+
+    info = &sPadInfos[padKind];
+    num = 0;
+    for (i = 0; i < ListMax; i++) {
+        action = sListActions[i];
         if (action == 2 && info->m_stickKind != 0 && m_work->m_edit.m_flickJump == 1) {
             continue;
         }
-        int j;
         for (j = 0; j < info->m_buttonNum; j++) {
             if (action == m_work->m_edit.m_buttons[j]) {
                 break;

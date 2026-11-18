@@ -219,12 +219,16 @@ void stDxGreens::updateLimit(float deltaFrame) {
 // Once the positions of the blocks are known, the starting position of the blocks of every column is set (the columns
 // start with 4, 3, 2, 2, 3 and 4 blocks).
 void stDxGreens::updateBlockInit(float deltaFrame) {
+    float* data;
+    stDxGreensBlockData* block;
+    u8 column;
+    u8 row;
     if (m_blockInit != 0) {
-        float* data = static_cast<float*>(m_stageData);
-        if (m_posBlock[0][0].m_x != 0.0f && data != NULL) {
-            for (u8 column = 0; column < 6; column++) {
-                for (u8 row = 0; row < 5; row++) {
-                    stDxGreensBlockData* block = &m_block[column][row];
+        if (m_posBlock[0][0].m_x != 0.0f && m_stageData != NULL) {
+            data = static_cast<float*>(m_stageData);
+            for (column = 0; column < 6; column++) {
+                for (row = 0; row < 5; row++) {
+                    block = &m_block[column][row];
                     block->m_pos = m_posBlock[column][row];
                     block->m_posTgt = m_posBlock[column][row];
                     block->m_index = row;

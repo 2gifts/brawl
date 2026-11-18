@@ -137,6 +137,7 @@ void muProcDiagram1p::begin(int side) {
 void muProcDiagram1p::initMsg() {
     for (int row = 0; row < RowNum; row++) {
         int wnd = m_msgWnd + row;
+        int valueWnd;
         m_msg->attachScnMdlSimple(
             wnd, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_objs[Obj_Row + row]->m_sceneModel), 0, 1.0f / 16.0f);
         m_msg->setFontType(wnd, 1);
@@ -154,7 +155,7 @@ void muProcDiagram1p::initMsg() {
         m_msg->setFontWidthModeFixed(wnd, 20.0f);
 
         for (int column = 0; column < ColumnNum; column++) {
-            int valueWnd = m_msgWnd + (column + (row * ColumnNum + Msg_Value));
+            valueWnd = m_msgWnd + (column + (row * ColumnNum + Msg_Value));
             m_msg->attachScnMdlSimple(
                 valueWnd, reinterpret_cast<nw4r::g3d::ScnMdlSimple*>(m_objs[Obj_Column + column]->m_sceneModel), row,
                 1.0f / 16.0f);
