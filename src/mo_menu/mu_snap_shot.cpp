@@ -20,8 +20,7 @@ extern "C" int fn_800C39D8(void* collection);
 extern "C" void changeMaterialTex__8MuObjectFPCcPvUsUs(MuObject* object, const char* name, void* pixels, u16 width, u16 height);
 
 // Functions of the other modules, which the module calls by their offset (module 6 is sora_menu_collect_viewer).
-// muCollectionViewer::loadResource() and muCollectionViewer::createObjResFile(name)
-extern "C" void fn_6_1134(muCollectionViewer* viewer);
+// muCollectionViewer::createObjResFile(name)
 extern "C" void fn_6_1260(muCollectionViewer* viewer, const char* name);
 // muCollectionViewer::checkBackgroundLoading(summary) and muCollectionViewer::createNoticeWindow(text)
 extern "C" int fn_6_3934(muCollectionViewer* viewer, void** summary);
@@ -101,7 +100,7 @@ muSnapShotTask* muSnapShotTask::create(scSnapShot* scene) {
 muSnapShotTask::~muSnapShotTask() { }
 
 void muSnapShotTask::loadResource() {
-    fn_6_1134(this);
+    muCollectionViewer::initProc();
     Work* work = getWork();
     requestResource(&work->m_brres, &work->m_unk000, &work->m_brresFlag, "/menu/collection/Snap.brres");
     work = getWork();

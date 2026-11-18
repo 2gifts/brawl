@@ -28,9 +28,8 @@ extern "C" void setFontWidthModeFixed__5MuMsgFUlf(MuMsg* msg, u32 msgIndex, floa
 extern "C" nw4r::g3d::G3dObj* Construct__Q34nw4r3g3d12ScnMdlExpandFP12MEMAllocatorPUliPQ34nw4r3g3d6ScnMdl(MEMAllocator* allocator, u32* size,
                                                                                                          int capacity, void* scnMdl);
 extern "C" void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjPCc(void* expand, void* object, const char* name);
-// The archive: the resource of a node of the pack and the data of a file (archive, id, type, index, size, file id)
+// The archive: the resource of a node of the pack (archive, index)
 extern "C" void* fn_800B03F0(gfArchive* archive, int index);
-extern "C" void* fn_80015E34(gfArchive* archive, int id, int type, int index, int* size, u16 fileId);
 // The window of the module of the name menus where a player picks a name: create(group, kind, resource, resource, pad, heap, model,
 // node, ...)
 extern "C" muEventNameWnd* fn_16_1CB0(void* group, int kind, nw4r::g3d::ResFile* resFileA, nw4r::g3d::ResFile* resFileB, int pad, int heap,
@@ -547,13 +546,13 @@ static const char* const sEventTblNames[2] = {"muEventTbl_1P", "muEventTbl_2P"};
 // Reads the lists of the events (for one player and for two players) from the file, leaving out the events that are not open.
 void muEventTask::makeEventList(muEventList* lists) {
     int size;
-    void* data = fn_80015E34(m_archive, 0, 1, 0x3C, &size, 0xFFFE);
+    void* data = m_archive->getData(0, Data_Type_Misc, 0x3C, &size, 0xFFFE);
     utRelocate relocate(reinterpret_cast<u8*>(data), size);
     for (int set = 0; set < 2; set++) {
         const muEventEntry* src = reinterpret_cast<const muEventEntry*>(relocate.getPublicAddress(sEventTblNames[set]));
-        muEventEntry* dst = lists[set].m_entries;
         int count = 0;
-        for (int i = 0; src->m_msgNo != -1; i++, src++) {
+        muEventEntry* dst = lists[set].m_entries;
+        for (int i = 0; src->m_msgNo != -1; src++, i++) {
             if (i > 0 && !g_GameGlobal->isGlobalRecordEventOpened(set, i)) {
                 continue;
             }

@@ -136,6 +136,7 @@ public:
     Work* m_work;                   // 0x1AC
 
     muCollectionViewer(const char* name);
+    void initProc();
     virtual ~muCollectionViewer();
     virtual bool checkLoadFinish() const;
     virtual void update();

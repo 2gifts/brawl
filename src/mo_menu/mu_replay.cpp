@@ -43,8 +43,7 @@ extern "C" int fn_1_385C(int player);
 extern "C" void fn_1_8E0C(scReplay* scene, MuObject** objects, int count);
 
 // Functions of the other modules, which the module calls by their offset (module 6 is sora_menu_collect_viewer).
-// muCollectionViewer::loadResource(), createObjResFile(name), setPanelMotion(table, count) and changeMedia(cursor)
-extern "C" void fn_6_1134(muCollectionViewer* viewer);
+// muCollectionViewer::createObjResFile(name), setPanelMotion(table, count) and changeMedia(cursor)
 extern "C" void fn_6_1260(muCollectionViewer* viewer, const char* name);
 extern "C" void fn_6_1ECC(muCollectionViewer* viewer);
 extern "C" void fn_6_1CC0(muCollectionViewer* viewer, const u8* table, int count);
@@ -148,7 +147,7 @@ muReplayTask* muReplayTask::create(scReplay* scene) {
 muReplayTask::~muReplayTask() { }
 
 void muReplayTask::loadResource() {
-    fn_6_1134(this);
+    muCollectionViewer::initProc();
     Work* work = getWork();
     requestResource(&work->m_brres, &work->m_unk000, &work->m_brresFlag, "/menu/collection/Replay.brres");
     work = getWork();

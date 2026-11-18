@@ -562,9 +562,13 @@ void muTitleSunsetTask::setCharaModelPosFromListSunset() {
     for (int i = 0; i < m_charCount; i++) {
         int kind = m_charOrder[i];
         m_backPosi->getPos(&pos, m_backName[i]);
-        pos.m_x = pos.m_x * factor.m_x + origin.m_x;
-        pos.m_y = pos.m_y * factor.m_y + origin.m_y;
-        pos.m_z = pos.m_z * factor.m_z * scale + origin.m_z;
+        pos.m_x *= factor.m_x;
+        pos.m_y *= factor.m_y;
+        pos.m_z *= factor.m_z;
+        pos.m_z *= scale;
+        pos.m_x += origin.m_x;
+        pos.m_y += origin.m_y;
+        pos.m_z += origin.m_z;
         m_charBack[kind]->setTrans(&pos);
     }
 }
