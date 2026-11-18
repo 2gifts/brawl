@@ -11,9 +11,6 @@
 
 // soExternalValueAccesser::isGroundTouch
 extern "C" int fn_27_8CC2C(BaseItem* item, int kind);
-// grCollStatus: the two ways to ask where a collision touched (the result holds the position in its last two floats)
-extern "C" int fn_801341D8(grCollStatus* status, float* out);
-extern "C" int fn_801342C8(grCollStatus* status, Vec2f* out);
 
 // The Yakumono grounds of the contest all keep the position of the node they are bound to in a world callback.
 // Sets the joint's collision flag bits with one chained assignment (HYPOTHESIS: they track "enabled").
@@ -166,17 +163,13 @@ void grHomerunBg::receiveCollMsg_Landing(grCollStatus* collStatus, grCollisionJo
         if (*m_taskIdSandBagWork == collStatus->m_taskId) {
             Vec3f pos;
             if (collStatus->m_currentCollShape->getType() == 2) {
-                float line[4];
-                fn_801341D8(collStatus, line);
-                pos.m_x = line[2];
-                pos.m_y = line[3];
-                pos.m_z = 0.0f;
+                clRhombus2D shape;
+                collStatus->getShape(&shape);
+                pos.set(shape.m_upPos.m_x, shape.m_upPos.m_y, 0.0f);
             } else {
                 Vec2f point;
-                fn_801342C8(collStatus, &point);
-                pos.m_x = point.m_x;
-                pos.m_y = point.m_y;
-                pos.m_z = 0.0f;
+                collStatus->getPos(&point);
+                pos.set(point.m_x, point.m_y, 0.0f);
             }
             if (pos.m_y < -10.0f) {
                 *m_landingSandBagWork = 1;
