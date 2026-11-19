@@ -8,7 +8,6 @@
 extern "C" {
 int fn_80110310(int* trigger, int* padNo);
 void fn_800E5174(IfPlayer* player, int mode);
-bool fn_27_23AC10(stLoader* loader);
 extern u8 lbl_27_bss_59D8;
 }
 
@@ -78,7 +77,7 @@ void stOperatorInfo::setLocalPlayerPadMaskWifi() {
 
 void stOperatorInfo::lockPlayer() {
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (m_loaderPlayers[i] && fn_27_23AC10(m_loaderPlayers[i])) {
+        if (m_loaderPlayers[i] && m_loaderPlayers[i]->isEntity()) {
             m_loaderPlayers[i]->lockEntity();
         }
     }
@@ -86,7 +85,7 @@ void stOperatorInfo::lockPlayer() {
 
 void stOperatorInfo::unlockPlayer() {
     for (int i = 0; i < MAX_PLAYERS; i++) {
-        if (m_loaderPlayers[i] && fn_27_23AC10(m_loaderPlayers[i])) {
+        if (m_loaderPlayers[i] && m_loaderPlayers[i]->isEntity()) {
             m_loaderPlayers[i]->unlockEntity();
         }
     }

@@ -6,7 +6,6 @@
 #include <st/loader/st_loader_stage_star_fox.h>
 #include <types.h>
 
-extern "C" bool fn_27_23ABA0(stLoader* loader);
 
 // MATCH-ONLY: the native code reads the 16-bit stage kind unsigned, not through the signed enum bitfield.
 static inline u32 getStageKind(gmGlobalModeMelee* melee) {
@@ -96,7 +95,7 @@ void stLoaderStageStarFox::shuffuleTable(int num) {
 }
 
 bool stLoaderStageStarFox::isLoad() {
-    return fn_27_23ABA0(this);
+    return stLoader::isLoad();
 }
 
 // TODO: clean up, give variables real names

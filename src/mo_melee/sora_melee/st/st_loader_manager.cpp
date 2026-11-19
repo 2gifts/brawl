@@ -1,10 +1,74 @@
 #include <gf/gf_task_scheduler.h>
 #include <st/loader/st_loader_manager.h>
 #include <st/loader/st_loader_sand_bag.h>
+#include <st/loader/st_loader_stage.h>
+#include <st/loader/st_loader_stage_star_fox.h>
+#include <st/loader/st_loader_stage_se.h>
+#include <st/loader/st_loader_info.h>
+#include <st/loader/st_loader_stage_adventure.h>
+#include <st/loader/st_loader_info_wifi.h>
+#include <st/loader/st_loader_info_adventure.h>
+#include <st/loader/st_loader_local_adventure.h>
+#include <st/loader/st_loader_info_stage_edit.h>
 #include <types.h>
 #include <memory.h>
 
 extern const void* lbl_27_data_4CCC0[2];
+
+// HYPOTHESIS: the loader class whose constructor sits at 0x23AC74 (a stLoaderStage subclass of size 0xE4).
+extern "C" stLoader* fn_27_23AC74(void* self);
+
+// TODO: clean up - the kind numbers are bare; name the loader kinds (players 0..6, then stage, star fox, SE, info, ...).
+stLoader* stLoaderManager::createLoader(u32 kind) {
+    switch (kind) {
+    case 0:
+        return new (Heaps::System) stLoaderPlayer(0);
+    case 1:
+        return new (Heaps::System) stLoaderPlayer(1);
+    case 2:
+        return new (Heaps::System) stLoaderPlayer(2);
+    case 3:
+        return new (Heaps::System) stLoaderPlayer(3);
+    case 4:
+        return new (Heaps::System) stLoaderPlayer(4);
+    case 5:
+        return new (Heaps::System) stLoaderPlayer(5);
+    case 6:
+        return new (Heaps::System) stLoaderPlayer(6);
+    case 7:
+        return new (Heaps::System) stLoaderStage;
+    case 8:
+        return new (Heaps::System) stLoaderStageStarFox;
+    case 9:
+        return new (Heaps::System) stLoaderStageSe;
+    case 10:
+        return new (Heaps::System) stLoaderPokemonSe;
+    case 11:
+        return new (Heaps::System) stLoaderInfo;
+    case 12:
+        return new (Heaps::System) stLoaderSandBag(2);
+    case 13: {
+        void* mem = operator new(0xE4, Heaps::System);
+        return mem != NULL ? fn_27_23AC74(mem) : NULL;
+    }
+    case 14:
+        return new (Heaps::System) stLoaderStageAdventure;
+    case 15:
+        return new (Heaps::System) stLoaderCommonSeAdventure;
+    case 16:
+        return new (Heaps::System) stLoaderStageSeAdventure;
+    case 17:
+        return new (Heaps::System) stLoaderInfoWifi;
+    case 18:
+        return new (Heaps::System) stLoaderInfoAdventure;
+    case 19:
+        return new (Heaps::System) stLoaderLocalAdventure;
+    case 20:
+        return new (Heaps::System) stLoaderInfoStageEdit;
+    default:
+        return NULL;
+    }
+}
 
 inline stLoaderManager::stLoaderManager()
     : unk38(0), unk3C(0), m_isRequested(false), m_isSetupDone(false),

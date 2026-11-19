@@ -21,5 +21,11 @@ public:
     virtual void removeEntity();
     virtual bool isLoad();
     virtual bool isEmpty();
+    // TODO: clean up - placeholder names for the non-virtual helpers (the map only names isEntity).
+    bool isFinish();            // sora_melee 0x23ABC4
+    bool isEntity();            // sora_melee 0x23AC10: the entity is entered
+    void setLockRequested();    // sora_melee 0x23AC3C
+    bool requestOnce();         // sora_melee 0x23AC48
+    void setGlobalModeMelee(gmGlobalModeMelee* globalModeMelee); // sora_melee 0x23AC6C
 };
 static_assert(sizeof(stLoader) == 0x48, "Class is wrong size!");
