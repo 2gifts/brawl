@@ -188,11 +188,15 @@ void muProcDiagram1p::post(int side) {
 void muProcDiagram1p::finish() {
     m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_mdls[Mdl_Row]));
     m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_mdls[Mdl_Column]));
-    for (int i = 0; i < RowNum; i++) {
-        m_msg->detachMuObject(m_objs[Obj_Row + i]);
+    int i;
+    int off;
+    // TODO: clean up - the explicit byte offset only pins the register numbering; the readable form is
+    // `for (i = 0; i < RowNum; i++) m_msg->detachMuObject(m_objs[Obj_Row + i]);`.
+    for (i = 0, off = 0; i < RowNum; i++, off += 4) {
+        m_msg->detachMuObject(*reinterpret_cast<MuObject**>(reinterpret_cast<u8*>(m_objs) + off + Obj_Row * 4));
     }
-    for (int i = 0; i < ColumnNum; i++) {
-        m_msg->detachMuObject(m_objs[Obj_Column + i]);
+    for (int j = 0; j < ColumnNum; j++) {
+        m_msg->detachMuObject(m_objs[Obj_Column + j]);
     }
     gfHeapManager::free(m_table);
 }

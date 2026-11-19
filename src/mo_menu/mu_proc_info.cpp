@@ -313,13 +313,15 @@ int muProcInfo::proc() {
 // Sorts the notices by the date they arrived, the oldest first; notices of the same date keep their number order.
 static int compare(const void* a, const void* b) {
     gmGlobalRecord::InfoAppFlagData* flag = g_GameGlobal->getInfoAppFlag();
-    u32 timeA = flag->m_recvTime[*static_cast<const int*>(a)];
-    u32 timeB = flag->m_recvTime[*static_cast<const int*>(b)];
+    int idxA = *static_cast<const int*>(a);
+    int idxB = *static_cast<const int*>(b);
+    u32 timeA = flag->m_recvTime[idxA];
+    u32 timeB = flag->m_recvTime[idxB];
     if (timeA != timeB) {
         if (timeA < timeB) {
             return -1;
         }
-    } else if (*static_cast<const int*>(a) < *static_cast<const int*>(b)) {
+    } else if (idxA < idxB) {
         return -1;
     }
     return 1;

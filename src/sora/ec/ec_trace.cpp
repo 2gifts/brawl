@@ -41,9 +41,19 @@ struct ecTrace {
     u32 unk80;
 
     ecTrace(u32 p1, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6);
+    ecTrace(u32 p1, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6, u32 p7);
     ~ecTrace();
     void end(u32 p1, u32 p2);
+    void pause(bool paused);
 };
+
+void ecTrace::pause(bool paused) {
+    if (paused) {
+        unkE |= 0x10;
+    } else {
+        unkE &= ~0x10;
+    }
+}
 
 void ecTrace::end(u32 p1, u32 p2) {
     f32 ratio;
@@ -101,6 +111,25 @@ ecTrace::ecTrace(u32 p1, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6) {
     unk44 = p2;
     unk48 = (s16) p3;
     unk4A = (s16) p4;
+}
+
+// TODO: clean up - p2 is dereferenced (lwz 0(r5)) although the map signature says u32; find the real pointee type
+ecTrace::ecTrace(u32 p1, u32 p2, u32 p3, u32 p4, u32 p5, u32 p6, u32 p7) {
+    unk30 = -1;
+    unk34 = -1;
+    unk38 = -1;
+    unk3C = -1;
+    unk40 = 0;
+    unk8 = p1 + 1;
+    unk70 = (s8) p6;
+    fn_80065C98(this);
+    if (p7 != 0) {
+        unkE |= 2;
+    }
+    unk44 = p3;
+    unk40 = *(u32*) p2;
+    unk48 = (s16) p4;
+    unk4A = (s16) p5;
 }
 
 // TODO: clean up, give variables real names

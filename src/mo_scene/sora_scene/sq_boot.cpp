@@ -1,5 +1,7 @@
 #include <gf/gf_application.h>
 #include <gf/gf_scene.h>
+#include <gm/gm_global.h>
+#include <gm/gm_lib.h>
 #include <sq/sq_boot.h>
 #include <sr/sr_common.h>
 #include <types.h>
@@ -16,84 +18,63 @@ void sqBoot::start() {
     unk8 = 0;
 }
 
-void sqBoot::exit() { }
-
-#include <gm/gm_global.h>
-// TODO: clean up, give variables real names
-namespace jj_21F3C {
-
-extern "C" {
-extern unsigned char lbl_1_data_6CA0[];
-void setNextScene__14gfSceneManagerFv(gfSceneManager*, const char*, int);
-void setNextSequence__14gfSceneManagerFv(gfSceneManager*, const char*, int);
-unsigned int* getGlobalRecordBootCountDatap__10GameGlobalFv(GameGlobal*);
-}
-
-struct BootSequence {
-    char pad[8];
-    unsigned int state;
-    unsigned int next;
-    unsigned char param;
-    char pad2[3];
-    int result;
-};
-
-extern "C" void fn_1_21F3C(BootSequence* self) {
-    char* base = (char*)lbl_1_data_6CA0;
-    gfSceneManager* manager = gfSceneManager::getInstance();
-    int again = 1;
+// The sequence of the boot: the strap scene, the memory check, the main menu (or the prize check on the first boots).
+void sqBoot::setNext() {
+    gfSceneManager* mgr = gfSceneManager::getInstance();
+    bool again = true;
     while (again) {
-        again = 0;
-        switch (self->state) {
+        again = false;
+        switch (unk8) {
         default:
         case 0:
-            self->state = 5;
-            again = 1;
+            unk8 = 5;
+            again = true;
             break;
         case 1:
-            setNextScene__14gfSceneManagerFv(manager, base + 8, self->param);
-            self->state = 2;
+            mgr->setNextScene("scMemoryChange", unk10);
+            unk8 = 2;
             break;
         case 2:
-            again = 1;
-            self->state = self->next;
+            again = true;
+            unk8 = unkC;
             break;
         case 5:
-            setNextScene__14gfSceneManagerFv(manager, base + 24, 0);
-            self->state = 6;
+            mgr->setNextScene("scStrap", 0);
+            unk8 = 6;
             break;
         case 6:
-            self->state = 1;
-            again = 1;
-            self->next = 3;
-            self->param = 2;
+            unk8 = 1;
+            again = true;
+            unkC = 3;
+            unk10 = 2;
             break;
         case 3:
-            setNextScene__14gfSceneManagerFv(manager, base + 32, 0);
-            self->state = 4;
+            mgr->setNextScene("scBoot", 0);
+            unk8 = 4;
             break;
         case 4:
-            if (self->result == 2)
-                self->state = 8;
-            else
-                self->state = 7;
-            again = 1;
+            if (unk14 == 2) {
+                unk8 = 8;
+            } else {
+                unk8 = 7;
+            }
+            again = true;
             break;
         case 8:
-            ((unsigned char*)g_GameGlobal->m_appData)[0x28] |= 0x40;
-            setNextSequence__14gfSceneManagerFv(manager, base + 40, 42);
+            g_GameGlobal->m_appData->_0x0[0x28] |= 0x40;
+            mgr->setNextSequence("sqMenuMain", 0x2A);
             break;
-        case 7:
-            {
-                unsigned int* count = getGlobalRecordBootCountDatap__10GameGlobalFv(g_GameGlobal);
-                if (*count < 0x05F5E0FFU)
-                    ++*count;
-                ((unsigned char*)g_GameGlobal->m_appData)[0x28] |= 0x40;
-                setNextSequence__14gfSceneManagerFv(manager, base + 52, 20);
+        case 7: {
+            u32* bootCount = g_GameGlobal->getGlobalRecordBootCountDatap();
+            if (*bootCount < 99999999) {
+                *bootCount = *bootCount + 1;
             }
+            g_GameGlobal->m_appData->_0x0[0x28] |= 0x40;
+            mgr->setNextSequence("sqPrizeCheck", 0x14);
             break;
+        }
         }
     }
 }
-}
 
+void sqBoot::exit() { }

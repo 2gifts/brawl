@@ -72,24 +72,63 @@ BOOL __OSWriteNandbootInfo(OSNandbootInfo *info) {
     return TRUE;
 }
 
-// TODO: clean up, give variables real names
-/* jj_801E3844 */
-s32 __OSGetNandbootInfoHeader(void* out);
+BOOL __OSGetNandbootInfoHeader(OSNandbootInfoHeader* header) {
+    NANDFileInfo file;
+    u8 args[0x100] __attribute__((aligned(32)));
+    OSNandbootInfoHeader buf __attribute__((aligned(32)));
+    u32 *ptr, i, j, sum;
 
-typedef struct {
-    u8 pad[0x18];
-    s32 hi;
-    s32 lo;
-} Out;
+    memset(header, 0, sizeof(OSNandbootInfoHeader));
 
-s64 fn_801E3844(void) {
-    Out sp8;
-    s32 var_r31 = 0;
-    s32 var_r30 = 0;
-    if (*(u8*)0x80003186 != 0 && __OSGetNandbootInfoHeader(&sp8) != 0) {
-        var_r31 = sp8.hi;
-        var_r30 = sp8.lo;
+    if (NANDPrivateOpen("/shared2/sys/NANDBOOTINFO", &file, 1) != 0) {
+        return FALSE;
     }
-    return ((s64)var_r31 << 32) | (u32)var_r30;
+
+    if (NANDRead(&file, &buf, sizeof(OSNandbootInfoHeader)) != sizeof(OSNandbootInfoHeader)) {
+        NANDClose(&file);
+        return FALSE;
+    }
+
+    ptr = &buf.ArgOffset;
+    sum = 0;
+    for (i = 0; i < (sizeof(OSNandbootInfoHeader) - 4) / 4; i++) {
+        sum += *ptr;
+        ptr++;
+    }
+
+    for (i = 0; i < 0x1000 / sizeof(args); i++) {
+        if (NANDRead(&file, args, sizeof(args)) != (s32)sizeof(args)) {
+            NANDClose(&file);
+            return FALSE;
+        }
+
+        ptr = (u32*)args;
+        for (j = 0; j < sizeof(args) / 4; j++) {
+            sum += *ptr;
+            ptr++;
+        }
+    }
+
+    if (NANDClose(&file) != 0) {
+        return FALSE;
+    }
+
+    if (buf.CheckSum == sum) {
+        memcpy(header, &buf, sizeof(OSNandbootInfoHeader));
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
+// TODO: clean up - 0x80003186 is the OS globals "nandboot info valid" byte; give it a named macro (OS_NANDBOOT_INFO_VALID)
+u64 OSGetLastTitleId(void) {
+    OSNandbootInfoHeader header;
+    u64 titleId = 0;
+
+    if (*(volatile u8*)0x80003186 != 0 && __OSGetNandbootInfoHeader(&header)) {
+        titleId = header.LastTitleId;
+    }
+
+    return titleId;
+}

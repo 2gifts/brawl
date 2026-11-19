@@ -2437,6 +2437,7 @@ RVL_SDK/ax/AXVPB.c:
 
 RVL_SDK/ax/AXVPB_part2.c:
 	.text       start:0x80201F38 end:0x802025D4
+	.sdata2     start:0x805A38F0 end:0x805A3910
 
 RVL_SDK/ax/AXProf.c:
 	.text       start:0x802025D4 end:0x80202614

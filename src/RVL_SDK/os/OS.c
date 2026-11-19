@@ -484,7 +484,7 @@ static void ReportOSInfo(void) {
     OSReport("MEM2 Arena : 0x%x - 0x%x\n", lo, hi);
 }
 
-extern u64 fn_801E3844(void);
+extern u64 OSGetLastTitleId(void);
 extern s32 ESP_SetUid(u64);
 
 void OSInit(void) {
@@ -650,7 +650,7 @@ void OSInit(void) {
             }
 
             if (ret == 0) {
-                playing = fn_801E3844();
+                playing = OSGetLastTitleId();
                 if (playing != 0 && playing != titleId) {
                     ESP_SetUid(playing);
                 }

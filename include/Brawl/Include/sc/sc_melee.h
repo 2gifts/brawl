@@ -53,6 +53,7 @@ public:
     u8 m_buttonConfigNo; // 0xFD
     char _254[2];
 
+    scMelee(const char* name);
     virtual void start();
     virtual s32 process();
     virtual s32 exit();

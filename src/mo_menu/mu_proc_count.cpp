@@ -216,10 +216,13 @@ void muProcCount::setPanelState(int state) {
 
 void muProcCount::exit() {
     int i;
+    int off;
     m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_objs[Obj_Panel]->m_sceneModel));
     m_group->Remove(reinterpret_cast<nw4r::g3d::ScnObj*>(m_mdls[Mdl_Back]));
-    for (i = 0; i < Rows; i++) {
-        m_msg->detachMuObject(m_objs[Obj_Row + i]);
+    // TODO: clean up - the explicit byte offset only pins the register numbering; the readable form is
+    // `for (i = 0; i < Rows; i++) m_msg->detachMuObject(m_objs[Obj_Row + i]);`.
+    for (i = 0, off = 0; i < Rows; i++, off += 4) {
+        m_msg->detachMuObject(*reinterpret_cast<MuObject**>(reinterpret_cast<u8*>(m_objs) + off + Obj_Row * 4));
     }
     m_msg->detachMuObject(m_objs[Obj_Arrow]);
     if (m_msg != NULL) {
