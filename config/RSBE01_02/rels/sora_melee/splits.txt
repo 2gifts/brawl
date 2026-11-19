@@ -12351,6 +12351,12 @@ mo_melee/sora_melee/so/so_array_vector_destructor_s32_5.cpp:
 mo_melee/sora_melee/so/so_array_vector_accessors_s32_5_part1.cpp:
 	.text       start:0x00291998 end:0x002919C8
 
+mo_melee/sora_melee/so/so_vtable_ct_vec_8soDamage_3_2919C8.cpp:
+	.text       start:0x002919C8 end:0x00291AC0
+
+mo_melee/sora_melee/so/so_vtable_ct_vec_19soCollisionHitGroup_3_291AC0.cpp:
+	.text       start:0x00291AC0 end:0x00291BB8
+
 mo_melee/sora_melee/so/so_array_vector_ctor_18soCollisionHitPart_3.cpp:
 	.text       start:0x00291BB8 end:0x00291CF8
 
@@ -12870,6 +12876,9 @@ mo_melee/sora_melee/it/it_figure_manager.cpp:
 
 mo_melee/sora_melee/so/so_array_list_archive_ptr_itFigureArchive_64_part1.cpp:
 	.text       start:0x002C1DA4 end:0x002C23B4
+
+mo_melee/sora_melee/so/so_array_base_soArrayList_P15itFigureArchive_2C23B4.cpp:
+	.text       start:0x002C23B4 end:0x002C24D0
 
 mo_melee/sora_melee/so/so_array_list_archive_ptr_itFigureArchive_64_part2.cpp:
 	.text       start:0x002C24D0 end:0x002C2708
@@ -13868,7 +13877,7 @@ mo_melee/sora_melee/wn/wn_lucario_aura_ball.cpp:
 	.ctors      start:0x000004D0 end:0x000004D4
 
 mo_melee/sora_melee/wn/wn_lucario_aura_ball_status_uniq_process.cpp:
-	.text       start:0x003A0694 end:0x003A1514
+	.text       start:0x003A0694 end:0x003A134C
 	.ctors      start:0x000004D4 end:0x000004D8
 
 mo_melee/sora_melee/ft/ft_ike_status_uniq_process_special_nstart.cpp:

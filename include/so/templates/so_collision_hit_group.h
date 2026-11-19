@@ -14,5 +14,9 @@ public:
     float unk14, unk18;
     u32 unk1c, unk20, unk24, unk28, unk2c;
     u8 unk30, unk31, unk32, unk33, unk34;
+#ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: out-of-line constructor/destructor (their definitions live in other units)
+    soCollisionHitGroup();
+    ~soCollisionHitGroup();
+#endif
 };
 static_assert(sizeof(soCollisionHitGroup) == 56, "Class is wrong size!");
