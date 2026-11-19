@@ -8544,6 +8544,9 @@ mo_melee/sora_melee/so/so_array_vector_accessors_soInstanceUnitFullProperty_soTr
 mo_melee/sora_melee/so/so_array_vector_accessors_soInstanceUnitFullProperty_soTransitionTerm_1_part2.cpp:
 	.text       start:0x001B0C10 end:0x001B0C38
 
+mo_melee/sora_melee/so/so_array_vector_accessors_soTransitionTermGroup_20_part2.cpp:
+	.text       start:0x001B0C38 end:0x001B0C60
+
 mo_melee/sora_melee/so/so_instance_manager_value_soAnimCmdControlUnit_11_part4.cpp:
 	.text       start:0x001B0C60 end:0x001B0D0C
 
@@ -13835,6 +13838,10 @@ mo_melee/sora_melee/ft/ft_lucario_status_uniq_process_special_n.cpp:
 mo_melee/sora_melee/wn/wn_lucario_aura_ball.cpp:
 	.text       start:0x0039BDA8 end:0x003A0694
 	.ctors      start:0x000004D0 end:0x000004D4
+
+mo_melee/sora_melee/wn/wn_lucario_aura_ball_status_uniq_process.cpp:
+	.text       start:0x003A0694 end:0x003A1514
+	.ctors      start:0x000004D4 end:0x000004D8
 
 mo_melee/sora_melee/ft/ft_ike_status_uniq_process_special_nstart.cpp:
 	.text       start:0x003A1514 end:0x003A1BBC
