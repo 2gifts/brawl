@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 // socket library (SO). talks to the IOS network stack through /dev/net/ip/top ioctls.
 // structure and ioctl numbers follow the ref socket layer, the "enter / alloc / ioctl / free / leave"
 // shape of every call is the same, only the helper names are my own guesses (HYPOTHESIS).

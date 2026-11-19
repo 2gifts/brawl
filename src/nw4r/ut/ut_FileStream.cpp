@@ -79,6 +79,7 @@ struct Outer {
     Sub* sub;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8015CD80(void* a, Outer* b) {
     Sub* sub = b->sub;
     sub->flag = 0;
@@ -105,6 +106,7 @@ struct Outer {
     Inner* inner;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8015CD54(void* a, Outer* r4) {
     Inner* m = r4->inner;
     m->flag6c = 0;

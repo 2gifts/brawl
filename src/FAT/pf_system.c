@@ -8,6 +8,7 @@ u32 lbl_805A1260 = 0;
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own.
 
+// TODO: clean up, give variables real names
 void PF_enterCritical(void* unk) {
     PF_CRITICAL* critical = unk;
     u32 context;
@@ -25,6 +26,7 @@ void PF_enterCritical(void* unk) {
     critical->count++;
 }
 
+// TODO: clean up, give variables real names
 void PF_exitCritical(void* unk) {
     PF_CRITICAL* critical = unk;
 
@@ -36,10 +38,12 @@ void PF_exitCritical(void* unk) {
     fn_803EC418(critical->resource);
 }
 
+// TODO: clean up, give variables real names
 void fn_803EBB4C(void) {
     lbl_805A1260 = 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_803EBB58(PF_FILE* p_file) {
     PF_SFD* p_sfd;
 
@@ -85,6 +89,7 @@ void fn_803EBBD8(void) {}
 
 int fn_803EC27C();
 
+// TODO: clean up, give variables real names
 void fn_803EBBDC(void) {
     fn_803EC27C();
 }

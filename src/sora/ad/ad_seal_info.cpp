@@ -67,6 +67,7 @@ inline int find(int id, int i, Slot* p, int count) {
  }
  return 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8015B230(Record* self) {
  float sentinel=lbl_805A2BA8;
  int invalid=-1;

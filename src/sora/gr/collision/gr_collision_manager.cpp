@@ -286,6 +286,7 @@ static inline float vectorLengthSq(const Vec2f& a, const Vec2f& b) {
     return (a - b).lengthSq();
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_801127D0(void* self) {
     grCollisionJoint* joint;
     grCollision* coll;

@@ -221,6 +221,7 @@ void* fn_803A9644(void* dst, const void* src, u32 length) { // VFipf_memcpy
     return dst;
 }
 
+// TODO: clean up, give variables real names
 int fn_803A962C(int a) {
     if (a < 0x61)
         return a;
@@ -229,6 +230,7 @@ int fn_803A962C(int a) {
     return a;
 }
 
+// TODO: clean up, give variables real names
 void* fn_803A976C(void* dst, int c, u32 length) {
     u8* p = dst;
     u32* word;
@@ -255,6 +257,7 @@ void* fn_803A976C(void* dst, int c, u32 length) {
     return dst;
 }
 
+// TODO: clean up, give variables real names
 u32 fn_803A9864(const s8* s) {
     const s8* p;
 
@@ -263,6 +266,7 @@ u32 fn_803A9864(const s8* s) {
     return p - s;
 }
 
+// TODO: clean up, give variables real names
 s8* fn_803A9884(s8* dst, const s8* src) {
     s8* d = dst;
 
@@ -273,6 +277,7 @@ s8* fn_803A9884(s8* dst, const s8* src) {
     return dst;
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803A98A8(u8 *arg0, u8 *arg1) {
     u8 c;
     u8 d;
@@ -283,6 +288,7 @@ s32 fn_803A98A8(u8 *arg0, u8 *arg1) {
     return c - *arg1;
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803A98E0(u8 *s1, u8 *s2, u32 n) {
     u32 i;
     u8 c1;
@@ -309,6 +315,7 @@ void VFiPFCODE_Divide_Width(unsigned int arg0, short *arg1, short *arg2) {
     *arg2 = arg0;
 }
 
+// TODO: clean up, give variables real names
 u16 fn_803A9948(const u8* buf) {
     return (buf[0] & ~0xFF00) | ((buf[1] << 8) & 0xFF00);
 }
@@ -321,6 +328,7 @@ u32 fn_803A9A78(PF_STR* p_str) { // VFiPFSTR_GetCodeMode
     return p_str->code_mode;
 }
 
+// TODO: clean up, give variables real names
 void fn_803A9A80(PF_STR* p_str, s8* p_local) {
     if (p_str->code_mode == 1 || p_local == NULL) {
         p_str->p_local = p_str->p_head;
@@ -329,6 +337,7 @@ void fn_803A9A80(PF_STR* p_str, s8* p_local) {
     p_str->p_local = p_local;
 }
 
+// TODO: clean up, give variables real names
 const s8* fn_803A9AA8(PF_STR* p_str, u32 target) {
     if (target == 1) {
         return p_str->p_head;
@@ -339,6 +348,7 @@ const s8* fn_803A9AA8(PF_STR* p_str, u32 target) {
     return p_str->p_local;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFSTR_InitStr(PF_STR* p_str, const s8* s, u32 code_mode) {
     if (p_str == NULL || s == NULL) {
         return 10;
@@ -474,6 +484,7 @@ void VFiPFSTR_ToUpperNStr(PF_STR* p_str, u16 num, s8* dest) {
     *dest = 0;
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803A9FF8(const u16* s) {
     const u16* p = s;
 
@@ -483,6 +494,7 @@ s32 fn_803A9FF8(const u16* s) {
     return (s32)((u32)p - (u32)s) >> 1;
 }
 
+// TODO: clean up, give variables real names
 u16* fn_803AA01C(u16* dst, const u16* src) {
     u16* d = dst;
 
@@ -493,6 +505,7 @@ u16* fn_803AA01C(u16* dst, const u16* src) {
     return dst;
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803AA040(u16 *arg0, u16 *arg1, s32 arg2) {
     u16 *s1 = arg0;
     u16 *s2 = arg1;
@@ -574,6 +587,7 @@ s32 VFiPFDRV_finalize(PF_VOLUME* p_vol) {
     return p_vol ? 0 : 10;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFDRV_unmount(PF_VOLUME* p_vol, u32 mode) {
     s32 err;
     s32 driver_error;
@@ -639,6 +653,7 @@ s32 VFiPFDRV_format(PF_VOLUME* p_vol, const u8* param) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFDRV_lread(PF_VOLUME* p_vol, u8* buf, u32 sector, u32 num_sectors, u32* p_num_success) {
     s32 err;
     s32 driver_error;
@@ -660,6 +675,7 @@ s32 VFiPFDRV_lread(PF_VOLUME* p_vol, u8* buf, u32 sector, u32 num_sectors, u32* 
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFDRV_lwrite(PF_VOLUME* p_vol, const u8* buf, u32 sector, u32 num_sectors, u32* p_num_success) {
     s32 err;
     s32 driver_error;
@@ -811,6 +827,7 @@ s32 VFipdm_disk_convert_block_into_sector(PDM_DISK* p_disk, u32 block, u32 num_b
 
 // Disk and partition handles encode the table index (bits 0-7), the handle kind
 // (bits 8-15: 3 = disk, 4 = partition) and the slot signature (bits 16-31).
+// TODO: clean up, give variables real names
 static inline s32 pdm_disk_check_handle(u32 handle) {
     u32 index = handle & 0xFF;
     u32 kind = handle & 0xFF00;
@@ -1074,6 +1091,7 @@ s32 fn_803AB6EC(PDM_DISK* p_disk, PDM_DISK* lp_disk) { // VFipdm_disk_do_get_per
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFipdm_disk_get_part_permission(PDM_DISK* p_disk) {
     u32 index;
     s32 err;
@@ -1091,6 +1109,7 @@ s32 VFipdm_disk_get_part_permission(PDM_DISK* p_disk) {
 
 // ---------------------------------------------------------------- pdm_partition
 
+// TODO: clean up, give variables real names
 static inline s32 pdm_part_check_handle(u32 handle) {
     u32 index = handle & 0xFF;
     u32 kind = handle & 0xFF00;
@@ -1110,6 +1129,7 @@ static inline s32 pdm_part_check_handle(u32 handle) {
     return i >= 26;
 }
 
+// TODO: clean up, give variables real names
 static inline s32 pdm_part_find_handle(u32 handle, PDM_PARTITION* p_part, u16* p_handle_no) {
     u16 i;
 
@@ -1125,6 +1145,7 @@ static inline s32 pdm_part_find_handle(u32 handle, PDM_PARTITION* p_part, u16* p
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFipdm_part_close_partition(PDM_PARTITION* p_part) {
     u32 index;
     s32 err;
@@ -1353,10 +1374,12 @@ s32 VFipdm_part_get_media_information(PDM_PARTITION* p_part, PDM_DISK_INFO* p_di
     return 0;
 }
 
+// TODO: clean up, give variables real names
 void VFipdm_part_set_driver_error_code(PDM_PARTITION* p_part, s32 error_code) {
     lbl_8053A6E0.partition[(u32)p_part & 0xFF].driver_last_error = error_code;
 }
 
+// TODO: clean up, give variables real names
 s32 VFipdm_part_get_driver_error_code(PDM_PARTITION* p_part) {
     u8 index = (u32)p_part;
 
@@ -1365,6 +1388,7 @@ s32 VFipdm_part_get_driver_error_code(PDM_PARTITION* p_part) {
 
 // ---------------------------------------------------------------- pdm_mbr
 
+// TODO: clean up, give variables real names
 s32 VFipdm_mbr_check_master_boot_record(PDM_DISK* p_disk, u8* buf, u32* is_master_boot) {
     u32 is_boot;
     PDM_MBR mbr;
@@ -1486,6 +1510,7 @@ s32 VFipdm_mbr_get_epbr_part_table(PDM_DISK* p_disk, PDM_MBR* p_mbr) {
 
 // ---------------------------------------------------------------- pdm_dskmng
 
+// TODO: clean up, give variables real names
 s32 VFipdm_open_disk(PDM_INIT_DISK* p_init_disk_tbl, PDM_DISK** pp_disk) {
     s32 err;
 
@@ -1549,6 +1574,7 @@ s32 VFipdm_open_partition(PDM_DISK* p_disk, s32 part_id, PDM_PARTITION** pp_part
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFipdm_close_disk(PDM_DISK* p_disk) {
     if (p_disk == NULL) {
         return 1;
@@ -2091,6 +2117,7 @@ s32 VFiPFDIR_chdir(PF_STR* p_path) {
     return err;
 }
 
+// TODO: clean up, give variables real names
 void fn_803B2968(unsigned char *p)
 {
     int i;
@@ -2101,6 +2128,7 @@ void fn_803B2968(unsigned char *p)
     }
 }
 
+// TODO: clean up, give variables real names
 void fn_803B29A0(unsigned char *p)
 {
     int i;
@@ -2849,10 +2877,12 @@ u32 VFiPFENT_ITER_IsAtLogicalEnd(PF_ENT_ITER* p_iter) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFENT_ITER_GetEntryOfPath(PF_ENT_ITER* p_iter, PF_DIR_ENT* p_ent, PF_VOLUME* p_vol, PF_STR* p_path, u32 no_look_last_token) {
     return fn_803B4910(p_iter, p_ent, p_vol, p_path, 0, no_look_last_token);
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803B5644(PF_ENT_ITER* p_iter, PF_DIR_ENT* p_ent, PF_VOLUME* p_vol, PF_STR* p_path) {
     return fn_803B4910(p_iter, p_ent, p_vol, p_path, 1, 1);
 }
@@ -3054,6 +3084,7 @@ s32 VFiPFFAT_GetContinuousSector(PF_FFD* p_ffd, u32 file_sector_index, u32 size,
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFFAT_MakeRootDir(PF_VOLUME* p_vol) {
     u32 num_success;
     PF_CACHE_PAGE* p_page;
@@ -3140,6 +3171,7 @@ s32 VFiPFFAT_FinalizeFFD(PF_FFD* p_ffd) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 u32 VFiPFFAT_GetValueOfEOC2(PF_VOLUME* p_vol) {
     return lbl_804169B0[p_vol->bpb.fat_type].eoc2;
 }
@@ -3473,10 +3505,12 @@ void VFiPFFILE_FinalizeAllFiles(PF_VOLUME* p_vol) {
 
 // ---------------------------------------------------------------- pf_path
 
+// TODO: clean up, give variables real names
 s32 VFiPFPATH_SplitPath(PF_STR* p_path, PF_STR* p_dir_path, PF_STR* p_filename) {
     return fn_803BD16C(p_path, p_dir_path, p_filename, 0);
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803BE3D0(PF_STR* p_path, PF_STR* p_dir_path, PF_STR* p_filename) {
     return fn_803BD16C(p_path, p_dir_path, p_filename, 1);
 }
@@ -3485,6 +3519,7 @@ s32 VFiPFPATH_cmpNameUni(const u16* p_name, PF_STR* sPattern) {
     return VFiPFPATH_MatchFileNameWithPattern((const s8*)p_name, sPattern, 1) == 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFPATH_cmpTailSFN(const s8* sfn_name, const s8* pattern) {
     return fn_803A98A8((u8*)sfn_name, (u8*)pattern) != 0;
 }
@@ -3495,6 +3530,7 @@ void VFiPFPATH_InitTokenOfPath(PF_STR* p_str, s8* path, u32 code_mode) {
     p_str->code_mode = code_mode;
 }
 
+// TODO: clean up, give variables real names
 PF_VOLUME* VFiPFPATH_GetVolumeFromPath(PF_STR* p_path) {
     s8 drv_char;
 
@@ -3508,6 +3544,7 @@ PF_VOLUME* VFiPFPATH_GetVolumeFromPath(PF_STR* p_path) {
     return VFiPFVOL_GetCurrentVolume();
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFPATH_transformInUnicode(u16* sDestStr, const s8* sSrcStr) {
     s16 oem_width;
     s16 uni_width;
@@ -3601,6 +3638,7 @@ s32 VFiPFPATH_parseShortNameNumeric(s8 *buf, u32 num)
 
 // ---------------------------------------------------------------- pf_sector
 
+// TODO: clean up, give variables real names
 s32 VFiPFSEC_ReadFAT(PF_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset, u16 size) {
     PF_CACHE_PAGE* p_page;
     s32 err;
@@ -3648,6 +3686,7 @@ static inline s32 pfvol_release_driver(PF_VOLUME* p_vol, u32 mode) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFVOL_p_unmount(PF_VOLUME* p_vol, u32 mode) {
     s32 result = 0;
     s32 err;
@@ -3675,6 +3714,7 @@ s32 VFiPFVOL_p_unmount(PF_VOLUME* p_vol, u32 mode) {
     return result;
 }
 
+// TODO: clean up, give variables real names
 PF_VOLUME* VFiPFVOL_GetVolumeFromDrvChar(s8 drv_char) {
     s16 index = fn_803A962C(drv_char) - 'A';
 
@@ -3684,15 +3724,18 @@ PF_VOLUME* VFiPFVOL_GetVolumeFromDrvChar(s8 drv_char) {
     return &lbl_8053B248.volumes[index];
 }
 
+// TODO: clean up, give variables real names
 void VFiPFVOL_LoadVolumeLabelFromBuf(const u8* buf, PF_VOLUME* p_vol) {
     fn_803A9644(p_vol->label, buf, 11);
     p_vol->label[11] = 0;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFVOL_errnum(void) {
     return lbl_8053B248.last_error;
 }
 
+// TODO: clean up, give variables real names
 s32 VFiPFVOL_unmount(s8 drv_char, u32 mode) {
     s16 index;
     PF_VOLUME* p_vol;
@@ -3792,6 +3835,7 @@ s32 VFiPFCODE_CP932_UnicodeCharWidth(const u16* buf) {
 
 // ---------------------------------------------------------------- pf_apicmn
 
+// TODO: clean up, give variables real names
 s32 VFiPFAPI_convertError(s32 err) {
     if (err == 0)
         return 0;
@@ -3827,6 +3871,7 @@ s32 VFiPFAPI_convertReturnValue4unmount(s32 err) {
 
 // ---------------------------------------------------------------- pf_w_* (API wrappers)
 
+// TODO: clean up, give variables real names
 int VFipf2_attach(PF_DRV_TBL** drv_tbl) {
     PF_DRV_TBL** p = drv_tbl;
     s32 err;
@@ -3889,6 +3934,7 @@ s32 VFipf2_finfo(PF_FILE* p_file, PF_INFO* p_info) {
     return VFiPFAPI_convertReturnValue(VFiPFFILE_finfo(p_file, p_info));
 }
 
+// TODO: clean up, give variables real names
 PF_FILE* VFipf2_fopen(const s8* path, const s8* mode) {
     PF_STR str;
     PF_FILE* p_file;
@@ -4033,6 +4079,7 @@ s32 VFipf2_mkdir(const s8* path) {
     return VFiPFAPI_convertReturnValue(err);
 }
 
+// TODO: clean up, give variables real names
 s32 VFipf2_remove(const s8* path) {
     PF_STR str;
     s32 err;
@@ -4050,6 +4097,7 @@ s32 VFipf2_unmount(s8 drv_char, u32 mode) {
     return VFiPFAPI_convertReturnValue4unmount(VFiPFVOL_unmount(drv_char, mode));
 }
 
+// TODO: clean up, give variables real names
 void VFiPF_InitLockFile(void) {
     lbl_805A1200.flock_count = 0;
 }
@@ -4128,6 +4176,7 @@ void VFiPFSYS_TimeStamp(PF_SYS_DATE* sdate, PF_SYS_TIME* stime) {
 
 // ---------------------------------------------------------------- d_vf
 
+// TODO: clean up, give variables real names
 s32 VFIsAvailable(void) {
     return lbl_805A1208 != 0;
 }
@@ -4402,6 +4451,7 @@ s32 VFDeleteFile(const s8* i_path_p) {
     return err;
 }
 
+// TODO: clean up, give variables real names
 s32 VFSeekFile(void* i_file_p, s32 i_offset, s32 i_origin) {
     s32 err;
 
@@ -4416,6 +4466,7 @@ s32 VFSeekFile(void* i_file_p, s32 i_offset, s32 i_origin) {
     return err;
 }
 
+// TODO: clean up, give variables real names
 s32 VFReadFile(void* i_file_p, void* o_buf_p, u32 i_size, u32* o_read_size_p) {
     s32 err;
 
@@ -4430,6 +4481,7 @@ s32 VFReadFile(void* i_file_p, void* o_buf_p, u32 i_size, u32* o_read_size_p) {
     return err;
 }
 
+// TODO: clean up, give variables real names
 s32 VFWriteFile(void* i_file_p, void* i_buf_p, u32 i_size) {
     s32 err;
 
@@ -4540,6 +4592,7 @@ s32 fn_803C3CF8(const s8* i_path_p) {
     return -1;
 }
 
+// TODO: clean up, give variables real names
 s32 VFGetLastDeviceError(const s8* i_drive) {
     s32 err;
     s32 handle_idx;
@@ -4560,6 +4613,7 @@ s32 VFGetLastDeviceError(const s8* i_drive) {
     return err;
 }
 
+// TODO: clean up, give variables real names
 s32 VFGetDriveFreeSize(const s8* i_drive)
 {
     s32 size;
@@ -4579,6 +4633,7 @@ s32 VFGetDriveFreeSize(const s8* i_drive)
     return size;
 }
 
+// TODO: clean up, give variables real names
 s32 VFSetSyncMode(const s8* i_drive, u32 i_mode) {
     s32 err;
     s32 handle_idx;
@@ -4601,12 +4656,14 @@ s32 VFSetSyncMode(const s8* i_drive, u32 i_mode) {
 
 // ---------------------------------------------------------------- d_vf_sys
 
+// TODO: clean up, give variables real names
 void VFSysSetLastError(s32 i_err) {
     if (i_err != 0) {
         lbl_805A1214 = i_err;
     }
 }
 
+// TODO: clean up, give variables real names
 static inline VF_HANDLE_TYPE* vfsys_get_handle(s32 i_idx) {
     if (i_idx < lbl_805A1210 && lbl_805A1220 != NULL) {
         return &lbl_805A1220[i_idx];
@@ -4614,6 +4671,7 @@ static inline VF_HANDLE_TYPE* vfsys_get_handle(s32 i_idx) {
     return NULL;
 }
 
+// TODO: clean up, give variables real names
 VF_HANDLE_TYPE* VFSysGetHandleP(s32 i_idx) {
     if (i_idx < lbl_805A1210 && lbl_805A1220 != NULL) {
         return &lbl_805A1220[i_idx];
@@ -4823,6 +4881,7 @@ void fn_803C74C8(void* dst, u32 size, u32 version, u8 flag) {
     fn_803A9644(dst, h, 0x20);
 }
 
+// TODO: clean up, give variables real names
 s32 VFSysCheckExistPrfFile(s32 i_handle_idx, const s8* i_prf_file_name_p, void* i_memory_p) {
     VF_HANDLE_TYPE* handle_p = vfsys_get_handle(i_handle_idx);
     VF_HANDLE_DEVICE* device_p;
@@ -4844,6 +4903,7 @@ s32 VFSysCheckExistPrfFile(s32 i_handle_idx, const s8* i_prf_file_name_p, void* 
     return -1;
 }
 
+// TODO: clean up, give variables real names
 s32 VFSysUnmountDrv(s32 i_handle_idx, u32 i_mode) {
     VF_HANDLE_TYPE* handle_p = vfsys_get_handle(i_handle_idx);
     s32 err;
@@ -4876,6 +4936,7 @@ s32 VFSysUnmountDrv(s32 i_handle_idx, u32 i_mode) {
     return VFipf2_errnum();
 }
 
+// TODO: clean up, give variables real names
 static inline VF_HANDLE_TYPE* vfsys_first_handle(void) {
     if (lbl_805A1210 != 0 && lbl_805A1220 != NULL) {
         return lbl_805A1220;
@@ -4883,6 +4944,7 @@ static inline VF_HANDLE_TYPE* vfsys_first_handle(void) {
     return NULL;
 }
 
+// TODO: clean up, give variables real names
 static inline VF_HANDLE_TYPE* vfsys_vol_to_handle(PF_VOLUME* p_vol) {
     VF_HANDLE_TYPE* handle_p;
     VF_HANDLE_TYPE* end;
@@ -4899,6 +4961,7 @@ static inline VF_HANDLE_TYPE* vfsys_vol_to_handle(PF_VOLUME* p_vol) {
     return NULL;
 }
 
+// TODO: clean up, give variables real names
 static inline VF_HANDLE_TYPE* vfsys_file_to_handle(PF_FILE* i_file_p) {
     VF_HANDLE_TYPE* handle_p = NULL;
 
@@ -5269,6 +5332,7 @@ s32 VFSysReadFile(u32* o_read_size_p, void* o_buf_p, u32 i_size, PF_FILE* i_file
     return err;
 }
 
+// TODO: clean up, give variables real names
 s32 VFSysGetLastError(void) {
     return lbl_805A1214;
 }
@@ -5317,6 +5381,7 @@ s32 VFSysGetLastDeviceError(s32 i_handle_idx) {
     return -1;
 }
 
+// TODO: clean up, give variables real names
 VFTimeStampCallback VFSysSetTimeStampCallback(VFTimeStampCallback callback) {
     VFTimeStampCallback old;
 
@@ -5325,6 +5390,7 @@ VFTimeStampCallback VFSysSetTimeStampCallback(VFTimeStampCallback callback) {
     return old;
 }
 
+// TODO: clean up, give variables real names
 VFTimeStampCallback VFSysGetTimeStampCallback(void) {
     return lbl_805A1224;
 }
@@ -5362,6 +5428,7 @@ void dTM_GetNowTime(PF_SYS_DATE* sdate, PF_SYS_TIME* stime) {
 
 // ---------------------------------------------------------------- d_hash
 
+// TODO: clean up, give variables real names
 void dHash_InitHashTable(void) {
     int i;
     dHashEntry* p = lbl_80563360;
@@ -5455,6 +5522,7 @@ int dCommon_IsPrfFile(void* i_buff_p) {
     return 1;
 }
 
+// TODO: clean up, give variables real names
 s32 dCommon_MakeFsInfoSec(u8* buf, u32 fsInfoSize) {
     PDM_FSINFO fsinfo;
 
@@ -5502,6 +5570,7 @@ u32 dCommon_GetRootEntNumFromFatType(enum FatType arg0) {
     return arg0 == FAT_32 ? 0 : 0x80;
 }
 
+// TODO: clean up, give variables real names
 static inline VF_DRIVE_INFO* dcommon_get_drive_info(PDM_DISK* p_disk) {
     u32 index = VFSysPDMDisk2HandleIdx(p_disk);
 
@@ -5629,6 +5698,7 @@ void dCommon_setLastDeviceErrorToDisk(PDM_DISK* p_disk, s32 i_lastDevErr) {
     }
 }
 
+// TODO: clean up, give variables real names
 void dCommon_setLastDeviceErrorToDisk2(s32 i_handleIdx, s32 i_lastDevErr) {
     if (i_handleIdx < 0) {
         return;

@@ -54,6 +54,7 @@ struct Dst {
     float fov;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800A323C(Dst* dst, Src* src, float farg0) {
     float prod = lbl_805A1F40 * (lbl_805A1F3C * dst->fov);
     float tanf = (float)fn_80400AB8(prod);

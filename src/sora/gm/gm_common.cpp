@@ -2369,6 +2369,7 @@ void gmResultInfo::gmSetSelStagePlayerModeResult(gmGlobalModeMelee* melee) {
     }
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80055760(u32 arg0, s32 arg1) {
     if (arg0 == 5) {
         s32 v = 0;
@@ -3046,6 +3047,7 @@ namespace jj_800557F8 {
 extern "C" void* fn_8004E5C4(void*);
 extern void* g_GameGlobal;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_800557F8(s32 arg0, s32 arg1, s32 arg2) {
     s32 off = arg2 * 0xCC;
     s32 base = (arg0 - 1) * 0x264;
@@ -3069,6 +3071,7 @@ namespace jj_80055888 {
 extern "C" void* fn_8004E5C4(void*);
 extern "C" void* g_GameGlobal;
 
+// TODO: clean up, give variables real names
 inline u32 findEntry(s32 a, s32 b, s32 i) {
     for (s32 j = b; j < 3; j++) {
         u32* p = (u32*)((u8*)fn_8004E5C4(g_GameGlobal) + 0x32c + (a - 1) * 0x264 + j * 0xcc + i * 4);
@@ -3077,6 +3080,7 @@ inline u32 findEntry(s32 a, s32 b, s32 i) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_80055888(s32 a, s32 b) {
     s32 count = 0;
     for (s32 i = 0; i < 0x33; i++) {
@@ -3093,6 +3097,7 @@ extern "C" {
 extern ItemFlags lbl_8042D098;
 extern ItemFlags lbl_804977E0;
 extern u32 fn_8004F3BC(u8);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 ItemFlags* fn_80056184(void) {
     int* src = (int*)&lbl_8042D098;
     int* dst = (int*)&lbl_804977E0;
@@ -3122,6 +3127,7 @@ extern ItemFlags lbl_8042C828[];
 extern ItemFlags lbl_804977E0;
 extern u32 fn_8004F3BC(u8);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 ItemFlags* fn_80055DD4(int arg0) {
     int* src = (int*)&lbl_8042C828[arg0];
     int* dst = (int*)&lbl_804977E0;
@@ -3152,6 +3158,7 @@ extern ItemFlags lbl_8042CFB8[];
 extern ItemFlags lbl_804977E0;
 extern u32 fn_8004F3BC(u8);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 ItemFlags* fn_80056064(int arg0) {
     int* src = (int*)&lbl_8042CFB8[arg0];
     int* dst = (int*)&lbl_804977E0;
@@ -3185,6 +3192,7 @@ unsigned int* fn_8004E67C(void*);
 unsigned int* fn_8004E688(void*);
 unsigned int* fn_8004E694(void*);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80053078(int a, int b, int c, int d, unsigned int* p) {
     p = 0;
     if ((unsigned char)(b + 0xF7) <= 1U) {
@@ -3225,6 +3233,7 @@ extern ItemFlags lbl_8042CC88[];
 extern ItemFlags lbl_804977E0;
 extern u32 fn_8004F3BC(u8);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 ItemFlags* fn_80055EF4(int arg0, int arg1) {
     if (arg1 == 1) {
         int* src = (int*)&lbl_8042C958[arg0];
@@ -3327,6 +3336,7 @@ struct Mode { char pad[5]; u8 mode; };
 struct Global { char pad[0x18]; Player* players; Mode* mode; };
 extern "C" Global* g_GameGlobal;
 extern "C" u16* fn_8004DA14(void*, int, int);
+// TODO: clean up, give variables real names
 extern "C" void fn_80053C34() {
     Player* players = g_GameGlobal->players;
     if (g_GameGlobal->mode->mode == 1) {

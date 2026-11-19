@@ -11,6 +11,7 @@ char lbl_80536500[SAKE_MAX_URL_LENGTH] = { 0 };
 // Checked: without this pragma 2 functions in this unit stop matching.
 #pragma auto_inline off
 
+// TODO: clean up, give variables real names
 int fn_8038D394(SAKE* sakePtr) {
     SAKE sake;
 
@@ -29,12 +30,14 @@ int fn_8038D394(SAKE* sakePtr) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 void fn_8038D480(SAKE sake, int profileId, const char* loginTicket) {
     sake->mProfileId = profileId;
     memcpy(sake->mLoginTicket, loginTicket, SAKE_LOGIN_TICKET_LENGTH);
     sake->mIsProfileAuthenticated = 1;
 }
 
+// TODO: clean up, give variables real names
 SAKERequest fn_8038D4D0(SAKE sake, void* input, void* callback, void* userData) {
     SAKERequest request;
     SAKERequest result;
@@ -55,6 +58,7 @@ SAKERequest fn_8038D4D0(SAKE sake, void* input, void* callback, void* userData) 
     return result;
 }
 
+// TODO: clean up, give variables real names
 int fn_8038D54C(SAKE sake, int fileId, char* url) {
     if (sake == NULL || url == NULL || !sake->mIsGameAuthenticated || !sake->mIsProfileAuthenticated) {
         return 0;
@@ -62,6 +66,7 @@ int fn_8038D54C(SAKE sake, int fileId, char* url) {
     return snprintf(url, SAKE_MAX_URL_LENGTH, lbl_80490DA0, sake->mGameName, fileId, sake->mGameId, sake->mProfileId) >= 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_8038D5D0(SAKE sake, char* url) {
     if (sake == NULL || url == NULL || !sake->mIsGameAuthenticated || !sake->mIsProfileAuthenticated) {
         return 0;
@@ -69,6 +74,7 @@ int fn_8038D5D0(SAKE sake, char* url) {
     return snprintf(url, SAKE_MAX_URL_LENGTH, lbl_80490DF4, sake->mGameName, sake->mGameId, sake->mProfileId) >= 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_8038D64C(const char* headers, int* result) {
     const char* headerName = lbl_80490E3C;
     const char* header = strstr(headers, headerName);
@@ -92,6 +98,7 @@ int fn_8038D64C(const char* headers, int* result) {
     return 1;
 }
 
+// TODO: clean up, give variables real names
 int fn_8038D6F8(const char* headers, int* fileId) {
     const char* headerName = lbl_80490E50;
     const char* header = strstr(headers, headerName);
@@ -104,6 +111,7 @@ int fn_8038D6F8(const char* headers, int* fileId) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_8038DC08(SAKERequest request) {
     SAKEIRequestInfo* info;
     int result;
@@ -135,6 +143,7 @@ int fn_8038DC08(SAKERequest request) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_8038DD48(SAKERequest request, SAKEIRequestInfo* info) {
     int result;
 
@@ -150,6 +159,7 @@ int fn_8038DD48(SAKERequest request, SAKEIRequestInfo* info) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_8038E268(SAKERequest request) {
     int found = fn_80367A60(request->mSoapResponse, lbl_80491088, request->mOutput);
     int result = 0;
@@ -160,10 +170,12 @@ int fn_8038E268(SAKERequest request) {
     return result;
 }
 
+// TODO: clean up, give variables real names
 int fn_8038E2AC(SAKERequest request) {
     return fn_8038DD48(request, &lbl_80491104);
 }
 
+// TODO: clean up, give variables real names
 int fn_8038E370(SAKERequest request) {
     int result = 4;
 
@@ -243,6 +255,7 @@ int sakeiDeleteRecordFillSoapRequest(SAKERequest request) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 SAKERequest fn_8038D77C(SAKE sake, int type, void* input, void* callback, void* userData) {
     SAKERequest request;
 
@@ -273,6 +286,7 @@ extern char lbl_8059FC04[7];  // "values"
 extern char lbl_8059FC0C[5];  // "name"
 extern char lbl_8059FC14[6];  // "value"
 
+// TODO: clean up, give variables real names
 int sakeiFillSoapRequestFieldValues(SAKERequest request, SAKEField* fields, int numFields) {
     int i;
 
@@ -331,6 +345,7 @@ void fn_8038D41C(void* arg) {
     fn_8035E00C(arg);
 }
 
+// TODO: clean up, give variables real names
 void fn_8038D84C(SAKERequest request) {
     fn_8035E00C(request);
 }
@@ -361,6 +376,7 @@ struct S {
     char pad[8];
     struct Inner *p;
 };
+// TODO: clean up, give variables real names
 int fn_8038E1C0(struct S *arg) {
     struct Inner *p = arg->p;
     int second;
@@ -379,6 +395,7 @@ extern char lbl_80490E60[0x130];
 extern char lbl_8059FBE8[8];
 int strcmp(const char *s1, const char *s2);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_8038D850(const char *arg0) {
     char *base = lbl_80490E60;
     int result;
@@ -442,6 +459,7 @@ int fn_8038D850(const char *arg0) {
 
 // sakeiSoapCallback: translates the HTTP result and the result tag of the SOAP response, lets the request callback
 // look at the output and frees the request.
+// TODO: clean up, give variables real names
 void fn_8038DA60(int httpResult, GSXmlStreamWriter requestData, GSXmlStreamReader response, void* userData) {
     SAKERequest request = (SAKERequest)userData;
     void* output = NULL;

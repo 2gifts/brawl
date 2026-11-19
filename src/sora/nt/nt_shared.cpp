@@ -22,6 +22,7 @@ struct NtBufferObj {
 
 extern "C" unsigned char __vt__8NtBuffer[];
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8013DB48(NtBufferObj* self) {
     self->m_size = 0;
     self->vtable = __vt__8NtBuffer;
@@ -40,6 +41,7 @@ struct NtBufferDispatch : NtBuffer {
     virtual void freeBuffer() = 0;
 };
 
+// TODO: clean up, give variables real names
 extern "C" NtBuffer* fn_8013DB6C(NtBuffer* self, int flag) {
     if (self) {
         if (self) {
@@ -54,6 +56,7 @@ extern "C" NtBuffer* fn_8013DB6C(NtBuffer* self, int flag) {
 }
 
 namespace jj_801410CC {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_801410CC(void* self, int index) {
     void* root = *(void**)((char*)self + 0x454);
     if (root == 0) return 0;
@@ -98,6 +101,7 @@ public:
 struct BufferObj : NtBuffer {
     int a, b, c, d;
 };
+// TODO: clean up, give variables real names
 extern "C" void* fn_8013DBD8(BufferObj* self, int flag) {
     if (self) {
         *(void**)self = lbl_8045E7AC;
@@ -136,6 +140,7 @@ struct NetBuf {
     int tail;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80142BF0(NetBuf* buf, int value) {
     int sum = buf->cap + (buf->tail - buf->head);
     int rem = sum % buf->cap;
@@ -187,6 +192,7 @@ struct Object {
     int x24c;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8013EFCC(Object* self) {
     self->b.clear();
     self->a.clear();
@@ -225,6 +231,7 @@ inline bool checkPlayers(Object* obj, Entry::Player* players) {
     }
     return true;
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_801416CC(Object* obj) {
     Entry::Player* playerData;
     Entry* second;
@@ -261,6 +268,7 @@ extern const f32 lbl_805A2B14;
 extern const f32 lbl_805A2B18;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8013F9B8(char* arg0) {
     muWifiInterfaceTask* task = g_muWifiInterfaceTask;
     u32 i;
@@ -321,6 +329,7 @@ static inline f32 clamp(f32 v, f32 lo, f32 hi) {
     return v;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" f32 fn_80143974(Self* self) {
     f32 sum = lbl_805A2AC8;
     f32 count = lbl_805A2AC8;
@@ -376,6 +385,7 @@ struct Object {
     SendFlag flags[4];
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80142A80(Object* self) {
     u8 done[4];
     done[0] = self->flags[0].active == 0;
@@ -461,6 +471,7 @@ extern u8 lbl_8059E742;
 extern Pair lbl_805A0418[4];
 extern char lbl_8045E1D0[];
 
+// TODO: clean up, give variables real names
 extern "C" u32 fn_80140604(u8 arg0, u32 arg1, Arg* arg2) {
     u32 i;
     u32 temp_r3;
@@ -545,6 +556,7 @@ extern u8 lbl_8059E742;
 extern char lbl_8045E188[];
 extern NtReport lbl_8045E1C0;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8014044C(Obj* obj) {
     if (obj->unk14C == 0xB4) {
         int p = lbl_805A0434;
@@ -601,6 +613,7 @@ extern int lbl_805A03A8;
 extern char lbl_8045E380[];
 extern char lbl_8045E3A8[];
 }
+// TODO: clean up, give variables real names
 inline void update(unsigned char* self) {
     self[0x11] = 0;
     self[0x12] = 0;
@@ -611,6 +624,7 @@ inline void update(unsigned char* self) {
         }
     }
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80141814(void* arg0) {
     unsigned char result;
     unsigned char* data;
@@ -676,6 +690,7 @@ extern NtSend* lbl_805A03D4;
 extern const f32 lbl_805A2AC8;
 extern const f32 lbl_805A2AD4;
 extern const f32 lbl_805A2B1C;
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_80140790(u8 arg0, u32 arg1, u8* arg2) {
     Node* n;
     u8* buf;
@@ -775,6 +790,7 @@ struct Word198 {
     u32 b : 24;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_8013D8A8(void* arg0) {
     char* p = (char*)arg0;
     s32 i;
@@ -986,6 +1002,7 @@ static inline void resetMgr(Mgr* g) {
     memset(g->unk160, 0, g->unk154);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8013DDEC(void) {
     lbl_805A0390->unkA8 = 0;
     resetMgr(lbl_805A0390);
@@ -1080,6 +1097,7 @@ static inline void resetMgr(Mgr* g) {
     memset(g->unk160, 0, g->unk154);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8013FB0C(void) {
     lbl_805A0390->unkA8 = 0;
     resetMgr(lbl_805A0390);
@@ -1125,6 +1143,7 @@ struct State {
     int mode;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_8013FDD4(State* self) {
     unsigned int offset;
     Entry* e;
@@ -1237,6 +1256,7 @@ extern u8 lbl_8059E742;
 extern u8 lbl_805A0418[8];
 extern void (*lbl_805A0398)(s32*, u32*, u16);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_801419FC(void* arg0) {
     NetElem* elem;
     NetCtx* self;
@@ -1356,6 +1376,7 @@ static inline void resetMgr(Mgr* g) {
  } }
  memset(g->unk160, 0, g->unk154);
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_8013F658() {
  fn_800D1A9C(g_muWifiInterfaceTask);
  lbl_805A0390->unkA8 = 0;
@@ -1444,6 +1465,7 @@ static inline void reset(State* self) {
 }
 
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_801400EC(State* self) {
     self->result = 0;
     if (g_NtMatchingStatus != 9) return 0;
@@ -1500,6 +1522,7 @@ extern const f32 lbl_805A2ADC;
 extern const f32 lbl_805A2AEC;
 }
 
+// TODO: clean up, give variables real names
 inline void update(unsigned char* self) {
     self[0x11] = 0;
     self[0x12] = 0;
@@ -1511,6 +1534,7 @@ inline void update(unsigned char* self) {
     }
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_80141EBC(void* arg0) {
     char* base = lbl_8045E018;
     u8* self = (u8*)arg0;
@@ -1804,6 +1828,7 @@ static inline void resetMgr(Mgr* g) {
     }
     memset(g->data, 0, g->size);
 }
+// TODO: clean up, give variables real names
 static inline void notifyCamera(int v) {
     if (lbl_805A0428) {
         lbl_805A0428->active = v;
@@ -1816,6 +1841,7 @@ static inline void notifyCamera(int v) {
         }
     }
 }
+// TODO: clean up, give variables real names
 static inline void clearMgr() {
     fn_800D1A9C(g_muWifiInterfaceTask);
     lbl_805A0390->state = 0;
@@ -1826,6 +1852,7 @@ static inline void clearMgr() {
         notifyCamera(0);
     }
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80142EB0(State* self) {
     char* base = lbl_8045E018;
     if (gfErrorManager::getInstance()->m_isSuspended && self->error == 0) {

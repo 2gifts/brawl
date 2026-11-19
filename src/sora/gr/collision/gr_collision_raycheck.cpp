@@ -157,6 +157,7 @@ struct Obj {
     u32 w[4];
 };
 
+// TODO: clean up, give variables real names
 u8 fn_8013848C(void* arg0, void* arg1, const u8* arg2) {
     Obj* o = (Obj*)arg0;
     u32* a1 = (u32*)arg1;

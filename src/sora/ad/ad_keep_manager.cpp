@@ -388,6 +388,7 @@ struct Arg0 {
     Holder* holder;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8015A138(Arg0* arg0, int arg1, int arg2) {
     if (arg1) {
         arg0->holder->flags &= 0xFFFFEFFF;
@@ -458,6 +459,7 @@ struct Table {
     u32 count;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8015A434(void* arg0, Entry* arg1) {
     Table* self = static_cast<Table*>(arg0);
     u32 off;

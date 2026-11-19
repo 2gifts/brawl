@@ -44,6 +44,7 @@ extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 extern "C" void* fn_800800D8(void*);
 extern "C" void fn_80080118(void*, int);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_800966EC(void* self, int arg) {
     void* p;
     *(unsigned char*)((char*)self + 0x0) = 1;
@@ -85,6 +86,7 @@ struct S {
 struct Obj { char pad[0x10]; S s; };
 struct Mgr { char pad[8]; Obj** objs; };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80098188(Mgr* m, int i, float v) {
     Obj* o = m->objs[i];
     S tmp = o->s;
@@ -126,6 +128,7 @@ extern "C" void fn_8003E6DC(const Mat*,V*);
 static inline V getScale(const Mat* m) { V v; fn_8003E6DC(m,&v); return v; }
 extern Mat lbl_804864C0;
 extern float lbl_805A1D28,lbl_805A1D2C;
+// TODO: clean up, give variables real names
 static inline Obj* find(Mgr* m,int id) {
  for(int i=0;i<m->count;++i) {
   Obj* o=m->objs[i];
@@ -153,6 +156,7 @@ struct Mat4 {
  in[12]=a.w;in[13]=b.w;in[14]=c.w;in[15]=d.w;
  }
 } __attribute__((aligned(16)));
+// TODO: clean up, give variables real names
 extern "C" void fn_800977F0(Mgr* self,Mat* matrices,void* arg) {
  Mat** result=fn_8032EF00(arg);
  Mat converted;
@@ -248,6 +252,7 @@ static inline s32 flags(const Arr& arr) {
     return arr.cap & 0x80000000;
 }
 
+// TODO: clean up, give variables real names
 static inline void initBuf(Buf& buf, Pool* pool) {
     buf.pool = pool;
     buf.a0.data = 0; buf.a0.size = 0; buf.a0.cap = (s32)0x80000000;
@@ -280,6 +285,7 @@ static inline void initBuf(Buf& buf, Pool* pool) {
 
 }
 
+// TODO: clean up, give variables real names
 static inline Ent* findEnt(Ctx* self, s16 id) {
     for (s32 k = 0; k < self->nEnts; k++) {
         Ent* q = self->ents[k];
@@ -298,6 +304,7 @@ static inline bool contains(Ctx* self, s16 id) {
     return false;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800969E0(Ctx* self, void* dst) {
     s32 idx;
     s16 id;

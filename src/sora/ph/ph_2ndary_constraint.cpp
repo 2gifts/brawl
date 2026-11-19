@@ -56,6 +56,7 @@ extern "C" void fn_801EC1B8(const void*, const void*, void*);
 extern float lbl_805A1BB4;
 typedef union { float f; unsigned int i; } FloatBits;
 #define IS_NAN(u, x) ((u.f = (x)), ((u.i >> 23 & 255) == 255) && (u.i & 0x7fffff))
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80082130(char* self) {
     FloatBits u11, u10, u9, u8, u7, u6, u5, u4, u3, u2, u1, u0;
     _MTX34 ident;

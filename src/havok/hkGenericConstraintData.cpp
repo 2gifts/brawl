@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 // Havok translation unit hkGenericConstraintData.o (main.dol 0x802DBC80-0x802DD570).
 // Not yet decompiled. Functions in address order:
 //   0x802DBC80    52  finishLoadedObjecthkGenericConstraintData
@@ -36,6 +37,9 @@
 #include <havok/hkRegistry.h>
 #include <havok/hkMath.h>
 #include <havok/hkConstraintQueryIn.h>
+#include <havok/hk1dConstraintInfo.h>
+#include <havok/hkContactPointMaterial.h>
+#include <havok/hkMotorBuildJacobian.h>
 
 
 void hkGenericConstraintData::finishLoadedObjecthkGenericConstraintData(void* p) {
@@ -418,7 +422,6 @@ struct Context { char pad[0x50]; Vec values[6]; char pad2[8]; int count; };
 struct Work { Vec a,b; };
 extern "C" {
 extern const float lbl_805A4270, lbl_805A4278, lbl_805A427C, lbl_805A4280;
-void fn_80287FE8(void*, void*, void*);
 void fn_802DCCC8(void*, int** indices, Vec** data, void*, Context* ctx, void* a, void* b) {
     Work work __attribute__((aligned(16)));
     ++*indices;
@@ -435,8 +438,187 @@ void fn_802DCCC8(void*, int** indices, Vec** data, void*, Context* ctx, void* a,
     if (work.b.z > lbl_805A4270 && v->z < lbl_805A4270 && work.b.z - v->z > lbl_805A427C)
         work.b.z -= lbl_805A4280;
     v->z = work.b.z;
-    fn_80287FE8(&work, a, b);
+    fn_80287FE8(*(const hk1dAngularLimitInfo*)&work, *(const hkConstraintQueryIn*)a, *(hkConstraintQueryOut*)b);
     ctx->count++;
 }
 }
 } // namespace jj_fn_802DCCC8
+
+// Command handlers of hatchScheme. Each reads its operands from the command stream (the axis index follows the
+// command word) and the data stream (one hkVector4 per command), builds one Jacobian row and advances the solver
+// result index. HYPOTHESIS: the parameter names; the first argument is the constraint data (not read).
+// TODO: clean up: make these static members of hkGenericConstraintData named as in the map (setLinearFrictionW,
+// setTwistLimitW, setAngularFrictionW, ...) once their mangled signatures are settled; the fn_ labels stay until then.
+
+// hkInternalConstraintUtils_calcRelativeAngle (hkInternalConstraintUtils.o). HYPOTHESIS: the parameters.
+// TODO: clean up: declare it in an hkInternalConstraintUtils header and name it in symbols.txt.
+extern "C" void fn_8028F9AC(const hkVector4& twistAxisA, const hkVector4& twistAxisB, const hkVector4& refAxisA,
+                            const hkVector4& refAxisB, hkVector4& axisOut, hkReal& angleOut);
+
+// setLinearFrictionW: friction along a column of the constraint basis, between the two pivots.
+extern "C" void fn_802DC144(hkGenericConstraintData* data, const int** commands, hkVector4** values,
+                            hkGenericConstraintDataScheme* scheme, hkGenericConstraintDataParameters* params,
+                            const hkConstraintQueryIn& in, hkConstraintQueryOut& out) {
+    hkSolverResults* results = (hkSolverResults*)(void*)in.unk44;
+    hk1dLinearFrictionInfo info;
+    int axis = *++(*commands);
+    info.m_constrainedDofW = (&params->m_constraintBasisW.m_col0)[axis];
+    info.m_pivot.setSub4(params->m_pivotAw, params->m_pivotBw);
+    hkVector4* v = (*values)++;
+    info.m_maxFrictionForce = v->x;
+    info.m_solverResults = results + params->m_currentResult;
+    fn_8028E080(info, in, out);
+    params->m_currentResult++;
+}
+
+// setTwistLimitW: limits the twist angle around one axis, measured against a reference axis.
+extern "C" void fn_802DCFE4(hkGenericConstraintData* data, const int** commands, hkVector4** values,
+                            hkGenericConstraintDataScheme* scheme, hkGenericConstraintDataParameters* params,
+                            const hkConstraintQueryIn& in, hkConstraintQueryOut& out) {
+    hk1dAngularLimitInfo info;
+    int twistAxis = *++(*commands);
+    int refAxis = *++(*commands);
+    info.m_tau = 0.5f;
+    fn_8028F9AC((&params->m_basisAw.m_col0)[twistAxis], (&params->m_basisBw.m_col0)[twistAxis],
+                (&params->m_basisAw.m_col0)[refAxis], (&params->m_basisBw.m_col0)[refAxis], info.m_constrainedDofW,
+                info.m_computedAngle);
+    hkVector4* v = (*values)++;
+    info.m_min = v->x;
+    info.m_max = v->y;
+    fn_80287FE8(info, in, out);
+    params->m_currentResult++;
+}
+
+// setAngularFrictionW: friction around one column of base A.
+extern "C" void fn_802DD45C(hkGenericConstraintData* data, const int** commands, hkVector4** values,
+                            hkGenericConstraintDataScheme* scheme, hkGenericConstraintDataParameters* params,
+                            const hkConstraintQueryIn& in, hkConstraintQueryOut& out) {
+    hkSolverResults* results = (hkSolverResults*)(void*)in.unk44;
+    hk1dAngularFrictionInfo info;
+    int axis = *++(*commands);
+    info.m_constrainedDofW = &(&params->m_basisAw.m_col0)[axis];
+    hkVector4* v = (*values)++;
+    info.m_maxFrictionTorque = v->x;
+    info.m_numFriction = 1;
+    info.m_solverResults = results + params->m_currentResult;
+    hk1dAngularFrictionBuildJacobian(info, in, out);
+    params->m_currentResult++;
+}
+
+// hk1dLinearVelocityMotorBeginJacobian (hkMotorBuildJacobian.o). HYPOTHESIS: the parameters.
+// TODO: clean up: declare it in hkMotorBuildJacobian.h and name it in symbols.txt.
+extern "C" void fn_80295374(const hkVector4& dir, const hkVector4& pivot, const hkConstraintQueryIn& in,
+                            hkJacobianElement* jac, hkConstraintMotorInput* motorInput);
+
+// setLinearMotorW: drives the pivots' distance along a column of the constraint basis with the scheme motor whose
+// index is the data word. Without a motor only the solver result index advances.
+// TODO: clean up: hkMotorBuildJacobian's members are declared on the wrong classes (hkCalcMotorData is called on
+// the motor, CommitJacobian on the 0x18-byte motor output and takes the query input/output); fix the header and
+// drop the casts below.
+extern "C" void fn_802DD2C8(hkGenericConstraintData* data, const int** commands, hkVector4** values,
+                            hkGenericConstraintDataScheme* scheme, hkGenericConstraintDataParameters* params,
+                            const hkConstraintQueryIn& in, hkConstraintQueryOut& out) {
+    hkSolverResults* results = (hkSolverResults*)(void*)in.unk44;
+    int axis = *++(*commands);
+    hkVector4* v = (*values)++;
+    hkConstraintMotor* motor = scheme->m_motors[(int)v->x];
+    hkVector4 dir;
+    hkVector4 diff;
+    dir = (&params->m_constraintBasisW.m_col0)[axis];
+    diff.setSub4(params->m_pivotAw, params->m_pivotBw);
+    hkReal position = diff.dot3(dir);
+    if (motor != NULL) {
+        hkConstraintMotorInput input;
+        hkMotorBuildJacobian output;
+        input.m_lastResults.m_impulseApplied = 0.0f;
+        input.m_lastResults.m_internalSolverData = 0.0f;
+        fn_80295374(dir, params->m_pivotBw, in, out.m_jacobians, &input);
+        input.m_lastResults = results[params->m_currentResult];
+        input.m_deltaTarget = 0.0f;
+        input.m_positionError = -position;
+        input.m_stepInfo = &in;
+        ((hkMotorBuildJacobian*)motor)->hkCalcMotorData((const u8*)&input, (float*)&output);
+        output.hk1dLinearVelocityMotorCommitJacobian((const hkVector4*)&in, (hkMotorJacobianCursor*)&out);
+    }
+    params->m_currentResult++;
+}
+
+// Next-axis table of the generic constraint (0, 1, 2, 0, 1): entries axis + 1 and axis + 2 give the two other axes.
+// TODO: clean up: define it here as a static int table once the unit's .data is split (the jj shims above use the
+// same label).
+extern "C" int lbl_80487A68[];
+
+// setAngularMotorW: drives the angle around a column of base A with the scheme motor whose index is the data x.
+// The data vector keeps the last angle (y) and the number of whole turns (z), so the motor sees a continuous
+// angle.
+// TODO: clean up: same hkMotorBuildJacobian cast as setLinearMotorW.
+extern "C" void fn_802DD0C8(hkGenericConstraintData* data, const int** commands, hkVector4** values,
+                            hkGenericConstraintDataScheme* scheme, hkGenericConstraintDataParameters* params,
+                            const hkConstraintQueryIn& in, hkConstraintQueryOut& out) {
+    hkSolverResults* results = (hkSolverResults*)(void*)in.unk44;
+    int axis = *++(*commands);
+    hkVector4* v = (*values)++;
+    int motorIndex = (int)v->x;
+    hkReal lastAngle = v->y;
+    const hkVector4& axisA = (&params->m_basisAw.m_col0)[axis];
+    const hkVector4& refA = (&params->m_basisAw.m_col0)[lbl_80487A68[axis + 1]];
+    const hkVector4& refB = (&params->m_basisBw.m_col0)[lbl_80487A68[axis + 1]];
+    const hkVector4& perpB = (&params->m_basisBw.m_col0)[lbl_80487A68[axis + 2]];
+    hkReal sinAngle = perpB.dot3(refA);
+    hkReal cosAngle = refB.dot3(refA);
+    hkReal turns = v->z;
+    hkConstraintMotor* motor = scheme->m_motors[motorIndex];
+    hkReal angle = hkMathTypes::hkMath_atan2fApproximation(-sinAngle, -cosAngle) + 3.1415927f;
+    hkReal delta = angle - lastAngle;
+    if (delta < -3.1415927f) {
+        turns += 1.0f;
+    } else if (delta > 3.1415927f) {
+        turns -= 1.0f;
+    }
+    lastAngle = angle;
+    angle += 6.2831855f * turns;
+    v->y = lastAngle;
+    v->z = turns;
+    v->w = 0.0f;
+    if (motor != NULL) {
+        hkConstraintMotorInput input;
+        hk1dAngularVelocityMotorInfo output;
+        input.m_lastResults.m_impulseApplied = 0.0f;
+        input.m_lastResults.m_internalSolverData = 0.0f;
+        fn_802887A8(axisA, in, out.m_jacobians, &input);
+        input.m_stepInfo = &in;
+        input.m_lastResults = results[params->m_currentResult];
+        input.m_deltaTarget = 0.0f;
+        input.m_positionError = -angle;
+        ((hkMotorBuildJacobian*)motor)->hkCalcMotorData((const u8*)&input, (float*)&output);
+        hk1dAngularVelocityMotorCommitJacobian(output, in, out);
+    }
+    params->m_currentResult++;
+}
+
+// setConeLimitW: limits the angle between the same column of the two bases. The row axis is their normalized
+// cross product; when the columns are (nearly) parallel no row is built and neither the data stream nor the solver
+// result index advances.
+extern "C" void fn_802DCE20(hkGenericConstraintData* data, const int** commands, hkVector4** values,
+                            hkGenericConstraintDataScheme* scheme, hkGenericConstraintDataParameters* params,
+                            const hkConstraintQueryIn& in, hkConstraintQueryOut& out) {
+    hk1dAngularLimitInfo info;
+    info.m_tau = 0.5f;
+    int axis = *++(*commands);
+    hkVector4 axisA = (&params->m_basisAw.m_col0)[axis];
+    hkVector4 axisB = (&params->m_basisBw.m_col0)[axis];
+    info.m_constrainedDofW.setCross(axisA, axisB);
+    info.m_tau = 0.5f;
+    if (info.m_constrainedDofW.lengthSquared3() < 1.1920929e-7f) {
+        return;
+    }
+    {
+        info.m_constrainedDofW.normalize3();
+        info.m_computedAngle = axisA.dot3(axisB);
+        hkVector4* v = (*values)++;
+        info.m_min = v->x;
+        info.m_max = v->y;
+        fn_80287FE8(info, in, out);
+        params->m_currentResult++;
+    }
+}

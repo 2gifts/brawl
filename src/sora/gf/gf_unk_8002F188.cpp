@@ -12,6 +12,7 @@ void fn_801F28F0(void*, void*, unsigned short, unsigned short, int, int, int, un
 void fn_801F2B44(void*, int, int, int, int, int, float, float, float);
 extern float lbl_805A1598;
 
+// TODO: clean up, give variables real names
 void fn_8002F4B4(int heap, void* texture, void** out) {
     unsigned short* src = fn_80023914(fn_80023AC8());
     unsigned int* dst;

@@ -40,8 +40,12 @@ hkFixedRigidMotion::hkFixedRigidMotion(const hkVector4& position, const hkQuater
 void hkFixedRigidMotion::setStepPosition(hkReal stepPosition) {}
 
 // Copies the motion state to out and clears its linear and angular velocity.
+// TODO: clean up: scheduling off gives the target's pairwise load/store copy of the motion state but loads the 0.0
+// literal one instruction late (99%); find the real reason the copy is not interleaved and drop the pragma.
+#pragma scheduling off
 void hkFixedRigidMotion::getPositionAndVelocities(hkMotion* out) const {
     out->m_motionState = m_motionState;
     out->m_linearVelocity.setZero4();
     out->m_angularVelocity.setZero4();
 }
+#pragma scheduling reset

@@ -441,6 +441,7 @@ namespace jj_8014BF68 {
 extern "C" void netReport__FPCce(const char*, ...);
 extern char lbl_8045F7A8[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8014BF68(char* arg0, int arg1) {
     char* base = lbl_8045F7A8;
     int temp_r0;
@@ -476,6 +477,7 @@ void free__13gfHeapManagerFPv(void*);
 void __dl__FPv(void*);
 
 struct NB { virtual void f0(); virtual void f1(); virtual void f2(); };
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_80149BC0(void* self, int flag) {
     if (self) {
         char* p = (char*)self;
@@ -525,6 +527,7 @@ extern "C" void netReport__FPCce(const char*, ...);
 extern char lbl_8045F7B8[];
 extern char lbl_8045F7DC[];
 
+// TODO: clean up, give variables real names
 extern "C" int fn_801474A0(NetworkState* self, u64 id, bool* found, bool* own) {
     *found = false;
     *own = false;
@@ -566,6 +569,7 @@ extern char lbl_8059E7C0;
 void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int, unsigned long);
 void* create__12gfMemoryPoolFPvUlPCc(void*, unsigned long, const char*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_80149AA0(void* arg0) {
     char* p = (char*)arg0;
     *(s32*)(p + 0x04) = 0;
@@ -644,6 +648,7 @@ struct FriendSelf {
     s8 unk3420;
 };
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_80147784(FriendSelf* self, u64 id, s32 flag) {
     s8 idx;
     s32 t;
@@ -700,6 +705,7 @@ extern char lbl_8045F7A8[];
 extern NtSend* lbl_805A03D4;
 void netReport__FPCce(const char*, ...);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80149EF8(u8* self) {
     char* base = lbl_8045F7A8;
     if (self[0x11] == 0) return;
@@ -768,6 +774,7 @@ struct Bits7C {
     unsigned char lo : 2;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80148664(int arg0, int arg1, int arg2, int arg3, int arg4) {
     unsigned char lowBits;
     unsigned char oldFlag;
@@ -829,6 +836,7 @@ extern int lbl_805A03E8;
 extern int lbl_805A03F4;
 extern int g_NtMatchingStatus;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_80149644(char* self) {
     char* base = lbl_8045F7A8;
     char* p = (char*)*getInstance__12ntFriendInfoFv((ntFriendInfo*)self) + 0x4f0;
@@ -920,6 +928,7 @@ extern unsigned char lbl_8049EC30[];
 extern int lbl_805A0430;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80148810(int arg0, int arg1) {
     char* base = lbl_8045F7A8;
     while (lbl_805A03D0 != 0 && *(unsigned char*)((char*)lbl_805A0434 + 0x33CC) == 0) {
@@ -984,6 +993,7 @@ extern NtSend* lbl_805A03D4;
 extern unsigned char __vt__8NtBuffer[];
 void* __nw__FUlQ25Heaps8HeapType(unsigned int, Heaps::HeapType);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80149C70(unsigned char* self, int arg1) {
     fn_80146FCC(0);
     lbl_805A03E0 = 0;
@@ -1103,6 +1113,7 @@ inline int checkState(int v) {
     return flag;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8014A0F4() {
     if (lbl_805A0434[0x33f4]) {
         unsigned char* p = *(unsigned char**)ntFriendInfo::getInstance() + 0x4f0;
@@ -1193,6 +1204,7 @@ void fn_80148280();
 void fn_801482C8();
 }
 extern char lbl_8045F890[];
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8014792C(void* arg) {
     unsigned char* self = (unsigned char*)arg;
     unsigned char oldOrder[64];
@@ -1256,6 +1268,7 @@ void fn_80148A94(void);
 void fn_8014B874(void);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80149204(void) {
     int r;
     char* base = lbl_8045F7A8;
@@ -1413,6 +1426,7 @@ struct BitsFCC {
     unsigned int low : 24;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
     unsigned char lowBits;
     char* base = lbl_8045F7A8;

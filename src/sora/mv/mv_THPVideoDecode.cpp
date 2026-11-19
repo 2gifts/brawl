@@ -166,6 +166,7 @@ namespace jj_8007E3C8 {
 extern "C" {
 extern int lbl_805A0208;
 
+// TODO: clean up, give variables real names
 void fn_8007E3C8(void) {
     lbl_805A0208 = 0;
 }

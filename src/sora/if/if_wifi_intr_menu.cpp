@@ -95,11 +95,13 @@ extern "C" void fn_800B5854(void*, int, int, int, int);
 extern "C" const unsigned char lbl_805A2700[8];
 extern "C" unsigned int lbl_804090E0[];
 
+// TODO: clean up, give variables real names
 static inline bool checkMask(gfPadStatus& s) {
  u32 mask = lbl_804090E0[s.m_controllerType];
  if (mask == (mask & s.m_buttonsCurrentFrame2.bits) && (s.m_buttonsPressedThisFrame.bits & mask)) return true;
  return false;
 }
+// TODO: clean up, give variables real names
 static inline bool checkOne(gfPadStatus& s, u32 b) {
  u32 pressed = s.m_buttonsPressedThisFrame.bits;
  int mask = *(int*)((char*)lbl_804090E0 + (s.m_controllerType << 2));
@@ -109,6 +111,7 @@ static inline bool checkOne(gfPadStatus& s, u32 b) {
  }
  return false;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 static inline bool checkTwo(gfPadStatus& s, u32 b, u32 c) {
  u32 pressed = s.m_buttonsPressedThisFrame.bits;
  u32 mask = *(u32*)((char*)lbl_804090E0 + ((u32)s.m_controllerType << 2));
@@ -122,6 +125,7 @@ static inline bool checkTwo(gfPadStatus& s, u32 b, u32 c) {
  }
  return false;
 }
+// TODO: clean up, give variables real names
 extern "C" int fn_800FBFDC(State* self) {
  int result = 1;
  gfPadStatus status2;

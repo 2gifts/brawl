@@ -1415,6 +1415,7 @@ static inline int getName(NameSlot* slot, void* out) {
     return 1;
 }
 struct Work { RawName raw; char buf[24]; char name[32]; };
+// TODO: clean up, give variables real names
 static inline int findName(Manager* mgr, Work& work, int& count, int& index, int& off) {
     while (index < count) {
         NameSlot* slot = (NameSlot*)((char*)mgr->slots + off);
@@ -1425,6 +1426,7 @@ static inline int findName(Manager* mgr, Work& work, int& count, int& index, int
     }
     return -1;
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_8004EFA8(Manager* mgr, Input* input) {
     memcpy(mgr->data, (char*)input + input->data, 0x4910);
     Work work;

@@ -1,3 +1,6 @@
+// TODO: clean up. Most of this file pokes request/response/connection structs through raw
+// byte offsets (*(s32*)(req + 0xcc) etc.). Define NHTTPRequest/NHTTPResponse/NHTTPConn structs with
+// named fields and rewrite the accesses, then re-verify codegen.
 #include <types.h>
 #include <stdio.h>
 #include <string.h>
@@ -151,6 +154,7 @@ int NHTTPi_strtonum(unsigned char *arg0, int arg1) {
 
 NHTTPRequestHandle* fn_8039651C(const char* url, NHTTPReqMethod method, char* buffer, size_t bufferSize, NHTTPReqCallback callback, void* userContext, int a, int b);
 
+// TODO: clean up, give variables real names
 NHTTPRequestHandle* NHTTPCreateRequest(const char* url, NHTTPReqMethod method, char* buffer, size_t bufferSize, NHTTPReqCallback callback, void* userContext) {
     return fn_8039651C(url, method, buffer, bufferSize, callback, userContext, 0, 0);
 }

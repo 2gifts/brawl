@@ -172,6 +172,7 @@ void fn_800368C8(void*);
 void* fn_8003682C(void*, int);
 void* __register_global_object(void*, void* (*)(void*, int), void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 gfHomeMenu* fn_800367C8() {
     char* base = lbl_804953D0;
     if ((signed char)base[0x130] == 0) {
@@ -202,6 +203,7 @@ union Fn8003718CFlags {
     Fn8003718CFlagBits bits;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8003718C(void* self) {
     char buffer[0x840];
     unsigned int status;
@@ -275,6 +277,7 @@ struct B1Bits {
     u8 rest : 6;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_8003798C(Self* self) {
     u8* b1 = (u8*)self + 0xB1;
     int state = (int)self->m_B0.raw >> 28;
@@ -350,6 +353,7 @@ extern "C" void* g_sndSystem;
 extern "C" u8 lbl_804955D4[];
 extern "C" u8 lbl_804955D5[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80036C5C(void* arg0) {
     u8* self = (u8*)arg0;
     s32 var_r4;
@@ -517,6 +521,7 @@ extern f32 lbl_805A16A4;
 extern f32 lbl_805A16C0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80037244(FnObj* self) {
     s32 r29b;
     if (fn_8003798C() != 0) {
@@ -643,6 +648,7 @@ void fn_8026F708();
 void fn_80036270(void*, unsigned char, int);
 void fn_801F1D10(int);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800374DC(Obj* self, Render* r) {
  float matrix[16];
  if (self->type == 1) {
@@ -730,6 +736,7 @@ extern f32 lbl_805A1680;
 extern f32 lbl_805A1684;
 extern f32 lbl_805A1688;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_80036270(s32 arg0, s8 arg1, s32 arg2) {
     Mtx sp70;
     Mtx44 sp30;

@@ -136,6 +136,7 @@ extern "C" void fn_803EF038(int *arg0) {
 namespace jj_803EF1D0 {
 extern void fn_801CBFB0(void*, void*, int, int, int, int);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_803EF1D0(int* a) {
     fn_801CBFB0((void*)(*a + 0xC), a + 2, 0x69, 0, 0, 0);
 }
@@ -145,6 +146,7 @@ namespace jj_803EF188 {
 extern void fn_801C92E4(int);
 extern void fn_803EF640(void);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_803EF188(int *arg0) {
     if (*arg0 != 0) {
         fn_803EF640();
@@ -167,6 +169,7 @@ typedef struct Obj {
     u8 unk3A;
 } Obj;
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_803EEFCC(void* arg0) {
     Obj* self = (Obj*)arg0;
     self->unk4 = 0;
@@ -200,6 +203,7 @@ extern void __destroy_arr(void*, void (*)(void*, int), unsigned long, unsigned l
 extern void __dl__FPv(void*);
 extern int lbl_805A12C8;
 
+// TODO: clean up, give variables real names
 extern "C" Object* fn_803EF044(Object* self, int flag) {
     u32 i;
     void* p;
@@ -232,6 +236,7 @@ extern float lbl_805A4B04;
 extern float lbl_805A4B0C;
 extern float lbl_805A4B10;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_803EF4A8(u8 *arg0, int arg1) {
     float f;
 
@@ -302,6 +307,7 @@ extern "C" void fn_803EF4A8(u8 *arg0, int arg1) {
 
 namespace jj_803EFEA4 {
 extern int fn_803EFA54(void *, int, int);
+// TODO: clean up, give variables real names
 extern "C" int fn_803EFEA4(void *a, int b, int c, int d) {
  int r;
  switch(b) {
@@ -390,6 +396,7 @@ extern const float lbl_805A4B50;
 extern const float lbl_805A4B54;
 extern const float lbl_805A4B58;
 
+// TODO: clean up, give variables real names
 extern "C" int fn_803F004C(Object *obj, int arg1, int arg2, int arg3, int arg4)
 {
     int result;

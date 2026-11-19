@@ -13,6 +13,7 @@ typedef struct {
     s16* e;
 } Q;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_80205474(Q* p, u8* q) {
     u16 b;
     u16 a;

@@ -196,6 +196,7 @@ namespace jj_800242DC {
 extern "C" {
 extern u8 lbl_805A0000;
 
+// TODO: clean up, give variables real names
 void fn_800242DC(void) {
     int i;
     for (i = 0; i < 0x40; i += 16) {

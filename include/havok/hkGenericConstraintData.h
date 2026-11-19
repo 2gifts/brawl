@@ -6,6 +6,7 @@
 #include <havok/hkArray.h>
 #include <havok/hkMatrix3.h>
 #include <havok/hkVector4.h>
+#include <havok/hkTransform.h>
 
 struct hkConstraintModifier;
 struct hkConstraintMotor;
@@ -50,8 +51,19 @@ struct hkGenericConstraintData : hkConstraintData {
     int getType() const;
 };
 
-// Parameter block for the generic constraint solver (empty constructor).
+// Working state of hatchScheme (built on its stack, 0xBC bytes, empty constructor). The command handlers read the
+// world pivots, the constraint basis and the two body bases from it and advance the solver result index.
+// HYPOTHESIS: the member names (layout from the handlers and hatchScheme's stores).
 struct hkGenericConstraintDataParameters {
+    hkVector4 m_pivotAw;                 // 0x00
+    hkVector4 m_pivotBw;                 // 0x10
+    hkMatrix3 m_constraintBasisW;        // 0x20 (columns indexed by the axis commands)
+    hkMatrix3 m_basisAw;                 // 0x50
+    hkMatrix3 m_basisBw;                 // 0x80
+    const hkTransform* m_rbA;     // 0xB0
+    const hkTransform* m_rbB;     // 0xB4
+    int m_currentResult;                 // 0xB8 solver result index of the next row
+
     hkGenericConstraintDataParameters();
 
     // Angle between two 0x10-byte records selected by a table lookup on the axis index (HYPOTHESIS: layout and table).

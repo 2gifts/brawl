@@ -262,6 +262,7 @@ extern "C" void fn_8017EDB8(nw4r::math::VEC3* pOut, const nw4r::math::VEC3* pA,
 }
 
 namespace jj_8018058C {
+// TODO: clean up, give variables real names
 extern "C" void fn_8018058C(unsigned int* dst, const unsigned int* src) {
     dst[0] = src[0];
     dst[1] = src[1];
@@ -294,6 +295,7 @@ struct Pair {
     float y;
 };
 
+// TODO: clean up, give variables real names
 inline void setCirclePoint(Pair* p, int i, float step, float k) {
     float fi = (float)i;
     fn_80162384(&p->y, &p->x, k * (step * fi));
@@ -317,6 +319,7 @@ struct Node {
     Pair* arr;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_801811DC(void* a0, Node* a1, int a2, int a3) {
     Inner* in = a1->obj->inner;
     int n = in->count;

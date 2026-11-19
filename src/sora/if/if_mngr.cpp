@@ -545,6 +545,7 @@ extern "C" void fn_800DCDD4(void* self) {
 
 extern "C" void fn_801052DC(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DCDFC(void* self) {
     fn_801052DC(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x78));
 }
@@ -561,6 +562,7 @@ struct T {
     S* unk_70;
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800DCA50(T *t) {
     return t->unk_70->unk_70;
 }
@@ -568,6 +570,7 @@ extern "C" int fn_800DCA50(T *t) {
 
 namespace jj_800DCD94 {
 extern "C" {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 unsigned int fn_800DCD94(void* p) {
     int* obj = *(int**)((char*)p + 0x74);
     unsigned int x = *(int*)((char*)obj + 0x110);
@@ -588,6 +591,7 @@ struct Data {
 extern "C" {
 void fn_801092E0(void* obj, Data* data);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800DCEA8(u8* self, const Data* src) {
     if (*(void**)(self + 0x94) != 0) {
         Data data = *src;
@@ -630,6 +634,7 @@ struct Iface0x300 : Pad0x300 { virtual void foo(int) = 0; };
 struct Pad0x5D4 { char pad[0x5D4]; };
 struct Iface0x5D4 : Pad0x5D4 { virtual void foo(int) = 0; };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800DC2E0(void* arg0) {
     char* self = (char*)arg0;
 
@@ -809,6 +814,7 @@ void fn_8000D6DC(void*, void*);
 extern void* g_gfSceneRoot;
 extern const int lbl_80408580[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800DBF08(char* self, const unsigned char* arg2) {
     void* spC = 0;
     void* sp8;

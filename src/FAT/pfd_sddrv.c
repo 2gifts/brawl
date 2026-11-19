@@ -73,6 +73,7 @@ struct fn_803EE8E0_obj {
     int unk4;
 };
 
+// TODO: clean up, give variables real names
 int fn_803EE8E0(struct fn_803EE8E0_obj *self, int arg) {
     self->unk4 = arg;
     self->unk0 = lbl_8041F3B8;
@@ -80,6 +81,7 @@ int fn_803EE8E0(struct fn_803EE8E0_obj *self, int arg) {
 }
 
 
+// TODO: clean up, give variables real names
 int fn_803EE5A4(int arg0) {
     if (arg0 == 0) {
         return 1;
@@ -95,6 +97,7 @@ extern int fn_803CB314(int, int *);
 extern int fn_803EED98(void *, void *);
 extern void OSReport(const char *, ...);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803EE760(int a, int *b)
 {
     char *s = lbl_804931C0;
@@ -145,6 +148,7 @@ extern int fn_803CC360(int, int, void *, int);
 extern void VFipf_memset(void *, int, unsigned int);
 extern void OSReport(const char *, ...);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803EE3E0(int a)
 {
     char *s;

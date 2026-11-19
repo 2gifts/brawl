@@ -14,6 +14,7 @@
 
 // Function bodies below are taken from https://github.com/jj-link/brawl.
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800F851C(int* p) {
     *p = 0;
 }
@@ -63,6 +64,7 @@ void fn_800B8A0C(void*, int);
 void __dl__FPv(void*);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_800F8680(void** p, int n) {
     if (p) {
         fn_800B8A0C(*p, 1);
@@ -78,6 +80,7 @@ namespace jj_800F7CCC {
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 extern "C" void* fn_800F7D30(void*, int, int, int);
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_800F7CCC(int a, int b, int c) {
     void* p = __nw__FUlQ25Heaps8HeapType(0x27ac, 0x2a);
     if (p != 0) {
@@ -123,6 +126,7 @@ public:
 
 extern "C" {
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_800F86DC(void* self, int arg1) {
     char* s = (char*)self;
 
@@ -308,6 +312,7 @@ static inline f32 lowerClamp(f32 value, f32 lo) {
     return nw4r::math::FSelect(value - lo, value, lo);
 }
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800F9A14(Self* self) {
     gfPadStatus in = fn_800B9F90(self->m_input, 0);
 

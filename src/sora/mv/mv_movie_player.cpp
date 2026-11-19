@@ -67,6 +67,7 @@ extern "C" {
 
 extern unsigned char lbl_8040ABC0[0x18];
 
+// TODO: clean up, give variables real names
 unsigned char *fn_8007FDF4(void) {
     return lbl_8040ABC0;
 }
@@ -80,6 +81,7 @@ void __dt__6gfTaskFv(void*, int);
 void __dl__FPv(void*);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_8007F3AC(void* p, int n) {
     if (p) {
         __dt__6gfTaskFv(p, 0);
@@ -99,10 +101,12 @@ extern s32 lbl_805A0250;
 extern s32 lbl_805A0254;
 extern s32 lbl_805A0258;
 
+// TODO: clean up, give variables real names
 u8 mvMoviePlayer::isOpened() {
     return lbl_805A0214 ? lbl_805A024A : 0;
 }
 
+// TODO: clean up, give variables real names
 void mvMoviePlayer::loadLastFrameInfo() {
     if (lbl_805A0214 != 0) {
         DVDOpen((const char*)lbl_8049DDD0, (DVDFileInfo*)lbl_8049DDF0);
@@ -111,6 +115,7 @@ void mvMoviePlayer::loadLastFrameInfo() {
     }
 }
 
+// TODO: clean up, give variables real names
 bool mvMoviePlayer::isLoadedLastFrameInfo() {
     if (lbl_805A024C[0] != 0 && DVDGetCommandBlockStatus((DVDCommandBlock*)lbl_8049DDF0) == 0) {
         return true;
@@ -118,6 +123,7 @@ bool mvMoviePlayer::isLoadedLastFrameInfo() {
     return false;
 }
 
+// TODO: clean up, give variables real names
 void mvMoviePlayer::closeLastFrameInfo() {
     if (lbl_805A024C[0] != 0) {
         DVDClose((DVDFileInfo*)lbl_8049DDF0);
@@ -125,6 +131,7 @@ void mvMoviePlayer::closeLastFrameInfo() {
     }
 }
 
+// TODO: clean up, give variables real names
 void mvMoviePlayer::getVideoSize(int* width, int* height) {
     *width = ((int*)lbl_8049DDB0)[0];
     *height = ((int*)lbl_8049DDB0)[1];
@@ -134,22 +141,26 @@ int mvMoviePlayer::getVideoState() {
     return THPPlayerGetState();
 }
 
+// TODO: clean up, give variables real names
 int mvMoviePlayer::getTotalFrame() {
     return lbl_805A0238;
 }
 
+// TODO: clean up, give variables real names
 void mvMoviePlayer::play() {
     if (lbl_805A0214) {
         THPPlayerPlay();
     }
 }
 
+// TODO: clean up, give variables real names
 void mvMoviePlayer::setScnMdl(nw4r::g3d::ScnMdl* model, int unk) {
     lbl_805A0250 = (s32)model;
     lbl_805A0254 = unk;
     lbl_805A0258 = 0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void mvMoviePlayer::loadLastFrame() {
     if (lbl_805A0214 != 0) {
         u8* work = lbl_8049DDF0;
@@ -160,6 +171,7 @@ void mvMoviePlayer::loadLastFrame() {
     }
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 bool mvMoviePlayer::isLoadedLastFrame() {
     if (lbl_805A024C[1] != 0) {
         if (DVDGetCommandBlockStatus((DVDCommandBlock*)(lbl_8049DDF0 + 0x3C)) == 0) {
@@ -169,6 +181,7 @@ bool mvMoviePlayer::isLoadedLastFrame() {
     return false;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void mvMoviePlayer::closeLastFrame() {
     if (lbl_805A024C[1] != 0) {
         DVDClose((DVDFileInfo*)(lbl_8049DDF0 + 0x3C));
@@ -176,10 +189,12 @@ void mvMoviePlayer::closeLastFrame() {
     }
 }
 
+// TODO: clean up, give variables real names
 s8 mvMoviePlayer::isPause() const {
     return lbl_805A024E;
 }
 
+// TODO: clean up, give variables real names
 void mvMoviePlayer::setLastFrame() {
     if (lbl_805A0214 != 0) {
         THPPlayerPause();
@@ -197,6 +212,7 @@ struct MovieTiming {
 
 extern "C" void fn_8007C61C(u32, u32, u32);
 
+// TODO: clean up, give variables real names
 void mvMoviePlayer::prepare(int unk) {
     if (lbl_805A0214 != 0) {
         MovieTiming* timing = (MovieTiming*)lbl_8049DDC0;

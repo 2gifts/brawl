@@ -2,6 +2,7 @@
 
 // Function bodies below are taken from https://github.com/jj-link/brawl.
 
+// TODO: clean up, give variables real names
 extern "C" unsigned int fn_801B4400(void) {
     return 0x53474558;
 }
@@ -13,6 +14,7 @@ extern "C" void fn_801B4A3C(void) {}
 
 extern "C" void fn_801B4A40(void) {}
 
+// TODO: clean up, give variables real names
 extern "C" void fn_801B4A44(void) {}
 
 extern "C" void fn_801B4A48(void) {}
@@ -23,6 +25,7 @@ extern "C" s32 fn_801B3CBC(void) {
     return 0x0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_801B3FB4(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x18);
 }
@@ -33,6 +36,7 @@ extern "C" {
 
 extern unsigned char lbl_8040ABF8[];
 
+// TODO: clean up, give variables real names
 unsigned char* fn_801B4AE8(void) {
     return lbl_8040ABF8;
 }
@@ -56,6 +60,7 @@ struct Obj {
 
 void fn_801B3FBC(void*, int, int, int, int);
 
+// TODO: clean up, give variables real names
 void fn_801B3DF4(struct Obj* p, int a) {
     if (p->x1C == 0) return;
     fn_801B3FBC(p, p->x1C, p->x10, p->x4, a);
@@ -78,6 +83,7 @@ struct Obj {
 
 extern void fn_801B3FBC(Obj*, int, int, int, int);
 
+// TODO: clean up, give variables real names
 void fn_801B3E18(Obj* obj, int arg) {
     int v = obj->x20;
     if (v == 0) {
@@ -98,6 +104,7 @@ public:
     virtual char* f3() const;
 };
 
+// TODO: clean up, give variables real names
 extern "C" char* fn_801B4AB8(const Obj* self) {
     return self->f3() + 4;
 }
@@ -117,6 +124,7 @@ struct Vt {
     virtual void f9(u32* p);
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_801B4564(u8* self, u32* arg1) {
     u32 tmp = *arg1;
     Vt* o = *(Vt**)(self + 0xe8);
@@ -128,6 +136,7 @@ namespace jj_801B4918 {
 extern "C" {
 void fn_801AC1AC(void* a, int b);
 
+// TODO: clean up, give variables real names
 void* fn_801B4918(void* arg0) {
     if (arg0 != 0) {
         fn_801AC1AC(arg0, 0);
@@ -154,6 +163,7 @@ namespace jj_801B49F8 {
 extern "C" {
 extern void __dl__FPv(void*);
 
+// TODO: clean up, give variables real names
 void* fn_801B49F8(void* arg0, int arg1) {
     if (arg0 != 0 && arg1 > 0) {
         __dl__FPv(arg0);
@@ -172,6 +182,7 @@ extern unsigned char lbl_8040ABA0[0x10];
 extern unsigned char lbl_8040AB80[0x10];
 extern unsigned char lbl_8040AA68[0x10];
 
+// TODO: clean up, give variables real names
 int fn_801B4A50(void* unused, unsigned int* p) {
     if (*p == (unsigned int)lbl_8040ABF8) return 1;
     unsigned int v = *p;
@@ -200,6 +211,7 @@ public:
     virtual u32 get() = 0;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_801B4374(Obj* arg0, Obj* arg1) {
     u32 t = arg1->get();
     u32 s = arg0->get();
@@ -254,6 +266,7 @@ struct Self {
     Class_80466418* first;
     Class_80466418* second;
 };
+// TODO: clean up, give variables real names
 extern "C" int fn_801B3CC4(Self* self, Class_804664C0* arg, int a, int b) {
     if (!self->second->fn_801AAFDC())
         return self->second->fn_801B35D0(arg, a, b);

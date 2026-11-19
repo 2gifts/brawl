@@ -3,6 +3,7 @@
 
 // Function bodies below are derived from https://github.com/jj-link/brawl.
 
+// TODO: clean up, give variables real names
 s32 fn_803EB304(s32 arg0, s32 arg1)
 {
     u8 c = arg0;
@@ -19,6 +20,7 @@ s32 fn_803EB304(s32 arg0, s32 arg1)
     }
 }
 
+// TODO: clean up, give variables real names
 s16 fn_803EB2D0(const s8* buf) {
     u16 uc;
     short oem_width;
@@ -28,6 +30,7 @@ s16 fn_803EB2D0(const s8* buf) {
     return oem_width;
 }
 
+// TODO: clean up, give variables real names
 s16 fn_803EB380(const u16* buf) {
     s8 oem[4];
     short oem_width;

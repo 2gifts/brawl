@@ -5,6 +5,7 @@ void fn_8038FD6C(void) {}
 
 extern void fn_8038E744(void);
 
+// TODO: clean up, give variables real names
 void fn_80390010(void) {
     fn_8038E744();
 }
@@ -25,6 +26,7 @@ extern char lbl_80491398[];
 extern char lbl_8059FC48;
 void OSReport(const char *msg, ...);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_8038F4C0(void) {
     char *base = lbl_80491398;
     if (lbl_8059FC38 >= 0) {
@@ -49,6 +51,7 @@ typedef struct {
 
 extern void fn_8038F7C8(void *, void *, void *);
 
+// TODO: clean up, give variables real names
 void fn_8038FF7C(Blk *a, Blk *b, const Blk *c)
 {
     unsigned int t0, t1, t2, t3;
@@ -75,6 +78,7 @@ extern char lbl_804914D0[];
 
 typedef void (*FuncType)(void*, void*, void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_8038FD70(void* arg0, void* arg1, void* arg2, int arg3) {
     int result;
     FuncType func;
@@ -108,6 +112,7 @@ extern char lbl_80491500[];
 typedef struct Vt { int a; int (*f)(void*, int, int); } Vt;
 typedef struct Obj { char pad[0x104]; Vt* vt; } Obj;
 
+// TODO: clean up, give variables real names
 int fn_8038FE28(Obj* o, int a, int b, int n) {
     int r;
     int (*f)(void*, int, int) = o->vt->f;
@@ -137,6 +142,7 @@ typedef struct Block {
 
 extern void fn_8038F550(Block *, Block *, Block *);
 
+// TODO: clean up, give variables real names
 void fn_8038FEE0(Block *arg0, Block *arg1, const Block *arg2) {
     Block buf;
     u32 a, c, b, t;

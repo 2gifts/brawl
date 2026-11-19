@@ -581,6 +581,7 @@ extern char lbl_8045D040[];
 void fn_800B8A0C(void*, int);
 void __dl__FPv(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_801049E8(char* arg0, int arg1) {
     if (arg0 != 0) {
         int i = 0;
@@ -622,6 +623,7 @@ void fn_80104C60(void* self, void* data);
 extern char lbl_80409218[];
 extern char lbl_8045D008[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80104AA4(void* self, u32 arg1, void* arg2, u32 arg3, u8* arg4, u32 arg5) {
     fn_80104B6C(self, lbl_80409218, 2, arg1, 0xC0);
     fn_80104C60(self, arg2);

@@ -411,6 +411,7 @@ namespace jj_80135B94 {
 extern "C" {
 extern void fn_80135950(int a, int b, int c);
 
+// TODO: clean up, give variables real names
 void fn_80135B94(int arg0, int arg1) {
     fn_80135950(arg0, arg0 + 0x1C, arg1);
 }
@@ -421,6 +422,7 @@ namespace jj_80135BA0 {
 extern "C" {
 extern void fn_80135950(void*, void*, int);
 
+// TODO: clean up, give variables real names
 void fn_80135BA0(void* arg0, int arg1) {
     fn_80135950(arg0, (char*)arg0 + 0x14, arg1);
 }
@@ -433,6 +435,7 @@ extern "C" {
     void __dl__FPv(void* a1);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_80137FF0(void* arg1, int arg2) {
     if (arg1) {
         if (arg1) {
@@ -469,6 +472,7 @@ struct Owner {
     Entry entries[8];
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_80137074(Owner* self, const Entry* src) {
     u8 count = self->count;
     int result = 0;
@@ -508,6 +512,7 @@ struct Owner {
     u8 pad2[0x174 - 0x7e];
     Entry entries[8];
 };
+// TODO: clean up, give variables real names
 extern "C" void fn_801371D8(Owner* self, const Entry* src) {
     u8 count = self->count;
     for (u32 i = 0; i < count; ++i) {
@@ -535,6 +540,7 @@ struct Entry {
 
 extern "C" int fn_80114A60(void** a, Entry** b);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80137114(u8* self, Entry** arg) {
     Entry** p = (Entry**)(self + 0x174);
     int ret = 0;
@@ -581,6 +587,7 @@ inline bool valid(Entry* p) {
     return p->a != 0 && p->b != 0 && p->c != 0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80137298(void* arg0, u32* arg1) {
     u8* base = (u8*)arg0;
     Entry* p = (Entry*)(base + 0x174);
@@ -635,6 +642,7 @@ struct Self {
     s32 mode;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80135950(const Self* self, Vec2f* base, f32* out) {
     Vec2f a, b, c;
     __memcpy(&a, &self->a, sizeof(Vec2f));
@@ -746,6 +754,7 @@ static inline void clearSpecial(Object* self, Entry* entry) {
         self->f80 = 0;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_801361F0(Object* self, void* target) {
     bool changed = false;
     Object* cursor = self;

@@ -126,6 +126,7 @@ void update__17gfKeepFrameBufferFv(void*);
 extern int g_gfHomeMenu;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8001789C(u8* self) {
     update__17gfKeepFrameBufferFv(self + 0xD0);
     u8* p = *(u8**)(self + 0xE0);
@@ -212,6 +213,7 @@ extern const float lbl_805A13D4;
 extern const float lbl_805A13D8;
 extern const float lbl_805A13DC;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80016938(Screen* screen) {
     Light light;
     Vec3f dir;

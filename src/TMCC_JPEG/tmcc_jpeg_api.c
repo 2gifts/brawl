@@ -25,6 +25,7 @@ typedef struct { unsigned int width, height, size; } Result;
 extern int fn_80264074(unsigned int *, unsigned int *, void *, Config *);
 extern int fn_802642F0(State *, void *, Config *);
 extern int fn_80262218(State *, void *, Config *);
+// TODO: clean up, give variables real names
 int fn_80260730(void *obj, void *data, unsigned int size, unsigned char type, unsigned char depth, unsigned int mode, Result *out) {
     unsigned int offset, length;
     Config cfg;

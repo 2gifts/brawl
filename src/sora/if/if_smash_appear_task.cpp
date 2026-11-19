@@ -870,6 +870,7 @@ inline void bindEntry(gfTask* self, Entry* e) {
     }
 }
 
+// TODO: clean up, give variables real names
 inline void playAnim(gfTask* self, Entry* e, int sel) {
     char buf[0x40];
     int suffix = sel + 1;
@@ -896,6 +897,7 @@ inline void playAnim(gfTask* self, Entry* e, int sel) {
     e->mu->m_modelAnim->setUpdateRate(rate);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800F7880(gfTask* self, int index) {
     for (int i = 0; i < 9; i++) {
         if (i != 0)

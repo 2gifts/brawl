@@ -60,10 +60,43 @@ void hkBoxShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {
     out->m_flag = 1;
 }
 
+// The eight corners of the unit box, indexed by vertex id / 2: id bit 3 = -x, bit 2 = -y, bit 1 = -z.
+static const hkReal s_boxVertexSigns[8][4] = {
+    {1.0f, 1.0f, 1.0f, 0.0f},  {1.0f, 1.0f, -1.0f, 0.0f},  {1.0f, -1.0f, 1.0f, 0.0f},  {1.0f, -1.0f, -1.0f, 0.0f},
+    {-1.0f, 1.0f, 1.0f, 0.0f}, {-1.0f, 1.0f, -1.0f, 0.0f}, {-1.0f, -1.0f, 1.0f, 0.0f}, {-1.0f, -1.0f, -1.0f, 0.0f},
+};
+
+// The corner on the side of the direction: the half extents with the direction's sign bits; w holds the vertex id
+// (the negative-lane mask without the w bit).
+// TODO: clean up: the sign copy works on the float bits through u32 views; a readable version would be an hkVector4
+// helper (setFlipSign4) once its out-of-line form is known.
+void hkBoxShape::getSupportingVertex(const hkVector4& direction, hkVector4& out) const {
+    out = m_halfExtents;
+    const u32* d = (const u32*)&direction;
+    u32* o = (u32*)&out;
+    o[0] ^= d[0] & 0x80000000;
+    o[1] ^= d[1] & 0x80000000;
+    o[2] ^= d[2] & 0x80000000;
+    o[3] ^= d[3] & 0x80000000;
+    out.setIntW(out.compareLessThanZero4() & 0xE);
+}
+
+// Each id selects a corner (half extents times the corner's signs); w keeps the id.
+void hkBoxShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
+    for (int i = numIds - 1; i >= 0; i--) {
+        int id = *ids++;
+        const hkVector4& sign = *(const hkVector4*)((const u8*)s_boxVertexSigns + id * 8);
+        out->x = m_halfExtents.x * sign.x;
+        out->y = m_halfExtents.y * sign.y;
+        out->z = m_halfExtents.z * sign.z;
+        out->w = m_halfExtents.w * sign.w;
+        out->setIntW(id);
+        out++;
+    }
+}
+
 // Not yet decompiled in this unit:
 //   0x802CD9DC   748  getAabb
-//   0x802CDCC8   204  getSupportingVertex
-//   0x802CDD94   300  convertVertexIdsToVertices
 //   0x802CDED4   448  getCollisionSpheres
 //   0x802CE094  1184  castRay
 

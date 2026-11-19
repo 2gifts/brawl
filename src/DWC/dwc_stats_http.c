@@ -20,6 +20,7 @@ int fn_80355454(int *arg0) {
 extern char lbl_8048DC08[];
 extern void fn_803360BC(int);
 
+// TODO: clean up, give variables real names
 void fn_80355388(void) {
     int val = *(int *)(lbl_8048DC08 + 8);
     if (val >= 0) {
@@ -33,6 +34,7 @@ void fn_80355388(void) {
 
 extern char lbl_8048DC08[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 s32 fn_8035423C(void* arg0, void* arg1, s32 arg2, s32 arg3, u32 arg4, s32 arg5, s32 arg6) {
     s32 i;
     s32 count;
@@ -76,6 +78,7 @@ extern void DWCi_GsFree(void *p);
 extern void DWC_ShutdownGHTTP(void);
 extern char lbl_8048DC08[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void DWCi_EncSessionShutdown(void) {
     int a;
     int c;

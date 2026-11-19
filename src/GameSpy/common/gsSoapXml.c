@@ -21,6 +21,7 @@ void gsXmlFreeWriter(GSXmlStreamWriter stream) {
     gsifree(writer);
 }
 
+// TODO: clean up, give variables real names
 GSSoapTask* fn_803621B8(const char* URL, const char* service, GSXmlStreamWriter request, GSSoapCallbackFunc callback, void* userData) {
     GSSoapTask* aSoapTask;
     GSTask* aCoreTask;
@@ -57,6 +58,7 @@ GSSoapTask* fn_803621B8(const char* URL, const char* service, GSXmlStreamWriter 
     return aSoapTask;
 }
 
+// TODO: clean up, give variables real names
 int fn_803622B0(int request, int result, char* buffer, int bufferLen, void* param) {
     GSSoapTask* aSoapTask = param;
     GSXmlStreamReader reader;
@@ -86,6 +88,7 @@ int gsiSoapTaskThink(void* taskData) {
     return 1;
 }
 
+// TODO: clean up, give variables real names
 void fn_80362384(void* taskData) {
     GSSoapTask* aSoapTask = taskData;
     void* post;
@@ -124,6 +127,7 @@ void gsiSoapTaskCallback(void* taskData, int result) {
     aSoapTask->mCallbackFunc(aSoapTask->mRequestResult, aSoapTask->mRequestSoap, aSoapTask->mResponseSoap, aSoapTask->mUserData);
 }
 
+// TODO: clean up, give variables real names
 GSXmlStreamReader fn_80362C98(void) {
     GSIXmlStreamReader* newStream;
 
@@ -191,6 +195,7 @@ int gsXmlMoveToNext(GSXmlStreamReader stream, const char* matchtag) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_803679BC(GSXmlStreamReader stream, const char* matchtag, char* valueOut, int maxLen) {
     const char* strValue = NULL;
     int strLen = 0;
@@ -272,6 +277,7 @@ static inline void set_char(char *buf, int i, char c)
     buf[i] = c;
 }
 
+// TODO: clean up, give variables real names
 int fn_80363BDC(char *buf, int *len)
 {
     int i = 0;
@@ -364,6 +370,7 @@ typedef struct Buffer { char *data; int length; int capacity; int changed; } Buf
 extern char *fn_8035DFF8(char *, int);
 extern char lbl_8059F5F4[3];
 
+// TODO: clean up, give variables real names
 static inline int reserve(Buffer *self, int capacity)
 {
     char *data = fn_8035DFF8(self->data, capacity);
@@ -402,6 +409,7 @@ static inline int close_tag(Buffer *self, const char *a, const char *b)
     if (!append_char(self, '<') || !append_char(self, '/') || !append(self, a) || !append_char(self, ':') || !append(self, b) || !append_char(self, '>')) return 0;
     return 1;
 }
+// TODO: clean up, give variables real names
 int fn_80365C7C(Buffer *self, const char *a, const char *b, double value)
 {
     char text[32];

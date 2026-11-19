@@ -27,6 +27,7 @@ extern "C" int DWC_CheckDirtyFlag(const DWCAccUserData* userdata);
 // HYPOTHESIS: clears the dirty flag of the account data.
 extern "C" void DWC_ClearDirtyFlag(DWCAccUserData* userdata);
 
+// TODO: clean up, give variables real names
 static inline bool getSaveHeaderInline(void** data) {
     bool result;
     if (data == 0) {
@@ -91,6 +92,7 @@ ntFriendInfoSave::~ntFriendInfoSave() {
 }
 
 // HYPOTHESIS: copies the Wi-Fi friend data to the buffer of a new gfSysRecorder2 and starts to save it.
+// TODO: clean up, give variables real names
 bool ntFriendInfoSave::startSave(Heaps::HeapType heap, bool exitWhenDone) {
     if (unk40 != 0) {
         return false;
@@ -170,6 +172,7 @@ static inline void alignSize32(u32* size) {
 }
 
 // HYPOTHESIS: true when the save of the Wi-Fi friend data has to be started.
+// TODO: clean up, give variables real names
 bool ntFriendInfo::isSaveNeeded() {
     if (!gfSysRecorder2::isEnable(2)) {
         return false;
@@ -198,10 +201,12 @@ void ntFriendInfo::lock() {
     OSLockMutex(&lbl_8049ECA0.m_mutex);
 }
 
+// TODO: clean up, give variables real names
 void ntFriendInfo::unlock() {
     OSUnlockMutex(&lbl_8049ECA0.m_mutex);
 }
 
+// TODO: clean up, give variables real names
 ntFriendInfo* ntFriendInfo::getInstance() {
     if (lbl_805A044C == 0) {
         ntFriendInfo* info = new ((Heaps::HeapType)0x2D) ntFriendInfo;
@@ -218,6 +223,7 @@ ntFriendInfo* ntFriendInfo::getInstance() {
     return lbl_805A044C;
 }
 
+// TODO: clean up, give variables real names
 bool ntFriendInfo::getSaveHeader(void** data) {
     bool result;
     if (data == 0) {
@@ -266,6 +272,7 @@ bool ntFriendInfo::isModified() {
     return modified;
 }
 
+// TODO: clean up, give variables real names
 bool ntFriendInfo::getSaveData(void** data, int* size) {
     if (!isModified()) {
         return false;

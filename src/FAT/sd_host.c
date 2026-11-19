@@ -112,6 +112,7 @@ extern void OSReport(const char *, ...);
 extern int fn_803CB620(int, unsigned int, int, int, int, void *, int, int, int, int *, int, int);
 extern char lbl_804927E0[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803CC7A8(int *arg0, int *arg1)
 {
     char *base = lbl_804927E0;
@@ -150,6 +151,7 @@ extern char lbl_804927E0[];
 #define lbl_8059FE98 (*(int*)&lbl_8059FE98)
 #define lbl_805A1244 (*(int **)&lbl_805A1244)
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803CB23C(int *arg0, int arg1, int *arg2, int arg3)
 {
     char *base = lbl_804927E0;
@@ -188,6 +190,7 @@ extern char lbl_804927E0[];
 #define lbl_805A1238 (*(int **)&lbl_805A1238)
 #define lbl_805A1244 (*(int **)&lbl_805A1244)
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803CB148(int *arg0, int arg1, int *arg2, int arg3)
 {
     char *base = lbl_804927E0;
@@ -245,6 +248,7 @@ typedef struct Req {
     void *unk18;
 } Req;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803CB004(int arg0, Req *arg1)
 {
     switch (arg1->unkC) {
@@ -291,6 +295,7 @@ extern char lbl_804927E0[];
 #define lbl_80563960 ((char*)&lbl_80563960)
 #define lbl_8059FE98 (*(int*)&lbl_8059FE98)
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803CC014(unsigned int arg0, int **arg1)
 {
     char *base = lbl_804927E0;
@@ -347,6 +352,7 @@ extern char lbl_804927E0[];
 #define lbl_805A123C (*(int **)&lbl_805A123C)
 #define lbl_805A1248 (*(int **)&lbl_805A1248)
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803CB410(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
                 int flag, int *out, int a10, int a11)
 {

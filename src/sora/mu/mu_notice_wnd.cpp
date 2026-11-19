@@ -249,6 +249,7 @@ extern const float lbl_805A22BC;
 void changeNodeAnimN__8MuObjectFPCc(void* obj, const char* name);
 void setFrameNode__8MuObjectFf(void* obj, float frame);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800BFF34(void* arg) {
     MuObject* obj = *(MuObject**)((char*)arg + 0x40);
     char buf[0x40];
@@ -276,6 +277,7 @@ void* fn_800B9678(void);
 unsigned long strlen(const char* s);
 void fn_800BF850(void* self, int id, const char* str, int len, int flag);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_800BEEB8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, Heaps::HeapType arg7,
                   int argSp8, unsigned char argSpC, unsigned char argSp10, unsigned char argSp14)
 {
@@ -337,6 +339,7 @@ void fn_800BF850(void* self, int id, const char* str, int len, int flag);
 void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int heap, unsigned long size);
 void* memcpy(void* d, const void* s, unsigned long n);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_800BF048(int arg0, void* arg1, unsigned long arg2, int arg3, int arg4, int arg5, int arg6,
                   Heaps::HeapType arg7, int argSp8, unsigned char argSpC, unsigned char argSp10,
                   unsigned char argSp14)
@@ -421,6 +424,7 @@ struct Self {
     int f124;
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800BFCF4(Self* self) {
     unsigned int flags60;
     PadStat status;

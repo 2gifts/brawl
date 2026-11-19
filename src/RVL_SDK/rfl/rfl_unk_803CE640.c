@@ -27,6 +27,7 @@ extern void fn_8020B898(void *, void *);
 extern int fn_8020B268(void *, int, void (*)(void), void *);
 extern void fn_803CFDB8(void);
 
+// TODO: clean up, give variables real names
 void fn_803CFF50(int a, int b, int c)
 {
     int result;

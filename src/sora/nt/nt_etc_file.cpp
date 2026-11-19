@@ -276,22 +276,32 @@ extern "C" u32 fn_80153810(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x0);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_80154278(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x10);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_80154280(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0xc);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_80154294(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0xc);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_801542A8(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0xc);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_801542BC(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0xc);
 }
@@ -304,6 +314,8 @@ extern "C" void* fn_80154288(void* arg0) {
 }
 
 namespace jj_8015429C {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_8015429C(void* arg0) {
     unsigned char* p = *reinterpret_cast<unsigned char**>(static_cast<unsigned char*>(arg0) + 0x10);
     return p + 0x34;
@@ -311,12 +323,16 @@ extern "C" void* fn_8015429C(void* arg0) {
 }
 
 namespace jj_801542B0 {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_801542B0(void* object) {
     return *reinterpret_cast<unsigned char**>(static_cast<char*>(object) + 0x10) + 0x34;
 }
 }
 
 namespace jj_80153488 {
+// TODO: clean up, give variables real names
+// TODO: clean up, give variables real names
 extern "C" void fn_80153488(int* arg0) {
     arg0[0] = 0;
     *(unsigned char*)(arg0 + 1) = 0;
@@ -332,6 +348,8 @@ struct Fn80153498Obj {
     u8 unk4;
 };
 
+// TODO: clean up, give variables real names
+// TODO: clean up, give variables real names
 extern "C" void* fn_80153498(Fn80153498Obj* p, int flag) {
     if (p != NULL) {
         if (p->unk4 != 0) {
@@ -352,6 +370,8 @@ namespace jj_80152BDC {
 extern "C" {
 extern char lbl_80461690[];
 void __dl__FPv(void*);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_80152BDC(void* self, int flag) {
     if (self) {
         void* ptr = *(void**)((char*)self + 0xC);
@@ -373,6 +393,8 @@ namespace jj_80153504 {
 extern "C" void free__13gfHeapManagerFPv(void*);
 extern "C" u32 NETCalcCRC32(void* p, s32 size);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_80153504(u8* arg0, u8* arg1) {
     if (arg0[4] != 0) {
         void* p = *(void**)arg0;
@@ -426,6 +448,8 @@ u8 getLanguage__10GameGlobalFv(GameGlobal*);
 u8 fn_8004EAC8(GameGlobal*);
 u32 fn_80204FC8(void*, u32, void*, void*, int);
 u32 NETCalcCRC32(void*, u32);
+// TODO: clean up, give variables real names
+// TODO: clean up, give variables real names
 int fn_80153610(Holder* self, Object_vptr_8* src, u64 id, Heaps::HeapType heap, u8 b, void* work) {
 Hdr* h;
 GameGlobal* g;
@@ -525,6 +549,8 @@ struct Obj {
 
 #define COPY(n) d[0x11 + n] = arg0->src->t[n];
 
+// TODO: clean up, give variables real names
+// TODO: clean up, give variables real names
 extern "C" void fn_80152FA4(Obj* arg0) {
     unsigned short var_r31;
     unsigned char var_r30;

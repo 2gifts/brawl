@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 #include <string.h>
 #include <types.h>
 #include <it/it_figure_manager.h>

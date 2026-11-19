@@ -1519,6 +1519,7 @@ extern "C" {
 
 int fn_800390C8(void*);
 
+// TODO: clean up, give variables real names
 int fn_800C39D8(const Stuct1* p) {
     int result = 0;
     if (p->flag == 0 && fn_800390C8(p->resource)) {
@@ -1543,6 +1544,7 @@ extern "C" int fn_802608BC(void*, void*, unsigned int, void*, unsigned int,
 extern "C" void fn_801D7718(const void*, unsigned int);
 extern "C" void fn_801F3194(void);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800C7324(void* arg0, void* arg1, void* heap, int depth,
                             int heapType) {
     char work[0x1C00];
@@ -1595,6 +1597,7 @@ void __construct_array(void*, void (*)(void*), void (*)(void*), unsigned long, i
 void fn_800C37B0(void*);
 void fn_800C37CC(void*);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_800C35CC(void* self, s32 mode, nw4r::g3d::ResFile arg2, nw4r::g3d::ResFile arg3,
  s32 a, s32 b, s32 c, s32 d, s32 arg_sp8, u8 arg_spC, u8 arg_sp10) {
  char* p = (char*)self;

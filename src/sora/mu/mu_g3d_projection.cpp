@@ -77,6 +77,7 @@ extern const float lbl_805A2344;
 
 struct Vec3 { float x, y, z; };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800DB674(int arg0, float* arg1) {
     Globals8049* base = &lbl_8049E030;
     unsigned char (Globals8049::*first)[0x30] = &Globals8049::first;

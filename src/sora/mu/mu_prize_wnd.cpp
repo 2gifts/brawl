@@ -268,6 +268,7 @@ public:
     virtual void target(void* a, void* b);
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800C15AC(void* self) {
     char* s = (char*)self;
     *(int*)(s + 0x3cc) = g_sndSystem->getBGMId();
@@ -293,6 +294,7 @@ extern char lbl_804080C0[];
 extern unsigned char lbl_805A22D0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_800C001C(void* a0, void* a1, void* a2, int a3, void* a4, int a5)
 {
     void* heap;
@@ -347,6 +349,7 @@ void attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(void*, u32, void
 void getWScale__5MuMsgFUlf(void*, u32, float);
 void setFontColor__5MuMsgFUlUcUcUcUc(void*, u32, u8, u8, u8, u8);
 
+// TODO: clean up, give variables real names
 void fn_800C0670(Self* self, void* data) {
     Inner* p;
     void* msg = create__5MuMsgFUlQ25Heaps8HeapTypeUl(1, 0x2a, 0x2b);
@@ -377,6 +380,7 @@ extern char lbl_80456EC0[];
 extern char lbl_80456ED0[];
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_800C11F4(char* self)
 {
     if (*(tyFigListDataManager**)(self + 0x228) &&
@@ -471,6 +475,7 @@ static s32 hasId(const Self* s, s32 val) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800C07D0(void* self) {
     const char* base = lbl_80456DD8;
     Self* s = (Self*)self;
@@ -534,6 +539,7 @@ struct Self {
     IOPair arr34C[4];
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800C1380(Self* self) {
     IOPair* p;
     int r0;
@@ -610,6 +616,7 @@ void __destroy_arr(void*, void (*)(void*, int), int, int);
 void __dt__14gfFileIOHandleFv(void*, int);
 void __dt__6gfTaskFv(void*, int);
 void __dl__FPv(void*);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_800C0330(unsigned char* self, int flag) {
  if (self) {
   *(void**)(self + 0x3c) = lbl_80456F5C;
@@ -718,6 +725,7 @@ struct Self {
     IOPair arr34C[4];
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800C1890(Self* self) {
     IOPair* p;
     int r0;

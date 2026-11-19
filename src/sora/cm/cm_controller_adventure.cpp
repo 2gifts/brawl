@@ -65,6 +65,7 @@ struct Obj {
 };
 
 extern "C" {
+// TODO: clean up, give variables real names
 void fn_800A59DC(Obj* dst, const float* src) {
     dst->a = src[0];
 }
@@ -72,6 +73,7 @@ void fn_800A59DC(Obj* dst, const float* src) {
 }
 
 namespace jj_800A41E4 {
+// TODO: clean up, give variables real names
 extern "C" void fn_800A41E4(void *dst, const void *src)
 {
     const unsigned int *s = (const unsigned int *)src;
@@ -86,6 +88,7 @@ namespace jj_800A5990 {
 extern float lbl_805A1F90;
 extern float lbl_805A1FF8;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800A5990(char* arg0, float* arg1)
 {
     char* r5 = *(char**)arg0;
@@ -114,6 +117,7 @@ struct CameraThing {
 
 extern "C" CameraController* getInstance__16CameraControllerFv();
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800A4200(void* self, const void* pos) {
     CameraController* cc;
     CameraThing* t;
@@ -137,6 +141,7 @@ extern "C" const float lbl_805A1F90;
 namespace init { extern "C" float lbl_805A1F90; }
 struct Vec2 { float x, y; }; struct Vec3 { float x,y,z; };
 struct Obj { char pad0[11]; unsigned char flags; char pad1[0x20]; Vec3 a,b,c,d,e; char pad2[0x18]; Vec3 zero; char pad3[0x5c]; float offsetX,offsetY; char pad4[0x20]; Vec3 f,g; };
+// TODO: clean up, give variables real names
 extern "C" void fn_800A58C0(Obj* p, Vec2* input, int useOffset, float scale) {
  float y=input->y; float x=input->x;
  struct Position { Vec2 xy; float z; } pos={{x,y},init::lbl_805A1F90};
@@ -180,6 +185,7 @@ extern "C" void fn_800A46B4(Object*, Box*, Vec2*, Vec2*);
 extern float lbl_805A1FA0;
 extern float lbl_805A1FCC;
 
+// TODO: clean up, give variables real names
 inline void makeBox(Box* box, float left, float bottom, float right, float top) {
     float margin = lbl_805A1FCC;
     float bottomFinal = bottom;
@@ -191,6 +197,7 @@ inline void makeBox(Box* box, float left, float bottom, float right, float top) 
     box->max.y = topFinal;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800A4BE4(Object* self, Vec2* arg) {
     Box box;
     Box other;

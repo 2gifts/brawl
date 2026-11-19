@@ -454,6 +454,7 @@ struct ArchiveLoader {
     utList usedList;
 };
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_8004570C(ArchiveLoader* self, void* data, s32 size, Heaps::HeapType heap) {
     ArchiveLoadNode* node = (ArchiveLoadNode*)self->freeList.getNode(0);
     if (node != nullptr) {
@@ -483,6 +484,7 @@ struct Str { unsigned int flags; unsigned int unused; char* ptr; };
 extern "C" void fn_800146F0(Str*, void*);
 extern "C" void fn_80014480(Str*, void*);
 extern "C" void __dl__FPv(void*);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_80045240(void* self, utList* list, void* key) {
     utListNode* node = list->getNode(0);
     while (node) {
@@ -529,6 +531,7 @@ void __dl__FPv(void*);
 struct Node : utListNode { u16 value; u16 pad; u32 index; u32 other; gfArchive* archive; };
 struct DBView { u16 capacity; u16 size; gfArchiveDatabaseEntry* entries; };
 struct Manager { void* vtable; DBView* db; u32 count; void* nodes; utList freeList; utList list1; utList list2; utList list3; utList list4; };
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline void processNode(Manager* self, Node* node) {
     if (self->list3.isExistNode(node) != -1) self->list3.remove(node);
     if (self->list2.isExistNode(node) != -1) self->list2.remove(node);
@@ -550,6 +553,7 @@ inline void processNode(Manager* self, Node* node) {
     node->archive = 0;
     self->freeList.addTail(node);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline void processFirstNode(Manager* self, utListNode* listNode) {
     Node* node = (Node*)listNode;
     if (self->list3.isExistNode(node) != -1) self->list3.remove(node);
@@ -573,6 +577,7 @@ inline void processFirstNode(Manager* self, utListNode* listNode) {
     self->freeList.addTail(node);
 }
 #define PROCESS(LIST) processNode(self, (Node*)LIST.getNode(0));
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_80044C3C(void* p, int flag) {
     Manager* self = (Manager*)p;
     if (self) {
@@ -597,6 +602,7 @@ namespace jj_800469E4 {
 extern "C" {
 void __dl__FPv(void*);
 
+// TODO: clean up, give variables real names
 void* fn_800469E4(void* slot, int destroy) {
     if (slot != 0 && destroy > 0) {
         __dl__FPv(slot);
@@ -659,6 +665,7 @@ inline Node* findNode(Manager* self, u32 id) {
     }
     return 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline void processNode(Manager* self, Node* node) {
     if (self->list3.isExistNode(node) != -1) self->list3.remove(node);
     if (self->list2.isExistNode(node) != -1) self->list2.remove(node);
@@ -680,6 +687,7 @@ inline void processNode(Manager* self, Node* node) {
     node->archive = 0;
     self->freeList.addTail(node);
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_800461D4(Manager* self, u32 id) {
     Node* node = findNode(self, id);
     if (node) {

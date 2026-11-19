@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses into fighter/module structs; add named fields to the fighter class (or a local struct) instead of *(T*)(p + 0x..)
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_POKELIZARDON_ARTICLE_POOLS
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE

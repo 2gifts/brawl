@@ -40,6 +40,7 @@ extern "C" void __dl__FPv(void*);
 extern "C" u8 lbl_8045B4B8[];
 extern "C" u8 lbl_8049E550[];
 
+// TODO: clean up, give variables real names
 extern "C" Obj* fn_800ED910(Obj* self, int deleting) {
     if (self != 0) {
         self->vtable = lbl_8045B4B8;
@@ -95,6 +96,7 @@ extern char lbl_8045C4BC[];
 extern char lbl_8045B4B8[];
 extern utList lbl_8049E550;
 }
+// TODO: clean up, give variables real names
 extern "C" void* fn_800ED9D0(Obj* object, int deleting) {
     if (object) {
         object->vtable2 = lbl_8045C4BC;
@@ -160,6 +162,7 @@ struct Context {
     char pad3[0x14];
     unsigned char flag;
 };
+// TODO: clean up, give variables real names
 extern "C" void fn_800EE600(Context* self, int arg1, int arg2) {
     unsigned char* result = (unsigned char*)g_GameGlobal->m_resultInfo;
     self->msg1->printf(0, lbl_8059E2F8, self->value1);
@@ -213,6 +216,7 @@ inline void clearSceneGroup() {
         }
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_800EE260(void* self, int arg1) {
     char* s = (char*)self;
     if (self != 0) {
