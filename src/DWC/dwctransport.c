@@ -105,3 +105,12 @@ void fn_8034EAB8(int arg0)
     *(short *)((char *)lbl_805A0FB0[0] + off + 0x22) = 0;
 }
 
+// TODO: clean up, give variables real names
+/* jj_8034EB74 */
+#define lbl_805A0FB0 (*(int*)&lbl_805A0FB0)
+
+void DWCi_ShutdownTransport(void) {
+    lbl_805A0FB0 = 0;
+}
+#undef lbl_805A0FB0
+

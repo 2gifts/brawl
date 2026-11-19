@@ -354,3 +354,29 @@ int DWCi_TblRequestResultToAsyncResult(int result, int* error) {
         return 22;
     }
 }
+
+// TODO: clean up, give variables real names
+/* jj_80358D94 */
+typedef unsigned long long u64;
+typedef struct { int v[10]; } Cal;
+typedef struct { char pad[0x10]; u64 t; } St;
+#define lbl_8048E680 (*(St*)&lbl_8048E680)
+extern u64 OSGetTime(void);
+extern void OSTicksToCalendarTime(u64, Cal*);
+
+void SBS_GetServerTime(int* a, int* b) {
+    Cal c;
+    OSTicksToCalendarTime(OSGetTime() - lbl_8048E680.t, &c);
+    a[0] = c.v[3];
+    a[1] = c.v[4];
+    a[2] = c.v[5];
+    a[3] = c.v[6];
+    a[4] = c.v[7];
+    b[0] = c.v[0];
+    b[1] = c.v[1];
+    b[2] = c.v[2];
+    b[3] = c.v[8];
+    b[4] = c.v[9];
+}
+#undef lbl_8048E680
+

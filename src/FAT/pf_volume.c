@@ -269,3 +269,21 @@ int fn_803D71D4(char *arg0, int a, unsigned int offset, unsigned int length, int
     return 0;
 }
 
+// TODO: clean up, give variables real names
+/* jj_803D6D0C */
+#define lbl_805644C0 ((char*)&lbl_805644C0)
+static inline void mark(char *p, u32 arg0) {
+    if (*(u32 *)(p + 0x1FBC) == arg0)
+        *(u16 *)(p + 0x1F8C) |= 0x14;
+}
+void PFDRV_MediaInsert(u32 arg0) {
+    char *p;
+    int i;
+    p = lbl_805644C0 + 0xA0;
+    for (i = 0; i < 26; i++) {
+        mark(p, arg0);
+        p += 0x1FC8;
+    }
+}
+#undef lbl_805644C0
+

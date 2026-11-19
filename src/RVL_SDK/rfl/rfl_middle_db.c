@@ -73,3 +73,104 @@ unsigned int fn_803D5B90(Data *p) {
  return p->aq <= 30;
 }
 
+// TODO: clean up, give variables real names
+/* jj_803D60FC */
+
+extern s32 RFLiPickupCharInfo(void* p);
+extern void fn_803D6008(s32 a, void* p);
+
+s32 RFLGetAdditionalInfo(s32 arg0) {
+    u8 sp8[0x50];
+    s32 temp_r3;
+
+    temp_r3 = RFLiPickupCharInfo(sp8);
+    if (temp_r3 == 0) {
+        fn_803D6008(arg0, sp8);
+    }
+    return temp_r3;
+}
+
+/* jj_803D5AC4 */
+extern int RFLAvailable(void);
+extern int RFLiCalculateCRC(int, int);
+extern int RFLiAddMiddleDBUserData(int, int);
+
+int RFLAddMiddleDBStoreData(int arg0, int arg1) {
+    if (arg0 == 0) return 0xF;
+    if (arg1 == 0) return 0xF;
+    if (RFLAvailable() == 0) return 1;
+    if (RFLiCalculateCRC(arg1, 0x4C) & 0xFFFF) return 7;
+    return RFLiAddMiddleDBUserData(arg0, arg1);
+}
+
+/* jj_803D5924 */
+extern void RFLiConvertHRaw2Info(void *a, void *b);
+extern int RFLiIsValidID(void *p);
+
+int RFLiGetCharInfoMiddleDB(void *arg0, u8 *arg1, u32 arg2) {
+    u8 *temp;
+
+    if (arg1 == 0) {
+        return 0;
+    }
+    if (arg2 >= *(u16 *)(arg1 + 0xC)) {
+        return 0;
+    }
+    if (*(u16 *)(arg1 + 0xE) == 0) {
+        return 0;
+    }
+    temp = *(u8 **)(arg1 + 0x8) + ((arg2 << 6) & 0x3FFFC0);
+    if (RFLiIsValidID(temp + 0x18) == 0) {
+        return 0;
+    }
+    RFLiConvertHRaw2Info(temp, arg0);
+    return 1;
+}
+
+/* jj_803D5878 */
+extern void* memset(void*, int, unsigned long);
+typedef struct {
+    int type;
+    int x4;
+    void* buf;
+    unsigned short count;
+    unsigned short xe;
+    union {
+        struct { unsigned char a, b, c, d; } u8;
+        struct { unsigned short h; unsigned char c, d; } u16;
+        struct { unsigned pad : 2; unsigned f : 15; unsigned rest : 15; } bf;
+        unsigned w;
+    } u;
+    int x14;
+} Obj;
+
+void RFLInitMiddleDB(Obj* o, int type, void* buf, unsigned short count) {
+    if (o == 0) return;
+    if (buf == 0) return;
+    o->type = type;
+    o->x4 = 0;
+    o->count = count;
+    o->buf = buf;
+    o->xe = 0;
+    o->u.w = 0;
+    o->x14 = 0;
+    switch (type) {
+    case 3:
+        if (count > 100) return;
+        o->u.u8.a = 2;
+        o->u.u8.b = 3;
+        o->u.u8.c = 3;
+        break;
+    case 1:
+    case 2:
+        if (count > 10000) return;
+        o->u.bf.f = -1;
+        break;
+    case 0:
+        o->u.u16.h = 0;
+        o->u.u16.c = 2;
+        break;
+    }
+    memset(o->buf, 0, o->count << 6);
+}
+

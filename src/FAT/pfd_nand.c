@@ -443,3 +443,30 @@ s32 fn_803ECB5C(u8* vol, u8* buf, u32* outType, s32 sectors)
     return 0;
 }
 
+// TODO: clean up, give variables real names
+/* jj_803ECFB8 */
+extern int NANDInit(void);
+extern int NANDGetCurrentDir(void*);
+extern void fn_803D80C4(void*);
+#define lbl_805A127C (*(int*)&lbl_805A127C)
+#define lbl_80598098 ((char*)&lbl_80598098)
+
+int fn_803ECFB8(void* arg0) {
+    if (arg0 == 0) {
+        return -0x14;
+    }
+    if (lbl_805A127C == 0) {
+        if (NANDInit() != 0) {
+            return -0x15;
+        }
+        if (NANDGetCurrentDir(lbl_80598098) != 0) {
+            return -0x15;
+        }
+        lbl_805A127C += 1;
+    }
+    fn_803D80C4(arg0);
+    return 0;
+}
+#undef lbl_805A127C
+#undef lbl_80598098
+

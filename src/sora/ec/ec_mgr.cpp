@@ -1,3 +1,5 @@
+#include <mt/mt_matrix.h>
+#include <nw4r/g3d/g3d_scnmdlsmpl.h>
 #include <ec/ec_trace_mgr.h>
 #include <ec/ec_mgr.h>
 #include <gf/gf_heap_manager.h>
@@ -973,6 +975,281 @@ void fn_80061160(Owner* self, u32 a1, s32 a2, u32 a3, u32 a4, u32 a5, u32 a6, u8
     fn_8004E958(g_GameGlobal);
     ((ecTraceMgr*)((u8*)self + 0x98))->start(a1, a3, a4, a5, self->slot[self->kind], a6, a7, 0, f);
 }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8005F56C {
+struct Entry {
+    u8 pad[0x7C];
+    s32 active;
+    u8 group;
+    u8 pad81[3];
+};
+
+struct Manager {
+    u8 pad[0x60];
+    Entry* entries;
+    u8 pad64[8];
+    s32 count;
+    s32 first;
+    s32 last;
+    s32 freeIndex;
+};
+
+extern "C" u32 fn_80061944(Entry*, f32);
+
+extern "C" u8 fn_8005F56C(Manager* self, int group, u32* low, u32* high, f32 value) {
+    u32 i;
+    Entry* entry = self->entries + self->first;
+    u8 next = 0;
+
+    for (i = self->first; i <= self->last;) {
+        if (entry->active) {
+            if (!(!(group != (int)entry->group))) {
+                if (group < (int)entry->group && !next)
+                    next = entry->group;
+            } else {
+                if (fn_80061944(entry, value) == 1) {
+                    self->count--;
+                    if (self->freeIndex > i)
+                        self->freeIndex = i;
+                }
+                if (*low > i)
+                    *low = i;
+                if (*high < i)
+                    *high = i;
+            }
+        }
+        ++i;
+        ++entry;
+    }
+    return next;
+}
+}
+
+namespace jj_8005EB68 {
+struct Entry {
+    int active;
+    unsigned char pad04[0x0C];
+    unsigned int id;
+    unsigned int pad14;
+};
+
+struct Record {
+    unsigned char pad00[0x30];
+    Entry* entry;
+    unsigned char pad34[0x48];
+    int active;
+    unsigned int pad80;
+};
+
+struct Owner {
+    unsigned char pad00[0x58];
+    Entry* entries;
+    unsigned int count;
+    Record* records;
+    unsigned char pad64[8];
+    int enabled;
+    unsigned int first;
+    unsigned int last;
+};
+
+extern "C" void end__12ecEffectWorkFbb(Record*, int, int);
+extern "C" void release__10ecResourceFb(Entry*, int);
+
+static inline Entry* findEntry(Owner* self, unsigned int id)
+{
+    for (unsigned int i = 0; i < self->count; ++i) {
+        if (self->entries[i].active && self->entries[i].id == id)
+            return &self->entries[i];
+    }
+    return 0;
+}
+
+extern "C" void fn_8005EB68(Owner* self, unsigned int id)
+{
+    Entry* entry = findEntry(self, id);
+    if (entry) {
+        if (self->enabled) {
+            Record* record;
+            unsigned int i = self->first;
+            record = &self->records[i];
+            for (; i <= self->last; ++i, ++record) {
+                if (record->active && record->entry->id == id)
+                    end__12ecEffectWorkFbb(record, 1, 1);
+            }
+        }
+        release__10ecResourceFb(entry, 0);
+    }
+}
+}
+
+namespace jj_80060A18 {
+
+struct Entry {
+    char pad[0x7C];
+    u32 key;
+    u32 tail;
+};
+
+extern Entry* lbl_805A0164;
+
+struct Manager {
+    char pad[0x60];
+    Entry* entries;
+    char pad64[8];
+    int active;
+    u32 first;
+    u32 last;
+
+    Entry* find(u32 key) {
+        if (key && active) {
+            Entry* entry = lbl_805A0164;
+            if (entry && entry->key == key)
+                return entry;
+
+            entry = &entries[first];
+            for (u32 i = first; i <= last; ++i, ++entry) {
+                if (entry->key == key) {
+                    lbl_805A0164 = entry;
+                    return entry;
+                }
+            }
+        }
+        return 0;
+    }
+};
+
+struct Resource {
+    char pad[0x14];
+    int offset;
+
+    void* data() {
+        return offset ? (char*)this + offset : 0;
+    }
+};
+
+extern "C" Resource* GetResTex__Q34nw4r3g3d7ResFileCFi(void*, void*);
+extern "C" void change_mdl_tex__12ecEffectWorkFPCcPCcPQ34nw4r3g3d7ResFilei(Entry*, int, void*, void*, int);
+
+extern "C" void fn_80060A18(
+    Manager* self, u32 key, int arg2, void* arg3, void* arg4, int arg5
+) {
+    Entry* entry = self->find(key);
+    if (entry) {
+        Resource* resource = GetResTex__Q34nw4r3g3d7ResFileCFi(arg4, arg3);
+        change_mdl_tex__12ecEffectWorkFPCcPCcPQ34nw4r3g3d7ResFilei(entry, arg2, resource->data(), arg4, arg5);
+    }
+}
+}
+
+namespace jj_8005F08C {
+struct Entry {
+    int active;
+    unsigned char pad04[0x0C];
+    unsigned int id;
+    unsigned int pad14;
+};
+
+struct Record {
+    unsigned char pad00[0x30];
+    Entry* entry;
+    unsigned char pad34[0x48];
+    int active;
+    unsigned int pad80;
+};
+
+struct Owner {
+    unsigned char pad00[0x58];
+    Entry* entries;
+    unsigned int count;
+    Record* records;
+    unsigned char pad64[8];
+    int enabled;
+    unsigned int first;
+    unsigned int last;
+};
+
+extern "C" int searchResourceID__5ecMgrFPc(Owner*);
+extern "C" void end__12ecEffectWorkFbb(Record*, int, int);
+extern "C" void release__10ecResourceFb(Entry*, int);
+
+static inline void findEntry(Owner* self, unsigned int id, Entry*& result)
+{
+    for (unsigned int i = 0; i < self->count; ++i) {
+        if (self->entries[i].active && self->entries[i].id == id) {
+            result = &self->entries[i];
+            return;
+        }
+    }
+    result = 0;
+}
+
+extern "C" void fn_8005F08C(Owner* self)
+{
+    int id = searchResourceID__5ecMgrFPc(self);
+    if (id < 0x137) {
+        Record* record;
+        Entry* entry;
+        findEntry(self, id, entry);
+        if (entry) {
+            if (self->enabled) {
+                unsigned int i = self->first;
+                record = &self->records[i];
+                for (; i <= self->last; ++i, ++record) {
+                    if (record->active && record->entry->id == (unsigned int)id)
+                        end__12ecEffectWorkFbb(record, 1, 1);
+                }
+            }
+            release__10ecResourceFb(entry, 0);
+        }
+    }
+}
+}
+
+namespace jj_800613B8 {
+
+extern unsigned char lbl_8040ABC0[0x18];
+extern unsigned char lbl_8040AC08[0x18];
+extern "C" void GetMtx__Q34nw4r3g3d6ScnObjCFQ44nw4r3g3d6ScnObj13ScnObjMtxTypePQ34nw4r4math5MTX34(nw4r::g3d::ScnMdlSimple* self, u32 arg1, Matrix* arg2);
+extern "C" void GetScnMtxPos__Q34nw4r3g3d12ScnMdlSimpleCFPQ34nw4r4math5MTX34Q44nw4r3g3d6ScnObj13ScnObjMtxTypeUl(const nw4r::g3d::ScnMdlSimple* self, Matrix* out, u32 type, u32 arg3);
+
+class VtblProbe {
+public:
+    virtual bool f0(void* a, void* b);
+};
+
+extern "C" void fn_800613B8(Matrix* arg0, nw4r::g3d::ScnMdlSimple* arg1, u32 arg2, Vec3f* arg3, Vec3f* arg4, Vec3f* arg5) {
+    Matrix sp10(true);
+    sp10.setSRT(*arg3, *arg4, *arg5);
+
+    bool ok = false;
+    if (arg1 != NULL) {
+        void* spC = lbl_8040ABC0;
+        if (((VtblProbe*)arg1)->f0(&spC, lbl_8040ABC0)) {
+            ok = true;
+        }
+    }
+    nw4r::g3d::ScnMdlSimple* sel = ok ? arg1 : NULL;
+    if (sel != NULL) {
+        GetScnMtxPos__Q34nw4r3g3d12ScnMdlSimpleCFPQ34nw4r4math5MTX34Q44nw4r3g3d6ScnObj13ScnObjMtxTypeUl(sel, arg0, 1, arg2);
+    } else {
+        bool ok2 = false;
+        if (arg1 != NULL) {
+            void* sp8 = lbl_8040AC08;
+            if (((VtblProbe*)arg1)->f0(&sp8, lbl_8040AC08)) {
+                ok2 = true;
+            }
+        }
+        nw4r::g3d::ScnMdlSimple* sel2 = ok2 ? arg1 : NULL;
+        if (sel2 != NULL) {
+            GetScnMtxPos__Q34nw4r3g3d12ScnMdlSimpleCFPQ34nw4r4math5MTX34Q44nw4r3g3d6ScnObj13ScnObjMtxTypeUl(*(nw4r::g3d::ScnMdlSimple**)((char*)sel2 + 0xE8), arg0, 1, arg2);
+        } else {
+            GetMtx__Q34nw4r3g3d6ScnObjCFQ44nw4r3g3d6ScnObj13ScnObjMtxTypePQ34nw4r4math5MTX34(arg1, 1, arg0);
+        }
+    }
+    arg0->mul(&sp10, arg0);
 }
 }
 
