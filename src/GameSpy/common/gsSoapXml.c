@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <internal/printf.h>
 #include <types.h>
 #include <string.h>
 #include <GameSpy/common/gsXML.h>
@@ -250,3 +253,160 @@ void fn_80362F4C(void* elem) {
 }
 
 void fn_80362F50(void* attr) {}
+
+// TODO: clean up, give variables real names
+/* jj_80363BDC */
+
+extern void *fn_803F602C(void *, const void *, unsigned long);
+extern char lbl_8059F5B8[6], lbl_8059F5C0[7], lbl_8059F5C8[7];
+extern char lbl_8059F5D0[5], lbl_8059F5D8[5], lbl_8059F5E0[4];
+extern char lbl_8059F5E4[5], lbl_8059F5EC[3];
+
+static inline signed char get_char(const char *buf, int i)
+{
+    return buf[i];
+}
+
+static inline void set_char(char *buf, int i, char c)
+{
+    buf[i] = c;
+}
+
+int fn_80363BDC(char *buf, int *len)
+{
+    int i = 0;
+    int n;
+    char *semi;
+    unsigned int sp8;
+    signed char c;
+    int val;
+    int j;
+
+    while (i < *len) {
+        if (get_char(buf, i) != '&') {
+            i++;
+            continue;
+        }
+
+        if (strncmp(buf + i, lbl_8059F5B8, 5) == 0) {
+            buf[i++] = '&';
+            n = 4;
+        } else if (strncmp(buf + i, lbl_8059F5C0, 6) == 0) {
+            buf[i++] = '"';
+            n = 5;
+        } else if (strncmp(buf + i, lbl_8059F5C8, 6) == 0) {
+            buf[i++] = 0x27;
+            n = 5;
+        } else if (strncmp(buf + i, lbl_8059F5D0, 4) == 0) {
+            buf[i++] = '<';
+            n = 3;
+        } else if (strncmp(buf + i, lbl_8059F5D8, 4) == 0) {
+            buf[i++] = '>';
+            n = 3;
+        } else if (strncmp(buf + i, lbl_8059F5E0, 3) == 0) {
+            int flag;
+            unsigned int mask;
+
+            sp8 = 0;
+            flag = 0;
+            mask = 0xff000000;
+            semi = strchr(buf + (i + 3), ';');
+            if (semi == 0)
+                return 0;
+            if (semi - (buf + (i + 3)) > 8)
+                return 0;
+
+            sscanf(buf + (i + 3), lbl_8059F5E4, &sp8);
+            for (j = 0; j < 4; j++) {
+                c = (signed char)((sp8 & mask) >> ((3 - j) * 8));
+                if (flag != 0 || c != 0) {
+                    buf[i++] = c;
+                    flag = 1;
+                }
+                mask >>= 8;
+            }
+            n = (semi - (buf + i)) + 1;
+        } else if (strncmp(buf + i, lbl_8059F5EC, 2) == 0) {
+            int flag;
+            unsigned int mask;
+
+            flag = 0;
+            mask = 0xff000000;
+            semi = strchr(buf + (i + 2), ';');
+            if (semi == 0)
+                return 0;
+
+            val = atoi(buf + (i + 2));
+            for (j = 0; j < 4; j++) {
+                c = (signed char)((val & mask) >> ((3 - j) * 8));
+                if (flag != 0 || c != 0) {
+                    buf[i++] = c;
+                    flag = 1;
+                }
+                mask >>= 8;
+            }
+            n = (semi - (buf + i)) + 1;
+        } else {
+            return 0;
+        }
+
+        fn_803F602C(buf + i, buf + (i + n), *len - (i + n));
+        memset(buf + (*len - n), 0x20, n);
+        *len -= n;
+    }
+
+    return 1;
+}
+
+/* jj_80365C7C */
+
+typedef struct Buffer { char *data; int length; int capacity; int changed; } Buffer;
+extern char *fn_8035DFF8(char *, int);
+extern char lbl_8059F5F4[3];
+
+static inline int reserve(Buffer *self, int capacity)
+{
+    char *data = fn_8035DFF8(self->data, capacity);
+    if (data == 0) return 0;
+    if (data != self->data) self->data = data;
+    self->capacity = capacity;
+    return 1;
+}
+static inline int append_char(Buffer *self, char c)
+{
+    if (self->length >= self->capacity) {
+        if (!reserve(self, self->capacity + 0x400)) return 0;
+    }
+    self->data[self->length] = c;
+    self->length++;
+    return 1;
+}
+static inline int append(Buffer *self, const char *str)
+{
+    int length = strlen(str);
+    if (length == 0) return 1;
+    while (self->capacity - self->length <= length) {
+        if (!reserve(self, self->capacity + 0x400)) return 0;
+    }
+    strcpy(self->data + self->length, str);
+    self->length += length;
+    return 1;
+}
+static inline int open_tag(Buffer *self, const char *a, const char *b)
+{
+    if (!append_char(self, '<') || !append(self, a) || !append_char(self, ':') || !append(self, b) || !append_char(self, '>')) return 0;
+    return 1;
+}
+static inline int close_tag(Buffer *self, const char *a, const char *b)
+{
+    if (!append_char(self, '<') || !append_char(self, '/') || !append(self, a) || !append_char(self, ':') || !append(self, b) || !append_char(self, '>')) return 0;
+    return 1;
+}
+int fn_80365C7C(Buffer *self, const char *a, const char *b, double value)
+{
+    char text[32];
+    sprintf(text, lbl_8059F5F4, value);
+    if (!open_tag(self, a, b) || !append(self, text) || !close_tag(self, a, b)) return 0;
+    return 1;
+}
+

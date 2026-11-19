@@ -3286,3 +3286,706 @@ extern "C" int fn_800CA18C(void* self) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_800CFEB8 {
+struct CopyW_0x4E { u32 w[0x4E]; };
+struct CopyB_0xA0 { u8  b[0xA0]; };
+struct CopyW_0x0E { u32 w[0x0E]; };
+
+struct Slot {
+    u8 pad[0x4C];
+    u8 player;  /* 0x4C */
+    u8 index;   /* 0x4D */
+    u8 pad4E;   /* 0x4E */
+    u8 flag4F;  /* 0x4F */
+};
+
+struct Flag {
+    u32 hi : 8; /* 0x50 */
+    u32 lo : 24;
+};
+
+struct Entry {
+    u8 pad[0xC6];
+    u8 bit80 : 1;
+    u8 padbits : 6;
+    u8 bit0 : 1;
+    u8 padbit2 : 1;
+    u8 bit40 : 1;
+    u8 padbit3 : 6;
+    u8 pad2[0x218 - 0xC8];
+};
+
+extern "C" u8 fn_800C851C(void);
+extern "C" u8 fn_800C8548(void);
+extern "C" void netReport__FPCce(const char*, ...);
+extern "C" void fn_800C8F68(const char*, ...);
+extern "C" void fn_8014B130(int);
+extern "C" void fn_800CF770(void*, u8);
+extern "C" void** getInstance__12ntFriendInfoFv(void);
+extern "C" int fn_8014FD6C(void);
+extern "C" void fn_800D0398(void*);
+extern "C" void fn_800D0AE0(void*, void*);
+extern "C" void fn_80145B98(int, int);
+
+extern char lbl_80457158[];
+extern char g_Network[];
+extern int lbl_805A03A8;
+extern int lbl_805A0434;
+
+extern "C" void fn_800CFEB8(u8* self) {
+    u8* dst;
+    u8* src;
+    char* base = lbl_80457158;
+
+    if (self[0xFD4] != 4) {
+        u8 a = fn_800C851C();
+        if (a == 0xFF)
+            a = 4;
+        if (self[0xFD4] != a) {
+            u8 b = fn_800C851C();
+            if (b == 0xFF)
+                b = 4;
+            if (b == 4) {
+                u8 c = fn_800C851C();
+                u8 d = c;
+                if (c == 0xFF)
+                    d = 4;
+                netReport__FPCce(base + 0x10E4, self[0xFD4], d);
+            } else {
+                u8 c = fn_800C851C();
+                u8 d = c;
+                if (c == 0xFF)
+                    d = 4;
+                netReport__FPCce(base + 0x111C, self[0xFD4], d);
+            }
+            u8 e = fn_800C851C();
+            u8 f = e;
+            if (e == 0xFF)
+                f = 4;
+            fn_800C8F68(base + 0x1150, self[0xFD4], f);
+            fn_8014B130(0xD);
+        }
+    } else {
+        src = self + self[0xFD4] * 0x218;
+        u8 loc = fn_800C851C();
+        if (loc == 0xFF)
+            loc = 4;
+        dst = self + loc * 0x218;
+
+        *(CopyW_0x4E*)(dst + 0x70) = *(CopyW_0x4E*)(src + 0x70);
+        *(CopyB_0xA0*)(dst + 0x1A8) = *(CopyB_0xA0*)(src + 0x1A8);
+        *(CopyW_0x0E*)(dst + 0x248) = *(CopyW_0x0E*)(src + 0x248);
+        dst[0x280] = src[0x280];
+        dst[0x281] = src[0x281];
+        fn_800CF770(self, self[0xFD4]);
+
+        Slot* slot = (Slot*)self;
+        for (s32 i = 0; i < 4; i++) {
+            if (self[0xFD4] == slot->player) {
+                u8 l = fn_800C851C();
+                if (l == 0xFF)
+                    l = 4;
+                slot->player = l;
+            }
+            slot = (Slot*)((u8*)slot + 8);
+        }
+
+        u8 sel = fn_800C851C();
+        if (sel == 0xFF)
+            sel = 4;
+        char* fr = *(char**)getInstance__12ntFriendInfoFv();
+        *(CopyB_0xA0*)(self + sel * 0x218 + 0x1A8) = *(CopyB_0xA0*)(fr + 0x450);
+
+        void* net = *(void**)(g_Network + 0x30);
+        u64 value;
+        if (net != 0) {
+            value = *(u64*)((char*)net + 0x3440);
+        } else {
+            value = 0;
+        }
+        *(u64*)(dst + 0x80) = value;
+
+        s32 ret = fn_8014FD6C();
+        ((Entry*)dst)->bit80 = ret;
+
+        u8 t = fn_800C851C();
+        if (t == 0xFF)
+            t = 4;
+
+        s32 off;
+        Slot* s27;
+        Flag* f26;
+        s32 off18;
+        s32 cnt = 0;
+        if (t != 4) {
+            s27 = (Slot*)self;
+            f26 = (Flag*)(self + 0x50);
+            off18 = t * 0x18;
+            s32 k = 0;
+            off = 0;
+            do {
+                u8* e;
+                u8 g = fn_800C8548();
+                if (g == 0xFF) {
+                    u8 l = fn_800C851C();
+                    if (l == 0xFF)
+                        l = 4;
+                    e = (u8*)((u32)self + l * 0x218 + 0x70);
+                } else {
+                    u8* p = self + g * 0x218;
+                    e = p + 0x70;
+                    if (!((p[0xE8] >> 7) & 1)) {
+                        u8 l = fn_800C851C();
+                        if (l == 0xFF)
+                            l = 4;
+                        e = (u8*)((u32)self + l * 0x218 + 0x70);
+                    }
+                }
+
+                s32 ok;
+                if (e[t + 0x68] != 1) {
+                    ok = 0;
+                } else {
+                    s32 w = *(s32*)(off + (u32)(e + off18) + 0x84);
+                    ok = ((w >> 24) == 1);
+                }
+
+                if (ok != 0) {
+                    s27->player = t;
+                    s27->index = cnt;
+                    cnt = cnt + 1;
+                    f26->hi = 1;
+                    f26 = (Flag*)((u8*)f26 + 8);
+                    s27->flag4F = 0;
+                    s27 = (Slot*)((u8*)s27 + 8);
+                }
+                k += 1;
+                off += 8;
+            } while (k < 3);
+        }
+
+        u8 n = fn_800C851C();
+        if (n == 0xFF)
+            n = 4;
+        Entry* rec = (Entry*)(self + n * 0x218);
+        u32 old = rec->bit40;
+        u32 enabled = *(s32*)((char*)lbl_805A0434 + 0x3408) < 0x40;
+        rec->bit40 = enabled;
+        if (old != enabled) {
+            u8 m = fn_800C851C();
+            if (m == 0xFF)
+                m = 4;
+            u8* rec2 = self + m * 0x218;
+            ((Entry*)rec2)->bit0 = 0;
+            fn_800D0AE0(self, rec2);
+            fn_80145B98(lbl_805A03A8, 0xFE);
+        }
+
+        fn_800D0398(self);
+        u16 v1050 = *(u16*)(self + 0x1050);
+        *(s16*)(self + 0xFDA) = (s16)(v1050 * 0x3C);
+        netReport__FPCce(base + 0x1050, v1050);
+
+        u8 z = fn_800C851C();
+        if (z == 0xFF)
+            z = 4;
+        self[0xFD4] = z;
+    }
+}
+}
+
+namespace jj_800CAA60 {
+
+extern "C" int fn_800C8524(void);
+extern "C" u8 fn_800C8548(void);
+extern "C" u8 fn_800C851C(void);
+extern "C" int fn_8014592C(int);
+extern "C" void fn_800D0AE0(void*, void*);
+extern "C" void fn_80145B98(int, int);
+extern "C" void fn_8014BF30(int, int, int);
+
+extern int lbl_805A03A8;
+extern int lbl_805A0434;
+extern char lbl_804579AC[];
+extern char lbl_804579E8[];
+
+struct Entry {
+    u8 pad0[0x56];
+    u8 localFlags : 7;
+    u8 lowFlag : 1;
+    u8 padBeforeActive[0x78 - 0x57];
+    u8 active : 1;
+    u8 flags : 7;
+    u8 pad1[0x218 - 0x79];
+};
+
+struct Parent {
+    u8 pad[0x70];
+    Entry entries[5];
+};
+
+inline u8* getInitial(u8* self) {
+    u8 idx = fn_800C8548();
+    if (idx == 0xFF)
+        return 0;
+    return (u8*)&((Parent*)self)->entries[idx];
+}
+
+inline u8* getSelectedForState(u8* self) {
+    u8 idx = fn_800C8548();
+    if (idx == 0xFF) {
+        u8 local = fn_800C851C();
+        if (local == 0xFF) local = 4;
+        return self + local * 0x218 + 0x70;
+    }
+    u8* p = (u8*)((unsigned int)self + idx * 0x218 + 0x70);
+    if (!((Entry*)p)->active) {
+        u8 local = fn_800C851C();
+        if (local == 0xFF) local = 4;
+        return self + local * 0x218 + 0x70;
+    }
+    return p;
+}
+
+inline int countPlayers(u8* self) {
+    u8 idx = fn_800C8548();
+    s8* p;
+    if (idx == 0xFF)
+        p = 0;
+    else
+        p = (s8*)(self + idx * 0x218 + 0x70);
+    int count;
+    if (p == 0) {
+        count = 1;
+    } else {
+        count = 0;
+        if (p[0x68] == 1) count = 1;
+        if (p[0x69] == 1) count++;
+        if (p[0x6A] == 1) count++;
+        if (p[0x6B] == 1) count++;
+    }
+    return count;
+}
+
+inline bool readyStatus(u8* self) {
+    u8* p = getInitial(self);
+    if (p == 0)
+        return 0;
+    u8 flags = p[0x78];
+    if ((flags >> 7) & 1)
+        return (flags >> 6) & 1;
+    return 0;
+}
+
+extern "C" int fn_800CAA60(u8* self) {
+    u8* initial;
+    u8 slot;
+    u8* owner;
+    int sub;
+    u8 player;
+    u8* record;
+    u8* flag;
+    unsigned int i;
+    int matches;
+    int row;
+
+    if (fn_800C8524() != 0) {
+        fn_800C8548();
+        initial = getInitial(self);
+        u8 idx;
+
+        if ((self[0xFC9] >> 3) & 1) {
+            if (initial[0x6C] != 0xFF)
+                return 0;
+            i = 0;
+            do {
+                u8* p = getSelectedForState(self);
+                if ((u32)(p[(u8)i + 0x68] - 2) <= 1)
+                    return 0;
+                i++;
+            } while (i < 4);
+        }
+
+        u8 countIdx = fn_800C8548();
+        s8* countEntry;
+        if (countIdx == 0xFF)
+            countEntry = 0;
+        else
+            countEntry = (s8*)(self + countIdx * 0x218 + 0x70);
+        int count;
+        if (countEntry == 0) {
+            count = 1;
+        } else {
+            count = 0;
+            if (countEntry[0x68] == 1) count = 1;
+            if (countEntry[0x69] == 1) count++;
+            if (countEntry[0x6A] == 1) count++;
+            if (countEntry[0x6B] == 1) count++;
+        }
+        if (count < 2)
+            return 0;
+
+        matches = 0;
+        row = 0;
+        record = self;
+        flag = self + 0x51;
+        do {
+            player = record[0x4C];
+            sub = record[0x4D];
+            int cond = (self[0xFCA] >> 5) & 1;
+            if (!cond) {
+                idx = fn_800C8548();
+                if (idx == 0xFF)
+                    owner = 0;
+                else
+                    owner = (u8*)((unsigned int)self + idx * 0x218 + 0x70);
+                if (owner == 0) {
+                    u8 local = fn_800C851C();
+                    if (local == 0xFF) local = 4;
+                    owner = (u8*)((unsigned int)self + local * 0x218 + 0x70);
+                }
+                slot = owner[0x79];
+                int valid;
+                if (slot >= 4) {
+                    valid = 0;
+                } else {
+                    u8* target;
+                    idx = fn_800C8548();
+                    if (idx == 0xFF) {
+                        u8 local = fn_800C851C();
+                        if (local == 0xFF) local = 4;
+                        target = (u8*)((unsigned int)self + local * 0x218 + 0x70);
+                    } else {
+                        target = (u8*)((unsigned int)self + idx * 0x218 + 0x70);
+                        if (!((target[0x78] >> 7) & 1)) {
+                            u8 local = fn_800C851C();
+                            if (local == 0xFF) local = 4;
+                            target = (u8*)((unsigned int)self + local * 0x218 + 0x70);
+                        }
+                    }
+                    valid = (target[slot + 0x68] == 1);
+                }
+                u8 pick = valid ? owner[0x79] : 0xFF;
+                u8 local = fn_800C851C();
+                if (local == 0xFF) local = 4;
+                cond = (pick == local);
+            }
+
+            u8 value;
+            if (cond && ((flag[0] >> 7) & 1)) {
+                value = 0;
+            } else if (player == 4) {
+                value = 0;
+            } else if (player > 4) {
+                value = 0;
+            } else {
+                u8* target;
+                idx = fn_800C8548();
+                if (idx == 0xFF) {
+                    u8 local = fn_800C851C();
+                    if (local == 0xFF) local = 4;
+                    target = (u8*)((unsigned int)self + local * 0x218 + 0x70);
+                } else {
+                    u8* base = self + idx * 0x218;
+                    target = base + 0x70;
+                    if (!((base[0xE8] >> 7) & 1)) {
+                        u8 local = fn_800C851C();
+                        if (local == 0xFF) local = 4;
+                        target = (u8*)((unsigned int)self + local * 0x218 + 0x70);
+                    }
+                }
+                int valid;
+                if (target[player + 0x68] != 1) {
+                    valid = 0;
+                } else {
+                    int word = *(int*)(target + 0x84 + player * 0x18 + sub * 8);
+                    valid = ((word >> 24) == 1);
+                }
+                if (valid)
+                    value = self[player * 0x218 + 0xC5];
+                else
+                    value = 0;
+            }
+            if ((int)value == 3)
+                matches++;
+            row++;
+            record += 8;
+            flag += 8;
+        } while (row < 4);
+
+        if (matches != self[0xFD5])
+            return 0;
+        int mode = *(int*)(self + 0x6C);
+        if (mode == 5 && matches < 4 && *(u16*)(self + 0xFDA) != 0)
+            return 0;
+        if (mode == 7 && matches < 4)
+            return 0;
+        if (!fn_8014592C(lbl_805A03A8))
+            return 0;
+
+        if (!((initial[0x78] >> 6) & 1)) {
+            initial[0x78] |= 0x40;
+            idx = fn_800C851C();
+            if (idx == 0xFF) idx = 4;
+            u8* q = self + idx * 0x218;
+            ((Entry*)(q + 0x70))->lowFlag = 0;
+            fn_800D0AE0(self, q);
+            fn_80145B98(lbl_805A03A8, 0xFE);
+            netReport(lbl_804579AC, matches);
+            fn_8014BF30(lbl_805A0434, 1, 0x3C);
+        }
+        return 1;
+    }
+
+    if ((*(int*)(self + 0xFCC) >> 24) != 4)
+        return 0;
+    int value = readyStatus(self);
+    if (!((self[0xFC9] >> 5) & 1) && value != 0) {
+        self[0xFC9] |= 0x20;
+        netReport(lbl_804579E8);
+        fn_8014BF30(lbl_805A0434, 1, 0x3C);
+    }
+    return value;
+}
+}
+
+namespace jj_800CD934 {
+#pragma switch_tables on
+
+
+typedef unsigned char u8;
+
+extern int gUnk805a03d8;
+extern int lbl_805A03A8;
+extern char lbl_8045726C[];
+
+extern "C" u8 fn_800C851C();
+extern "C" int fn_800C8524();
+extern "C" u8 fn_800C8548();
+extern "C" void netReport__FPCce(const char*, ...);
+extern "C" void fn_800C8F68(const char*, ...);
+extern "C" void fn_800D0AE0(void*, void*);
+extern "C" void fn_80145B98(int, int);
+extern "C" void fn_8014CB1C(void*, int);
+
+struct NetworkData {
+    char pad[0x33F4];
+    u8 flag;
+};
+
+struct Network {
+    char pad[0x30];
+    NetworkData* data;
+};
+
+extern Network g_Network;
+
+struct Flags {
+    u8 rest : 7;
+    u8 flag : 1;
+};
+
+struct Entry {
+    u8 pad0[0x68];
+    u8 states[4];
+    u8 pad1[0xC];
+    u8 active : 1;
+    u8 flags : 7;
+    u8 unk79;
+    u8 pad2[2];
+    unsigned int state : 5;
+    unsigned int rest : 27;
+    u8 pad3[0x218 - 0x80];
+};
+
+struct Parent {
+    u8 pad[0x70];
+    Entry entries[5];
+};
+
+inline u8 localIdx() {
+    u8 index = fn_800C851C();
+    if (index == 0xFF)
+        index = 4;
+    return index;
+}
+
+inline Entry* getLocal(void* self) {
+    return &((Parent*)self)->entries[localIdx()];
+}
+
+inline Entry* getSelectedA(u8* self) {
+    u8 index = fn_800C8548();
+    if (index == 0xFF)
+        return getLocal(self);
+    Entry* entry = &((Parent*)self)->entries[index];
+    if (!entry->active)
+        return getLocal(self);
+    return entry;
+}
+
+inline u8* getSelected(u8* self) {
+    u8 index = fn_800C8548();
+    if (index == 0xFF)
+        return (u8*)getLocal(self);
+    u8* p = self + index * 0x218;
+    u8* entry = p + 0x70;
+    if (!((p[0xE8] >> 7) & 1))
+        return (u8*)getLocal(self);
+    return entry;
+}
+
+#define SET_STATUS(value)                                                    \
+    do {                                                                     \
+        ntFriendInfo* info = ntFriendInfo::getInstance();                     \
+        (*(u8**)info)[0x577] = (value);                                      \
+        g_Network.data->flag = 1;                                            \
+        netReport__FPCce(lbl_8045726C, (value));                            \
+        fn_800C8F68(lbl_8045726C, (value));                                 \
+        if (fn_800C8524() != 0) {                                           \
+            u8 index = fn_800C8548();                                       \
+            Entry* entry;                                                    \
+            if (index == 0xFF)                                              \
+                entry = 0;                                                   \
+            else                                                             \
+                entry = &((Parent*)self)->entries[index];                    \
+            if (entry != 0) {                                               \
+                entry->state = (value);                                     \
+                u8 local = fn_800C851C();                                   \
+                if (local == 0xFF)                                          \
+                    local = 4;                                               \
+                u8* p = base + local * 0x218;                               \
+                ((Flags*)(p + 0xC6))->flag = 0;                             \
+                fn_800D0AE0(self, p);                                       \
+                fn_80145B98(lbl_805A03A8, 0xFE);                            \
+            }                                                                \
+        }                                                                    \
+    } while (0)
+
+extern "C" void fn_800CD934(void* self, u8 count) {
+    u8* base = (u8*)self;
+
+    if (gUnk805a03d8 == 4) {
+        u8 selected;
+        Entry* entry;
+        int sub;
+        u8 player;
+
+        player = base[0x4C];
+        sub = base[0x4D];
+        int cond = (base[0xFCA] >> 5) & 1;
+
+        if (cond == 0) {
+            u8 index = fn_800C8548();
+            if (index == 0xFF)
+                entry = 0;
+            else
+                entry = &((Parent*)base)->entries[index];
+
+            if (entry == 0)
+                entry = getLocal(base);
+
+            selected = entry->unk79;
+            int valid;
+            if (selected >= 4) {
+                valid = 0;
+            } else {
+                Entry* current = getSelectedA(base);
+                valid = current->states[selected] == 1;
+            }
+
+            u8 pick = valid ? entry->unk79 : 0xFF;
+            cond = pick == localIdx();
+        }
+
+        if (cond != 0 && ((base[0x51] >> 7) & 1)) {
+            player = 0;
+        } else if (player == 4) {
+            player = 0;
+        } else if (player > 4) {
+            player = 0;
+        } else {
+            u8* current = getSelected(base);
+            int valid;
+            if ((current + player)[0x68] != 1) {
+                valid = 0;
+            } else {
+                s32 word = *(s32*)(current + 0x84 + player * 0x18 + sub * 8);
+                valid = (word >> 24) == 1;
+            }
+
+            if (valid)
+                player = (base + player * 0x218)[0xC5];
+            else
+                player = 0;
+        }
+
+        if (player == 0)
+            player = 1;
+
+        int players = player;
+
+        if (base[0xFD6] != count) {
+            base[0xFD6] = count;
+            u8* info = *(u8**)ntFriendInfo::getInstance();
+            if (count > 4)
+                count = 4;
+            info[0x578] = count;
+
+            if (fn_800C8524() != 0) {
+                switch (*(unsigned int*)(base + 0x6C)) {
+                case 0:
+                    if (base[0xFD6] >= 4) {
+                        SET_STATUS(0x19);
+                    } else if (players != 4) {
+                        SET_STATUS(0x13);
+                    } else {
+                        SET_STATUS(0x17);
+                    }
+                    break;
+
+                case 1:
+                    if (players < 4) {
+                        if (base[0xFD6] >= 2) {
+                            SET_STATUS(0x1A);
+                        } else {
+                            SET_STATUS(0x14);
+                        }
+                    }
+                    break;
+
+                case 7:
+                    if (players < 4) {
+                        if (base[0xFD6] >= 4) {
+                            SET_STATUS(0x0A);
+                        } else {
+                            SET_STATUS(0x0E);
+                        }
+                    }
+                    break;
+
+                case 2:
+                    if (players < 4) {
+                        if (base[0xFD6] >= 2) {
+                            SET_STATUS(0x1B);
+                        } else {
+                            SET_STATUS(0x15);
+                        }
+                    }
+                    break;
+
+                case 3:
+                case 5:
+                case 6:
+                    break;
+                }
+            }
+
+            g_Network.data->flag = 1;
+            fn_8014CB1C(ntFriendInfo::getInstance(), 1);
+        }
+    }
+}
+}
+
