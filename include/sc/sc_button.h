@@ -31,6 +31,14 @@ public:
     int m_padNo;                   // 0x100 the pad of the player who set the buttons
     Work* m_work;                  // 0x104
 
+    scButton();
+    static scButton* create();
+    virtual void start();
+    virtual s32 process();
+    virtual s32 exit();
+    virtual ~scButton();
+    virtual int getEndNum();
+    virtual void setModule();
     // Gives the object process of the menu the objects it updates.
     void setMenuObjs(MuObject** objs, int num);
     // Shows / hides a model (or a group) of the menu (in the menu layer of the scene root).
