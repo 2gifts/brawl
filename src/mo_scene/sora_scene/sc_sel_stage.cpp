@@ -18,15 +18,44 @@
 #include <string.h>
 #include <types.h>
 
+// The loader of the packs as the scenes of the character and stage selection see it (one bit flags).
+class scResourceLoaderEx {
+public:
+    gfFileIOHandle m_handle;            // 0x00
+    u32 m_unk04;
+    u32 m_unk08;
+    u32 m_unk0C;
+    u32 m_unk10;
+    u32 m_unk14;
+    u32 m_unk18;
+    u8 m_flagA : 1;                     // 0x1C
+    u8 m_flagB : 1;
+    u8 m_flagC : 1;
+    u8 m_flagD : 5;
+    u8 m_unk1D[3];
+    scResourceLoaderEx() {
+        m_unk04 = 0;
+        m_unk08 = 0;
+        m_unk0C = 0;
+        m_unk10 = 0;
+        m_flagA = 0;
+        m_unk18 = 0;
+        m_flagB = 1;
+        m_unk14 = 0xFF;
+        m_flagC = 0;
+    }
+    ~scResourceLoaderEx() { fn_1_406C(reinterpret_cast<scResourceLoader*>(this)); }
+};
+
 // Starts the read of a pack of the scene module into the archive (scResourceLoader of the scene module).
-extern "C" void fn_1_3C68(scResourceLoader* loader, int heap, const char* path, gfArchive* archive, int size);
+extern "C" void fn_1_3C68(scResourceLoaderEx* loader, int heap, const char* path, gfArchive* archive, int size);
 
 // Makes the scene root of a pack of the main module.
 extern "C" MenuRoot* fn_800AFBFC(const char* name, int heap, gfArchive* archive, int index);
 // Gets the data of the file with that number from the archive (main module).
 extern "C" void* fn_800B03F0(gfArchive* archive, int index);
 // Tells whether the pack is read.
-extern "C" bool fn_1_3E50(scResourceLoader* loader);
+extern "C" bool fn_1_3E50(scResourceLoaderEx* loader);
 
 // What the scene gives to the stage selection screen (the layout of muSelectStageTask::Param; this scene's constructor
 // sets every member).
@@ -111,7 +140,7 @@ public:
     u8 m_clearColor[4];                 // 0x449 the color the screen is cleared with (restored when the scene ends)
     u8 m_unk44D[3];
     gfArchive* m_archive;               // 0x450 the pack of the screen
-    scResourceLoader* m_loader;         // 0x454 reads the pack
+    scResourceLoaderEx* m_loader;         // 0x454 reads the pack
 
     scSelStage();
     static scSelStage* create();
@@ -157,7 +186,7 @@ void scSelStage::setModule() {
 void scSelStage::start() {
     if (m_mode == 0) {
         m_archive = new (Heaps::MenuResource) gfArchive();
-        m_loader = new (Heaps::MenuResource) scResourceLoader();
+        m_loader = new (Heaps::MenuResource) scResourceLoaderEx();
         m_camera = CameraController::getInstance();
         fn_1_3C68(m_loader, Heaps::MenuResource, "/menu2/sc_selmap.pac", m_archive, 0x100000);
         m_camera->changeInput(CameraController::MenuPad);
@@ -181,7 +210,7 @@ s32 scSelStage::exit() {
         delete m_archive;
         m_archive = NULL;
     }
-    scResourceLoader* loader = m_loader;
+    scResourceLoaderEx* loader = m_loader;
     if (loader != NULL) {
         delete loader;
         m_loader = NULL;

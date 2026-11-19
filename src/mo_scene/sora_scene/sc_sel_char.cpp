@@ -16,14 +16,43 @@
 #include <string.h>
 #include <types.h>
 
+// The loader of the packs as the scenes of the character and stage selection see it (one bit flags).
+class scResourceLoaderEx {
+public:
+    gfFileIOHandle m_handle;            // 0x00
+    u32 m_unk04;
+    u32 m_unk08;
+    u32 m_unk0C;
+    u32 m_unk10;
+    u32 m_unk14;
+    u32 m_unk18;
+    u8 m_flagA : 1;                     // 0x1C
+    u8 m_flagB : 1;
+    u8 m_flagC : 1;
+    u8 m_flagD : 5;
+    u8 m_unk1D[3];
+    scResourceLoaderEx() {
+        m_unk04 = 0;
+        m_unk08 = 0;
+        m_unk0C = 0;
+        m_unk10 = 0;
+        m_flagA = 0;
+        m_unk18 = 0;
+        m_flagB = 1;
+        m_unk14 = 0xFF;
+        m_flagC = 0;
+    }
+    ~scResourceLoaderEx() { fn_1_406C(reinterpret_cast<scResourceLoader*>(this)); }
+};
+
 // Starts the read of a pack of the scene module into the archive (scResourceLoader of the scene module).
-extern "C" void fn_1_3C68(scResourceLoader* loader, int heap, const char* path, gfArchive* archive, int size);
+extern "C" void fn_1_3C68(scResourceLoaderEx* loader, int heap, const char* path, gfArchive* archive, int size);
 
 // Tells whether the pack is read.
-extern "C" bool fn_1_3E50(scResourceLoader* loader);
+extern "C" bool fn_1_3E50(scResourceLoaderEx* loader);
 // Hands the archives that the packs are read into to the loaders (scene module).
-extern "C" void fn_1_3F04(scResourceLoader* loader, gfArchive* archive, gfArchive* main, int unk);
-extern "C" void fn_1_3F84(scResourceLoader* loader, gfArchive* archive, int unk);
+extern "C" void fn_1_3F04(scResourceLoaderEx* loader, gfArchive* archive, gfArchive* main, int unk);
+extern "C" void fn_1_3F84(scResourceLoaderEx* loader, gfArchive* archive, int unk);
 // Gets the data of the file with that number from the archive (main module).
 extern "C" void* fn_800B03F0(gfArchive* archive, int index);
 // Makes the scene root of a pack of the main module.
@@ -127,8 +156,8 @@ public:
     u8 m_color[4];
     u8 m_pad40D[0x3];
     gfArchive* m_archive;               // 0x410
-    scResourceLoader* m_loader;         // 0x414
-    scResourceLoader* m_loader2;        // 0x418
+    scResourceLoaderEx* m_loader;         // 0x414
+    scResourceLoaderEx* m_loader2;        // 0x418
 
     scSelChar();
     static scSelChar* create();
@@ -194,8 +223,8 @@ void scSelChar::start() {
     m_archive = new (Heaps::MenuResource) gfArchive();
     m_unk3B0 = new (Heaps::MenuResource) gfArchive();
     m_unk3AC = new (Heaps::InfoExtraResource) gfArchive();
-    m_loader = new (Heaps::MenuResource) scResourceLoader();
-    m_loader2 = new (Heaps::InfoExtraResource) scResourceLoader();
+    m_loader = new (Heaps::MenuResource) scResourceLoaderEx();
+    m_loader2 = new (Heaps::InfoExtraResource) scResourceLoaderEx();
     m_camera = CameraController::getInstance();
     fn_1_3C68(m_loader, Heaps::MenuResource, "/menu2/sc_selcharacter.pac", m_archive, 0x100000);
     fn_1_3C68(m_loader2, Heaps::InfoExtraResource, "/menu2/sc_selcharacter2.pac", NULL, 0);
@@ -237,12 +266,12 @@ s32 scSelChar::exit() {
         delete m_archive;
         m_archive = NULL;
     }
-    scResourceLoader* loader = m_loader;
+    scResourceLoaderEx* loader = m_loader;
     if (loader != NULL) {
         delete loader;
         m_loader = NULL;
     }
-    scResourceLoader* loader2 = m_loader2;
+    scResourceLoaderEx* loader2 = m_loader2;
     if (loader2 != NULL) {
         delete loader2;
         m_loader2 = NULL;
