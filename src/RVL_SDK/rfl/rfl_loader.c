@@ -155,6 +155,9 @@ void loadResGetlengthcallback_(void) {
 /* jj_803CD484 */
 extern void *RFLiGetLoader(void);
 
+// TODO: clean up. This zeroes the RFLLoader state through raw byte offsets from RFLiGetLoader()
+// (u16/u32 stores at +0x00..). Replace with a real RFLLoader struct and named fields once the
+// layout is known, then re-check that the codegen still matches.
 void RFLiInitLoader(void)
 {
     char *p = (char *)RFLiGetLoader();

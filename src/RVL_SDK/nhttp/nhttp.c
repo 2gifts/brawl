@@ -1,3 +1,6 @@
+// TODO: clean up. Most of this file pokes request/response/connection structs through raw
+// byte offsets (*(s32*)(req + 0xcc) etc.). Define NHTTPRequest/NHTTPResponse/NHTTPConn structs with
+// named fields and rewrite the accesses, then re-verify codegen.
 #include <types.h>
 #include <stdio.h>
 #include <string.h>
