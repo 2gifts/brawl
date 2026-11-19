@@ -591,3 +591,22 @@ extern "C" void* fn_80044C3C(void* p, int flag) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_800469E4 {
+// Release a runtime slot when requested, preserving its original pointer.
+extern "C" {
+void __dl__FPv(void*);
+
+void* fn_800469E4(void* slot, int destroy) {
+    if (slot != 0 && destroy > 0) {
+        __dl__FPv(slot);
+    }
+    return slot;
+}
+}
+}
+
+namespace jj_80046A24 {
+extern "C" void fn_80046A24(void) {}
+}
+

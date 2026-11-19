@@ -807,3 +807,12 @@ void fn_80036270(s32 arg0, s8 arg1, s32 arg2) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_80037DC8 {
+extern "C" void fn_80036C20(void*);
+
+extern "C" void fn_80037DC8(void* self) {
+    fn_80036C20(reinterpret_cast<u8*>(self) - 0x8);
+}
+}
+

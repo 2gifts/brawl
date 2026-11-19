@@ -3,6 +3,7 @@
 #include <types.h>
 #include <gm/gm_global.h>
 #include <gm/gm_syssave_task.h>
+#include <nt/nt_offline.h>
 
 extern "C" void* lbl_8042E8D8[3];
 extern "C" Heaps::HeapType lbl_8059CE48;
@@ -178,9 +179,6 @@ int fn_80030DEC(Obj*, int);
 int fn_80030F2C(Obj*);
 int fn_80030F58(Obj*);
 void fn_8004EEC8(int, int);
-int fn_8014C61C();
-int fn_8014C754();
-int fn_8014C75C(int*);
 }
 extern int g_GameGlobal;
 extern int lbl_8059CE48;
@@ -244,7 +242,7 @@ extern "C" void fn_8005A470(Arg* arg) {
         }
         return;
     case 3:
-        if (fn_8014C61C() != 0) {
+        if (ntFriendInfo::isSaveNeeded() != 0) {
             if (lbl_805A00F8 == 0) {
                 lbl_805A00F8 = fn_80030548(lbl_8059CE48);
                 if (!lbl_805A00F8) {
@@ -257,13 +255,13 @@ extern "C" void fn_8005A470(Arg* arg) {
                 arg->state = 6;
                 return;
             }
-            int size = fn_8014C754();
-            int src = 0;
-            if (!fn_8014C75C(&src)) {
+            int size = ntFriendInfo::getSaveSize();
+            void* src = 0;
+            if (!ntFriendInfo::getSaveHeader(&src)) {
                 arg->state = 6;
                 return;
             }
-            memcpy((void*)p, (void*)src, size);
+            memcpy((void*)p, src, size);
             if (!fn_80030F58(lbl_805A00F8)) {
                 arg->state = 6;
                 return;
