@@ -2,8 +2,30 @@
 #include <gf/gf_scene.h>
 #include <gf/gf_task.h>
 #include <memory.h>
+#include <ph/ph_Interface.h>
 #include <sr/sr_common.h>
 #include <types.h>
+
+// The minigame object of sora_minigame.rel (0x500 bytes; its constructor is not named there) and the object that the scene
+// keeps for the minigame (it has a virtual destructor).
+class ifCoinShooterMain : public gfTask {
+public:
+    ifCoinShooterMain();
+    u8 m_unk40[0x500 - 0x40];
+};
+class ifCoinShooterObj {
+public:
+    ifCoinShooterObj();
+    virtual ~ifCoinShooterObj();
+    u8 m_unk04[0x28 - 0x04];
+};
+
+// The havok system of the game, the minigame (module sora_minigame) and the object of the scene.
+extern phInterface* lbl_8049DEC8;
+extern void* lbl_20_bss_8;
+extern ifCoinShooterObj* lbl_1_bss_60;
+// Leaves the minigame (sora_minigame.rel).
+extern "C" void fn_20_9044(gfTask* task);
 
 // The task of the coin shooter minigame of sora_minigame.rel. Only what the scene reads is declared.
 class ifCoinShooterTask : public gfTask {
@@ -41,6 +63,31 @@ s32 scCoinShooter::process() {
         gfSceneManager* mgr = gfSceneManager::getInstance();
         mgr->unk1 = 0;
         mgr->processStep = 2;
+    }
+    return 0;
+}
+
+void scCoinShooter::start() {
+    if (lbl_8049DEC8 == NULL) {
+        phInterface* physics = new (Heaps::Physics) phInterface();
+        lbl_8049DEC8 = physics;
+        static_cast<gfTask*>(physics)->init();
+    }
+    ifCoinShooterMain* game = new (Heaps::Physics) ifCoinShooterMain();
+    lbl_20_bss_8 = game;
+    m_task = reinterpret_cast<ifCoinShooterTask*>(game);
+    lbl_1_bss_60 = new (Heaps::MenuInstance) ifCoinShooterObj();
+}
+
+s32 scCoinShooter::exit() {
+    if (lbl_1_bss_60 != NULL) {
+        delete lbl_1_bss_60;
+    }
+    fn_20_9044(m_task);
+    m_task->exit();
+    if (lbl_8049DEC8 != NULL) {
+        lbl_8049DEC8->removeHavokSystem();
+        lbl_8049DEC8->deleteInstance();
     }
     return 0;
 }

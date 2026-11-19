@@ -166,6 +166,13 @@ public:
     virtual s32 exit();
     virtual void setModule();
     muSelCharTask* createTask();
+    // Tells whether both packs are read.
+    bool isLoaded() {
+        if (fn_1_3E50(m_loader) == 0) {
+            return false;
+        }
+        return fn_1_3E50(m_loader2);
+    }
 };
 static_assert(sizeof(scSelChar) == 0x41C, "Class is wrong size!");
 
@@ -281,13 +288,7 @@ s32 scSelChar::exit() {
 
 s32 scSelChar::process() {
     if (m_task == NULL) {
-        bool ready;
-        if (fn_1_3E50(m_loader)) {
-            ready = fn_1_3E50(m_loader2);
-        } else {
-            ready = false;
-        }
-        if (ready) {
+        if (isLoaded()) {
             fn_1_3F04(m_loader, m_unk3B0, m_archive, 20);
             fn_1_3F84(m_loader2, m_unk3AC, 10);
             m_unk35C = fn_800AFBFC("SelCharMenuRootTask", 0x12C, m_archive, 10);

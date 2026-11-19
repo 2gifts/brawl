@@ -18,6 +18,16 @@
 // Makes the prize window of the main module (the arguments are the model file, the texts, the scene group, ...).
 extern "C" gfTask* fn_800C001C(void* resFile, void* msgData, void* group, int unk, void* unk2, int unk3);
 
+// An entry of the prize list of the window: the number of the prize and whether it is shown.
+// HYPOTHESIS: the names follow how the window uses the entries.
+struct scPrizeEntry {
+    int m_id;
+    int m_shown;
+    scPrizeEntry(int id, int shown) : m_id(id), m_shown(shown) { }
+};
+static scPrizeEntry s_prizeHidden(0xFF, 0);
+static scPrizeEntry s_prizeShown(0xFF, 1);
+
 // A file of the menu that is read when the scene starts (the handle is the only thing it holds).
 struct scNetFileHandle : gfFileIOHandle {
     scNetFileHandle() { m_request = NULL; }

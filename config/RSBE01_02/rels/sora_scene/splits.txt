@@ -143,6 +143,7 @@ mo_scene/sora_scene/sc_prize_info.cpp:
 	.text       start:0x0000DEAC end:0x0000E530
 	.ctors      start:0x00000010 end:0x00000014
 	.data       start:0x00004540 end:0x00004688
+	.bss        start:0x00000068 end:0x00000078
 
 mo_scene/sora_scene/sc_challenger.cpp:
 	.text       start:0x0000E530 end:0x0000E9D8
