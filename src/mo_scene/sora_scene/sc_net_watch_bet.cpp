@@ -12,12 +12,31 @@
 #include <string.h>
 #include <types.h>
 
+// One slot of the bet table the task keeps (copied to the scene when the menu is over).
+struct scNetBetEntry {
+    u8 m_flag;                          // 0x00
+    int m_words[20];                    // 0x04
+};
+
 // The betting menu of the online watch mode of sora_menu_watch.rel. Only what the scene reads is declared.
 class muWifiWatchBetTask : public gfTask {
 public:
-    u8 m_unk40[0x504 - 0x40];
+    u8 m_unk40[8];
+    int m_result;                       // 0x48 how the menu was left (read when m_state is 0xC)
+    u8 m_unk4C[0x434 - 0x4C];
+    int m_unk434;                       // 0x434
+    int m_unk438;                       // 0x438
+    scNetBetEntry m_entry;              // 0x43C
+    u8 m_unk490[0x504 - 0x490];
     int m_state;                        // 0x504 (0xC: the menu is over)
 };
+
+// A table of the scene that is copied as a whole (0xD0 bytes).
+struct scNetSlotTable {
+    int m_head;
+    int m_words[51];
+};
+
 
 // A file of the menu that is read when the scene starts (the handle is the only thing it holds).
 struct scNetFileHandle : gfFileIOHandle {
@@ -43,12 +62,14 @@ public:
     int m_unk388;
     muWifiWatchBetTask* m_task;         // 0x38C
     scNetFileHandle m_files[10];        // 0x390 the files of the menu
-    u8 m_unk3B8[0xD0];                  // 0x3B8
-    u8 m_unk488[0xD0];                  // 0x488
+    scNetSlotTable m_unk3B8;            // 0x3B8
+    scNetSlotTable m_unk488;            // 0x488
     int m_unk558;
     u8 m_unk55C[0xCA];                  // 0x55C
     u8 m_unk626[2];
-    u8 m_unk628[0x684 - 0x628];
+    int m_unk628;                       // 0x628 what the task kept at 0x434
+    int m_unk62C;                       // 0x62C what the task kept at 0x438
+    scNetBetEntry m_entry;              // 0x630 the slot the task kept at 0x43C
     u8 m_unk684;
     u8 m_unk685[3];
     int m_unk688;
@@ -56,6 +77,17 @@ public:
 
     scNetWatchBet();
     static scNetWatchBet* create();
+    muWifiWatchBetTask* createTask();
+    bool isLoaded();
+    // Tells whether all the files are read.
+    bool isAllReady() {
+        for (int i = 0; i < 10; i++) {
+            if (!m_files[i].isReady()) {
+                return false;
+            }
+        }
+        return true;
+    }
     virtual void start();
     virtual s32 process();
     virtual s32 exit();
@@ -80,8 +112,8 @@ scNetWatchBet::scNetWatchBet()
     m_buf368 = NULL;
     m_buf36C = NULL;
     m_buf370 = NULL;
-    memset(m_unk3B8, 0, sizeof(m_unk3B8));
-    memset(m_unk488, 0, sizeof(m_unk488));
+    memset(&m_unk3B8, 0, sizeof(m_unk3B8));
+    memset(&m_unk488, 0, sizeof(m_unk488));
     memset(m_unk55C, 0, sizeof(m_unk55C));
 }
 
@@ -312,111 +344,82 @@ extern "C" void createTask__13scNetWatchBetFv(u8* self) {
 }
 }
 
-// TODO: clean up, give variables real names
-namespace jj_C44C {
-
-
-typedef struct {
-    u32 w[20];
-} Blob80;
-
-typedef struct {
-    u32 w[51];
-} Blob204;
-
-extern "C" char* createTask__13scNetWatchBetFv(char*);
-extern "C" bool isReady__14gfFileIOHandleCFv(const void*);
-extern "C" int isLoadFinishMenuSound__6muMenuFv(void*);
-extern unsigned char lbl_1_rodata_6E8[];
-
-extern "C" int process__13scNetWatchBetFv(char* self) {
-    int ready;
-    if (*(char**)(self + 0x38C) == 0) {
-        int n = 0;
-        char* cur = self + 0x390;
-        for (; n < 10; n++, cur += 4) {
-            if (!isReady__14gfFileIOHandleCFv(cur)) {
-                ready = 0;
-                goto done;
-            }
+// Tells whether the files, the scene root and the sounds of the menu are read.
+bool scNetWatchBet::isLoaded() {
+    for (int i = 0; i < 10; i++) {
+        if (!m_files[i].isReady()) {
+            return false;
         }
-        {
-            char* menu = *(char**)(self + 0x35C);
-            if (*(unsigned char*)(menu + 0x1A4) == 0)
-                ready = 0;
-            else
-                ready = isLoadFinishMenuSound__6muMenuFv(menu) != 0;
-        }
-    done:
-        if (!ready)
+    }
+    if (m_root->m_isLoaded == 0) {
+        return false;
+    }
+    return muMenu::isLoadFinishMenuSound() != 0;
+}
+
+// TODO: clean up - the task of sora_menu_watch.rel is only declared as raw offsets here; a header with the named members
+// (kind, bet slot table, counts, result) would replace the pointer arithmetic below.
+#define TASK_INT(off) (*reinterpret_cast<int*>(reinterpret_cast<char*>(m_task) + (off)))
+s32 scNetWatchBet::process() {
+    if (m_task == NULL) {
+        if (!isLoaded()) {
             return 0;
+        }
         g_gfApplication->unkD0.endKeepScreen();
-        *(char**)(self + 0x38C) = createTask__13scNetWatchBetFv(self);
+        m_task = createTask();
     }
-
-    char* object = *(char**)(self + 0x38C);
-    int state;
-    if (*(int*)(object + 0x504) != 12) {
-        state = 0;
+    int result;
+    if (m_task->m_state != 0xC) {
+        result = 0;
     } else {
-        state = *(int*)(object + 0x48);
+        result = m_task->m_result;
     }
-
-    if (state != 0) {
-        int pos = *(int*)(object + 0x510) + *(int*)(object + 0x50C) * 10;
-        *(int*)(self + 0x558) = pos;
-        if (pos > 0x1869F) {
-            *(int*)(self + 0x558) = 0x1869F;
+    if (result != 0) {
+        int total = TASK_INT(0x510) + TASK_INT(0x50C) * 10;
+        m_unk558 = total;
+        if (total > 99999) {
+            m_unk558 = 99999;
         }
-
-        if (state == 1) {
-            char* src = *(char**)(self + 0x38C);
-            *(int*)(self + 0x628) = *(int*)(src + 0x434);
-            *(int*)(self + 0x62C) = *(int*)(src + 0x438);
-            *(unsigned char*)(self + 0x630) = *(unsigned char*)(src + 0x43C);
-            *(Blob80*)(self + 0x634) = *(Blob80*)(src + 0x440);
-
-            int c;
-            char* o = *(char**)(self + 0x38C);
-            if (*(int*)(o + 0x434) == 0) {
-                c = *(int*)(o + 0x514);
-                unsigned char v;
-                if (c == 0)
-                    v = 0;
-                else
-                    v = *(unsigned char*)(o + (c - 1) * 0x14 + 0x450);
-                *(unsigned char*)(self + 0x684) = v;
-            } else {
-                c = *(int*)(o + 0x514);
+        if (result == 1) {
+            muWifiWatchBetTask* task = m_task;
+            m_unk628 = task->m_unk434;
+            m_unk62C = task->m_unk438;
+            m_entry = task->m_entry;
+            if (TASK_INT(0x434) == 0) {
                 int v;
-                if (c == 0)
+                if (TASK_INT(0x514) == 0) {
                     v = 0;
-                else
-                    v = *(int*)(o + (((c - 5) << 1)) * 0x14 + 0x44C);
-                *(int*)(self + 0x688) = v;
+                } else {
+                    v = *reinterpret_cast<u8*>(reinterpret_cast<char*>(m_task) + 0x450 + (TASK_INT(0x514) - 1) * 0x14);
+                }
+                m_unk684 = v;
+            } else {
+                int v;
+                if (TASK_INT(0x514) == 0) {
+                    v = 0;
+                } else {
+                    v = reinterpret_cast<int(*)[5]>(reinterpret_cast<char*>(m_task) + 0x44C)[(TASK_INT(0x514) - 5) * 2][0];
+                }
+                m_unk688 = v;
             }
-
-            object = *(char**)(self + 0x38C);
-            int m;
-            if (*(int*)(object + 0x514) == 0)
-                m = 0;
-            else
-                m = *(int*)(object + 0x520) * 10;
-            *(int*)(self + 0x68C) = m;
-            *(int*)(self + 0x558) -= m;
-            if (*(int*)(self + 0x558) < 0) {
-                *(int*)(self + 0x558) = 0;
+            int cost;
+            if (TASK_INT(0x514) == 0) {
+                cost = 0;
+            } else {
+                cost = TASK_INT(0x520) * 10;
             }
-
-            *(int*)(self + 0x488) = *(int*)(self + 0x3B8);
-            *(Blob204*)(self + 0x48C) = *(Blob204*)(self + 0x3BC);
+            m_unk68C = cost;
+            m_unk558 -= cost;
+            if (m_unk558 < 0) {
+                m_unk558 = 0;
+            }
+            m_unk488 = m_unk3B8;
         }
-
-        gfSceneManager* manager = gfSceneManager::getInstance();
-        manager->unk1 = lbl_1_rodata_6E8[state];
-        manager->processStep = 2;
+        static const u8 nextLayout[8] = {0, 0, 1, 2, 3, 0, 0, 0};
+        gfSceneManager* mgr = gfSceneManager::getInstance();
+        mgr->unk1 = nextLayout[result];
+        mgr->processStep = 2;
     }
     return 0;
 }
-}
-
+#undef TASK_INT

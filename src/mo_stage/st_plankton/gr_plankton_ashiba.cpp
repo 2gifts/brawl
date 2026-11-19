@@ -340,10 +340,9 @@ void grPlanktonAshiba::updateLine(float deltaFrame) {
 
 void grPlanktonAshiba::updateLanding(float deltaFrame) {
     m_landTimer = m_landTimer - deltaFrame;
-    if (0.0f <= m_landTimer) {
-        return;
+    if (m_landTimer < 0.0f) {
+        m_landTimer = 0.0f;
     }
-    m_landTimer = 0.0f;
 }
 
 // A flower of the leaf: the hit count goes up when the stage drops a leaf onto the leaf (hanenbou) and the timer starts.

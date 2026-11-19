@@ -466,13 +466,21 @@ void grIceYama::setGravity(float up, float down) {
 }
 
 // All the lines of the joint get the material (the top of the mountain is snow, ice during the fall).
+// TODO: clean up - the material is a one byte field of grCollisionLine (0x11); declare it as a u8 member of the shared
+// header (as its own byte, not part of the 24 bit bitfield word) and drop this view.
+struct scMaterialView {
+    u8 m_unk0[0x11];
+    u8 m_material : 8;
+};
+
 void grIceYama::setCollisionAttr(u8 material) {
     if (m_joint != NULL) {
+        u32 i;
         u16 count = reinterpret_cast<u16*>(m_joint)[1];
-        for (u32 i = 0; i != count; i++) {
+        for (i = 0; i != count; i++) {
             grCollisionLine* line = m_joint->getLine(i);
             if (line != NULL) {
-                line->m_materialType = static_cast<grCollisionLine::MaterialType>(material);
+                reinterpret_cast<scMaterialView*>(line)->m_material = material;
             }
         }
     }

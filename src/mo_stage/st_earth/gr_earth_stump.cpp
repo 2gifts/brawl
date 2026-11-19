@@ -112,13 +112,21 @@ void grEarthStump::setAILowPriority(u8 flag) {
     m_joint->m_0x55_3 = flag & 1;
 }
 
+// TODO: clean up - the material is a one byte field of grCollisionLine (0x11); declare it as a u8 member of the shared
+// header (as its own byte, not part of the 24 bit bitfield word) and drop this view.
+struct scMaterialView {
+    u8 m_unk0[0x11];
+    u8 m_material : 8;
+};
+
 void grEarthStump::setCollisionAttr(u8 material) {
     if (m_joint != NULL) {
+        u32 i;
         u16 count = *reinterpret_cast<u16*>(reinterpret_cast<u8*>(m_joint) + 2);
-        for (u32 i = 0; i != count; i++) {
+        for (i = 0; i != count; i++) {
             grCollisionLine* line = m_joint->getLine(i);
             if (line != NULL) {
-                line->m_materialType = static_cast<grCollisionLine::MaterialType>(material);
+                reinterpret_cast<scMaterialView*>(line)->m_material = material;
             }
         }
     }
