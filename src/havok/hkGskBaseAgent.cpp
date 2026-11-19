@@ -116,3 +116,44 @@ extern "C" void fn_802B1B3C(Object* a, Object* b, void* c, Vec4* out) {
     out->w = (v.w - ra) - rb;
 }
 } // namespace jj_fn_802B1B3C
+
+#include <havok/hkCdPoint.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkMonitorStream.h>
+
+// Input of hkGsk::getClosestPoint (hkGsk.o, under its fn_ label). HYPOTHESIS: the names.
+// TODO: clean up: move to hkGsk.h and name the function in symbols.txt once its body is written.
+struct hkGskClosestPointInput {
+    const hkTransform* m_aTb;       // 0x00 B in A's space
+    const hkTransform* m_transformA; // 0x04
+    const hkShape* m_shapeA;        // 0x08
+    const hkShape* m_shapeB;        // 0x0C
+    hkSimdReal m_tolerance;         // 0x10
+};
+extern "C" hkResult fn_8031AD90(const hkGskClosestPointInput& input, void* cache, hkVector4& normal,
+                                hkVector4& position);
+
+void hkGskBaseAgent::getClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                      void* collector) {
+    HK_TIMER_BEGIN("Gsk");
+    hkTransform aTb;
+    const hkTransform& tB = *(const hkTransform*)bodyB.m_motion;
+    const hkTransform& tA = *(const hkTransform*)bodyA.m_motion;
+    aTb.setMulInverseMul(tA, tB);
+    hkCdPoint event;
+    hkGskClosestPointInput in;
+    hkContactPoint contact;
+    in.m_shapeA = bodyA.m_shape;
+    in.m_shapeB = bodyB.m_shape;
+    in.m_transformA = (const hkTransform*)bodyA.m_motion;
+    in.m_aTb = &aTb;
+    in.m_tolerance = input.getTolerance();
+    if (fn_8031AD90(in, unkC, contact.m_normal, contact.m_position) == 0) {
+        event.m_cdBodyA = &bodyA;
+        event.m_cdBodyB = &bodyB;
+        event.m_contact.m_position = contact.m_position;
+        event.m_contact.m_normal = contact.m_normal;
+        ((hkCdPointCollector*)collector)->addCdPoint(&event);
+    }
+    HK_TIMER_END();
+}

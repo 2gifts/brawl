@@ -32,6 +32,8 @@ struct hkGskBaseAgent : hkIterativeLinearCastAgent {
 
     virtual void cleanup();
     virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3);
+    // The closest points of the pair from the agent's cached simplex (unkC).
+    virtual void getClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, void* collector);
     virtual void invalidateTim(void* arg);
     virtual void warpTime(float oldTime, float newTime, void* arg);
 } __attribute__((aligned(16)));
