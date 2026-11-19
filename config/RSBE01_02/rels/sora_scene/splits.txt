@@ -121,6 +121,29 @@ mo_scene/sora_scene/sc_net_time_result.cpp:
 	.text       start:0x0000C824 end:0x0000C9C4
 	.data       start:0x000040D0 end:0x00004140
 
+mo_scene/sora_scene/sc_coin_shooter.cpp:
+	.text       start:0x0000C9C4 end:0x0000CBA0
+	.data       start:0x00004140 end:0x000041A8
+
+mo_scene/sora_scene/sc_vc_trial.cpp:
+	.text       start:0x0000CBA0 end:0x0000CECC
+	.rodata     start:0x000006F0 end:0x00000708
+	.data       start:0x000041A8 end:0x000042B8
+
+mo_scene/sora_scene/sc_sel_char.cpp:
+	.text       start:0x0000CECC end:0x0000D6C0
+	.data       start:0x000042B8 end:0x00004408
+
+mo_scene/sora_scene/sc_sel_stage.cpp:
+	.text       start:0x0000D6C0 end:0x0000DEAC
+	.rodata     start:0x00000708 end:0x00000710
+	.data       start:0x00004408 end:0x00004540
+
+mo_scene/sora_scene/sc_prize_info.cpp:
+	.text       start:0x0000DEAC end:0x0000E530
+	.ctors      start:0x00000010 end:0x00000014
+	.data       start:0x00004540 end:0x00004688
+
 mo_scene/sora_scene/sc_challenger.cpp:
 	.text       start:0x0000E530 end:0x0000E9D8
 

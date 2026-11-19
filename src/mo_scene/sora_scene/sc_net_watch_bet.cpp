@@ -93,7 +93,7 @@ void scNetWatchBet::start() {
     m_root = MenuRoot::create("NetWatchMenuRootTask", 0x96, "/menu/defaultcamera/CharacterSelect.brres");
     CameraController::getInstance()->changeInput(CameraController::MenuFixed);
     m_task = NULL;
-    bool withPrize = gfSceneManager::getInstance()->m_memoryLayout != 0;
+    int withPrize = gfSceneManager::getInstance()->m_memoryLayout;
     m_files[0].readRequest("/menu/wifi/wifi_watch.brres", Heaps::MenuResource, 0, 0);
     m_files[1].readRequest("/menu/wifi/wifi_count.brres", Heaps::MenuResource, 0, 0);
     m_files[2].readRequest("/menu/cmnwindow/wifi_notice_wnd.brres", Heaps::MenuResource, 0, 0);

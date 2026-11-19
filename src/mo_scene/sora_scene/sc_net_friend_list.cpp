@@ -8,7 +8,9 @@
 #include <gm/gm_global.h>
 #include <memory.h>
 #include <mu/menu.h>
+#include <gm/gm_common.h>
 #include <mu/mu_menuroot.h>
+#include <nw4r/g3d/g3d_resfile.h>
 #include <sr/sr_common.h>
 #include <types.h>
 
@@ -22,6 +24,29 @@ public:
     int m_unk2ABC;                      // 0x2ABC what the menu hands back to the scene
 
     void destroy();
+    static muWifiFriendListTask* create(void* param);
+};
+
+// What the scene hands to the friend list menu: how it was entered, the models and texts it reads, the scene group of the
+// scene root, the data of the friend icons and the pad that decided. HYPOTHESIS: the names follow how the menu uses them.
+struct scNetFriendListParam {
+    int m_mode;
+    int* m_res0;
+    int* m_res1;
+    int* m_res2;
+    int* m_res3;
+    void* m_msg;
+    void* m_msg2;
+    nw4r::g3d::ScnGroup* m_scene;
+    void* m_msgCommon;
+    void* m_rflRes;
+    int m_rflSize;
+    u32 m_pad;
+    int m_unk30;
+
+    scNetFriendListParam()
+        : m_mode(0), m_res0(NULL), m_res1(NULL), m_res2(NULL), m_res3(NULL), m_msg(NULL), m_msg2(NULL), m_scene(NULL), m_msgCommon(NULL), m_rflRes(NULL), m_rflSize(0),
+          m_pad(0), m_unk30(0) { }
 };
 
 // A file of the menu that is read when the scene starts (the handle is the only thing it holds).
@@ -54,6 +79,8 @@ public:
     virtual s32 exit();
     virtual void setModule();
     muWifiFriendListTask* createTask();
+    // Takes the model file that a handle has read and prepares it for use.
+    static inline void loadResFile(scNetFileHandle* handle, nw4r::g3d::ResFile* out);
     // Tells whether all the files are read.
     bool isAllReady() {
         for (int i = 0; i < 9; i++) {
@@ -89,9 +116,8 @@ void scNetFriendList::start() {
     m_root = MenuRoot::create("NetFriendListMenuRootTask", 100, NULL);
     CameraController::getInstance()->changeInput(CameraController::MenuFixed);
     m_task = NULL;
-    m_files[8].readRequest(g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen
-                               ? "/menu/defaultcamera/CharacterSelectWide.brres"
-                               : "/menu/defaultcamera/CharacterSelect.brres",
+    u32 wide = g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen;
+    m_files[8].readRequest(wide ? "/menu/defaultcamera/CharacterSelectWide.brres" : "/menu/defaultcamera/CharacterSelect.brres",
                            Heaps::MenuResource, 0, 0);
     m_files[0].readRequest("/menu/wifi/wifi_friend_list.brres", Heaps::MenuResource, 0, 0);
     m_files[1].readRequest("/menu/cmnwindow/wifi_notice_wnd.brres", Heaps::MenuResource, 0, 0);
@@ -168,4 +194,68 @@ s32 scNetFriendList::exit() {
         m_files[i].cancelRequest();
     }
     return 0;
+}
+
+// Takes the model file that a handle has read and prepares it for use (null when the read failed).
+inline void scNetFriendList::loadResFile(scNetFileHandle* handle, nw4r::g3d::ResFile* out) {
+    nw4r::g3d::ResFile resFile(static_cast<void*>(NULL));
+    void* buffer;
+    if (handle->getReturnStatus() == 0x15) {
+        buffer = NULL;
+    } else {
+        buffer = handle->getBuffer();
+        handle->release();
+    }
+    if (buffer != NULL) {
+        resFile = nw4r::g3d::ResFile(buffer);
+        nw4r::g3d::ResFile::Init(&resFile);
+    }
+    *out = resFile;
+}
+
+// Takes the buffer that a handle has read (null when the read failed).
+static inline void* takeBuffer(gfFileIOHandle* handle) {
+    void* buffer;
+    if (handle->getReturnStatus() == 0x15) {
+        buffer = NULL;
+    } else {
+        buffer = handle->getBuffer();
+        handle->release();
+    }
+    return buffer;
+}
+
+// Hands the files that were read to the friend list menu and makes it.
+muWifiFriendListTask* scNetFriendList::createTask() {
+    static const u8 mode[8] = {0, 1, 2, 3, 4, 0, 0, 0};
+    scNetFriendListParam param;
+    nw4r::g3d::ResFile res;
+    m_root->attachScnAnm(&m_files[8]);
+    m_files[8].release();
+    loadResFile(&m_files[0], &res);
+    m_unk360 = reinterpret_cast<int>(res.ptr());
+    loadResFile(&m_files[1], &res);
+    m_unk364 = reinterpret_cast<int>(res.ptr());
+    loadResFile(&m_files[2], &res);
+    m_unk368 = reinterpret_cast<int>(res.ptr());
+    loadResFile(&m_files[3], &res);
+    m_unk36C = reinterpret_cast<int>(res.ptr());
+    m_unk370 = reinterpret_cast<int>(takeBuffer(&m_files[4]));
+    m_unk374 = reinterpret_cast<int>(takeBuffer(&m_files[5]));
+    m_unk378 = reinterpret_cast<int>(takeBuffer(&m_files[6]));
+    int size = m_files[7].getSize();
+    m_unk37C = reinterpret_cast<int>(takeBuffer(&m_files[7]));
+    param.m_mode = mode[gfSceneManager::getInstance()->m_memoryLayout];
+    param.m_res0 = &m_unk360;
+    param.m_res1 = &m_unk364;
+    param.m_res2 = &m_unk368;
+    param.m_res3 = &m_unk36C;
+    param.m_msg = reinterpret_cast<void*>(m_unk370);
+    param.m_msgCommon = reinterpret_cast<void*>(m_unk378);
+    param.m_msg2 = reinterpret_cast<void*>(m_unk374);
+    param.m_rflRes = reinterpret_cast<void*>(m_unk37C);
+    param.m_rflSize = size;
+    param.m_scene = m_root->scene;
+    param.m_pad = gmGetMenuDecisionPad();
+    return muWifiFriendListTask::create(&param);
 }

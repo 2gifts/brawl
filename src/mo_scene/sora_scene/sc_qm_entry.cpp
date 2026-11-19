@@ -96,7 +96,7 @@ void scQMEntry::start() {
         data->m_count = 16;
         data->m_playing = 7;
     }
-    for (int i = 0; i < 16; i++) {
+    for (u32 i = 0; i < 16; i++) {
         scQMEntrySeat* seat = &data->m_seats[i];
         slots[i].m_order = seat->m_order;
         slots[i].m_number = seat->m_number;
@@ -105,11 +105,12 @@ void scQMEntry::start() {
             seat->m_number = i + 1;
             slots[i].m_number = i + 1;
         }
-        if (layout != 0 && seat->m_order < data->m_playing && seat->m_order >= 0) {
+        int player = seat->m_order;
+        if (layout != 0 && player < data->m_playing && player >= 0) {
             u8* sel = reinterpret_cast<u8*>(g_GameGlobal->m_selCharData);
-            seat->m_character = sel[seat->m_order * 4 + 0xA];
-            seat->m_costume = sel[seat->m_order * 0x5C + 0xBD];
-            u8 tag = sel[seat->m_order * 0x5C + 0xD0];
+            seat->m_character = sel[player * 4 + 0xA];
+            seat->m_costume = sel[player * 0x5C + 0xBD];
+            u8 tag = sel[player * 0x5C + 0xD0];
             if (seat->m_tag != tag && tag != 0x78) {
                 seat->m_tag = tag;
                 g_GameGlobal->getName(tag, seat->m_name);
