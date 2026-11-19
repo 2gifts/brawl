@@ -8,5 +8,6 @@ struct hkSetLocalRotationsConstraintAtom : hkConstraintAtom {
     hkRotation m_rotationA; // 0x10
     hkRotation m_rotationB; // 0x40
 
+    void setLocalRotationsFromAtom(const struct hkConstraintQueryIn& in, hkTransform& baseA, hkTransform& baseB) const;
     int numSolverResults() const;
 };

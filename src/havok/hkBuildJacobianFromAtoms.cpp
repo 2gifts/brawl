@@ -22,17 +22,17 @@
 //   0x80289BFC     8  numSolverResults (hkSetLocalTransformsConstraintAtom)
 //   0x80289C04   264  hkSetLocalTranslationsConstraintAtom::setLocalTranslationsFromAtom
 //   0x80289D0C     8  numSolverResults (hkSetLocalTranslationsConstraintAtom)
-//   0x80289D14   812  setLocalRotationsFromAtom
+//   0x80289D14   812  hkSetLocalRotationsConstraintAtom::setLocalRotationsFromAtom
 //   0x8028A040     8  numSolverResults (hkSetLocalRotationsConstraintAtom)
 //   0x8028A048  1252  buildJacobianFromBallSocketAtom
 //   0x8028A52C     8  numSolverResults
 //   0x8028A534   444  fn_8028A534
 //   0x8028A6F0     8  numSolverResults
-//   0x8028A6F8   168  fn_8028A6F8
+//   0x8028A6F8   168  hkLinConstraintAtom::buildJacobianFromLinAtom
 //   0x8028A7A0     8  numSolverResults
 //   0x8028A7A8   184  buildJacobianFromLinSoftAtom
 //   0x8028A860     8  numSolverResults
-//   0x8028A868   172  buildJacobianFromLinLimitAtom
+//   0x8028A868   172  hkLinLimitConstraintAtom::buildJacobianFromLinLimitAtom
 //   0x8028A914     8  numSolverResults
 //   0x8028A91C   204  buildJacobianFromLinFrictionAtom
 //   0x8028A9E8    32  hkSkipSolverResults
@@ -41,7 +41,7 @@
 //   0x8028ABD8     8  numSolverResults
 //   0x8028ABE0   320  buildJacobianFrom2dAngAtom
 //   0x8028AD20     8  numSolverResults
-//   0x8028AD28   268  buildJacobianFromAngAtom
+//   0x8028AD28   268  buildJacobianFromAngAtom (fn_8028AD28 below)
 //   0x8028AE34     8  numSolverResults
 //   0x8028AE3C   684  buildJacobianFromAngLimitAtom
 //   0x8028B0E8     8  numSolverResults
@@ -246,6 +246,31 @@ int hkSetLocalTranslationsConstraintAtom::numSolverResults() const {
     return 0;
 }
 
+// rotation = a's rotation * b's rotation: the column loop of hkTransform::setMul without the translation.
+// HYPOTHESIS: the target runs the loop four times (two unrolled iterations of two), as here.
+static inline void hkRotation_setMul(hkTransform& t, const hkTransform& a, const hkTransform& b) {
+    hkRotation r = a.m_rotation;
+    const hkTransform* bp = &b;
+    for (int i = 0; i < 4; i++) {
+        hkReal* out = &t.m_rotation.m_col0.x + i * 4;
+        hkReal z = (&bp->m_rotation.m_col0.x)[i * 4 + 2];
+        hkReal y = (&bp->m_rotation.m_col0.x)[i * 4 + 1];
+        hkReal x = (&bp->m_rotation.m_col0.x)[i * 4 + 0];
+        out[0] = x * r.m_col0.x + y * r.m_col1.x + z * r.m_col2.x;
+        out[1] = x * r.m_col0.y + y * r.m_col1.y + z * r.m_col2.y;
+        out[2] = x * r.m_col0.z + y * r.m_col1.z + z * r.m_col2.z;
+        out[3] = 0.0f;
+    }
+}
+
+// Turns the constraint space of both bodies: base rotation = world rotation * atom's local rotation.
+void hkSetLocalRotationsConstraintAtom::setLocalRotationsFromAtom(const hkConstraintQueryIn& in, hkTransform& baseA,
+                                                                  hkTransform& baseB) const {
+    hkRotation_setMul(baseA, *in.m_transformA.m_value, (const hkTransform&)m_rotationA);
+    hkRotation_setMul(baseB, *in.m_transformB.m_value, (const hkTransform&)m_rotationB);
+}
+
+
 int hkSetLocalRotationsConstraintAtom::numSolverResults() const {
     return 0;
 }
@@ -337,6 +362,15 @@ int hk2dAngConstraintAtom::numSolverResults() const {
     return 2;
 }
 
+// Input of the one-dimensional angular rows (0x30 bytes). HYPOTHESIS: the member names.
+struct hk1dAngularBilateralInfo {
+    hkVector4 m_zeroErrorAxisAinW;      // 0x00
+    hkVector4 m_perpZeroErrorAxisAinW;  // 0x10
+    hkVector4 m_constrainedDofBinW;     // 0x20
+};
+void hk1dAngularBilateralConstraintBuildJacobian(const hk1dAngularBilateralInfo& info, const hkConstraintQueryIn& in,
+                                                 hkConstraintQueryOut& out);
+
 int hkAngConstraintAtom::numSolverResults() const {
     return m_numConstrainedAxes;
 }
@@ -384,6 +418,47 @@ extern "C" int fn_8028A52C(void) {
 
 extern "C" int fn_8028A6F0(void) {
     return 1;
+}
+
+// Input of the one-dimensional linear rows: the two pivots and the constrained direction (0x30 bytes).
+// HYPOTHESIS: the member names.
+struct hk1dLinearBilateralInfo {
+    hkVector4 m_pivotA;           // 0x00
+    hkVector4 m_pivotB;           // 0x10
+    hkVector4 m_constrainedDofW;  // 0x20
+};
+void hk1dLinearBilateralConstraintBuildJacobian(const hk1dLinearBilateralInfo& info, const hkConstraintQueryIn& in,
+                                                hkConstraintQueryOut& out);
+
+// Keeps the pivots on a plane: one linear row along the axis of body B's base picked by the atom.
+void hkLinConstraintAtom::buildJacobianFromLinAtom(const hkConstraintQueryIn& in, const hkTransform& baseA,
+                                                   const hkTransform& baseB, hkConstraintQueryOut& out) const {
+    hk1dLinearBilateralInfo info;
+    info.m_pivotA = baseA.m_translation;
+    info.m_pivotB = baseB.m_translation;
+    info.m_constrainedDofW = baseB.getColumn(m_axisIndex);
+    hk1dLinearBilateralConstraintBuildJacobian(info, in, out);
+}
+
+// Input of the one-dimensional linear limit rows (0x38 bytes). HYPOTHESIS: the member names.
+struct hk1dLinearLimitInfo : hk1dLinearBilateralInfo {
+    hkReal m_min; // 0x30
+    hkReal m_max; // 0x34
+};
+void hk1dLinearLimitBuildJacobian(const hk1dLinearLimitInfo& info, const hkConstraintQueryIn& in,
+                                  hkConstraintQueryOut& out);
+
+// Keeps the pivots' distance along body B's first base axis within [m_min, m_max]. The target reads column 0 of
+// the base, not the column of m_axisIndex.
+void hkLinLimitConstraintAtom::buildJacobianFromLinLimitAtom(const hkConstraintQueryIn& in, const hkTransform& baseA,
+                                                             const hkTransform& baseB, hkConstraintQueryOut& out) const {
+    hk1dLinearLimitInfo info;
+    info.m_pivotA = baseA.m_translation;
+    info.m_pivotB = baseB.m_translation;
+    info.m_min = m_min;
+    info.m_max = m_max;
+    info.m_constrainedDofW = baseB.getColumn(0);
+    hk1dLinearLimitBuildJacobian(info, in, out);
 }
 
 extern "C" int fn_8028A7A0(void) {

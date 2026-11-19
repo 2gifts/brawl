@@ -115,6 +115,10 @@ struct hkOverwritePivotConstraintAtom : hkConstraintAtom {
 // Size 0x04.
 struct hkLinConstraintAtom : hkConstraintAtom {
     u8 m_axisIndex; // 0x02
+
+    // One linear row along the axis of body B's base picked by m_axisIndex (hkBuildJacobianFromAtoms).
+    void buildJacobianFromLinAtom(const struct hkConstraintQueryIn& in, const hkTransform& baseA,
+                                  const hkTransform& baseB, struct hkConstraintQueryOut& out) const;
 };
 
 // Size 0x0C.
@@ -122,6 +126,9 @@ struct hkLinLimitConstraintAtom : hkConstraintAtom {
     u8 m_axisIndex; // 0x02
     hkReal m_min;   // 0x04
     hkReal m_max;   // 0x08
+
+    void buildJacobianFromLinLimitAtom(const struct hkConstraintQueryIn& in, const hkTransform& baseA,
+                                       const hkTransform& baseB, struct hkConstraintQueryOut& out) const;
 
     int numSolverResults() const;
 };
