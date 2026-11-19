@@ -1,4 +1,8 @@
 #pragma once
+#ifdef SO_INSTANCE_UNIT_LOCAL_TEMPLATE
+// The sora_melee units that need the signed attribute copies use the local template copy instead.
+#include <so/templates/so_instance_unit.h>
+#else
 
 #include <StaticAssert.h>
 #include <types.h>
@@ -79,3 +83,4 @@ public:
         m_attr(attr), m_prop(elm, id, m_attr, p4) { }
     ~soInstanceUnitFullPropertyWrapper() { }
 };
+#endif // SO_INSTANCE_UNIT_LOCAL_TEMPLATE

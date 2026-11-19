@@ -591,6 +591,9 @@ mo_melee/sora_melee/so/so_status_module_impl.cpp:
 mo_melee/sora_melee/so/transition/so_transition_module_impl.cpp:
 	.text       start:0x000767A0 end:0x0007756C
 
+mo_melee/sora_melee/so/transition/so_transition_term_copy_ctor.cpp:
+	.text       start:0x0007756C end:0x00077588
+
 mo_melee/sora_melee/so/so_transition_term_copy.cpp:
 	.text       start:0x00077588 end:0x000775AC
 
@@ -1616,14 +1619,23 @@ mo_melee/sora_melee/so/so_array_vector_thunks_P22soGimmickEventObserver_12.cpp:
 mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_P22soGimmickEventObserver_AB120.cpp:
 	.text       start:0x000AB120 end:0x000AB128
 
+mo_melee/sora_melee/so/transition/so_transition_term_group.cpp:
+	.text       start:0x000AB128 end:0x000ABB44
+
 mo_melee/sora_melee/so/so_array_base_soArrayFixed_46soInstanceUnitFullProperty_16soTransitionTerm_ABB44.cpp:
 	.text       start:0x000ABB44 end:0x000ABB78
+
+mo_melee/sora_melee/so/transition/so_transition_term_group_part2.cpp:
+	.text       start:0x000ABB78 end:0x000ABF8C
 
 mo_melee/sora_melee/so/so_array_vector_destructor_ptr_soInstanceUnitFullProperty_soTransitionTerm_25.cpp:
 	.text       start:0x000ABF8C end:0x000ABFCC
 
 mo_melee/sora_melee/so/so_array_vector_accessors_ptr_soInstanceUnitFullProperty_soTransitionTerm_25_part1.cpp:
 	.text       start:0x000ABFCC end:0x000ABFDC
+
+mo_melee/sora_melee/so/transition/so_instance_manager_eccentric_soTransitionTerm.cpp:
+	.text       start:0x000ABFDC end:0x000AC2C4
 
 mo_melee/sora_melee/so/so_array_vector_accessors_ptr_soInstanceUnitFullProperty_soTransitionTerm_25_part2.cpp:
 	.text       start:0x000AC2C4 end:0x000AC37C
@@ -3367,11 +3379,17 @@ mo_melee/sora_melee/so/so_array_vector_abstract_layout_soTargetSearchRayCheckCac
 mo_melee/sora_melee/so/so_array_vector_abstract_layout_soCollisionAttackAbsolute.cpp:
 	.text       start:0x000DF0D8 end:0x000DFBE4
 
+mo_melee/sora_melee/so/so_array_vector_abstract_value_soInterpolationVec3f.cpp:
+	.text       start:0x000DFBE4 end:0x000E0470
+
 mo_melee/sora_melee/so/so_array_vector_abstract_value_soCollisionShieldGroup.cpp:
 	.text       start:0x000E0470 end:0x000E1454
 
 mo_melee/sora_melee/so/so_array_vector_abstract_layout_soArticleEventObserver.cpp:
 	.text       start:0x000E1454 end:0x000E1BA0
+
+mo_melee/sora_melee/so/so_array_vector_abstract_layout_soTransitionTermGroup.cpp:
+	.text       start:0x000E1BA0 end:0x000E2274
 
 mo_melee/sora_melee/so/so_array_vector_abstract_shield.cpp:
 	.text       start:0x000E2274 end:0x000E3280

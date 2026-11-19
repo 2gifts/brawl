@@ -341,7 +341,7 @@ s32 soInstanceManagerFullPropertyVector<T, C>::getFreeId() const {
 }
 
 template <class T>
-class soInstanceManagerFullPropertyEccentric : public soInstanceManagerAttributePolicy<T>, public soInstanceManagerPriorityPolicy<T> {
+class soInstanceManagerFullPropertyEccentric : public soInstanceManagerPriorityPolicy<T>, public soInstanceManagerAttributePolicy<T> {
 public:
     // Starts at 0x8, because there are 2 vtables.
     soArray<soInstanceUnitFullProperty<T> >* m_array;
@@ -349,4 +349,9 @@ public:
     virtual void getPriorityArray(soArray<T*>& arr);
     virtual void getAttributeArray(soAttributeFlag mask, soArray<T*>& arr);
     virtual soAttributeFlag getAttribute(s32) const;
+#ifdef SO_TRANSITION_TERM_GROUP_UNIT
+    // Out-of-line in the term group unit (fn_27_AB900): the term group adds its terms through it.
+    s32 add(T& elm, s32 id, soAttributeFlag attr, s16 p4);
+    s32 unkFindIndex(s32 priority);
+#endif
 };
