@@ -320,8 +320,17 @@ void grIceFish::createEatArea() {
 
 // The place of the mouth is given to the area of the fighters that are eaten.
 void grIceFish::presentPosEvent() {
+    // TODO: clean up - soGimmickChappyEventArgs_Pos takes the position by value (a word copy) and is built after the node
+    // position is read; the original built the arguments first and copied the position by components. Give the shared
+    // class a constructor without the position (and a setter), then drop this local type.
+    struct PosArgs : soGimmickEventArgs {
+        Vec3f m_pos;
+        PosArgs() : soGimmickEventArgs(Gimmick::Chappy_Event_Pos, 0) { }
+    } args;
     Vec3f pos;
-    getNodePosition(&pos, 0, m_areaData.m_nodeIndex);
-    soGimmickChappyEventArgs_Pos args(pos);
+    Ground::getNodePosition(&pos, 0, m_areaData.m_nodeIndex);
+    args.m_pos.m_x = pos.m_x;
+    args.m_pos.m_y = pos.m_y;
+    args.m_pos.m_z = pos.m_z;
     m_yakumono->presentEventGimmick(&args, -1);
 }
