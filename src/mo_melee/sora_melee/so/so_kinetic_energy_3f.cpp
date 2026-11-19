@@ -1,8 +1,11 @@
+#define MT_VEC3F_SCALE_XY_IN_PLACE
 #define MT_VEC3F_MUL_INLINE
 #include <mt/mt_vector.h>
 #include <so/kinetic/so_kinetic_energy.h>
 #include <so/so_kinetic_utility.h>
 #include <so/so_module_accesser.h>
+#include <so/situation/so_situation_event_presenter.h>
+#include <so/ground/so_ground_module_impl.h>
 #include <types.h>
 
 // HYPOTHESIS: the full 3D counterpart of soKineticEnergyNormal (layout and vtable order from the REL's own vtable).
@@ -48,6 +51,7 @@ void soKineticEnergy3f::resetEnergy(int, Vec3f* speed, Vec3f*, soModuleAccesser*
     m_limit3f = Vec3f(-1.0f, -1.0f, -1.0f);
 }
 
+// TODO: clean up -- hand-written paired-single multiply; should be a shared Vec3f helper.
 // MATCH-ONLY: componentwise product in paired singles (the same style as Vec3fAdd).
 static inline void Vec3fMul(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
     register f32 fr3, fr2, fr1, fr0;
@@ -118,3 +122,108 @@ Vec2f soKineticEnergy3f::getSpeed() {
 }
 
 soKineticEnergy3f::~soKineticEnergy3f() { }
+
+// TODO: clean up -- MATCH-ONLY paired-single add with the original register assignment; should be Vec3f::operator+= once
+// the shared Vec3fAdd helper has a variant with these register lifetimes.
+static inline void Vec3fAddLocal(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
+    register f32 rxy, lxy, sxy, rz, lz, sz;
+    asm {
+        psq_l  lxy, Vec3f.m_x(lhs), 0, 0
+        psq_l  rxy, Vec3f.m_x(rhs), 0, 0
+        ps_add sxy, lxy, rxy
+        psq_l  lz, Vec3f.m_z(lhs), 1, 0
+        psq_l  rz, Vec3f.m_z(rhs), 1, 0
+        ps_add sz, lz, rz
+        psq_st sxy, Vec3f.m_x(pOut), 0, 0
+        psq_st sz, Vec3f.m_z(pOut), 1, 0
+    }
+}
+
+// TODO: clean up -- Vec3f::lengthSq() with the Z + (X + Y) grouping and no out-of-line call; should use the shared
+// MT_VEC3F_LENGTH_SQ_INLINE form of Vec3f::lengthSq.
+static inline float lengthSq3(const Vec3f& v) {
+    return v.m_z * v.m_z + (v.m_x * v.m_x + v.m_y * v.m_y);
+}
+
+// NEAR-MISS: the projection of the ground-normal-followed acceleration copies its temporaries differently, and the
+// x-axis brake clamp stores 0.0f where the y/z axes store the target (kept as observed).
+void soKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
+    if (lengthSq3(m_accel3f) != 0.0f || lengthSq3(m_speed3f) != 0.0f) {
+        Vec3f accel = m_accel3f;
+        Vec3f brake = m_brake3f;
+        if (moduleAccesser->getSituationModule().getKind() == Situation_Ground) {
+            if (unk44 == true || unk45 == true) {
+                if (moduleAccesser->getGroundModule().isTouch(8, 0)) {
+                    if (unk45 == true) {
+                        float friction = moduleAccesser->getGroundModule().getDownFriction(0);
+                        if (friction > 1.0f) {
+                            Vec3fScale(&brake, &brake, friction);
+                        } else if (friction < 1.0f) {
+                            Vec3fScale(&accel, &accel, friction);
+                            Vec3fScale(&brake, &brake, friction);
+                        }
+                    }
+                    if (unk44 == true) {
+                        Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
+                        Vec2f flat(accel);
+                        Vec2f projected;
+                        projected = soKineticUtility::projectionNormalFollow(&flat, &normal);
+                        accel.m_x = projected.m_x;
+                        accel.m_y = projected.m_y;
+                    }
+                }
+            }
+        }
+        Vec3fAddLocal(&m_speed3f, &m_speed3f, &accel);
+        Vec3f target = m_targetSpeed3f;
+        if (target.m_x < 0.0f)
+            target.m_x = 0.0f;
+        if (target.m_y < 0.0f)
+            target.m_y = 0.0f;
+        if (m_speed3f.m_x > target.m_x) {
+            m_speed3f.m_x -= brake.m_x;
+            if (m_speed3f.m_x < target.m_x)
+                m_speed3f.m_x = 0.0f;
+        } else {
+            m_speed3f.m_x += brake.m_x;
+            if (m_speed3f.m_x > target.m_x)
+                m_speed3f.m_x = target.m_x;
+        }
+        if (m_speed3f.m_y > target.m_y) {
+            m_speed3f.m_y -= brake.m_y;
+            if (m_speed3f.m_y < target.m_y)
+                m_speed3f.m_y = target.m_y;
+        } else {
+            m_speed3f.m_y += brake.m_y;
+            if (m_speed3f.m_y > target.m_y)
+                m_speed3f.m_y = target.m_y;
+        }
+        if (m_speed3f.m_z > target.m_z) {
+            m_speed3f.m_z -= brake.m_z;
+            if (m_speed3f.m_z < target.m_z)
+                m_speed3f.m_z = target.m_z;
+        } else {
+            m_speed3f.m_z += brake.m_z;
+            if (m_speed3f.m_z > target.m_z)
+                m_speed3f.m_z = target.m_z;
+        }
+        if (m_limit3f.m_x >= 0.0f) {
+            if (m_speed3f.m_x > m_limit3f.m_x)
+                m_speed3f.m_x = m_limit3f.m_x;
+            else if (m_speed3f.m_x < -m_limit3f.m_x)
+                m_speed3f.m_x = -m_limit3f.m_x;
+        }
+        if (m_limit3f.m_y >= 0.0f) {
+            if (m_speed3f.m_y > m_limit3f.m_y)
+                m_speed3f.m_y = m_limit3f.m_y;
+            else if (m_speed3f.m_y < -m_limit3f.m_y)
+                m_speed3f.m_y = -m_limit3f.m_y;
+        }
+        if (m_limit3f.m_z >= 0.0f) {
+            if (m_speed3f.m_z > m_limit3f.m_z)
+                m_speed3f.m_z = m_limit3f.m_z;
+            else if (m_speed3f.m_z < -m_limit3f.m_z)
+                m_speed3f.m_z = -m_limit3f.m_z;
+        }
+    }
+}

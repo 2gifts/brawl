@@ -132,8 +132,16 @@ public:
     s16 m_generalTermIndex;
     u8 _pad06[2];
 
+#ifdef SO_TRANSITION_TERM_GROUP_UNIT
+    soTransitionTerm() { }
+    // Out-of-line copy constructor (fn_27_7756C) used when the term groups copy a record by value.
+    soTransitionTerm(const soTransitionTerm& other);
+    soTransitionTerm& operator=(const soTransitionTerm& other);
+#endif
+
     // Checks if term currently has all of its soGeneralTerms satisfied.
-    int checkEstablish(soModuleAccesser* accesserIn, u32* returnWord, soGeneralTermCache* generalTermCache);
+    // HYPOTHESIS: the cache parameter is mangled as void* (checkEstablish__16soTransitionTermFP16soModuleAccesserPUlPv).
+    int checkEstablish(soModuleAccesser* accesserIn, u32* returnWord, void* generalTermCache);
     void addGeneralTerm(soGeneralTerm* termIn);
     void clearGeneralTerm();
 };
@@ -153,6 +161,11 @@ public:
 #ifdef FT_MODULE_BUILDER
     ~soTransitionTermGroup();
 #endif
+#endif
+
+#ifdef SO_TRANSITION_TERM_GROUP_ASSIGN
+    // Out-of-line assignment (fn_27_AB2E0) called by the soArrayVectorAbstract<soTransitionTermGroup> copies.
+    soTransitionTermGroup& operator=(const soTransitionTermGroup&);
 #endif
 
     // Checks if any of the terms within this group currently have all of their soGeneralTerms satisfied.

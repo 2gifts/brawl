@@ -9,6 +9,9 @@ class wnemProcFncObj {
 public:
     u32 unk0;
     u32 unk4;
+#ifdef SO_ARRAY_INLINE_ELEMENT_CTOR // MATCH-ONLY: the vector constructor of sora_melee expands the element constructor inline
+    wnemProcFncObj() : unk0(0), unk4(-1) { }
+#endif
 #ifdef SO_ARRAY_ELEMENT_CTOR // MATCH-ONLY: out-of-line constructor/destructor (their definitions live in other units)
     wnemProcFncObj();
     ~wnemProcFncObj();
