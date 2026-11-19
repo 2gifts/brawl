@@ -292,6 +292,7 @@ struct Obj {
     u8 m_lo : 3;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8009C968(Obj* self, s32 flag) {
     if (flag != 0) {
         fn_8009E3D0((u8*)self + 0x194);
@@ -310,6 +311,7 @@ extern "C" void fn_800A9E58(void*, int, int, int);
 extern "C" void changeInput__16CameraControllerFQ216CameraController4Kind(CameraController*, int);
 extern void* lbl_805A0278;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8009CD94(CameraController* arg0, int a, int b, int c) {
     char* target = *(char**)((char*)lbl_805A0278 + 0x78);
     fn_800A9E58(target, a, b, c);
@@ -342,6 +344,7 @@ extern "C" void changeInput__16CameraControllerFQ216CameraController4Kind(Camera
 extern const f32 lbl_805A1DA0;
 extern const f32 lbl_805A1DB8;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8009C61C(CameraController* self) {
     self->lowerFlags = 0;
     self->unk45 = 0;
@@ -410,6 +413,7 @@ struct Block {
     unsigned int w[18];
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8009D158(char* dst, const Block* src) {
     Block* d = (Block*)(dst + 0xC4);
     d->f = src->f;
@@ -450,6 +454,7 @@ void fn_8009EC5C(float);
 void* fn_8009E3F4(void*, float);
 void fn_8009EA18(void*, void*);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8009CA88(CameraSelf* self) {
     s32 r30 = (*(u32*)((char*)g_gfApplication + 0xEC) >> 27) != 0;
     if ((self->flags44 >> 7) & 1) {
@@ -528,6 +533,7 @@ struct gfTaskObj {
     void* unk80;
 };
 
+// TODO: clean up, give variables real names
 extern "C" gfTaskObj* fn_8009C38C(gfTaskObj* self, int flag) {
     if (self != 0) {
         self->vtbl = lbl_80454BF0;

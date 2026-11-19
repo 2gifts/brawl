@@ -39,6 +39,7 @@ void __dl__FPv(void*);
 extern char lbl_80462130[];
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_801582A4(void* self, int flag) {
     if (self) {
         *(void**)((char*)self + 0x3C) = lbl_80462130;
@@ -64,6 +65,7 @@ extern char lbl_804620F8[];
 extern char lbl_80462130[];
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_8015820C(void* self, int arg1) {
     unsigned char* p = (unsigned char*)self;
     __ct__6gfTaskFPCcQ26gfTask8Categoryiib(self, lbl_804620F8, 0x26, 0xE, 0xD, true);
@@ -119,6 +121,7 @@ void fn_8014D854(Target*);
 void fn_8014FE04(int);
 void fn_8014DBDC(Target*);
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_801583AC(Self* self) {
     switch (self->state) {
     case 0:

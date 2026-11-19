@@ -2348,6 +2348,7 @@ struct Dispatcher {
 
 extern "C" Dispatcher* lbl_805A02DC;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800E407C(char* self) {
     int i = 2;
     char* p = self + 8;
@@ -2391,6 +2392,7 @@ public:
     MuObject* m_arr[14];
 };
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_800E3FB0(Owner* self) {
         MuObject** p;
     MuObject* first = self->m_arr[11];
@@ -2425,6 +2427,7 @@ extern float lbl_805A23B0;
 extern "C" void setFrameNode__8MuObjectFf(MuObject*, float);
 extern "C" int fn_800B5854(MuObject*, int, int, int, int);
 extern "C" void fn_800E1588(State*, int, int, int);
+// TODO: clean up, give variables real names
 extern "C" void fn_800E3820(State* self, int mode) {
     self->field130 = 0;
     if (mode != 1) { float frame = lbl_805A23B0; self->field134 = 0; self->field12C = frame; }
@@ -2461,6 +2464,7 @@ extern float lbl_805A23B0;
 extern float lbl_805A23C0;
 extern float lbl_805A23E4;
 extern "C" void fn_800E1588(State*, unsigned int, int, int);
+// TODO: clean up, give variables real names
 extern "C" void fn_800E370C(State* self) {
  MuObject** p;
  int i;
@@ -2507,6 +2511,7 @@ extern f32 lbl_805A23C0;
 extern "C" int fn_800B5854(void*, int, int, int, int);
 extern "C" void fn_800B6838(MuObject*, const Vec3f*);
 extern "C" void fn_800E1840(void*, u32, int);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800E3A90(u8* self) {
  u8* p;
  u8* pos;
@@ -2565,6 +2570,7 @@ extern f32 lbl_805A23C0;
 extern "C" void fn_800B6838(MuObject*, const Vec3f*);
 extern "C" void fn_800E1588(void*, u32, s32, s32);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800E3E64(u8* self) {
     s32 i;
     u8* f;
@@ -2640,6 +2646,7 @@ extern float lbl_805A23B0, lbl_805A23C0, lbl_805A244C, lbl_805A2454, lbl_805A245
 extern float lbl_804088A0[], lbl_804088B0[];
 void fn_800B6F6C(void*,const float*);
 void fn_800B6838(void*,const float*,float,float,float,float);
+// TODO: clean up, give variables real names
 void fn_800E4FD0(Object* self,int arg1,int arg2) {
 float stack[6];
 Child* child=self->child;
@@ -2750,6 +2757,7 @@ void fn_800B798C(MuObject* obj, float f);
 void fn_800E5318(Self* self, s32 v);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800E5174(Self* self, s32 arg1) {
     s32 i;
     Vt* r30;

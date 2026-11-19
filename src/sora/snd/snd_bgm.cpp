@@ -368,6 +368,7 @@ extern "C" void fn_80078768(Self*);
 extern "C" void fn_80078990(Self*);
 extern "C" void fn_800741EC(sndSystem*, int, unsigned int);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80078648(Self* self) {
     switch (self->state) {
     case 0:

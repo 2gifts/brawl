@@ -152,6 +152,7 @@ inline int clampCount(int count) {
  if (n < 3) limit = n;
  return limit;
 }
+// TODO: clean up, give variables real names
 extern "C" Task* fn_800DA15C(int count, int priority, Source* source, const char* name, int draw, int heap, Heaps::HeapType allocator) {
  int node;
  Task* task = (Task*)__nw__FUlQ25Heaps8HeapType(0x68, heap);

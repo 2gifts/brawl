@@ -31,6 +31,7 @@ typedef struct {
  unsigned short aj:4,ak:3,al:4,am:5;
  unsigned short an:1,ao:4,ap:5,aq:5,ar:1;
 } Data;
+// TODO: clean up, give variables real names
 unsigned int fn_803D5B90(Data *p) {
  if (p->a > 7) return 0;
  if (p->b > 5) return 0;
@@ -79,6 +80,7 @@ unsigned int fn_803D5B90(Data *p) {
 extern s32 RFLiPickupCharInfo(void* p);
 extern void fn_803D6008(s32 a, void* p);
 
+// TODO: clean up, give variables real names
 s32 RFLGetAdditionalInfo(s32 arg0) {
     u8 sp8[0x50];
     s32 temp_r3;
@@ -107,6 +109,7 @@ int RFLAddMiddleDBStoreData(int arg0, int arg1) {
 extern void RFLiConvertHRaw2Info(void *a, void *b);
 extern int RFLiIsValidID(void *p);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int RFLiGetCharInfoMiddleDB(void *arg0, u8 *arg1, u32 arg2) {
     u8 *temp;
 

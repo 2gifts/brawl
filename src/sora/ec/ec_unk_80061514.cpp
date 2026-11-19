@@ -466,6 +466,7 @@ void fn_801EC158(Mtx34S*);
 void fn_801EC1B8(Mtx34S*, Mtx34S*, Mtx34S*);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80065300(void*, int kind, void*, void*, Mtx34S* m) {
     switch (kind) {
     case 1: {
@@ -525,6 +526,7 @@ AnmObjShpRes* fn_8019BC04(MEMAllocator*, int*, ResAnmShp, ResMdl, bool);
 extern float lbl_805A1958;
 }
 
+// TODO: clean up, give variables real names
 inline void chrInner(u32 index, ResMdl model, gfModelAnimation* a) {
     int size;
     ResAnmChr anim(fn_8018D6D8(&a->m_resFile, index));
@@ -545,6 +547,7 @@ inline void chr(u32 index, ResMdl model, gfModelAnimation* a) {
         chrInner(index, model, a);
 }
 
+// TODO: clean up, give variables real names
 inline void visInner(ResMdl model, u32 index, gfModelAnimation* a) {
     int size;
     AnmObjVisRes* obj;
@@ -587,6 +590,7 @@ inline void name(u32 index, void* model, gfModelAnimation* a) { \
 
 HELPER(pat, GetResAnmTexPatNumEntries, fn_8018DCF0, ResAnmTexPat,
        AnmObjTexPatRes, m_anmObjTexPatRes)
+// TODO: clean up, give variables real names
 HELPER(srt, GetResAnmTexSrtNumEntries, fn_8018DEF8, ResAnmTexSrt,
        AnmObjTexSrtRes, m_anmObjTexSrtRes)
 HELPER(clr, GetResAnmClrNumEntries, fn_8018DAE8, ResAnmClr,
@@ -612,6 +616,7 @@ inline void shp(u32& index, void* model, gfModelAnimation* a) {
         shpInner(index, ResMdl(model), a);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80063538(Owner* self, u32 index, int flags) {
     void* visModel;
     if (self->animation) {
@@ -790,6 +795,7 @@ void* GetResNode__Q34nw4r3g3d6ResMdlCFPCc(
 extern const float lbl_805A1958;
 extern float lbl_805A195C;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80061944(Record* self, float rate) {
     TableEntry* table =
         (TableEntry*)(self->resource->data + self->index * 16);

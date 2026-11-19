@@ -991,6 +991,7 @@ extern "C" void fn_801627CC(MTX33*, const MTX34*);
 extern "C" void fn_801D7748(void*, unsigned int);
 extern const float lbl_805A3340;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_801A482C(MTX34* arg0, MTX33* arg1, MTX34* arg2, unsigned int* arg3, unsigned int count, const MTX34* arg5, const MTX34* arg6, const unsigned int* arg7, MTX34* arg8) {
     if (arg6 == 0) {
         unsigned int flags = *arg7;

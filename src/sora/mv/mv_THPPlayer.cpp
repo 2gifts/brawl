@@ -275,6 +275,7 @@ extern "C" void fn_8007E4C4();
 extern "C" void fn_80207BC0(int*);
 extern "C" void fn_801FF4CC(void*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8007C9DC() {
     if (*(int*)&g_thpObject.unk80[0x20] && g_thpObject.unk80[0x24]) {
         g_thpObject.unk80[0x25] = 0;
@@ -329,6 +330,7 @@ int fn_801F6708(void*, void*, unsigned int, unsigned int,
                 void (*)(void*, void*), void*);
 int fn_801F6524(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_8007BE4C(void) {
     switch (lbl_805A01E8) {
     case 0:
@@ -430,6 +432,7 @@ extern "C" int fn_8007CF00(void);
 #define I(n) (*(int*)(P + (n)))
 #define B(n) (*(u8*)(P + (n)))
 #define Q (*(u64*)(P + 0xC8))
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8007CB98(int arg) {
     int r31;
     void (*cb)(int) = (void (*)(int))*(int*)((char*)lbl_805A01F8 + 0x7F4);

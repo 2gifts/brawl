@@ -64,12 +64,14 @@ extern "C" void fn_801581F4(void* self) {
 
 extern "C" void fn_80157BC4(void*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_801581FC(void* self) {
     fn_80157BC4(reinterpret_cast<u8*>(self) - 0x344);
 }
 
 extern "C" void fn_80157A78(void*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80158204(void* self) {
     fn_80157A78(reinterpret_cast<u8*>(self) - 0x344);
 }
@@ -113,6 +115,7 @@ struct gfThread {
     s8 unk37C;
 };
 
+// TODO: clean up, give variables real names
 extern "C" gfThread* fn_80157200(gfThread* self, s32 heap)
 {
     self->vtable = __vt__8gfThread;
@@ -158,6 +161,7 @@ inline bool terminated(u8* thread) {
     return OSIsThreadTerminated((OSThread*)(thread + 8)) == 1;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_801572DC(void* self, int flag) {
     u8* p = (u8*)self;
     if (p != 0) {
@@ -217,6 +221,7 @@ struct Buf {
     u8 pad2[0x10];
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_801578C4(void* self) {
     s32 one;
     u8* p = (u8*)self;
@@ -339,6 +344,7 @@ static inline void* taskBase(Task* self) {
     return result;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8015741C(Task* self) {
     if (self->cancel)
         return;

@@ -56,6 +56,7 @@ extern "C" char lbl_8042E8D8[];
 extern "C" void* g_GameGlobal;
 extern "C" int lbl_805A00FC;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005A6E8(void) {
     void* temp_r3 = (void*)lbl_805A00FC;
 
@@ -92,6 +93,7 @@ struct Task {
     void* unk3C;
 };
 
+// TODO: clean up, give variables real names
 extern "C" Task* fn_8005A1A4(Task* p, int flag) {
     if (p) {
         p->unk3C = lbl_8042E8FC;
@@ -126,6 +128,7 @@ extern int lbl_805A00F0;
 extern Obj* lbl_805A00F8;
 extern int lbl_805A00FC;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005A238(gfTask* t) {
     if (lbl_805A00FC) {
         if (lbl_805A00F8) { fn_800307B4(); lbl_805A00F8 = 0; }
@@ -185,6 +188,7 @@ extern int lbl_8059CE48;
 extern gfTask* lbl_805A00F0;
 extern Obj* lbl_805A00F8;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005A470(Arg* arg) {
     gfTask* t = lbl_805A00F0;
     if (t != 0) {

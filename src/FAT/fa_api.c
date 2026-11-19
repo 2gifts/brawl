@@ -15,6 +15,7 @@ unsigned char lbl_805A1270[0x8] __attribute__((aligned(4))) = { 0 };
 
 extern FAHandle* fn_803EB644(const char*, const char*);
 
+// TODO: clean up, give variables real names
 FAHandle* FAFopen(const char* filepath, const char* mode) {
     FAHandle* handle = fn_803EB644(filepath, mode);
     if (handle == NULL)
@@ -32,6 +33,7 @@ int FAIsWriteProtected(s8 arg0) {
 
 FACallbacks lbl_80598080 = { 0 };
 
+// TODO: clean up, give variables real names
 int FAClosedir(FAHandle* handle) {
     int err = fn_803EB5D8(handle);
 
@@ -53,6 +55,7 @@ int FAErrnum(void) {
     return err;
 }
 
+// TODO: clean up, give variables real names
 int FAFclose(FAHandle* handle) {
     int err = fn_803EB620(handle);
 
@@ -62,6 +65,7 @@ int FAFclose(FAHandle* handle) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int FAFseek(FAHandle* handle, int offset, int mode) {
     int err = fn_803EB708(handle, offset, mode);
 
@@ -71,6 +75,7 @@ int FAFseek(FAHandle* handle, int offset, int mode) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int FAFsfirst(const char* pattern, int filter, FAEntryInfo* ret) {
     int err = fn_803EB72C(pattern, filter, ret);
 
@@ -80,6 +85,7 @@ int FAFsfirst(const char* pattern, int filter, FAEntryInfo* ret) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int FAFsnext(FAEntryInfo* ret) {
     int err = fn_803EB7A0(ret);
 
@@ -89,6 +95,7 @@ int FAFsnext(FAEntryInfo* ret) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int FAFstat(const char* filepath, FAStat* st) {
     int err = fn_803EB7C4(filepath, st);
 
@@ -125,6 +132,7 @@ int FAMount(s8 drv_char) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 FAHandle* FAOpendir(const char* path) {
     FAHandle* dir = fn_803EB970(path);
 
@@ -162,6 +170,7 @@ void FANotifySDEject(s8 drv_char) {
     lbl_80598080.unk4(drv_char);
 }
 
+// TODO: clean up, give variables real names
 int FARemove(const char* filepath) {
     int err = fn_803EB9C8(filepath);
 
@@ -171,6 +180,7 @@ int FARemove(const char* filepath) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_803EC22C(s8 drv_char) {
     int result = fn_803EBA18(drv_char);
 

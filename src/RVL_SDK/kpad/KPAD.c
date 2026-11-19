@@ -23,17 +23,20 @@ void fn_8022555C(char a, char b) {
 
 extern unsigned char lbl_804F9FC0[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_80225570(int idx, float a, float b) {
     unsigned char* p = lbl_804F9FC0 + idx * 0x528;
     *(float*)(p + 0x9c) = a;
     *(float*)(p + 0xa0) = b;
 }
 
+// TODO: clean up, give variables real names
 void fn_80228138(int arg0) {
     int offset = arg0 * 0x528;
     ((unsigned char *)lbl_804F9FC0 + offset)[0x520] = 0;
 }
 
+// TODO: clean up, give variables real names
 void fn_80228154(int arg0) {
     int offset = arg0 * 0x528;
     ((unsigned char *)lbl_804F9FC0 + offset)[0x520] = 1;
@@ -66,6 +69,7 @@ extern const float lbl_805A39F8;
 extern const float lbl_805A3A04;
 extern float lbl_8059ED2C;
 typedef struct { char pad0[0x54]; float x, y; char pad1[0x448]; float a, b, c; } Object;
+// TODO: clean up, give variables real names
 void calc_acc_vertical(Object *p) {
     float nx, oy, ox, t, t2;
     float sum = p->a * p->a + p->b * p->b;
@@ -97,6 +101,7 @@ extern double sqrt(float);
 extern const double lbl_805A3A08;
 extern const float lbl_805A39E8;
 
+// TODO: clean up, give variables real names
 void clamp_stick_circle(float* out, int a, int b, int c, int d) {
     float fa = (float)a;
     float fb = (float)b;
@@ -144,6 +149,7 @@ typedef struct Obj {
     f32 f4BC;
 } Obj;
 
+// TODO: clean up, give variables real names
 s32 select_1obj_continue(Obj* obj) {
     Point* outer;
     Point* inner;
@@ -397,6 +403,7 @@ inline static float dot2(const Vec2 *b, const Vec2 *a)
   return (a->x * b->x) + (a->y * b->y);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int select_2obj_first(void *base)
 {
   float scale;
@@ -483,6 +490,7 @@ int select_2obj_first(void *base)
 #define lbl_805A39E8 (*(float*)&lbl_805A39E8)
 #define lbl_805A39F8 (*(float*)&lbl_805A39F8)
 
+// TODO: clean up, give variables real names
 void clamp_stick_cross(float *out, int x, int y, int min, int max)
 {
     float a, b, len;

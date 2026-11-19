@@ -35,6 +35,7 @@ const s8* VFiPFSTR_GetStrPos(PF_STR* p_str, u32 target) {
 
 // Function bodies below are derived from https://github.com/jj-link/brawl.
 
+// TODO: clean up, give variables real names
 u16 fn_803D68B8(PF_STR* p_str) {
     return p_str->p_tail - p_str->p_head;
 }

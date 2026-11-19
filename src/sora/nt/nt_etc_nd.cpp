@@ -113,6 +113,7 @@ struct Context {
     unsigned char flag34E;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80151904(Context* self) {
     int a;
     int b;

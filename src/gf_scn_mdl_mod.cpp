@@ -91,6 +91,7 @@ unsigned char* fn_8004810C(void) {
 }
 
 namespace jj_80047C0C {
+// TODO: clean up, give variables real names
 extern "C" int fn_80047C0C(void* self, int off)
 {
     return (signed char)((unsigned char*)self)[off] >= 2;
@@ -106,6 +107,7 @@ public:
     virtual char* f3();
 };
 
+// TODO: clean up, give variables real names
 extern "C" char* fn_800480DC(Inner* self) {
     return self->f3() + 4;
 }
@@ -121,6 +123,7 @@ extern unsigned char lbl_8040AB90[0x10];
 extern unsigned char lbl_8040AB80[0x10];
 extern unsigned char lbl_8040AA68[0x10];
 
+// TODO: clean up, give variables real names
 int fn_8004805C(void* unused, unsigned int* p) {
     if (*p == (unsigned int)lbl_8040ABD8) return 1;
     unsigned int v = *p;

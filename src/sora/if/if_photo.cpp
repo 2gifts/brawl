@@ -210,6 +210,7 @@ extern "C" u32 fn_800F01B8(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x40);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_800F1750(void* self) {
     return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x48);
 }
@@ -220,12 +221,14 @@ namespace jj_800F1774 {
 
 extern int g_sndSystem;
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800F1774(void) {
     return g_sndSystem;
 }
 }
 
 namespace jj_800F1758 {
+// TODO: clean up, give variables real names
 extern "C" int fn_800F1758(const unsigned int *p)
 {
     return (p[3] >> 12) & 1;
@@ -247,6 +250,7 @@ struct Part {
     virtual void method(int);
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_800EFC8C(void* arg0, int arg1) {
     if (arg0 != 0) {
         char* base = (char*)arg0;
@@ -299,6 +303,7 @@ extern char lbl_8059E3A0;
 extern char lbl_8059DEC0;
 extern char __RTTI__18gfCameraController;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800F00D4(void* arg0, s8 arg1, s32 arg2, s32 arg3, s32 arg4) {
     char* self = (char*)arg0;
     char* task = (char*)getTask__15gfTaskSchedulerFPCc(getInstance__15gfTaskSchedulerFv(), &lbl_8059E3A0);
@@ -361,11 +366,13 @@ void fn_800F0954(void*);
 extern char lbl_8059DEC0, __RTTI__18gfCameraController;
 extern char lbl_8045B7E8[];
 }
+// TODO: clean up, give variables real names
 inline Raw getPad(Self* self) {
     Raw r;
     fn_800F0250(&r, self);
     return r;
 }
+// TODO: clean up, give variables real names
 extern "C" int fn_800F14C0(Self* self) {
     void* obj = fn_800F00AC();
     void* camera = 0;
@@ -470,6 +477,7 @@ static inline gfPadStatus getSysPad(int port) {
     return status;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800F05CC(Self* self, int arg) {
     Object_vptr_0* object = self->object;
     while (object->count != 0) {

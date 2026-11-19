@@ -1804,6 +1804,7 @@ static inline void clamp_store(signed char *p, int v)
     *p = r;
 }
 
+// TODO: clean up, give variables real names
 void fn_80265B24(int *arg0, signed char *arg1)
 {
     int tmp[64];

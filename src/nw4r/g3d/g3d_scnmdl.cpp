@@ -1322,6 +1322,7 @@ struct Object {
         field184 = a12;
     }
 };
+// TODO: clean up, give variables real names
 extern "C" Object* fn_801B0A28(Object* self, void* a1, s32* a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8, s32 a9, ParamData* a10, s32 a11, s32 a12) {
     return new(self) Object(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
 }

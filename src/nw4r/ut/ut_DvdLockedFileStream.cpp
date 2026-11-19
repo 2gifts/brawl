@@ -70,6 +70,7 @@ extern "C" void fn_801E187C(void* p);
 extern "C" void fn_8015D29C(void* arg);
 extern int lbl_805A0498;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8015D6A8(void* arg0) {
     unsigned int status = OSDisableInterrupts();
     *(unsigned char*)((char*)arg0 + 0x6F) = 1;

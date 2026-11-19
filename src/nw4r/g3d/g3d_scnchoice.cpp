@@ -164,6 +164,7 @@ extern "C" {
 
 extern unsigned char lbl_8040ABE8[0x10];
 
+// TODO: clean up, give variables real names
 unsigned char *fn_801B3C74(void) {
     return lbl_8040ABE8;
 }
@@ -177,6 +178,7 @@ extern "C" void* fn_80204E5C(void*, unsigned int);
 extern "C" void fn_801AC13C(void*, int, int, int);
 extern "C" int lbl_80466410[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_801B3440(void* arg0, int* arg1, int arg2) {
     void* result = 0;
     unsigned int size = (unsigned int)(arg2 * 4 + 0xEF) & 0xFFFFFFFC;
@@ -246,6 +248,7 @@ extern "C" {
 extern int lbl_805A0558;
 void fn_801AAB18(void*, void*);
 void fn_801ABA14(void*, int, int, void*);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_801B35D0(Class_80466418* self, int arg1, int arg2, Class_80466418* arg3) {
  int sp8 = arg2;
  int var5;

@@ -91,6 +91,7 @@ struct GameGlobal {
 extern "C" GameGlobal* g_GameGlobal;
 extern "C" u32 getStepIndex__19adventureStaticDataFUl(u32);
 
+// TODO: clean up, give variables real names
 extern "C" bool fn_8010ECB8(u32 arg) {
     u32 idx = getStepIndex__19adventureStaticDataFUl(arg | 0x2a000100);
     int value = g_GameGlobal->p->flags[idx >> 3];

@@ -270,6 +270,7 @@ struct Obj {
 extern "C" void fn_800110CC(void* ctx, Obj* node);
 extern "C" Obj* fn_800121A8(Obj* node);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80012094(void* arg0, void* arg1, Obj* arg2) {
     Obj* node;
     Obj* it;
@@ -309,6 +310,7 @@ void fn_80012E18(void*);
 extern const float lbl_805A13B0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800121B0(char* self, float f0, float f1) {
     unsigned int v = !((self[0x51] >> 7) & 1);
     if (v) {
@@ -405,6 +407,7 @@ struct Object {
 extern "C" int fn_80041920(float*, float*);
 extern "C" unsigned int fn_800130A8(void*, void*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80012C6C(Node* self, LinkListNode* obj) {
     Node* cur = self;
     Rect key = ((Object*)obj)->rect;
@@ -552,6 +555,7 @@ inline void bounds(Rect* out, f32* e) {
         out->v[2] = t3; out->v[3] = t0;
     }
 }
+// TODO: clean up, give variables real names
 inline void process(Tree* c) {
     Class_804207E4* end = (Class_804207E4*)&c->head;
     Class_804207E4* m = c->head;
@@ -568,6 +572,7 @@ inline void process(Tree* c) {
         c = (Tree*)((char*)c + 4);
     }
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80012660(char* arg) {
     Bounds* bp;
     Class_804207E4* n;

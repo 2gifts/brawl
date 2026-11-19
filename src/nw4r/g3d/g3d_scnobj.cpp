@@ -751,6 +751,7 @@ extern "C" void* fn_80204E5C(void* owner, unsigned int size);
 extern "C" void fn_801AAB2C(void* obj, void* owner);
 extern "C" char lbl_80466270[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_801AB6CC(void* owner, unsigned int* outSize, unsigned int count) {
     unsigned int size = (count * 4 + 0xEB) & ~3;
     char* result = 0;

@@ -101,6 +101,7 @@ extern "C" void fn_8014A060(void*);
 extern "C" void fn_80143C48(void*, int);
 extern "C" void fn_8013DDEC(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_801466AC(void* self) {
     if (gUnk805a03d8 != 3) {
         netReport(lbl_8045F204);
@@ -121,6 +122,7 @@ extern int gUnk805a03d8;
 extern char g_Network[];
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80146DC4(void) {
     int* net = (int*)g_Network;
     if (net != 0) {
@@ -205,6 +207,7 @@ extern "C" void fn_80149EF8(NetworkWork*);
 extern "C" void fn_80143C44(NtBase*);
 extern "C" void fn_8013EFCC(NtBase*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80146574(NetworkContext* self) {
     if (gUnk805a03d8 == 0) {
         netReport(lbl_8045F244);
@@ -265,6 +268,7 @@ void fn_800C8F68(const char*, ...);
 void fn_800CD340(void* p);
 unsigned char fn_800C851C(void);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_80146950(void* arg0) {
     char* base = lbl_8045F1D8;
     if (gUnk805a03d8 != 0 && fn_801DEDC4(&lbl_8049EC30) != 0) {

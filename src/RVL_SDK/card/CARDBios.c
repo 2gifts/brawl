@@ -9,6 +9,7 @@ unsigned char lbl_805A0B98[0x8] __attribute__((aligned(4))) = { 0 };
 
 int fn_8020A53C(int);
 
+// TODO: clean up, give variables real names
 int fn_8020A4EC(int arg0) {
     if (arg0 == 0) {
         if (fn_8020A53C(0) == -1 || fn_8020A53C(1) == -1) {
@@ -32,6 +33,7 @@ typedef struct Blk {
 } Blk;
 #define lbl_804ECE00 ((Blk*)&lbl_804ECE00)
 
+// TODO: clean up, give variables real names
 int fn_8020A438(int arg0, Blk** arg1) {
     int r;
     int en;
@@ -81,6 +83,7 @@ void OSRegisterVersion(const char* ver);
 void OSCreateAlarm(void* alarm);
 void OSRegisterShutdownFunction(int* info);
 
+// TODO: clean up, give variables real names
 void fn_8020A37C(void) {
     Blk* p;
     int i;

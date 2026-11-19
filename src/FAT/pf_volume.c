@@ -253,6 +253,7 @@ int fn_803D7168(char *arg0) {
 extern int fn_803D8B64(int, int, unsigned int, unsigned int, unsigned short, int);
 extern int fn_803D899C(int);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803D71D4(char *arg0, int a, unsigned int offset, unsigned int length, int last) {
     int result;
 
@@ -276,6 +277,7 @@ static inline void mark(char *p, u32 arg0) {
     if (*(u32 *)(p + 0x1FBC) == arg0)
         *(u16 *)(p + 0x1F8C) |= 0x14;
 }
+// TODO: clean up, give variables real names
 void PFDRV_MediaInsert(u32 arg0) {
     char *p;
     int i;

@@ -80,6 +80,7 @@ public:
 extern "C" void fn_8004B780(void*, void*);
 extern "C" void* lbl_8059FFF0;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80022DE4() {
     fn_8004B780(ipSwitch::getInstance()->m_18, &lbl_8059FFF0);
 }

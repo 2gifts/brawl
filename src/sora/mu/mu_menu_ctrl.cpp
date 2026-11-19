@@ -210,6 +210,7 @@ extern "C" void* g_GameGlobal;
 extern "C" void* lbl_8059E080;
 extern "C" void* lbl_8059E08C;
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_800B9640(void) {
     void* r;
     if (fn_8004D9E8(g_GameGlobal) != 0) {
@@ -229,6 +230,7 @@ extern void* g_GameGlobal;
 extern int lbl_8059E084;
 extern int lbl_8059E094;
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800B9678(void) {
     if (fn_8004D9E8(g_GameGlobal)) {
         return lbl_8059E084;
@@ -245,6 +247,7 @@ extern void* g_GameGlobal;
 extern int lbl_8059E098;
 extern int lbl_8059E09C;
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800B96B0(void) {
     if (fn_8004D9E8(g_GameGlobal)) {
         return lbl_8059E098;

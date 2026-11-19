@@ -341,6 +341,7 @@ s32 fn_80358CD4(void);
 void fn_803359CC(void);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80152338(Self* self) {
     char* base = lbl_80461390;
     s32 errorType;

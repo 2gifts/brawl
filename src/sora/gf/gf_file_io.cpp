@@ -1013,6 +1013,7 @@ s32 fn_8020A870(void* p);
 extern char lbl_804215C8[];
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_800207FC(u8* arg0) {
     char buf[0x74];
     s32 retry;
@@ -1082,6 +1083,7 @@ extern unsigned char lbl_8059FFDC;
 extern const unsigned char lbl_805A14B0[8];
 extern const unsigned char lbl_805A14B8[8];
 
+// TODO: clean up, give variables real names
 void fn_8001BBB8() {
     fn_803EC154(0, fn_8001BB1C, fn_8001BB8C);
     fn_803EBFCC(0x10000);
@@ -1154,6 +1156,7 @@ struct Lock {
     }
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_8001CFA4(S* arg) {
     Lock lock(lbl_80494910);
     S local;
@@ -1195,6 +1198,7 @@ extern "C" {
 int fn_803EBE4C(void);
 extern char lbl_8042153C[];
 
+// TODO: clean up, give variables real names
 int fn_8001FB64(const char* pattern, unsigned int dest, int unused, int size) {
     int result;
     char* output = (char*)dest;
@@ -1258,6 +1262,7 @@ int fn_8001DB34(char**);
 }
 struct A { const char* p; int a, b, c, d; unsigned r : 8; unsigned x : 8; unsigned y : 16; };
 struct B { unsigned char pad[0x15]; unsigned char x : 8; };
+// TODO: clean up, give variables real names
 extern "C" int fn_8001D8E8(A* self) {
     char buf[128];
     int t = fn_8001B7F8(self->p);
@@ -1298,6 +1303,7 @@ int fn_803C3DE0(int*, int, int);
 void fn_8001B9E8(void);
 int fn_803C3ED8(int*);
 extern const char lbl_80421520[];
+// TODO: clean up, give variables real names
 int fn_8001F84C(int arg0, unsigned int dest, int unused, int size) {
     char buffer[0x444];
     int status;
@@ -1366,6 +1372,7 @@ struct Lock {
     void release() { if (locked) OSUnlockMutex(mutex); }
 };
 }
+// TODO: clean up, give variables real names
 extern "C" int fn_800208E8(const char* name, int arg1) {
     if (name == 0 || arg1 == 0)
         return 0;
@@ -1451,6 +1458,7 @@ struct B {
     unsigned char x : 8;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_8001EE94(S* self) {
     int out2;
     int out1;
@@ -1540,6 +1548,7 @@ extern int fn_8020A710(void *, int, int);
 extern int fn_8020B9BC(void *, int, int);
 extern char lbl_80420FC0[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_8002035C(int arg0, int arg1) {
     char sp8[0x7C];
     char *base;
@@ -1656,6 +1665,7 @@ struct Lock {
     }
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_8001FDDC(Arg* arg) {
     char name[0x80];
     char path[0x80];
@@ -1759,6 +1769,7 @@ struct Lock {
     }
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_8001C9EC(Arg* arg) {
     Lock lock(&lbl_80494910);
     char path[0x80];
@@ -1859,6 +1870,7 @@ struct Guard {
     unsigned char flag : 8;
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_8001E2F8(S* self) {
     int out;
     int r;
@@ -1961,6 +1973,7 @@ struct Lock {
         if (locked) OSUnlockMutex(mutex);
     }
 };
+// TODO: clean up, give variables real names
 extern "C" void fn_8001DD0C(S* self) {
     char buf[128];
     char sdPath[128];
@@ -2067,6 +2080,7 @@ struct Lock {
     }
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_8001EC10(S* self) {
     char name[128];
     char tmp[128];
@@ -2168,6 +2182,7 @@ struct S {
     unsigned y : 16;
 };
 struct B { unsigned char pad[0x15]; unsigned char x : 8; };
+// TODO: clean up, give variables real names
 extern "C" int fn_8001F0D4(S* self) {
     char name[128];
     char localized[128];
@@ -2296,6 +2311,7 @@ struct Lock {
     }
 };
 
+// TODO: clean up, give variables real names
 inline int retryNAND(int status) {
     int retry = 0;
     if ((u32)(status + 3) <= 1) {
@@ -2307,6 +2323,7 @@ inline int retryNAND(int status) {
     return retry;
 }
 
+// TODO: clean up, give variables real names
 extern "C" int fn_8001C5D4(gfFileIORequest* arg) {
     Lock lock(&lbl_80494910);
     NANDFileInfo handle;

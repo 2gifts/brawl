@@ -245,6 +245,7 @@ extern "C" void fn_800A6CF8(S*);
 extern "C" void fn_800A709C(S*, int);
 extern "C" const float lbl_805A205C;
 extern Root* g_gfSceneRoot;
+// TODO: clean up, give variables real names
 extern "C" void fn_800A6B78(S* s) {
     fn_800A6CF8(s);
     s->f14 = 0;
@@ -291,6 +292,7 @@ struct Report {
     u8 fb8;
 };
 
+// TODO: clean up, give variables real names
 extern "C" Report* fn_800A6AD4(Report* self) {
     self->f04 = lbl_80454F28;
     self->f00 = 0;
@@ -357,6 +359,7 @@ struct Self {
 
 extern "C" void fn_80018778(Camera*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800A6BF0(Self* self) {
     Camera* camera = self->camera;
     camera->e = self->values[0];
@@ -404,6 +407,7 @@ inline float clamp(float v, float lo, float hi) {
     float t = nw4r::math::FSelect(v - lo, v, lo);
     return nw4r::math::FSelect(t - hi, hi, t);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800A8C18(void* arg0, int arg1) {
     gfPadStatus padStatus;
     Local loc;
@@ -486,6 +490,7 @@ extern const float lbl_805A2080;
 extern const float lbl_805A2084;
 extern const float lbl_805A2088;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800A6E78(Output* out, Input* in) {
     if (in->mode == 0 || in->mode == 2) {
         CameraController* c = CameraController::getInstance();

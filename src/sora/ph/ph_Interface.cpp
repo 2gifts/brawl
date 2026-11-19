@@ -329,6 +329,7 @@ struct Object {
     Array b;
 };
 
+// TODO: clean up, give variables real names
 extern "C" Object* fn_8009A1E0(Object* self, int flag) {
     if (self) {
         if ((unsigned int)self + 0x6c != 0 && !(self->b.raw & 0x80000000)) {
@@ -369,11 +370,13 @@ extern "C" Manager* lbl_8049DEC8[];
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 extern "C" void* fn_800966EC(void*, void*);
 extern "C" void fn_8027CE3C(Vec*, int);
+// TODO: clean up, give variables real names
 inline void Vec::push(void* value) {
     if (size == (int)(capacity & 0x3FFFFFFF))
         fn_8027CE3C(this, 4);
     data[size++] = value;
 }
+// TODO: clean up, give variables real names
 extern "C" void* fn_8009B238(void* arg) {
     if (lbl_8049DEC8[0]) {
         unsigned char enabled = lbl_8049DEC8[0]->active ? lbl_8049DEC8[0]->enabled : 0;
@@ -442,6 +445,7 @@ extern Object_vptr_0* lbl_805A0EB8;
 extern void* lbl_8059DC18;
 extern State* lbl_8049DEC8[32];
 extern u8 lbl_805A0270;
+// TODO: clean up, give variables real names
 extern "C" void fn_8009A38C(Self* self) {
     if (!self->flag) {
         self->flag = 1;

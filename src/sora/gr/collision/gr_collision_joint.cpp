@@ -288,6 +288,7 @@ struct Obj {
 };
 struct Vec { u8 pad[12]; u32 a,b,c; };
 struct Src { u16 h[8]; struct { u16 pad:13; u16 b2:1; u16 b1:1; u16 b0:1; } flags; u8 pad[2]; float f[4]; u16 a,b,c,d; };
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80112EBC(Obj* self, Vec* vec, Src* src) {
  self->p48 = (u16)self->p48;
  self->a.b0=0; self->a.b1=1; self->a.b2=0; self->a.b4=0; self->a.b5=0;

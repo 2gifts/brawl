@@ -44,6 +44,7 @@ struct Entry { unsigned char pad0, active, pad2[2], priority, pad5[27]; };
 struct Group { signed char pad, ids[16]; };
 struct Object { Group groups[9]; char pad[3]; Entry entries[1]; };
 extern "C" void fn_8005DCF8(Object*, Entry*);
+// TODO: clean up, give variables real names
 extern "C" void fn_8005DC24(Object* obj, int group) {
     Group* g = &obj->groups[group];
     int max = -1;
@@ -83,6 +84,7 @@ struct Input {
 
 extern "C" void fn_8005E438(int, GXColor*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005DCF8(int arg0, Input* arg1) {
     switch (arg1->mode) {
     case 0: {
@@ -127,6 +129,7 @@ inline void remove(u8* base, s32 value) {
         }
     }
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_8005DE38(u8* base, s32 index, s32 value) {
     base += index * 17;
     remove(base, value);
@@ -154,6 +157,7 @@ extern const float lbl_805A1950;
 
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005E438(int unused, u32* arg1) {
     Matrix sp8(true);
     sp8.setIdentity();
@@ -241,6 +245,7 @@ extern "C" void fn_8005DA68(Self*, Data*);
 extern "C" void fn_8005DE38(Self*, unsigned char, int);
 extern float lbl_805A1918;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005D7D8(Self* self, float delta) {
     if (!(delta <= lbl_805A1918)) {
         for (int i = 0; i < 10; i++) {

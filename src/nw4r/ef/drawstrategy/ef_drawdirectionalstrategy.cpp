@@ -478,6 +478,7 @@ namespace jj_8017842C {
 extern "C" {
 void fn_801ECD70(void*, void*, void*);
 
+// TODO: clean up, give variables real names
 void fn_8017842C(void* arg0, void* arg1, s32 arg2) {
     f32 v0[3], v1[3], v2[3], v3[3];
 

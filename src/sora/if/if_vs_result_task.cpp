@@ -2746,6 +2746,7 @@ namespace jj_800E60E4 {
 extern "C" void fn_800E636C(u8*, u32, u32, s32);
 extern "C" void fn_800E6608(u8*, u32, s32, s32);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800E60E4(u8* self, s32 index) {
     s32 line = index * 4;
     u8* player;
@@ -2838,6 +2839,7 @@ class Model : public ModelBase {
 public:
 virtual void destroy(int);
 };
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_800E7CA8(void* self, int arg1) {
 char* s = (char*)self;
 if (self != 0) {
@@ -2850,25 +2852,30 @@ if (o->count != 0) o->fn_801B3050(o->count - 1);
 }
 }
 fn_8000E590(g_gfSceneRoot, 8, 0);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(nw4r::g3d::G3dObj**)(s + 0x658) != 0) {
 (*(nw4r::g3d::G3dObj**)(s + 0x658))->Destroy();
 *(void**)(s + 0x658) = 0;
 }
 {
 Class_80454F64* o = *(Class_80454F64**)(s + 0x4458);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (o != 0) {
 if (o != 0) o->fn_800A6A94(1);
 *(void**)(s + 0x4458) = 0;
 }
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(gfTask**)(s + 0x4454) != 0) {
 (*(gfTask**)(s + 0x4454))->exit();
 *(void**)(s + 0x4454) = 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(nw4r::g3d::G3dObj**)(s + 0x658) != 0) {
 (*(nw4r::g3d::G3dObj**)(s + 0x658))->Destroy();
 *(void**)(s + 0x658) = 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(gfTask**)(s + 0x65C) != 0) {
 (*(gfTask**)(s + 0x65C))->exit();
 *(void**)(s + 0x65C) = 0;
@@ -2878,6 +2885,7 @@ char* p = s;
 unsigned int i = 0;
 do {
 nw4r::g3d::G3dObj* o = *(nw4r::g3d::G3dObj**)(p + 0x578);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (o != 0) {
 o->Destroy();
 *(void**)(p + 0x578) = 0;
@@ -2891,6 +2899,7 @@ unsigned int i = 0;
 char* p = s;
 do {
 Model* o = *(Model**)(p + 0xE8);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (o != 0) {
 if (o != 0) o->destroy(1);
 *(void**)(p + 0xE8) = 0;
@@ -2899,32 +2908,38 @@ i++;
 p += 4;
 } while (i < 0x124);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(int*)(s + 0x4498) == 0) {
 if (*(int*)(s + 0x688) != 0) {
 gfHeapManager::free(((gfFileIOHandle*)(s + 0x4468))->getBuffer());
 ((gfFileIOHandle*)(s + 0x4468))->release();
 *(int*)(s + 0x688) = 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(int*)(s + 0x670) != 0) {
 gfHeapManager::free(((gfFileIOHandle*)(s + 0x446C))->getBuffer());
 ((gfFileIOHandle*)(s + 0x446C))->release();
 *(int*)(s + 0x670) = 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(int*)(s + 0x684) != 0) {
 gfHeapManager::free(((gfFileIOHandle*)(s + 0x4470))->getBuffer());
 ((gfFileIOHandle*)(s + 0x4470))->release();
 *(int*)(s + 0x684) = 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(int*)(s + 0x68C) != 0) {
 gfHeapManager::free(((gfFileIOHandle*)(s + 0x4474))->getBuffer());
 ((gfFileIOHandle*)(s + 0x4474))->release();
 *(int*)(s + 0x68C) = 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(int*)(s + 0x690) != 0) {
 gfHeapManager::free(((gfFileIOHandle*)(s + 0x4478))->getBuffer());
 ((gfFileIOHandle*)(s + 0x4478))->release();
 *(int*)(s + 0x690) = 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(int*)(s + 0x694) != 0) {
 gfHeapManager::free(((gfFileIOHandle*)(s + 0x447C))->getBuffer());
 ((gfFileIOHandle*)(s + 0x447C))->release();
@@ -2940,6 +2955,7 @@ gfFileIOHandle* q;
 char* p = s;
 unsigned int i = 0;
 do {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(int*)(p + 0x4488) != 0) {
 q = (gfFileIOHandle*)((unsigned int)s + (i + 8) * 4 + 0x4468);
 gfHeapManager::free(q->getBuffer());
@@ -2956,6 +2972,7 @@ fn_800B8A0C(*(void**)(s + 0x654), 1);
 {
 gfTask* t = *(gfTask**)(s + 0x660);
 *(void**)(s + 0x64C) = 0;
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (t != 0) {
 t->exit();
 *(void**)(s + 0x660) = 0;

@@ -14,10 +14,12 @@ void fn_803A9620(OSMutex* mutex) {
     OSInitMutex(mutex);
 }
 
+// TODO: clean up, give variables real names
 void fn_803A9624(OSMutex* mutex) {
     OSLockMutex(mutex);
 }
 
+// TODO: clean up, give variables real names
 void fn_803A9628(OSMutex* mutex) {
     OSUnlockMutex(mutex);
 }
@@ -34,6 +36,7 @@ struct IOVec {
     int len;
 };
 
+// TODO: clean up, give variables real names
 int fn_803A8AF4(int arg0) {
     int local __attribute__((aligned(32)));
     int val __attribute__((aligned(32)));
@@ -65,6 +68,7 @@ extern int IOS_Close(int fd);
 extern int IOS_Ioctlv(int fd, int cmd, int flag1, int flag2, void *data);
 extern char lbl_80492710[];
 struct IOVec { void *base; int len; };
+// TODO: clean up, give variables real names
 int SSLShutdown(int arg0) {
     int local __attribute__((aligned(32)));
     int result __attribute__((aligned(32)));
@@ -96,6 +100,7 @@ struct IOVec {
     int len;
 };
 
+// TODO: clean up, give variables real names
 int fn_803A8A2C(int arg0, int arg1) {
     int local0 __attribute__((aligned(32)));
     int local1 __attribute__((aligned(32)));
@@ -136,6 +141,7 @@ struct IOVec {
     int len;
 };
 
+// TODO: clean up, give variables real names
 int fn_803A9490(int arg0, int arg1) {
     int val __attribute__((aligned(32)));
     int local0 __attribute__((aligned(32)));
@@ -176,6 +182,7 @@ struct IOVec {
     int len;
 };
 
+// TODO: clean up, give variables real names
 int fn_803A9558(int arg0, int arg1) {
     int val __attribute__((aligned(32)));
     int local0 __attribute__((aligned(32)));
@@ -213,6 +220,7 @@ extern char lbl_80492710[];
 extern const char *lbl_8059FE20;
 #define lbl_805A11F8 (*(int*)&lbl_805A11F8)
 struct IOVec { void *base; int len; };
+// TODO: clean up, give variables real names
 int fn_803A88D4(int arg0, char *arg1) {
  char buf[256] __attribute__((aligned(32)));
  struct IOVec iov[3] __attribute__((aligned(32)));
@@ -257,6 +265,7 @@ struct IOVec {
     int len;
 };
 
+// TODO: clean up, give variables real names
 int SSLWrite(int arg0, char *buf, unsigned int len) {
     char tmp[32] __attribute__((aligned(32)));
     int fd;
@@ -391,6 +400,7 @@ struct IOVec {
     unsigned int len;
 };
 
+// TODO: clean up, give variables real names
 int fn_803A8BA0(int arg0, char *buf, unsigned int len) {
     char tmp[32] __attribute__((aligned(32)));
     int fd;

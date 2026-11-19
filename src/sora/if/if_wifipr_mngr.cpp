@@ -292,24 +292,28 @@ extern "C" void fn_800FCC7C(void* self) {
 
 extern "C" void fn_800DA9CC(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FCDF8(void* self) {
     fn_800DA9CC(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x40));
 }
 
 extern "C" void fn_800FD4F0(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FCE00(void* self) {
     fn_800FD4F0(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
 }
 
 extern "C" void fn_800FD508(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FCE08(void* self) {
     fn_800FD508(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
 }
 
 extern "C" void fn_800FBF90(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FD108(void* self) {
     fn_800FBF90(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x38));
 }
@@ -341,6 +345,7 @@ struct Outer {
     Inner* g;
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800FCC84(Outer* o) {
     return o->g->d;
 }
@@ -349,12 +354,14 @@ extern "C" int fn_800FCC84(Outer* o) {
 namespace jj_800FD0F0 {
 extern "C" void fn_800FBDF4(void*, void*, int);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FD0F0(void* self, void* other) {
     fn_800FBDF4(*(void**)((char*)self + 0x38), other, 0);
 }
 }
 
 namespace jj_800FD0FC {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" unsigned char fn_800FD0FC(void *arg0) {
     return *(unsigned char *)((unsigned char *)*(void **)((unsigned char *)arg0 + 0x38) + 0x1c);
 }
@@ -365,6 +372,7 @@ extern "C" {
 void __dt__14gfFileIOHandleFv(void* p, int flag);
 void __dl__FPv(void* p);
 
+// TODO: clean up, give variables real names
 void* fn_800FC3E4(void* p, int n) {
     if (p) {
         __dt__14gfFileIOHandleFv(p, 0);
@@ -387,6 +395,7 @@ void fn_800FC3E4(void*);
 void __destroy_arr(void*, void (*)(void*), unsigned long, unsigned long);
 void __dl__FPv(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800FC290(void) {
     void* p = g_IfWifiprMngr;
     if (p != 0) {
@@ -409,6 +418,7 @@ extern "C" { void fn_800FC43C(FileHolder*, int); }
 #pragma push
 #pragma opt_propagation off
 #pragma opt_lifetimes off
+// TODO: clean up, give variables real names
 void fn_800FC43C(FileHolder* self, int arg1) {
     u32 sp10, spC;
     self->h54.read("/info/info_wifi_practice.brres", (HeapType)9, arg1);

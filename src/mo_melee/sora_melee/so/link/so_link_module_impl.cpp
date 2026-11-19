@@ -335,6 +335,7 @@ struct soLinkDeactivateEvent : public soLinkEventArgs {
     soLinkDeactivateEvent(int eventKind) : soLinkEventArgs(eventKind) { }
 };
 
+// TODO: clean up, give variables real names
 void soLinkModuleImpl::deactivate() {
     soLinkDeactivateEvent nodeEvent(StageObject::Link::Event_Deactivate_Node);
     sendEventParents(-1, nodeEvent);
@@ -345,6 +346,7 @@ void soLinkModuleImpl::deactivate() {
     lbl_27_bss_110.exit(&m_serverNode);
 }
 
+// TODO: clean up, give variables real names
 bool soLinkModuleImpl::link(u32 index, int taskId) {
     return lbl_27_bss_110.link(this, taskId, &m_connections->at(index));
 }

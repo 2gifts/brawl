@@ -195,6 +195,7 @@ extern int lbl_805A0130;
 extern int lbl_805A0134;
 extern float lbl_805A0138;
 
+// TODO: clean up, give variables real names
 void fn_8005CE70(Obj* self) {
     int state = self->w0c >> 24;
     if ((state == 2 || state == 4) && fn_8016FBC8(self->sub) != 0) {

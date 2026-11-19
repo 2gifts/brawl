@@ -88,6 +88,7 @@ void fn_801F5484(float, float, float, float, float, float);
     fn_803D45A8(items[i].x, items[i].y, items[i].z, \
                 items[i].w, items[i].h, items[i].mode)
 
+// TODO: clean up, give variables real names
 void fn_803D3D3C(void *arg0, Settings *settings, DrawItem *items, int size)
 {
     float viewport[6];

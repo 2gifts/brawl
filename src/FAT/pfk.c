@@ -15,6 +15,7 @@ extern char lbl_8049318C[0x33];
 // Function bodies below are derived from https://github.com/jj-link/brawl, where each
 // one was matched in a translation unit of its own.
 
+// TODO: clean up, give variables real names
 int fn_803EC27C(u32* context) {
     OSThread* thread;
 
@@ -32,6 +33,7 @@ int fn_803EC27C(u32* context) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803EC2F8(PFK_SEMAPHORE_INFO* info) {
     s32 count;
     OSSemaphore* sem;
@@ -49,6 +51,7 @@ s32 fn_803EC2F8(PFK_SEMAPHORE_INFO* info) {
     return (s32)info->sem;
 }
 
+// TODO: clean up, give variables real names
 int fn_803EC394(s32 resource) {
     if (resource == 0) {
         OSReport(lbl_80493128);
@@ -57,6 +60,7 @@ int fn_803EC394(s32 resource) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_803EC3D4(s32 resource) {
     if (resource == 0) {
         OSReport(lbl_8049315C);
@@ -66,6 +70,7 @@ int fn_803EC3D4(s32 resource) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_803EC418(s32 resource) {
     if (resource == 0) {
         OSReport(lbl_8049318C);

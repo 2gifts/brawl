@@ -83,6 +83,7 @@ s32 fn_801AC554(void*, s32);
 void fn_801AC5EC(void*, s32);
 void fn_801ACB68(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800A63A0(Self* self, float f) {
     gfCamera* t = self->m0;
     if (self->m20 == 1) {

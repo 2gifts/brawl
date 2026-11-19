@@ -382,6 +382,7 @@ struct Context {
     unsigned char empty;
 };
 extern const float lbl_805A1CA8;
+// TODO: clean up, give variables real names
 extern "C" void fn_80095990(Context* self, int* __restrict count) {
     switch (self->reverse) {
     case 0: {
@@ -444,6 +445,7 @@ extern "C" void fn_8009ACA0(Obj*, Obj*);
 extern float lbl_805A1C98;
 extern float lbl_805A1C9C;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8008AD64(Self* self) {
     if (self->unk8 == 0) {
         if (self->unkA == 0) {
@@ -490,6 +492,7 @@ struct Blk {
     unsigned int w[12];
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80092250(char* self) {
     Blk blk;
     float f98[12];
@@ -551,6 +554,7 @@ struct Object {
     float value;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80091F28(Object* self) {
     self->value = self->nodes[1]->value;
 
@@ -671,16 +675,19 @@ s32 fn_80086AC0(void* mgr, Obj* o, u8 b);
 ResNodeData* GetResNode__Q34nw4r3g3d6ResMdlCFUl(const nw4r::g3d::ResMdl* mdl, u32 idx);
 }
 
+// TODO: clean up, give variables real names
 static inline void* getMgr() {
     void* m = lbl_8049DEC8.ptr->m58;
     return m ? m : 0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 static inline bool isNaNf(f32& x) {
     u32 b = *(u32*)&x;
     return ((b >> 23) & 0xFF) == 0xFF && (b & 0x7FFFFF) != 0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8008EB3C(Self* self, Entry* arr, nw4r::g3d::ResMdl* mdl) {
     self->b59 = 0;
     if (self->flagF == 0) {
@@ -817,6 +824,7 @@ extern "C" void fn_80083390(
     Context*, Node*, Node*, void*, int, bool, int, int,
     int, int, int, int, int, int, int, int);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8008D8B0(
     Self* self, Matrix* matrices, nw4r::g3d::ResMdl* model,
     int start, int count)
@@ -1036,20 +1044,24 @@ static inline void clearMarks(Context* self) {
         b->flag5d = 0;
     }
 }
+// TODO: clean up, give variables real names
 static inline void resetSecond(Object* o) {
     for (int i = 0; i < o->count; i++)
         o->nodes[i]->second = nw4r::math::VEC3(lbl_805A1CA8, lbl_805A1CA8, lbl_805A1CA8);
 }
+// TODO: clean up, give variables real names
 static inline void resetFirst(Object* o) {
     for (int i = 0; i < o->count; i++)
         o->nodes[i]->first = nw4r::math::VEC3(lbl_805A1CA8, lbl_805A1CA8, lbl_805A1CA8);
 }
+// TODO: clean up, give variables real names
 static inline void setMatrices(Object* target, nw4r::math::VEC3 v1, nw4r::math::VEC3 v2) {
     char m[0x30];
     fn_801EC158(m);
     fn_801EC868(m, target->matrix1, v1.x, v1.y, v1.z);
     fn_801EC868(m, target->matrix2, v2.x, v2.y, v2.z);
 }
+// TODO: clean up, give variables real names
 static inline void restore(Object* o) {
     for (int i = 1; i < o->count; i++) {
         if (lbl_805A1CA8 == o->nodes[i]->value)
@@ -1059,6 +1071,7 @@ static inline void restore(Object* o) {
     o->flage8 = 0;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8008F3E0(Context* self, int mode) {
     Object* o = self->a;
     if (!o) return;

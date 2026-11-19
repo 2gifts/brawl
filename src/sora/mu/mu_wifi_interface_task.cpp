@@ -2939,6 +2939,7 @@ extern "C" u8 fn_800C851C();
 struct Copy160 { u8 bytes[160]; };
 struct FriendData { u8 pad[0x450]; u8 names[4][40]; };
 struct FriendInfo { FriendData* data; };
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800D2AD0(u8* self, const u8* src, int index) {
     u8* dst = getInstance__12ntFriendInfoFv()->data->names[index];
     int count = 20;
@@ -2968,10 +2969,12 @@ extern char lbl_80457158[];
 struct FccWord { u32 top : 8; u32 rest : 24; };
 struct Entry { char pad[0x218]; };
 struct Parent { char pad[0x70]; Entry entries[5]; };
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 static inline s32 getId(char* ent) {
     u32 w = *(u32*)(ent + 0x78);
     return (s32)((w << 24) | ((w >> 8) & 0x800000)) >> 24;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800D5A7C(char* self) {
     char* base = lbl_80457158;
     char* ent;
@@ -3043,6 +3046,7 @@ struct Parent {
     Entry entries[5];
 };
 
+// TODO: clean up, give variables real names
 inline u8 localIdx() {
     u8 l = fn_800C851C();
     if (l == 0xFF)
@@ -3050,6 +3054,7 @@ inline u8 localIdx() {
     return l;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_800D7C0C(void* self, s32 slot, s32 flag) {
     Parent* parent = (Parent*)self;
     Entry* e;
@@ -3154,6 +3159,7 @@ struct EntryView {
     u8* getData() { return data; }
 };
 
+// TODO: clean up, give variables real names
 inline u8 localIdx() {
     u8 l = fn_800C851C();
     if (l == 0xFF)
@@ -3165,6 +3171,7 @@ inline Entry* getLocal(void* self) {
     return (Entry*)((unsigned int)self + localIdx() * 0x218 + 0x70);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline u8* getSelectedOrNull(u8* self) {
     unsigned int idx = fn_800C8548();
     if (idx == 0xFF)
@@ -3172,6 +3179,7 @@ inline u8* getSelectedOrNull(u8* self) {
     return (u8*)((unsigned int)self + idx * 0x218 + 0x70);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline Entry* getSelectedA(u8* self) {
     u8 index = fn_800C8548();
     if (index == 0xFF)
@@ -3184,6 +3192,7 @@ inline Entry* getSelectedA(u8* self) {
     return entry;
 }
 
+// TODO: clean up, give variables real names
 inline u8* getSelected(u8* self) {
     u8 idx = fn_800C8548();
     if (idx == 0xFF)
@@ -3196,6 +3205,7 @@ inline u8* getSelected(u8* self) {
     return entry;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_800CA18C(void* self) {
     u8 r31;
     u8* e;
@@ -3333,6 +3343,7 @@ extern char g_Network[];
 extern int lbl_805A03A8;
 extern int lbl_805A0434;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800CFEB8(u8* self) {
     u8* dst;
     u8* src;
@@ -3525,6 +3536,7 @@ struct Parent {
     Entry entries[5];
 };
 
+// TODO: clean up, give variables real names
 inline u8* getInitial(u8* self) {
     u8 idx = fn_800C8548();
     if (idx == 0xFF)
@@ -3532,6 +3544,7 @@ inline u8* getInitial(u8* self) {
     return (u8*)&((Parent*)self)->entries[idx];
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline u8* getSelectedForState(u8* self) {
     u8 idx = fn_800C8548();
     if (idx == 0xFF) {
@@ -3548,6 +3561,7 @@ inline u8* getSelectedForState(u8* self) {
     return p;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline int countPlayers(u8* self) {
     u8 idx = fn_800C8548();
     s8* p;
@@ -3578,6 +3592,7 @@ inline bool readyStatus(u8* self) {
     return 0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_800CAA60(u8* self) {
     u8* initial;
     u8 slot;
@@ -3804,6 +3819,7 @@ struct Parent {
     Entry entries[5];
 };
 
+// TODO: clean up, give variables real names
 inline u8 localIdx() {
     u8 index = fn_800C851C();
     if (index == 0xFF)
@@ -3815,6 +3831,7 @@ inline Entry* getLocal(void* self) {
     return &((Parent*)self)->entries[localIdx()];
 }
 
+// TODO: clean up, give variables real names
 inline Entry* getSelectedA(u8* self) {
     u8 index = fn_800C8548();
     if (index == 0xFF)
@@ -3825,6 +3842,7 @@ inline Entry* getSelectedA(u8* self) {
     return entry;
 }
 
+// TODO: clean up, give variables real names
 inline u8* getSelected(u8* self) {
     u8 index = fn_800C8548();
     if (index == 0xFF)
@@ -3863,6 +3881,7 @@ inline u8* getSelected(u8* self) {
         }                                                                    \
     } while (0)
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800CD934(void* self, u8 count) {
     u8* base = (u8*)self;
 

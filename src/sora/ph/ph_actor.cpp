@@ -48,6 +48,7 @@ public:
 extern SoHeapAllocator* lbl_805A0EB8;
 
 extern "C" {
+// TODO: clean up, give variables real names
 void* fn_80099EB8(void* arg0, int arg1) {
     if (arg0 != 0 && arg1 > 0) {
         lbl_805A0EB8->free(arg0, *(unsigned short*)((char*)arg0 + 4), 0x25);
@@ -77,6 +78,7 @@ struct S {
     u16 type;
 };
 
+// TODO: clean up, give variables real names
 void* fn_80099F14(void* arg0, s32 arg1) {
     if (arg0 != 0 && arg1 > 0) {
         S* s = (S*)arg0;
@@ -143,6 +145,7 @@ inline void erase(Vec* v, s32 found) {
     }
 }
 
+// TODO: clean up, give variables real names
 inline void remove(Vec* v, const s32& key) {
     s32 found = find(v, key);
     if (v->elems[found].data) {
@@ -152,11 +155,13 @@ inline void remove(Vec* v, const s32& key) {
     erase(v, found);
 }
 
+// TODO: clean up, give variables real names
 inline void destroy(Vec* v) {
     if (v && v->isOwned())
         fn_8027EABC(lbl_805A0EC8, v->elems, v->flags << 3, 0x15);
 }
 
+// TODO: clean up, give variables real names
 extern "C" Vec* fn_80099994(Vec* self, s32 destroyFlag) {
     s32 i;
     s32 found;
