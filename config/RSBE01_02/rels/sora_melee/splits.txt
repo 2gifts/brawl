@@ -11744,6 +11744,11 @@ mo_melee/sora_melee/ai/ai_weapon.cpp:
 mo_melee/sora_melee/so/so_array_list_members_ptr_BaseItem_64_part1.cpp:
 	.text       start:0x0021BE00 end:0x0021BE10
 
+mo_melee/sora_melee/so/so_sinit_pair_21BE10.cpp:
+	.text       start:0x0021BE10 end:0x0021BE40
+	.ctors      start:0x000002A0 end:0x000002A4
+	.bss        start:0x00005658 end:0x00005668
+
 mo_melee/sora_melee/ai/ai_enemy.cpp:
 	.text       start:0x0021BE40 end:0x0021CB30
 	.rodata     start:0x00003280 end:0x00003290
@@ -12911,6 +12916,11 @@ mo_melee/sora_melee/it/it_kinetic_module_impl.cpp:
 mo_melee/sora_melee/so/so_array_list_members_soInstanceUnitFullProperty_ptr_soKineticEnergy_11_part1.cpp:
 	.text       start:0x002BB9F0 end:0x002BC544
 
+mo_melee/sora_melee/so/so_sinit_pair_2BC544.cpp:
+	.text       start:0x002BC544 end:0x002BC574
+	.ctors      start:0x00000334 end:0x00000338
+	.bss        start:0x00007168 end:0x00007178
+
 mo_melee/sora_melee/so/so_instance_manager_thunks_UniqImpl_soKineticEnergy_11.cpp:
 	.text       start:0x002BC574 end:0x002BC58C
 
@@ -12969,6 +12979,11 @@ mo_melee/sora_melee/so/so_array_base_soArrayFixed_P15itFigureArchive_2C299C.cpp:
 
 mo_melee/sora_melee/it/it_figure_archive.cpp:
 	.text       start:0x002C2A00 end:0x002C2CF4
+
+mo_melee/sora_melee/so/so_sinit_pair_2C2CF4.cpp:
+	.text       start:0x002C2CF4 end:0x002C2D24
+	.ctors      start:0x0000034C end:0x00000350
+	.bss        start:0x00007318 end:0x00007328
 
 mo_melee/sora_melee/if/if_resetsan.cpp:
 	.text       start:0x002C2D24 end:0x002C3FE4
