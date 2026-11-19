@@ -130,8 +130,6 @@ hkBool hkTriangleShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCast
 }
 
 // Not yet decompiled in this unit:
-//   0x802D65E0   216  getSupportingVertex
-//   0x802D66B8   288  convertVertexIdsToVertices
 //   0x802D6804   708  getAabb
 //   0x802D6ADC   128  getCollisionSpheres
 
@@ -236,3 +234,33 @@ extern "C" void fn_802D6804(float *a, void *m, float *out, float r)
 }
 }
 
+
+// The vertex furthest along the direction; w holds its byte offset from m_vertexA (the vertex id).
+void hkTriangleShape::getSupportingVertex(const hkVector4& direction, hkVector4& out) const {
+    hkVector4 dots;
+    dots.set(direction.dot3(m_vertexA), direction.dot3(m_vertexB), direction.dot3(m_vertexC), 0.0f);
+    int vertexId;
+    hkReal best;
+    if (dots.z > dots.y) {
+        vertexId = 0x20;
+        best = dots.z;
+    } else {
+        vertexId = 0x10;
+        best = dots.y;
+    }
+    if (dots.x > best) {
+        vertexId = 0;
+    }
+    out = *(const hkVector4*)((const char*)&m_vertexA + vertexId);
+    out.setIntW(vertexId);
+}
+
+// Vertex ids are byte offsets from m_vertexA; w keeps the id. Draft: the target never moves a vertex load above
+// the previous store to out (here and in getSupportingVertex), ours does; its loop also counts down from n - 1.
+void hkTriangleShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
+    for (int i = 0; i < numIds; i++) {
+        int id = ids[i];
+        out[i] = *(const hkVector4*)((const char*)&m_vertexA + id);
+        out[i].setIntW(id);
+    }
+}

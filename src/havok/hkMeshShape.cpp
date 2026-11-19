@@ -5,8 +5,6 @@
 //   0x802D523C    72  getVtablehkMeshShape
 //   0x802D5284   112  __ct
 //   0x802D52F4     8  getType
-//   0x802D52FC   168  getFirstKey
-//   0x802D53A4   252  getNextKey
 //   0x802D54A0   508  getChildShape
 //   0x802D5734   348  addToAabb
 //   0x802D5890   544  getAabb
@@ -246,3 +244,45 @@ extern "C" void fn_802D5734(f32 *bounds, void *m, const f32 *a, const f32 *b) {
 }
 }
 
+
+#include <havok/hkTriangleShape.h>
+
+// hkTriangleUtil::isDegenerate (hkTriangleUtil.o) and its default tolerance (an .sdata float, 1e-7).
+// TODO: clean up: declare both in an hkTriangleUtil header and name them in symbols.txt.
+extern "C" hkBool fn_802D7260(const hkVector4& a, const hkVector4& b, const hkVector4& c, hkReal tolerance);
+extern "C" hkReal lbl_8059EFC8;
+
+// The first key whose triangle is not degenerate.
+int hkMeshShape::getFirstKey() const {
+    ShapeBuffer buffer;
+    const hkTriangleShape* triangle = (const hkTriangleShape*)getChildShape(0, buffer);
+    if (!fn_802D7260(triangle->m_vertexA, triangle->m_vertexB, triangle->m_vertexC, lbl_8059EFC8)) {
+        return 0;
+    }
+    return getNextKey(0);
+}
+
+// Keys hold the subpart index in the top m_numBitsForSubpartIndex bits and the triangle index below; degenerate
+// triangles are skipped, -1 ends the walk.
+int hkMeshShape::getNextKey(int key) const {
+    u32 subpart = (u32)key >> (32 - m_numBitsForSubpartIndex);
+    int triangleIndex = key & (0xFFFFFFFF >> m_numBitsForSubpartIndex);
+    int nextKey;
+    do {
+        triangleIndex++;
+        if (triangleIndex >= m_subparts[subpart].m_numTriangles) {
+            subpart++;
+            if (subpart >= (u32)m_subparts.m_size) {
+                return -1;
+            }
+            triangleIndex = 0;
+        }
+        nextKey = triangleIndex | (subpart << (32 - m_numBitsForSubpartIndex));
+        ShapeBuffer buffer;
+        const hkTriangleShape* triangle = (const hkTriangleShape*)getChildShape(nextKey, buffer);
+        if (!fn_802D7260(triangle->m_vertexA, triangle->m_vertexB, triangle->m_vertexC, lbl_8059EFC8)) {
+            break;
+        }
+    } while (true);
+    return nextKey;
+}

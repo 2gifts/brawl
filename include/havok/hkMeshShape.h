@@ -50,4 +50,10 @@ struct hkMeshShape : hkShapeCollection {
     virtual int getType() const; // 0x10
     // The filter info of the triangle's material (the first word of the material), 0 without materials.
     virtual u32 getCollisionFilterInfo(u32 key) const; // 0x44
+    // Primary-vtable entries of the container overrides follow (the container sub-vtable at 0x28 reaches them
+    // through thunks). HYPOTHESIS: addSubpart's parameter.
+    virtual void addSubpart(const hkMeshShapeSubpart& part); // 0x48
+    virtual int getFirstKey() const;                          // 0x4C
+    virtual int getNextKey(int key) const;                    // 0x50
+    virtual const hkShape* getChildShape(u32 key, ShapeBuffer& buffer) const; // 0x54
 };

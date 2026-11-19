@@ -1,6 +1,6 @@
 // Havok translation unit hkConstrainedSystemFilter.o (main.dol 0x8032BD74-0x8032C304).
 // Functions in address order. Only the functions listed below are
-// written so far; the four isCollisionEnabled overloads are not done yet.
+// written so far.
 //   0x8032BDE4    72  finishLoadedObjecthkConstrainedSystemFilter
 //   0x8032BE2C    20  cleanupLoadedObjecthkConstrainedSystemFilter
 //   0x8032BE40   100  getVtablehkConstrainedSystemFilter
@@ -65,6 +65,54 @@ void hkConstrainedSystemFilter::constraintAddedCallback(const void* constraint) 
 }
 
 void hkConstrainedSystemFilter::constraintRemovedCallback(const void* constraint) {}
+
+// The entity owning a collidable (broad-phase type 1), else null. HYPOTHESIS: the type name.
+static inline hkEntity* hkConstrainedSystemFilter_getEntity(const hkCollidable& c) {
+    if (c.m_broadPhaseHandle.m_type == 1) {
+        return (hkEntity*)((char*)&c + c.m_ownerOffset);
+    }
+    return 0;
+}
+
+// Two entities joined by a constraint (other than a contact constraint, type 11) do not collide. The constraint
+// list of the entity with fewer constraints is searched.
+hkBool hkConstrainedSystemFilter::isCollisionEnabled(const hkCollidable& a, const hkCollidable& b) const {
+    hkEntity* entityA = hkConstrainedSystemFilter_getEntity(a);
+    hkEntity* entityB = hkConstrainedSystemFilter_getEntity(b);
+    hkBool disabled = false;
+    hkCollisionFilter* child = m_childFilter;
+    if (child != 0) {
+        if (child->isCollisionEnabled(a, b)) {
+        } else {
+            disabled = true;
+        }
+    }
+    if (disabled) {
+        return false;
+    }
+    if (entityA == 0 || entityB == 0) {
+        return true;
+    }
+    hkEntity* searched;
+    hkEntity* other;
+    if (entityA->getNumConstraints() > entityB->getNumConstraints()) {
+        searched = entityB;
+        other = entityA;
+    } else {
+        searched = entityA;
+        other = entityB;
+    }
+    int numConstraints = searched->getNumConstraints();
+    for (int i = 0; i < numConstraints; i++) {
+        hkConstraintInstance* constraint = searched->getConstraint(i);
+        if (constraint != 0 && constraint->getData()->getType() != 11) {
+            if (constraint->getEntityA() == other || constraint->getEntityB() == other) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 
 hkBool hkConstrainedSystemFilter::isCollisionEnabled(const hkCollisionInput& input, const hkCdBody& a,
                                                      const hkCdBody& b, const hkShapeCollection& bContainer,

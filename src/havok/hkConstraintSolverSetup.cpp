@@ -113,3 +113,44 @@ extern "C" void fn_802E0D84(Fn802E0D84Obj* self, s32 arg1) {
     self->unk48 = self->unk44;
 }
 } // namespace jj_fn_802E0D84
+
+static inline char* hkSolverAlign16(char* p) {
+    return (char*)(((u32)p + 15) & ~15);
+}
+
+// Splits the solver buffer into its regions (see hkConstraintSolverResources) and resets the write cursors.
+// Draft: same instructions as the target, scheduling and register choice still differ.
+void hkConstraintSolverSetup::initializeSolverState(const hkStepInfo& stepInfo, const hkSolverInfo& solverInfo,
+                                                    const hkConstraintQueryIn& constraintQueryIn, char* buffer,
+                                                    int bufferSize, hkConstraintSolverResources& s) {
+    int size = bufferSize - bufferSize % 16;
+    char* p = hkSolverAlign16(buffer);
+    s.m_region0Begin = p;
+    s.m_stepInfo = &stepInfo;
+    s.m_solverInfo = &solverInfo;
+    s.m_constraintQueryIn = &constraintQueryIn;
+    p = hkSolverAlign16(p + size * 10 / 64);
+    s.m_region0End = p;
+    s.m_region1Begin = p;
+    p = hkSolverAlign16(p + size * 4 / 64);
+    s.m_region1End = p;
+    s.m_region2Begin = p;
+    p = hkSolverAlign16(p + size * 30 / 64);
+    s.m_region2End = p;
+    s.m_region3Begin = p;
+    p = hkSolverAlign16(p + size * 10 / 64);
+    s.m_region3End = p;
+    s.m_region4Begin = p;
+    p = hkSolverAlign16(p + (u32)(0.6f * (size * 10) / 64.0f));
+    s.m_region4End = p;
+    s.m_region5Begin = p;
+    s.m_region5End = buffer + size;
+    s.m_region0Cursor = s.m_region0Begin;
+    s.m_region2Cursor = s.m_region2Begin;
+    s.m_region3Cursor = s.m_region3Begin;
+    s.m_region3Cursor2 = s.m_region3Begin;
+    s.m_region4Cursor = s.m_region4Begin;
+    s.m_region4Cursor2 = s.m_region4Begin;
+    s.m_region5Cursor = s.m_region5Begin;
+    s.m_region5Cursor2 = s.m_region5Begin;
+}
