@@ -1008,3 +1008,38 @@ void ChrAnmResult::SetRotTrans(const math::MTX34* pRotTrans) {
 
 } // namespace g3d
 } // namespace nw4r
+
+// TODO: clean up, give variables real names
+namespace jj_801956CC {
+typedef unsigned int u32;
+
+extern float lbl_805A31F4;
+
+struct Vec {
+    float x, y, z;
+
+    void set(float c, float b, float a) {
+        x = a;
+        y = b;
+        z = c;
+    }
+};
+
+struct Src {
+    u32 flags;
+    Vec v;
+};
+
+extern "C" void ChrAnmResult_GetScale__FPC12ChrAnmResultP5Vec3f(Src* src, Vec* dst) {
+    if (src->flags & 8) {
+        float k = lbl_805A31F4;
+        dst->x = k;
+        dst->y = k;
+        dst->z = k;
+        return;
+    }
+
+    dst->set(src->v.z, src->v.y, src->v.x);
+}
+}
+

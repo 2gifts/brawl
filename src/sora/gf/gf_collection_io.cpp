@@ -869,3 +869,983 @@ extern "C" void fn_8003CFC8(void* self) {
 }
 }
 
+#include <sr/sr_getappname.h>
+// TODO: clean up, give variables real names
+namespace jj_8003A6F0 {
+
+extern "C" {
+int getCollectionVFName__14gfSysRecorder2FPc(char*);
+void __ct__11gfCryptoESPFv(void*);
+int encrypt__11gfCryptoESPFPCvUlQ25Heaps8HeapType(void*, unsigned int, unsigned int, int);
+void __dt__11gfCryptoESPFv(void*, int);
+int fn_8003C4E4(void*, int, int, int);
+int sprintf(char*, const char*, ...);
+}
+extern OSMutex lbl_80497768;
+extern OSMutex* lbl_8059C6D4;
+extern OSMutex* lbl_8059C6D8;
+extern u16 lbl_805A00A8;
+extern u16 lbl_805A00AA;
+extern char lbl_8059C6DC[5];
+extern char lbl_8059C6E4[4];
+extern char lbl_8059C700[6];
+extern char MOD_PATCH_DIR[];
+extern const char* lbl_80423560[];
+
+struct Args {
+    int unk0;
+    int mode;
+    int index;
+    char name[0x80];
+    void* data;
+    int length;
+    u8 flag;
+};
+
+extern "C" int fn_8003A6F0(u8* self, Args* arg) {
+    int result = 3;
+    u32 locked = (u32)(-arg->mode | arg->mode) >> 31;
+    int vf;
+    int sd;
+    char path[0x20];
+    char buf2[0x40];
+    char buf[0x40];
+    char thread[0x371];
+
+    if (locked != 0) OSLockMutex(&lbl_80497768);
+    vf = 0;
+    sd = 0;
+    if (arg->mode == 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 == 0 && (getCollectionVFName__14gfSysRecorder2FPc(buf), ((gfFileIOHandle*)(self + 0x4c))->mountVF(0, buf))) {
+            while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x4c))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D4);
+                vf = 0;
+            } else {
+                goto vf_inc;
+            }
+        } else {
+vf_inc:
+            lbl_805A00A8 = lbl_805A00A8 + 1;
+            OSUnlockMutex(lbl_8059C6D4);
+            vf = 1;
+        }
+        if (lbl_805A00A8 == 0) goto cleanup;
+        {
+            int index = arg->index;
+            strcpy(path, lbl_8059C6DC);
+            strcat(path, lbl_80423560[index]);
+        }
+    } else {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->mountSD()) {
+            while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x48))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D8);
+                sd = 0;
+            } else {
+                goto sd_inc;
+            }
+        } else {
+sd_inc:
+            lbl_805A00AA = lbl_805A00AA + 1;
+            OSUnlockMutex(lbl_8059C6D8);
+            sd = 1;
+        }
+        if (lbl_805A00AA == 0) goto cleanup;
+        {
+            int index = arg->index;
+            strcpy(path, lbl_8059C6E4);
+            strcat(path, MOD_PATCH_DIR);
+            strcat(path, srGetAppGamename());
+            strcat(path, lbl_80423560[index]);
+        }
+    }
+    if (!((gfFileIOHandle*)(self + 0x44))->checkDirRequest(path)) {
+        result = 3;
+    } else {
+        while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+            OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+        }
+        if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() == 0x12) {
+            if (((gfFileIOHandle*)(self + 0x44))->createDirRequest(path)) {
+                while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() != 0) goto cleanup;
+            } else {
+                goto cleanup;
+            }
+        }
+        sprintf(buf2, lbl_8059C700, path, arg->name);
+        if (arg->flag != 0 && ((gfFileIOHandle*)(self + 0x44))->checkFileRequest(buf2)) {
+            while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() == 0) {
+                if (((gfFileIOHandle*)(self + 0x44))->del(buf2)) {
+                    while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+                        OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                    }
+                    if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() != 0) goto cleanup;
+                } else {
+                    goto cleanup;
+                }
+            }
+        }
+        if (arg->mode == 0) {
+            if (((gfFileIOHandle*)(self + 0x44))->writeRequest(buf2, arg->data, arg->length, 0)) {
+                goto final_loop;
+            } else {
+                goto cleanup;
+            }
+        } else {
+            __ct__11gfCryptoESPFv(thread);
+            *(u8*)(thread + 0x370) = 1;
+            if (encrypt__11gfCryptoESPFPCvUlQ25Heaps8HeapType(thread, (unsigned int)arg->data, (unsigned int)arg->length, *(int*)(self + 0x50)) != 0) {
+                while (*(u8*)(thread + 0x360) == 0) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                if (*(int*)(thread + 0x364) != 0) {
+                    __dt__11gfCryptoESPFv(thread, -1);
+                    goto cleanup;
+                }
+                if (((gfFileIOHandle*)(self + 0x44))->writeRequest(buf2, *(void**)(thread + 0x368), *(int*)(thread + 0x36c), 0) == 0) {
+                    __dt__11gfCryptoESPFv(thread, -1);
+                    goto cleanup;
+                } else {
+                    goto d054_c;
+                }
+            } else {
+                __dt__11gfCryptoESPFv(thread, -1);
+                goto cleanup;
+            }
+d054_c:
+            __dt__11gfCryptoESPFv(thread, -1);
+        }
+final_loop:
+        while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+            OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+        }
+        if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() == 0) {
+            result = 0;
+            fn_8003C4E4(self, 0, 0, 1);
+        }
+    }
+cleanup:
+    if (vf != 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 != 0) {
+            lbl_805A00A8 = lbl_805A00A8 - 1;
+            if (lbl_805A00A8 == 0 && ((gfFileIOHandle*)(self + 0x4c))->unmountVF(0)) {
+                while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x4c))->getReturnStatus();
+                lbl_805A00A8 = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D4);
+    }
+    if (sd != 0) {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA != 0) {
+            lbl_805A00AA = lbl_805A00AA - 1;
+            if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->unmountSD()) {
+                while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x48))->getReturnStatus();
+                lbl_805A00AA = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D8);
+    }
+    if (locked != 0) OSUnlockMutex(&lbl_80497768);
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8003AD48 {
+
+extern "C" {
+int getCollectionVFName__14gfSysRecorder2FPc(char*);
+void* __ct__11gfCryptoESPFv(void*);
+int decrypt__11gfCryptoESPFPCvUlQ25Heaps8HeapType(void*, void*, unsigned int, int);
+void* __dt__11gfCryptoESPFv(void*, int);
+void fn_80153488(void*);
+void fn_80153498(void*, int);
+int fn_80153504(void*, void*);
+int getDataType__10nteSectionFv(void*);
+}
+extern OSMutex lbl_80497768;
+extern OSMutex* lbl_8059C6D4;
+extern OSMutex* lbl_8059C6D8;
+extern u16 lbl_805A00A8;
+extern u16 lbl_805A00AA;
+extern char lbl_8059C6DC[5];
+extern char lbl_8059C6E4[4];
+extern char lbl_8059C708[2];
+extern char MOD_PATCH_DIR[];
+extern const char* lbl_80423560[];
+
+struct Args { int unk0; int mode; int index; char name[1]; };
+
+extern "C" int fn_8003AD48(u8* self, Args* arg) {
+    char path[0x40];
+    char buf[0x40];
+    char thread[0x380];
+    char sp8[8];
+    int result = 4;
+    bool locked;
+    int vf;
+    int sd;
+
+    *(int*)(self + 0xEC) = 0;
+    locked = arg->mode != 0;
+    if (locked) OSLockMutex(&lbl_80497768);
+    vf = 0;
+    sd = 0;
+    if (arg->mode == 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 == 0 && (getCollectionVFName__14gfSysRecorder2FPc(buf), ((gfFileIOHandle*)(self + 0x4c))->mountVF(0, buf))) {
+            while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x4c))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D4);
+                vf = 0;
+            } else {
+                goto vf_inc;
+            }
+        } else {
+vf_inc:
+            lbl_805A00A8 = lbl_805A00A8 + 1;
+            OSUnlockMutex(lbl_8059C6D4);
+            vf = 1;
+        }
+        if (lbl_805A00A8 == 0) goto cleanup;
+        int index = arg->index;
+        strcpy(path, lbl_8059C6DC);
+        strcat(path, lbl_80423560[index]);
+    } else {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->mountSD()) {
+            while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x48))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D8);
+                sd = 0;
+            } else {
+                goto sd_inc;
+            }
+        } else {
+sd_inc:
+            lbl_805A00AA = lbl_805A00AA + 1;
+            OSUnlockMutex(lbl_8059C6D8);
+            sd = 1;
+        }
+        if (lbl_805A00AA == 0) goto cleanup;
+        int index = arg->index;
+        strcpy(path, lbl_8059C6E4);
+        strcat(path, MOD_PATCH_DIR);
+        strcat(path, srGetAppGamename());
+        strcat(path, lbl_80423560[index]);
+    }
+    strcat(path, lbl_8059C708);
+    strcat(path, arg->name);
+
+    if (((gfFileIOHandle*)(self + 0x44))->checkFileRequest(path)) {
+        while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+            OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+        }
+        if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() != 0) {
+            *(void**)(self + 0xE4) = 0;
+            *(int*)(self + 0xE8) = 0;
+            goto cleanup;
+        }
+        if ((u32)((gfFileIOHandle*)(self + 0x44))->getSize() > 0x64000) {
+            *(void**)(self + 0xE4) = 0;
+            *(int*)(self + 0xE8) = 0;
+            goto cleanup;
+        }
+        if (((gfFileIOHandle*)(self + 0x44))->readRequest(path, *(Heaps::HeapType*)(self + 0x50), 0, 0)) {
+            while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() != 0) {
+                *(void**)(self + 0xE4) = 0;
+                *(int*)(self + 0xE8) = 0;
+                goto cleanup;
+            }
+            if (arg->mode == 0) {
+                *(void**)(self + 0xE4) = ((gfFileIOHandle*)(self + 0x44))->getBuffer();
+                *(int*)(self + 0xE8) = ((gfFileIOHandle*)(self + 0x44))->getSize();
+                goto block_48;
+            }
+            __ct__11gfCryptoESPFv(thread);
+            {
+                unsigned int size = ((gfFileIOHandle*)(self + 0x44))->getSize();
+                if (decrypt__11gfCryptoESPFPCvUlQ25Heaps8HeapType(thread, ((gfFileIOHandle*)(self + 0x44))->getBuffer(), size, *(int*)(self + 0x50)) != 0) {
+                    while (*(u8*)(thread + 0x360) == 0) {
+                        OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                    }
+                    if (*(int*)(thread + 0x364) != 0) {
+                        gfHeapManager::free(((gfFileIOHandle*)(self + 0x44))->getBuffer());
+                        *(void**)(self + 0xE4) = 0;
+                        *(int*)(self + 0xE8) = 0;
+                        __dt__11gfCryptoESPFv(thread, -1);
+                        goto cleanup;
+                    }
+                    gfHeapManager::free(((gfFileIOHandle*)(self + 0x44))->getBuffer());
+                    *(void**)(self + 0xE4) = *(void**)(thread + 0x368);
+                    *(int*)(self + 0xE8) = *(int*)(thread + 0x36C);
+                    goto thread_done;
+                }
+                gfHeapManager::free(((gfFileIOHandle*)(self + 0x44))->getBuffer());
+                *(void**)(self + 0xE4) = 0;
+                *(int*)(self + 0xE8) = 0;
+                __dt__11gfCryptoESPFv(thread, -1);
+                goto cleanup;
+            }
+        }
+        goto cleanup;
+    }
+    goto cleanup;
+
+thread_done:
+    __dt__11gfCryptoESPFv(thread, -1);
+block_48:
+    fn_80153488(sp8);
+    if (fn_80153504(sp8, *(void**)(self + 0xE4)) == 0) {
+        if (*(void**)(self + 0xE4) != 0) {
+            gfHeapManager::free(*(void**)(self + 0xE4));
+        }
+        *(void**)(self + 0xE4) = 0;
+        result = 6;
+        *(int*)(self + 0xE8) = 0;
+        fn_80153498(sp8, -1);
+    } else {
+        int kind = 0;
+        switch (getDataType__10nteSectionFv(sp8)) {
+        case 1:
+            kind = 1;
+            break;
+        case 2:
+            kind = 2;
+            break;
+        case 3:
+            kind = 3;
+            break;
+        }
+        if (kind == 0 || arg->index != kind) {
+            if (*(void**)(self + 0xE4) != 0) {
+                gfHeapManager::free(*(void**)(self + 0xE4));
+            }
+            *(void**)(self + 0xE4) = 0;
+            result = 6;
+            *(int*)(self + 0xE8) = 0;
+            fn_80153498(sp8, -1);
+        } else {
+            fn_80153498(sp8, -1);
+            switch (arg->index) {
+            case 1:
+                *(int*)(self + 0xEC) = 1;
+                break;
+            case 2:
+                *(int*)(self + 0xEC) = 2;
+                break;
+            case 3:
+                *(int*)(self + 0xEC) = 3;
+                break;
+            }
+            result = 0;
+        }
+    }
+
+cleanup:
+    if (vf != 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 != 0) {
+            lbl_805A00A8 = lbl_805A00A8 - 1;
+            if (lbl_805A00A8 == 0 && ((gfFileIOHandle*)(self + 0x4c))->unmountVF(0)) {
+                while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x4c))->getReturnStatus();
+                lbl_805A00A8 = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D4);
+    }
+    if (sd != 0) {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA != 0) {
+            lbl_805A00AA = lbl_805A00AA - 1;
+            if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->unmountSD()) {
+                while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x48))->getReturnStatus();
+                lbl_805A00AA = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D8);
+    }
+    if (locked) OSUnlockMutex(&lbl_80497768);
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8003B760 {
+
+extern "C" {
+void fn_8003B420(void*);
+int getCollectionVFName__14gfSysRecorder2FPc(char*);
+}
+extern OSMutex lbl_80497768;
+extern OSMutex* lbl_8059C6D4;
+extern OSMutex* lbl_8059C6D8;
+extern u16 lbl_805A00A8;
+extern u16 lbl_805A00AA;
+extern char lbl_8059C6DC[5];
+extern char lbl_8059C6E4[4];
+extern char MOD_PATCH_DIR[];
+extern const char* lbl_80423560[];
+extern const char* lbl_80423680[];
+
+struct Args { int unk0; int mode; int index; };
+
+extern "C" int fn_8003B760(u8* self, Args* arg) {
+    char path[0x40];
+    char buf[0x40];
+    int result = 4;
+    fn_8003B420(self);
+    bool locked = arg->mode != 0;
+    if (locked) OSLockMutex(&lbl_80497768);
+    int vf = 0;
+    int sd = 0;
+    if (arg->mode == 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 == 0 && (getCollectionVFName__14gfSysRecorder2FPc(buf), ((gfFileIOHandle*)(self + 0x4c))->mountVF(0, buf))) {
+            while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x4c))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D4);
+                vf = 0;
+            } else {
+                goto vf_inc;
+            }
+        } else {
+vf_inc:
+            lbl_805A00A8 = lbl_805A00A8 + 1;
+            OSUnlockMutex(lbl_8059C6D4);
+            vf = 1;
+        }
+        if (lbl_805A00A8 == 0) goto cleanup;
+    } else {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->mountSD()) {
+            while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x48))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D8);
+                sd = 0;
+            } else {
+                goto sd_inc;
+            }
+        } else {
+sd_inc:
+            lbl_805A00AA = lbl_805A00AA + 1;
+            OSUnlockMutex(lbl_8059C6D8);
+            sd = 1;
+        }
+        if (lbl_805A00AA == 0) goto cleanup;
+    }
+    {
+        int index = arg->index;
+        if (arg->mode == 0) {
+            strcpy(path, lbl_8059C6DC);
+            strcat(path, lbl_80423560[index]);
+        } else {
+            strcpy(path, lbl_8059C6E4);
+            strcat(path, MOD_PATCH_DIR);
+            strcat(path, srGetAppGamename());
+            strcat(path, lbl_80423560[index]);
+        }
+        strcat(path, lbl_80423680[index]);
+        if (!((gfFileIOHandle*)(self + 0x44))->findfirstRequest(path, *(HeapType*)(self + 0x50))) {
+            *(void**)(self + 0xe4) = 0;
+            *(int*)(self + 0xe8) = 0;
+        } else {
+            while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            switch (((gfFileIOHandle*)(self + 0x44))->getReturnStatus()) {
+            case 0:
+                *(void**)(self + 0xe4) = ((gfFileIOHandle*)(self + 0x44))->getBuffer();
+                *(int*)(self + 0xe8) = ((gfFileIOHandle*)(self + 0x44))->getSize();
+                break;
+            case 17:
+                *(void**)(self + 0xe4) = 0;
+                *(int*)(self + 0xe8) = 0;
+                break;
+            default:
+                *(void**)(self + 0xe4) = 0;
+                *(int*)(self + 0xe8) = 0;
+                goto failed;
+            }
+            result = 0;
+            *(int*)(self + 0xec) = 7;
+failed:
+            if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() != 0 &&
+                ((gfFileIOHandle*)(self + 0x44))->getBuffer() != 0) {
+                gfHeapManager::free(((gfFileIOHandle*)(self + 0x44))->getBuffer());
+            }
+        }
+    }
+cleanup:
+    if (vf != 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 != 0) {
+            lbl_805A00A8 = lbl_805A00A8 - 1;
+            if (lbl_805A00A8 == 0 && ((gfFileIOHandle*)(self + 0x4c))->unmountVF(0)) {
+                while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x4c))->getReturnStatus();
+                lbl_805A00A8 = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D4);
+    }
+    if (sd != 0) {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA != 0) {
+            lbl_805A00AA = lbl_805A00AA - 1;
+            if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->unmountSD()) {
+                while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x48))->getReturnStatus();
+                lbl_805A00AA = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D8);
+    }
+    if (locked) OSUnlockMutex(&lbl_80497768);
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8003BBDC {
+
+extern "C" {
+void fn_8003B420(void*);
+int getCollectionVFName__14gfSysRecorder2FPc(char*);
+}
+extern OSMutex lbl_80497768;
+extern OSMutex* lbl_8059C6D4;
+extern OSMutex* lbl_8059C6D8;
+extern u16 lbl_805A00A8;
+extern u16 lbl_805A00AA;
+extern char lbl_8059C6DC[5];
+extern char lbl_8059C6E4[4];
+extern char MOD_PATCH_DIR[];
+extern const char* lbl_80423560[];
+extern const char* lbl_80423680[];
+
+struct Args { int unk0; int mode; int index; };
+
+extern "C" int fn_8003BBDC(u8* self, Args* arg) {
+    char path[0x40];
+    char buf[0x40];
+    int result = 4;
+    bool locked;
+    int vf;
+    int sd;
+
+    fn_8003B420(self);
+    locked = arg->mode != 0;
+    if (locked) OSLockMutex(&lbl_80497768);
+    vf = 0;
+    sd = 0;
+    if (arg->mode == 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 == 0 && (getCollectionVFName__14gfSysRecorder2FPc(buf), ((gfFileIOHandle*)(self + 0x4c))->mountVF(0, buf))) {
+            while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x4c))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D4);
+                vf = 0;
+            } else {
+                goto vf_inc;
+            }
+        } else {
+vf_inc:
+            lbl_805A00A8 = lbl_805A00A8 + 1;
+            OSUnlockMutex(lbl_8059C6D4);
+            vf = 1;
+        }
+        if (lbl_805A00A8 == 0) goto cleanup;
+    } else {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->mountSD()) {
+            while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x48))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D8);
+                sd = 0;
+            } else {
+                goto sd_inc;
+            }
+        } else {
+sd_inc:
+            lbl_805A00AA = lbl_805A00AA + 1;
+            OSUnlockMutex(lbl_8059C6D8);
+            sd = 1;
+        }
+        if (lbl_805A00AA == 0) goto cleanup;
+    }
+    {
+        int index = arg->index;
+        if (arg->mode == 0) {
+            strcpy(path, lbl_8059C6DC);
+            strcat(path, lbl_80423560[index]);
+        } else {
+            strcpy(path, lbl_8059C6E4);
+            strcat(path, MOD_PATCH_DIR);
+            strcat(path, srGetAppGamename());
+            strcat(path, lbl_80423560[index]);
+        }
+        strcat(path, lbl_80423680[index]);
+        if (((gfFileIOHandle*)(self + 0x44))->findFileCountRequest(path)) {
+            while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            switch (((gfFileIOHandle*)(self + 0x44))->getReturnStatus()) {
+            case 0:
+                *(int*)(self + 0xe4) = 0;
+                *(int*)(self + 0xe8) = ((gfFileIOHandle*)(self + 0x44))->getSize();
+                goto block_35;
+            case 17:
+                *(int*)(self + 0xe4) = 0;
+                *(int*)(self + 0xe8) = 0;
+block_35:
+                result = 0;
+                *(int*)(self + 0xec) = 8;
+                break;
+            }
+        }
+    }
+cleanup:
+    if (vf != 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 != 0) {
+            lbl_805A00A8 = lbl_805A00A8 - 1;
+            if (lbl_805A00A8 == 0 && ((gfFileIOHandle*)(self + 0x4c))->unmountVF(0)) {
+                while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x4c))->getReturnStatus();
+                lbl_805A00A8 = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D4);
+    }
+    if (sd != 0) {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA != 0) {
+            lbl_805A00AA = lbl_805A00AA - 1;
+            if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->unmountSD()) {
+                while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x48))->getReturnStatus();
+                lbl_805A00AA = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D8);
+    }
+    if (locked) OSUnlockMutex(&lbl_80497768);
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8003C4E4 {
+
+extern "C" {
+u8 getEnableSaveLoad__10GameGlobalFv(void* a);
+int getCollectionVFName__14gfSysRecorder2FPc(char* buf);
+int checkSDInserted__8gfFileIOFv(void);
+int checkSDWriteProtected__8gfFileIOFv(void);
+}
+
+extern void* g_GameGlobal;
+extern OSMutex* lbl_8059C6D4;
+extern OSMutex* lbl_8059C6D8;
+extern OSMutex lbl_80497768;
+extern u16 lbl_805A00A8;
+extern u16 lbl_805A00AA;
+extern char lbl_8059C714;
+extern char lbl_8059C71C;
+
+struct FileState {
+    u8 unk0;
+    u8 pad1[3];
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+};
+extern FileState lbl_80423690;
+
+extern "C" s32 fn_8003C4E4(u8* self, void* unused, gfFileIOHandle* arg2, u32 mode) {
+    char buf[0x40];
+    s32 size;
+    s32 state;
+
+    size = 0;
+    state = 1;
+    if (arg2 == 0) {
+        arg2 = (gfFileIOHandle*)(self + 0x44);
+    }
+    if ((getEnableSaveLoad__10GameGlobalFv(g_GameGlobal) >> 3) & 1) {
+        if (lbl_80423690.unkC == 0 || mode == 1) {
+            s32 ok;
+            OSLockMutex(lbl_8059C6D4);
+            if (lbl_805A00A8 == 0 && (getCollectionVFName__14gfSysRecorder2FPc(buf), ((gfFileIOHandle*)(self + 0x4C))->mountVF(0, buf))) {
+                while (!((gfFileIOHandle*)(self + 0x4C))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                if (((gfFileIOHandle*)(self + 0x4C))->getReturnStatus() != 0) {
+                    OSUnlockMutex(lbl_8059C6D4);
+                    ok = 0;
+                } else {
+                    goto vf_inc;
+                }
+            } else {
+vf_inc:
+                lbl_805A00A8 = lbl_805A00A8 + 1;
+                OSUnlockMutex(lbl_8059C6D4);
+                ok = 1;
+            }
+            if (ok != 0) {
+                if (arg2->checkFreeSize(&lbl_8059C714)) {
+                    while (!arg2->isReady()) {
+                        OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                    }
+                    if (arg2->getReturnStatus() == 0) {
+                        lbl_80423690.unkC = arg2->getSize();
+                    }
+                }
+                OSLockMutex(lbl_8059C6D4);
+                if (lbl_805A00A8 != 0) {
+                    lbl_805A00A8 = lbl_805A00A8 - 1;
+                    if (lbl_805A00A8 == 0 && ((gfFileIOHandle*)(self + 0x4C))->unmountVF(0)) {
+                        while (!((gfFileIOHandle*)(self + 0x4C))->isReady()) {
+                            OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                        }
+                        ((gfFileIOHandle*)(self + 0x4C))->getReturnStatus();
+                        lbl_805A00A8 = 0;
+                    }
+                }
+                OSUnlockMutex(lbl_8059C6D4);
+            }
+        }
+    } else {
+        lbl_80423690.unkC = 0;
+    }
+    if (checkSDInserted__8gfFileIOFv() != 0) {
+        if (lbl_80423690.unk4 != (state = 0) || mode == 1) {
+            s32 ok2;
+            OSLockMutex(&lbl_80497768);
+            OSLockMutex(lbl_8059C6D8);
+            if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->mountSD()) {
+                while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                if (((gfFileIOHandle*)(self + 0x48))->getReturnStatus() != 0) {
+                    OSUnlockMutex(lbl_8059C6D8);
+                    ok2 = 0;
+                } else {
+                    goto sd_inc;
+                }
+            } else {
+sd_inc:
+                lbl_805A00AA = lbl_805A00AA + 1;
+                OSUnlockMutex(lbl_8059C6D8);
+                ok2 = 1;
+            }
+            if (ok2 != 0) {
+                if (checkSDWriteProtected__8gfFileIOFv() != 0) {
+                    state = 2;
+                }
+                if (arg2->checkFreeSize(&lbl_8059C71C)) {
+                    while (!arg2->isReady()) {
+                        OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                    }
+                    if (arg2->getReturnStatus() == 0) {
+                        size = arg2->getSize();
+                    }
+                }
+                OSLockMutex(lbl_8059C6D8);
+                if (lbl_805A00AA != 0) {
+                    lbl_805A00AA = lbl_805A00AA - 1;
+                    if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->unmountSD()) {
+                        while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                            OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                        }
+                        ((gfFileIOHandle*)(self + 0x48))->getReturnStatus();
+                        lbl_805A00AA = 0;
+                    }
+                }
+                OSUnlockMutex(lbl_8059C6D8);
+            } else {
+                state = 3;
+            }
+            OSUnlockMutex(&lbl_80497768);
+        }
+    }
+    if (lbl_80423690.unk4 != state || mode == 1) {
+        lbl_80423690.unk8 = size;
+        lbl_80423690.unk4 = state;
+    }
+    lbl_80423690.unk0 = 1;
+    return 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8003C934 {
+
+extern "C" {
+int getCollectionVFName__14gfSysRecorder2FPc(char*);
+int fn_8003C4E4(void*, int, int, int);
+}
+extern OSMutex lbl_80497768;
+extern OSMutex* lbl_8059C6D4;
+extern OSMutex* lbl_8059C6D8;
+extern u16 lbl_805A00A8;
+extern u16 lbl_805A00AA;
+extern char lbl_8059C6DC[5];
+extern char lbl_8059C6E4[4];
+extern char lbl_8059C708[2];
+extern char MOD_PATCH_DIR[];
+extern const char* lbl_80423560[];
+
+struct Args { int unk0; int mode; int index; char name[1]; };
+
+extern "C" int fn_8003C934(u8* self, Args* arg) {
+    char path[0x40];
+    char buf[0x40];
+    int result = 7;
+    if (arg->mode == 0) {
+        OSLockMutex(lbl_8059C6D4);
+        int ok;
+        if (lbl_805A00A8 == 0 && (getCollectionVFName__14gfSysRecorder2FPc(buf), ((gfFileIOHandle*)(self + 0x4c))->mountVF(0, buf))) {
+            while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x4c))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D4);
+                ok = 0;
+            } else {
+                goto vf_inc;
+            }
+        } else {
+vf_inc:
+            lbl_805A00A8 = lbl_805A00A8 + 1;
+            OSUnlockMutex(lbl_8059C6D4);
+            ok = 1;
+        }
+        if (ok == 0) return 7;
+        int index = arg->index;
+        strcpy(path, lbl_8059C6DC);
+        strcat(path, lbl_80423560[index]);
+    } else {
+        OSLockMutex(&lbl_80497768);
+        OSLockMutex(lbl_8059C6D8);
+        int ok;
+        if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->mountSD()) {
+            while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+            }
+            if (((gfFileIOHandle*)(self + 0x48))->getReturnStatus() != 0) {
+                OSUnlockMutex(lbl_8059C6D8);
+                ok = 0;
+            } else {
+                goto sd_inc;
+            }
+        } else {
+sd_inc:
+            lbl_805A00AA = lbl_805A00AA + 1;
+            OSUnlockMutex(lbl_8059C6D8);
+            ok = 1;
+        }
+        if (ok == 0) {
+            OSUnlockMutex(&lbl_80497768);
+            return 7;
+        }
+        int index = arg->index;
+        strcpy(path, lbl_8059C6E4);
+        strcat(path, MOD_PATCH_DIR);
+        strcat(path, srGetAppGamename());
+        strcat(path, lbl_80423560[index]);
+    }
+    strcat(path, lbl_8059C708);
+    strcat(path, arg->name);
+    if (((gfFileIOHandle*)(self + 0x44))->del(path)) {
+        while (!((gfFileIOHandle*)(self + 0x44))->isReady()) {
+            OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+        }
+        if (((gfFileIOHandle*)(self + 0x44))->getReturnStatus() == 0) {
+            result = 0;
+            fn_8003C4E4(self, 0, 0, 1);
+        }
+    }
+    if (arg->mode == 0) {
+        OSLockMutex(lbl_8059C6D4);
+        if (lbl_805A00A8 != 0) {
+            lbl_805A00A8 = lbl_805A00A8 - 1;
+            if (lbl_805A00A8 == 0 && ((gfFileIOHandle*)(self + 0x4c))->unmountVF(0)) {
+                while (!((gfFileIOHandle*)(self + 0x4c))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x4c))->getReturnStatus();
+                lbl_805A00A8 = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D4);
+    } else {
+        OSLockMutex(lbl_8059C6D8);
+        if (lbl_805A00AA != 0) {
+            lbl_805A00AA = lbl_805A00AA - 1;
+            if (lbl_805A00AA == 0 && ((gfFileIOHandle*)(self + 0x48))->unmountSD()) {
+                while (!((gfFileIOHandle*)(self + 0x48))->isReady()) {
+                    OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                }
+                ((gfFileIOHandle*)(self + 0x48))->getReturnStatus();
+                lbl_805A00AA = 0;
+            }
+        }
+        OSUnlockMutex(lbl_8059C6D8);
+        OSUnlockMutex(&lbl_80497768);
+    }
+    return result;
+}
+}
+

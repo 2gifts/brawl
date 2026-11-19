@@ -463,3 +463,53 @@ void soStatusModuleImpl::changeStatusForce(int status, soModuleAccesser* moduleA
     changeStatusSub(this, status, moduleAccesser);
 }
 
+// TODO: clean up, give variables real names
+namespace jj_73C10 {
+extern "C" {
+void __dl__FPv(void* p);
+
+void* fn_27_73C10(void* p, int n) {
+    if (p != 0 && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_760A0 {
+extern "C" {
+void __dl__FPv(void* p);
+void* fn_27_760A0(void* p, int n) {
+    if (p != 0 && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_76140 {
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_27_76140(void* ptr, int size) {
+    if (ptr != 0 && size > 0)
+        __dl__FPv(ptr);
+    return ptr;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_76180 {
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_27_76180(void* p, s32 n) {
+    if (p != nullptr && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+

@@ -643,3 +643,13 @@ void ftRobot::updateFinal(soModuleAccesser* acc) {
 extern "C" {
 void fn_120_C48C() {}
 } // extern "C"
+
+// TODO: clean up, give variables real names
+namespace jj_9E7C {
+extern "C" s32 g_soValueVariation;
+
+extern "C" s32 getValueVariation__15soValueAccesserFv() {
+    return g_soValueVariation;
+}
+}
+

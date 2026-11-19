@@ -29,3 +29,12 @@ void ftDiddyStatusUniqProcessSpecialPopGun::execStop(soModuleAccesser* moduleAcc
 
 void ftDiddyStatusUniqProcessSpecialPopGun::exitStatus(soModuleAccesser* moduleAccesser, int nextStatus) {
 }
+
+// TODO: clean up, give variables real names
+namespace jj_364D34 {
+extern "C" float fn_27_364D34(float x)
+{
+    return __fabsf(x);
+}
+}
+

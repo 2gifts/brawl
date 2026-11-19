@@ -2644,3 +2644,387 @@ soGeneralWork::soGeneralWork(soArray<s32>* ints, soArray<float>* floats, soArray
 void itKineticModuleImpl::addSpeed(Vec3f* speed, soModuleAccesser* moduleAccesser) {
     addSpeed(speed, true, moduleAccesser);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_27F4D8 {
+struct FnOut {
+    void *ptr;
+    int flag;
+};
+
+extern const float lbl_27_rodata_4614;
+extern const float lbl_27_rodata_4610;
+
+extern "C" {
+void fn_27_27F4D8(FnOut *out, float *v, float f1, float f2, float f3)
+{
+    float one = lbl_27_rodata_4614;
+    out->ptr = v;
+    out->flag = 1;
+    float zero = lbl_27_rodata_4610;
+    v[0] = zero;
+    v[1] = one + f3;
+    v[2] = -f3 - one;
+    v[3] = one + f1;
+    v[4] = f2 - one;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_27F520 {
+extern const unsigned char lbl_27_rodata_4610[];
+struct Entry { int a; float b,c,d,e; };
+struct Self { Entry* ptr; int count; };
+extern "C" void fn_27_27F520(Self* self, Entry* entry, float x, float y) {
+const float* k = (const float*)lbl_27_rodata_4610;
+self->ptr = entry;
+self->count = 1;
+float t = k[2] * x;
+float zero = k[0];
+entry->a = 0;
+entry->b = zero;
+entry->c = y;
+entry->d = zero;
+entry->e = t + k[3];
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_281308 {
+extern "C" {
+extern char __vt__10soNullable[];
+extern char lbl_27_data_C940[];
+extern char lbl_27_data_C910[];
+extern char __RTTI__11soEventUnit[];
+extern char lbl_27_data_13A70[];
+
+void* getInstance__13soEventSystemFv();
+void* getManager__13soEventSystemFl(void*, long);
+void* __dynamic_cast(void*, long, const void*, const void*, long);
+}
+
+struct Sys {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual int check(int);
+};
+
+struct Mgr {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual int has(int);
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void* get(int);
+};
+
+struct Unit {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual int value();
+};
+
+struct Self {
+    void* vt;
+    unsigned char flag;
+    void* vt2;
+    short id;
+    short kind;
+    int value;
+};
+
+extern "C" Self* fn_27_281308(Self* self, unsigned char flag) {
+    self->vt = __vt__10soNullable;
+    self->flag = flag;
+    self->vt2 = lbl_27_data_C940;
+    self->id = -1;
+    self->kind = 11;
+    int result = 0;
+    self->value = result;
+
+    if (self->id > 0 && self->id > -1) {
+        if (((Sys*)getInstance__13soEventSystemFv())->check(self->id) != 0) {
+            if (((Mgr*)getManager__13soEventSystemFl(
+                getInstance__13soEventSystemFv(), self->id))->has(self->kind) == 0) {
+                self->value = result;
+            } else {
+                Mgr* m;
+                short type;
+                type = self->kind;
+                m = (Mgr*)getManager__13soEventSystemFl(
+                    getInstance__13soEventSystemFv(), self->id);
+                if (m->has(type) == 0) {
+                    result = 0;
+                } else {
+                    Unit* u = (Unit*)__dynamic_cast(
+                        m->get(type), 0, lbl_27_data_C910, __RTTI__11soEventUnit, 0);
+                    if (u == 0) {
+                        result = 0;
+                    } else {
+                        result = u->value();
+                    }
+                }
+                self->value = result;
+            }
+        }
+    }
+
+    self->vt = lbl_27_data_13A70;
+    self->vt2 = lbl_27_data_13A70 + 12;
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2852B0 {
+typedef unsigned int u32;
+
+struct Vec3 {
+    float x, y, z;
+};
+
+struct Module {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void setScale(float);
+    virtual float getScale();
+};
+
+struct ObjectBase {
+    char pad[0x3C];
+};
+
+struct Object : ObjectBase {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3(); virtual void v4();
+    virtual void v5(); virtual void v6(); virtual void v7(); virtual void v8(); virtual void v9();
+    virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14();
+    virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24();
+    virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
+    virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34();
+    virtual void v35(); virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
+    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43(); virtual void v44();
+    virtual void v45(); virtual void v46(); virtual void v47(); virtual void v48(); virtual void v49();
+    virtual void v50(); virtual void v51(); virtual void v52(); virtual void v53(); virtual void v54();
+    virtual void v55(); virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
+    virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63(); virtual void v64();
+    virtual void v65(); virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
+    virtual void v70(); virtual void v71(); virtual void v72(); virtual void v73(); virtual void v74();
+    virtual void v75(); virtual void v76(); virtual void v77(); virtual void v78(); virtual void v79();
+    virtual void v80(); virtual void v81(); virtual void v82(); virtual void v83(); virtual void v84();
+    virtual void v85(); virtual void v86(); virtual void v87(); virtual void v88(); virtual void v89();
+    virtual void v90(); virtual void v91(); virtual void v92(); virtual void v93(); virtual void v94();
+    virtual void v95(); virtual void v96(); virtual void v97(); virtual void v98(); virtual void v99();
+    virtual void v100(); virtual void v101(); virtual void v102(); virtual void v103(); virtual void v104();
+    virtual void v105(); virtual void v106(); virtual void v107(); virtual void v108(); virtual void v109();
+    virtual void v110(); virtual void v111(); virtual void v112(); virtual void v113(); virtual void v114();
+    virtual void v115(); virtual void v116(); virtual void v117(); virtual void v118(); virtual void v119();
+    virtual void v120(); virtual void v121(); virtual void v122(); virtual void v123(); virtual void v124();
+    virtual void v125(); virtual void v126(); virtual void v127(); virtual void v128(); virtual void v129();
+    virtual void v130(); virtual void v131(); virtual void v132(); virtual void v133(); virtual void v134();
+    virtual void v135(); virtual void v136(); virtual void v137(); virtual void v138(); virtual void v139();
+    virtual void v140(); virtual void v141(); virtual void v142(); virtual void v143(); virtual void v144();
+
+    virtual void setPos(const Vec3&);
+    virtual Vec3 getPos();
+
+    char pad1[0x888];
+    u32 id;
+    char pad2[0x3444];
+    Module module;
+};
+
+extern "C" void* getTask__6gfTaskFi(int);
+extern "C" void* __dynamic_cast(void*, long, const void*, const void*, short);
+extern "C" u32 __RTTI__8BaseItem[];
+extern "C" u32 __RTTI__6gfTask[];
+extern "C" void* getTeamOwnerId__23soExternalValueAccesserFP11StageObject(Object*);
+extern "C" void fn_27_8D454(void*, void*);
+
+inline Object* resolve(const u32& id) {
+    if (id == 0xFFFFFFFF)
+        return 0;
+
+    void* task = getTask__6gfTaskFi(id);
+    if (task)
+        return (Object*)__dynamic_cast(task, 0x3C, __RTTI__8BaseItem, __RTTI__6gfTask, 0);
+
+    return 0;
+}
+
+inline Object* linked(Object* self) {
+    if (self->id == 0xFFFFFFFF)
+        return 0;
+
+    return resolve(self->id);
+}
+
+extern "C" void fn_27_2852B0(Object* self) {
+    Object* other = linked(self);
+    if (other) {
+        const Vec3& pos = other->getPos();
+        self->setPos(pos);
+        self->module.setScale(other->module.getScale());
+    } else {
+        fn_27_8D454((char*)self + 0xB8, getTeamOwnerId__23soExternalValueAccesserFP11StageObject(self));
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_28E29C {
+extern "C" void setupThrowAttack__8BaseItemFffP5Vec3f(void* self, void* arg, float f1, float f2);
+extern "C" void removeModelConstraint__8BaseItemFP16soModuleAccesserib(void* self, int a, int b);
+
+class A {
+public:
+    virtual void a0(); virtual void a1(); virtual void a2(); virtual void a3();
+    virtual void a4(); virtual void a5();
+};
+
+class B {
+public:
+    virtual void b0(); virtual void b1(); virtual void b2(); virtual void b3();
+    virtual void b4();
+    virtual void s7(int, int, float);
+    virtual void b6(); virtual void b7(); virtual void b8(); virtual void b9();
+    virtual void b10(); virtual void b11(); virtual void b12(); virtual void b13();
+    virtual void b14(); virtual void b15(); virtual void b16();
+    virtual int s19(int);
+    virtual void s20(int);
+};
+
+class C {
+public:
+    virtual void c0(); virtual void c1(); virtual void c2();
+    virtual void s5(int, void*);
+};
+
+class D {
+public:
+    virtual void d0(); virtual void d1();
+    virtual unsigned int* s4(int);
+};
+
+#define F10(p) virtual void p##0(); virtual void p##1(); virtual void p##2(); virtual void p##3(); virtual void p##4(); virtual void p##5(); virtual void p##6(); virtual void p##7(); virtual void p##8(); virtual void p##9();
+
+class E {
+public:
+    F10(e) F10(f) F10(g) F10(h)
+    virtual void e40();
+    virtual void s43(float*);
+    virtual void e42(); virtual void e43(); virtual void e44();
+    virtual void s47();
+    virtual void e46();
+    virtual void s49();
+};
+
+struct LblBase {
+    int a;
+};
+
+class Lbl : public LblBase {
+public:
+    virtual void l0(); virtual void l1(); virtual void l2(); virtual void l3();
+    virtual void l4();
+    virtual void s7(void*, int, int);
+};
+
+extern Lbl itValueAccesserGlobalStorage;
+
+class H {
+public:
+    F10(h) virtual void h10(); virtual void h11(); virtual void h12();
+    virtual void h13(); virtual void h14(); virtual void h15();
+    virtual int s18();
+};
+
+struct V2r {
+    float y;
+    float x;
+};
+
+struct Mid {
+    char pad[0x70];
+    H* h;
+};
+
+struct Frame {
+    char pad0[0xCC];
+    char cc[4];
+    char pad1[0x1A4 - 0xD0];
+    Mid* mid;
+    char pad2[0xDB4 - 0x1A8];
+    A a;
+    char pad3[0x15C0 - 0xDB8];
+    E e;
+    char pad4[0x297C - 0x15C4];
+    D d;
+    char pad5[0x2AAC - 0x2980];
+    B b;
+    char pad6[0x2C34 - 0x2AB0];
+    C c;
+};
+
+extern "C" void fn_27_28E29C(Frame* arg0, int unused, float farg0, float farg1, float* arg2) {
+    V2r local;
+    V2r copy;
+
+    arg0->a.a5();
+    setupThrowAttack__8BaseItemFffP5Vec3f(arg0, arg2, farg0, farg1);
+    removeModelConstraint__8BaseItemFP16soModuleAccesserib(arg0->cc, 5, 0);
+    local.y = arg2[0];
+    local.x = arg2[1];
+    arg0->b.s7(0, 0x1000001C, local.y);
+    arg0->c.s5(5, arg0->cc);
+    if (arg0->mid->h->s18() == 5) {
+        arg0->b.s20(0x22000000);
+        if (arg0->b.s19(0x22000000) != 0) {
+            if (!(*arg0->d.s4(8) & 0x4c00)) {
+                float x = local.x;
+                float y = local.y;
+                copy.x = x;
+                copy.y = y;
+                arg0->e.s43(&copy.y);
+                Lbl* lp = &itValueAccesserGlobalStorage;
+                lp->s7(arg0->cc, 0xD6F, 0);
+                arg0->e.s47();
+                lp->s7(arg0->cc, 0xD70, 0);
+                arg0->e.s49();
+            }
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2905F0 {
+extern "C" void* fn_27_2905F0(void* p, s32 size) {
+    if (p != nullptr) {
+        if (size > 0) {
+            ::operator delete(p);
+        }
+    }
+    return p;
+}
+}
+

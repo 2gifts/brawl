@@ -1293,3 +1293,120 @@ struct ftOwnerStartupRecord {
 
 static ftOwnerStartupRecord ftOwnerStartupA(0xFF, 0);
 static ftOwnerStartupRecord ftOwnerStartupB(0xFF, 1);
+
+// TODO: clean up, give variables real names
+namespace jj_111B38 {
+extern "C" void setStartPos__7ftOwnerFP5Vec3f(void** p, float f) {
+    *(float*)((char*)*p + 0x4d4) = f;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_111B5C {
+typedef struct {
+    float x;
+    float y;
+    float z;
+} Vec3f;
+
+struct Target {
+    char pad[0x4d8];
+    float x;
+    float y;
+    float z;
+};
+
+extern "C" void fn_27_111B5C(Target **t, const Vec3f *v)
+{
+    Target *p = *t;
+    p->x = v->x;
+    p->y = v->y;
+    p->z = v->z;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_112AC8 {
+struct Pair {
+    unsigned int y, z;
+};
+
+struct Triple {
+    unsigned int x;
+    Pair yz;
+};
+
+struct Data {
+    unsigned char padding[0x4F8];
+    Triple values[1];
+};
+
+struct Object {
+    Data* data;
+};
+
+extern "C" void fn_27_112AC8(Object* object, int index, Triple* output)
+{
+    *output = object->data->values[index];
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_112BEC {
+struct Unknown {
+    unsigned char pad[0x834];
+    float f834;
+};
+
+extern "C" float fn_27_112BEC(Unknown** p) {
+    return (*p)->f834;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_112C10 {
+struct fn27Inner {
+    char pad[0x5c];
+    s32 val;
+};
+
+struct fn27Outer {
+    fn27Inner* inner;
+    u8 pad[6];
+    u8 state;
+};
+
+extern "C" void fn_27_112C10(fn27Outer* p, s32 amount) {
+    if (p->state != 1) {
+        return;
+    }
+    fn27Inner* in = p->inner;
+    s32 max = 0x7FFFFFFF - in->val;
+    if (max < amount) {
+        amount = max;
+    }
+    in->val += amount;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_112C58 {
+struct Inner {
+    unsigned char pad[0x60];
+    void* f60;
+};
+
+struct Outer {
+    Inner* inner;
+    unsigned char pad[6];
+    unsigned char flag;
+};
+
+extern "C" void addCoin__7ftOwnerFi(Outer* p, void* v) {
+    if (p->flag != 1) {
+        return;
+    }
+    p->inner->f60 = v;
+}
+}
+

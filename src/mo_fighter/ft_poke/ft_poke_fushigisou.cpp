@@ -408,3 +408,14 @@ bool ftPokeFushigisouArticleMediator::shoot(soModuleAccesser* acc, soArticle* ar
     default: return false;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_21410 {
+extern "C" void* getInstanceAt__21ftPurinArticleSubPoolFl(void* object, int index) {
+    if (index == 0) {
+        return static_cast<char*>(object) + 0x0c;
+    }
+    return 0;
+}
+}
+

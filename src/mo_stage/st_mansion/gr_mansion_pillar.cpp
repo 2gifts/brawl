@@ -372,3 +372,18 @@ void grMansionPillar::onDamage(int index, soDamage* damage, soDamageAttackerInfo
         break;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_3CBC {
+extern "C" s32 fn_47_3CBC(void) {
+    return -0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4CB4 {
+extern "C" s32 fn_47_4CB4(void) {
+    return 0x1;
+}
+}
+

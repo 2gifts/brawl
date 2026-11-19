@@ -684,3 +684,11 @@ GXColor stMarioPast::getFinalTechniqColor() {
 bool stMarioPast::isBamperVector() {
     return true;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_1F20 {
+extern "C" void setMdlIndex__6GroundFi(void* self, u16 value) {
+    *reinterpret_cast<u16*>(reinterpret_cast<u8*>(self) + 0x5c) = value;
+}
+}
+

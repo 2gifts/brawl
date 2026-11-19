@@ -14,3 +14,14 @@ void ftStatusUniqProcessGimmickLadder::execLadderCatchBottom(soModuleAccesser* m
     adjustLadderMovement(moduleAccesser, info->m_upperNodePos.m_x, info->m_upperNodePos.m_y);
     correctX(moduleAccesser, info->m_upperNodePos.m_x, 1);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_177CE0 {
+extern "C" void fixPosLadderCatchBottom__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesserP24soGimmickLadderEventArgs(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_177CE4 {
+extern "C" void exitLadderCatchBottom__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesser(void) {}
+}
+

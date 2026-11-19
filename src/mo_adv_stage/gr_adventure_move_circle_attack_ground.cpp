@@ -71,3 +71,32 @@ void grAdventureMoveCircleAttackGround::notifyEventOnTrigger(int flag) {
 }
 
 grAdventureMoveCircleAttackGround::~grAdventureMoveCircleAttackGround() { }
+
+// TODO: clean up, give variables real names
+namespace jj_29E20 {
+extern "C" void fn_40_29E20(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_29E24 {
+extern "C" void fn_40_29E24(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2A114 {
+extern "C" void fn_40_29E24(void*);
+
+extern "C" void fn_40_2A114(void* self) {
+    fn_40_29E24(reinterpret_cast<u8*>(self) - 0x14c);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2A124 {
+extern "C" void fn_40_29E20(void*);
+
+extern "C" void fn_40_2A124(void* self) {
+    fn_40_29E20(reinterpret_cast<u8*>(self) - 0x154);
+}
+}
+

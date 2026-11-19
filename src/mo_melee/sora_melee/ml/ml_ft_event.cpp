@@ -474,3 +474,723 @@ void mlFtEvent::notifyEventResultWin(int entryId, int winAnim) {
         stage->m_winAnim = winAnim;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_27D810 {
+
+extern "C" {
+extern char* g_IfMngr;
+void setDamageState__8IfPlayerFi(void*, int);
+void updateStockCoin__8IfPlayerFi(void*, int);
+void setDisablePlayerNo__16CameraControllerFi(void*, unsigned int);
+}
+struct Stage_base { char pad[0x3c]; };
+class Stage : public Stage_base { public:
+virtual void processDefault();
+virtual void processBegin();
+virtual void processAnim();
+virtual void processUpdate();
+virtual void processPreMapCorrection();
+virtual void processMapCorrection();
+virtual void processFixPosition();
+virtual void processPreCollision();
+virtual void processCollision();
+virtual void processCatch();
+virtual void processHit();
+virtual void processCamera();
+virtual void processFixCamera();
+virtual void processEffect();
+virtual void processGameProc();
+virtual void processEnd();
+virtual void renderPre();
+virtual void renderOpa();
+virtual void renderXlu();
+virtual void processDebug();
+virtual void renderDebug();
+virtual void init();
+virtual void destructor();
+virtual void createObj();
+virtual void createObjPokeTrainer();
+virtual void getPokeTrainerPointNum();
+virtual int getPokeTrainerPointData();
+virtual void getPokeTrainerPositionZ();
+virtual void getPokeTrainerDrawLayer();
+virtual void isAdventureStage();
+virtual void getItemPac();
+virtual void getItemGenPac();
+virtual void getItemPacEnemyFigure();
+virtual int getEnemyPac(int, int, int);
+virtual void getAdvRadarData();
+virtual void initializeStage();
+virtual void closeStage();
+virtual void renderDebugPositions();
+virtual void loading();
+virtual void process();
+virtual void updateStagePositions();
+virtual void debugCollision();
+virtual void getAIRange();
+virtual void getDefaultLightSetIndex();
+virtual void getZoneLightSetIndex();
+virtual void getScrollDir();
+virtual void clearCameraParam();
+virtual void initCameraParam();
+virtual void startLoadLocalData();
+virtual void isLoadLocalData();
+virtual void entryLocalData();
+virtual void removeLocalData();
+virtual void appearanceFighterLocal();
+virtual void getFighterStartPos();
+virtual void getFighterReStartPos();
+virtual void isReStartSamePoint();
+virtual void getPokeTrainerStartPos();
+virtual void getItemPosCount();
+virtual void getItemPos();
+virtual void getRandItemPos();
+virtual void getKirifudaPos();
+virtual void getKirifudaAngle();
+virtual void getKirifudaScale();
+virtual void getKirifudaModelType();
+virtual void getPokeTrainerPosCount();
+virtual void getPokeTrainerPos();
+virtual void getFighterDeadEffectSizeRate();
+virtual void getEnemyDeadEffectSizeRate();
+virtual void getEnableZ();
+virtual void getBgmID();
+virtual void getBgmID_2();
+virtual void getNowStepBgmID();
+virtual void getBgmOptionID();
+virtual void isBgmChange();
+virtual void getBgmChangeID();
+virtual void setBgmChange();
+virtual void getBgmVolume();
+virtual void getBgmPlayOffsetFrame();
+virtual void isNextStepBgmEqualNowStepBgmFromFlag();
+virtual void setFrameRuleTime();
+virtual void getFrameRuleTime();
+virtual void notifyTimmingGameStart();
+virtual void isEnd();
+virtual void isEventEnd();
+virtual void enableDevil();
+virtual void disableDevil();
+virtual void isDevil();
+virtual void setDevilScrool();
+virtual void getLucarioFinalTechniquePosition();
+virtual void startAppear();
+virtual void setAppearKind();
+virtual void endAppear();
+char pad40[8];
+float value;
+};
+extern Stage* g_Stage;
+struct Player { char pad[0x5c]; };
+struct Data { char pad[9]; unsigned char mode; char padA; unsigned char flagB; };
+class Self {
+public:
+virtual void slot0();
+virtual void slot1();
+virtual void slot2();
+virtual void slot3();
+virtual void slot4();
+virtual void slot5();
+virtual void slot6();
+virtual void slot7();
+virtual void slot8();
+virtual void slot9();
+virtual void slot10();
+virtual void slot11();
+virtual void slot12();
+virtual void slot13();
+virtual void slot14();
+virtual void slot15();
+virtual void slot16();
+virtual void slot17();
+virtual void slot18();
+virtual void slot19();
+virtual void slot20();
+virtual void slot21();
+virtual void slot22();
+virtual void slot23();
+virtual void slot24();
+virtual void slot25();
+virtual void slot26();
+virtual void slot27();
+virtual void slot28();
+virtual void slot29();
+virtual void slot30();
+virtual void slot31();
+virtual void slot32();
+virtual void slot33();
+virtual void slot34();
+virtual void slot35();
+virtual void slot36();
+virtual void slot37();
+virtual void slot38();
+virtual void slot39();
+virtual void slot40();
+virtual void slot41();
+virtual void slot42();
+virtual int slot43();
+char pad04[8];
+Data* data;
+Stage* entries[8];
+Stage* module;
+unsigned char flags;
+char pad35[3];
+unsigned int id;
+};
+
+inline int decrement(Self* self, int playerNo) {
+    int off = playerNo * 0x5c;
+    signed char c = *(signed char*)((char*)self->data + off + 0x9c);
+    if (c != 0) *(signed char*)((char*)self->data + off + 0x9c) = c - 1;
+    int v;
+    int c2 = *(signed char*)((char*)self->data + off + 0x9c);
+    v = c2;
+    if (v < 0) v = 0;
+    if (self->slot43() != 0 && ((self->flags >> 5) & 1) != 0) {
+        updateStockCoin__8IfPlayerFi(*(void**)(g_IfMngr + *(unsigned char*)((char*)self->data + off + 0x9a) * 4 + 0x4c), v);
+    }
+    return c2 != 0;
+}
+extern "C" void fn_27_27D810(Self* self, int entryId, int u1, int u2, int arg7) {
+    int result = 0;
+    int playerNo = g_ftManager->getPlayerNo(entryId);
+    if (self->slot43() != 0 && ((self->data->flagB >> 1) & 1) == 0 &&
+        ((self->flags >> 5) & 1) != 0 && (!self->module || !self->module->getPokeTrainerPointData())) {
+        int off = playerNo * 0x5c;
+        unsigned char idx = *(unsigned char*)((char*)self->data + off + 0x9a);
+        unsigned char b = *(unsigned char*)(g_IfMngr + idx + 0x68);
+        setDamageState__8IfPlayerFi(*(void**)(g_IfMngr + (b << 2) + 0x4c), 2);
+    }
+    if (self->module) {
+        result = self->module->getEnemyPac(entryId, playerNo, arg7);
+    } else if ((unsigned int)((self->data->mode >> 5) & 7) == 1) {
+        if (decrement(self, playerNo)) result = 1;
+    } else {
+        result = 1;
+    }
+    if (result && arg7 >= 0) {
+        self->entries[playerNo]->value = (float)arg7;
+        self->entries[playerNo]->createObj();
+    } else {
+        setDisablePlayerNo__16CameraControllerFi(CameraController::getInstance(), playerNo);
+    }
+    if (g_Stage && self->id == (unsigned int)entryId) {
+        g_Stage->endAppear();
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_27E498 {
+class ftManager {
+public:
+    int getPlayerNo(int entryId);
+};
+
+extern ftManager* g_ftManager;
+
+struct SubPad {
+    u8 pad[0x3c];
+};
+
+class SubObj : public SubPad {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void vf5();
+    virtual void vf6();
+    virtual void vf7();
+    virtual void vf8();
+    virtual void vf9();
+    virtual void vf10();
+    virtual void vf11();
+    virtual void vf12();
+    virtual void vf13();
+    virtual void vf14();
+    virtual void vf15();
+    virtual void vf16();
+    virtual void vf17();
+    virtual void vf18();
+    virtual void vf19();
+    virtual void vf20();
+    virtual void vf21();
+    virtual void vf22();
+    virtual void vf23();
+    virtual void vf24();
+    virtual void vf25();
+    virtual void vf26();
+    virtual void vf27();
+    virtual void vf28();
+    virtual void vf29();
+    virtual void vf32(u32 a, u32 b);
+};
+
+class Self {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void vf5();
+    virtual void vf6();
+    virtual void vf7();
+    virtual void vf8();
+    virtual void vf9();
+    virtual void vf10();
+    virtual void vf11();
+    virtual void vf12();
+    virtual void vf13();
+    virtual void vf14();
+    virtual void vf15();
+    virtual void vf16();
+    virtual void vf17();
+    virtual void vf18();
+    virtual void vf19();
+    virtual void vf20();
+    virtual void vf21();
+    virtual void vf22();
+    virtual void vf23();
+    virtual void vf24();
+    virtual void vf25();
+    virtual void vf26();
+    virtual void vf27();
+    virtual void vf28();
+    virtual void vf29();
+    virtual void vf30();
+    virtual void vf31();
+    virtual void vf32();
+    virtual void vf33();
+    virtual void vf34();
+    virtual void vf35();
+    virtual void vf36();
+    virtual void vf37();
+    virtual void vf38();
+    virtual void vf39();
+    virtual void vf40();
+    virtual void vf41();
+    virtual void vf42();
+    virtual bool vf45();
+    u8 m_pad4[8];
+    u8* m_entries;
+    u8 m_pad10[0x1c];
+    SubObj* m_sub;
+    u8 m_pad30[4];
+    u8 m_flags;
+};
+
+extern "C" void fn_27_27E498(Self* self, u32 entryId, u32 arg) {
+    if (self->vf45()) {
+        if ((self->m_flags >> 7) & 1) {
+            if (self->m_sub != 0) {
+                int playerNo = g_ftManager->getPlayerNo(entryId);
+                u8* entry = self->m_entries + playerNo * 0x5c;
+                if (!((entry[0xb3] >> 2) & 1)) {
+                    self->m_sub->vf32(entry[0x9a], arg);
+                }
+            }
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_27E54C {
+class ftManager {
+public:
+    int getPlayerNo(int entryId);
+};
+
+extern ftManager* g_ftManager;
+
+struct SubPad {
+    u8 pad[0x3c];
+};
+
+class SubObj : public SubPad {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void vf5();
+    virtual void vf6();
+    virtual void vf7();
+    virtual void vf8();
+    virtual void vf9();
+    virtual void vf10();
+    virtual void vf11();
+    virtual void vf12();
+    virtual void vf13();
+    virtual void vf14();
+    virtual void vf15();
+    virtual void vf16();
+    virtual void vf17();
+    virtual void vf18();
+    virtual void vf19();
+    virtual void vf20();
+    virtual void vf21();
+    virtual void vf22();
+    virtual void vf23();
+    virtual void vf24();
+    virtual void vf25();
+    virtual void vf26();
+    virtual void vf27();
+    virtual void vf28();
+    virtual void vf29();
+    virtual void vf32();
+    virtual void vf33(u8, s32);
+};
+
+class SelfT {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void vf5();
+    virtual void vf6();
+    virtual void vf7();
+    virtual void vf8();
+    virtual void vf9();
+    virtual void vf10();
+    virtual void vf11();
+    virtual void vf12();
+    virtual void vf13();
+    virtual void vf14();
+    virtual void vf15();
+    virtual void vf16();
+    virtual void vf17();
+    virtual void vf18();
+    virtual void vf19();
+    virtual void vf20();
+    virtual void vf21();
+    virtual void vf22();
+    virtual void vf23();
+    virtual void vf24();
+    virtual void vf25();
+    virtual void vf26();
+    virtual void vf27();
+    virtual void vf28();
+    virtual void vf29();
+    virtual void vf30();
+    virtual void vf31();
+    virtual void vf32();
+    virtual void vf33();
+    virtual void vf34();
+    virtual void vf35();
+    virtual void vf36();
+    virtual void vf37();
+    virtual void vf38();
+    virtual void vf39();
+    virtual void vf40();
+    virtual void vf41();
+    virtual void vf42();
+    virtual bool vf45();
+    u8 m_pad4[8];
+    u8* m_entries;
+    u8 m_pad10[0x1c];
+    SubObj* m_sub;
+    u8 m_pad30[4];
+    u8 m_flags;
+};
+
+extern "C" void fn_27_27E54C(SelfT* self, s32 entryId, s32 arg2) {
+    if (self->vf45()) {
+        if ((self->m_flags >> 7) & 1) {
+            if (self->m_sub != 0) {
+                int playerNo = g_ftManager->getPlayerNo(entryId);
+                u8* entry = self->m_entries + playerNo * 0x5c;
+                if (!((entry[0xb3] >> 2) & 1)) {
+                    self->m_sub->vf33(entry[0x9a], arg2);
+                }
+            }
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_27E600 {
+class ftManager {
+public:
+    int getPlayerNo(int entryId);
+};
+
+extern ftManager* g_ftManager;
+
+class SubObj {
+public:
+    u8 pad[0x3c];
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void vf5();
+    virtual void vf6();
+    virtual void vf7();
+    virtual void vf8();
+    virtual void vf9();
+    virtual void vf10();
+    virtual void vf11();
+    virtual void vf12();
+    virtual void vf13();
+    virtual void vf14();
+    virtual void vf15();
+    virtual void vf16();
+    virtual void vf17();
+    virtual void vf18();
+    virtual void vf19();
+    virtual void vf20();
+    virtual void vf21();
+    virtual void vf22();
+    virtual void vf23();
+    virtual void vf24();
+    virtual void vf25();
+    virtual void vf26();
+    virtual void vf27();
+    virtual void vf28();
+    virtual void vf29();
+    virtual void vf30();
+    virtual void vf31();
+    virtual void vf32(u8, s32);
+};
+
+class SelfT {
+public:
+    virtual void vf0();
+    virtual void vf1();
+    virtual void vf2();
+    virtual void vf3();
+    virtual void vf4();
+    virtual void vf5();
+    virtual void vf6();
+    virtual void vf7();
+    virtual void vf8();
+    virtual void vf9();
+    virtual void vf10();
+    virtual void vf11();
+    virtual void vf12();
+    virtual void vf13();
+    virtual void vf14();
+    virtual void vf15();
+    virtual void vf16();
+    virtual void vf17();
+    virtual void vf18();
+    virtual void vf19();
+    virtual void vf20();
+    virtual void vf21();
+    virtual void vf22();
+    virtual void vf23();
+    virtual void vf24();
+    virtual void vf25();
+    virtual void vf26();
+    virtual void vf27();
+    virtual void vf28();
+    virtual void vf29();
+    virtual void vf30();
+    virtual void vf31();
+    virtual void vf32();
+    virtual void vf33();
+    virtual void vf34();
+    virtual void vf35();
+    virtual void vf36();
+    virtual void vf37();
+    virtual void vf38();
+    virtual void vf39();
+    virtual void vf40();
+    virtual void vf41();
+    virtual void vf42();
+    virtual bool vf43();
+    u8 m_pad4[8];
+    u8* m_entries;
+    u8 m_pad10[0x1c];
+    SubObj* m_sub;
+    u8 m_pad30[4];
+    u8 m_flags;
+};
+
+extern "C" void fn_27_27E600(SelfT* self, s32 entryId, s32 arg) {
+    if (self->vf43()) {
+        if ((self->m_flags >> 7) & 1) {
+            if (self->m_sub != 0) {
+                int playerNo = g_ftManager->getPlayerNo(entryId);
+                u8* entry = self->m_entries + playerNo * 0x5c;
+                self->m_sub->vf32(entry[0x9a], arg);
+            }
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_27E950 {
+struct ftManager;
+
+extern "C" {
+extern ftManager* g_ftManager;
+int getPlayerNo__9ftManagerFi(ftManager*, int);
+}
+
+struct TargetBase {
+    unsigned char padding[0x3C];
+};
+
+struct Target : TargetBase {
+    virtual void unused0();
+    virtual void unused1();
+    virtual void unused2();
+    virtual void unused3();
+    virtual void unused4();
+    virtual void unused5();
+    virtual void unused6();
+    virtual void unused7();
+    virtual void unused8();
+    virtual void unused9();
+    virtual void unused10();
+    virtual void unused11();
+    virtual void unused12();
+    virtual void unused13();
+    virtual void unused14();
+    virtual void unused15();
+    virtual void unused16();
+    virtual void unused17();
+    virtual void unused18();
+    virtual void unused19();
+    virtual void unused20();
+    virtual void unused21();
+    virtual void unused22();
+    virtual void unused23();
+    virtual void unused24();
+    virtual void unused25();
+    virtual void unused26();
+    virtual void unused27();
+    virtual void unused28();
+    virtual void unused29();
+    virtual void unused30();
+    virtual void unused31();
+    virtual void unused32();
+    virtual void unused33();
+    virtual void unused34();
+    virtual void unused35();
+    virtual void unused36();
+    virtual void setEnabled(int);
+};
+
+struct Player {
+    unsigned char padding[0x5A];
+    unsigned char enabled;
+    unsigned char end;
+};
+
+struct PlayerData {
+    unsigned char padding[0x40];
+    Player players[4];
+};
+
+struct State {
+    unsigned char padding0[0x0C];
+    PlayerData* players;
+    unsigned char padding1[0x20];
+    Target* target;
+};
+
+extern "C" void fn_27_27E950(State* self, int entryId) {
+    if (self->target) {
+        int playerNo = getPlayerNo__9ftManagerFi(g_ftManager, entryId);
+        if (self->players->players[playerNo].enabled) {
+            self->target->setEnabled(1);
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_27E9C0 {
+struct ftManager;
+
+extern "C" {
+extern ftManager* g_ftManager;
+int getPlayerNo__9ftManagerFi(ftManager*, int);
+}
+
+class Target {
+    char pad[0x3C];
+
+public:
+    virtual void dummy0();
+    virtual void dummy1();
+    virtual void dummy2();
+    virtual void dummy3();
+    virtual void dummy4();
+    virtual void dummy5();
+    virtual void dummy6();
+    virtual void dummy7();
+    virtual void dummy8();
+    virtual void dummy9();
+    virtual void dummy10();
+    virtual void dummy11();
+    virtual void dummy12();
+    virtual void dummy13();
+    virtual void dummy14();
+    virtual void dummy15();
+    virtual void dummy16();
+    virtual void dummy17();
+    virtual void dummy18();
+    virtual void dummy19();
+    virtual void dummy20();
+    virtual void dummy21();
+    virtual void dummy22();
+    virtual void dummy23();
+    virtual void dummy24();
+    virtual void dummy25();
+    virtual void dummy26();
+    virtual void dummy27();
+    virtual void dummy28();
+    virtual void dummy29();
+    virtual void dummy30();
+    virtual void dummy31();
+    virtual void dummy32();
+    virtual void dummy33();
+    virtual void dummy34();
+    virtual void dummy35();
+    virtual void dummy36();
+    virtual void invoke(int);
+};
+
+struct Entry {
+    char pad[0x5A];
+    unsigned char flag;
+    char pad2;
+};
+
+struct Data {
+    char pad[0x40];
+    Entry entries[4];
+};
+
+struct State {
+    char pad0[0xC];
+    Data* data;
+    char pad1[0x20];
+    Target* target;
+};
+
+extern "C" void fn_27_27E9C0(State* self, int entryId) {
+    if (self->target) {
+        int playerNo = getPlayerNo__9ftManagerFi(g_ftManager, entryId);
+        if (self->data->entries[playerNo].flag) {
+            Target* target = self->target;
+            target->invoke(-1);
+        }
+    }
+}
+}
+

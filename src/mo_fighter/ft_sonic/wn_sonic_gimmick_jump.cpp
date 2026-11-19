@@ -213,3 +213,33 @@ void wnSonicGimmickJump::notifyEventGimmick(soGimmickEventArgs* args, int*) {
     default: break;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_12F7C {
+extern "C" void __dt__15soKineticEnergyFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_123_12F7C(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            short zero = 0;
+            __dt__15soKineticEnergyFv(object, zero);
+        }
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_14030 {
+extern "C" void fn_123_14030(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_14034 {
+extern "C" void fn_123_14034(void) {}
+}
+

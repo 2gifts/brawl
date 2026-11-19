@@ -1348,3 +1348,659 @@ void wnemSimple::updateNodeSRT() {
         moduleAccesser->getModelModule().setNodeSRT(0, &scale, &rotation, &position);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_2F1AC {
+extern "C" void fn_27_C9D44(void* self, short arg);
+extern "C" void __dl__FPv(void* p);
+
+extern "C" void* fn_41_2F1AC(void* self, short del) {
+    if (self != 0) {
+        fn_27_C9D44(self, -1);
+        if (del > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2F810 {
+extern "C" void* __dt__17soSoundModuleImplFv(void*, short);
+extern "C" void* __dt__30soSound3dGeneratorAccesserImplFv(void* p, short size);
+
+extern "C" void* fn_41_2F810(void* p, short flag) {
+    if (p) {
+        __dt__17soSoundModuleImplFv(static_cast<unsigned char*>(p) + 0xC, -1);
+        __dt__30soSound3dGeneratorAccesserImplFv(p, -1);
+        if (flag > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_31308 {
+class Object_vptr_0 {
+public:
+ virtual void slot0();
+ virtual void slot1();
+ virtual void slot2();
+ virtual void slot3();
+ virtual void slot4(float, float, int, float, int);
+ virtual void slot5();
+ virtual void slot6();
+ virtual void slot7();
+ virtual void slot8();
+ virtual void slot9();
+ virtual void slot10();
+ virtual void slot11();
+ virtual void slot12(int, void*, int);
+};
+struct Entry { char bytes[0x20]; };
+struct List { Entry* entries; int count; };
+struct Data { char pad[0x30]; List* list; };
+extern int lbl_41_data_405C;
+extern "C" void fn_41_31308(char* self, float a, float b, int arg, float c) {
+ Object_vptr_0* obj = *(Object_vptr_0**)(*(char**)(*(char**)(self + 0x6c) + 0xd8) + 0x20);
+ if ((*(Data**)(self + 0x2184))->list) {
+  obj->slot12(0, (*(Data**)(self + 0x2184))->list->entries, 0);
+  if ((*(Data**)(self + 0x2184))->list->count >= 2)
+   obj->slot12(1, (*(Data**)(self + 0x2184))->list->entries + 1, 0);
+  else
+   obj->slot12(1, &lbl_41_data_405C, 0);
+ } else {
+  obj->slot12(0, &lbl_41_data_405C, 0);
+  obj->slot12(1, &lbl_41_data_405C, 0);
+ }
+ obj->slot4(a, b, arg, c, 0);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_32D1C {
+class soAnimCmdEventObserver {public:
+virtual void addObserver();
+virtual void slot1();
+virtual void slot2();
+virtual void slot3();
+virtual void slot4();
+virtual void onDamage__18emDamageModuleImplFUl();
+virtual void isCheckGroundDamage__18soDamageModuleImplFv();
+virtual void onGroundDamage__18soDamageModuleImplFv();
+virtual void getReactionSub__18soDamageModuleImplFP21soCollisionAttackDataUli();
+virtual void getReactionMul__18emDamageModuleImplFP21soCollisionAttackDataUli();
+virtual void getWeightReactionMul__18soDamageModuleImplFP21soCollisionAttackData();
+virtual void getDamageMul__18soDamageModuleImplFv();
+virtual void reqDamageEffect__18soDamageModuleImplFv();
+virtual void isObserv__18emDamageModuleImplFc();
+virtual void notifyEventAnimCmd__18emDamageModuleImplFP9acAnimCmdP16soModuleAccesseri();
+virtual void notifyEventCollisionHit__18emDamageModuleImplFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog();
+};
+class soNullable {public:
+virtual void isNull();
+virtual void slot1();
+virtual void slot2();
+virtual void slot3();
+virtual void slot4();
+virtual void slot5();
+virtual void slot6();
+virtual void slot7();
+virtual void slot8();
+virtual void slot9();
+virtual void slot10();
+virtual void slot11();
+virtual void slot12();
+virtual void slot13();
+virtual void slot14();
+virtual int slot15();
+};
+struct Message { int id; unsigned char result; int type; };
+class Class_6E20 {public:
+virtual void __dt__24wnemDamageTransactorImplFv();
+virtual void getDamageValueParam__24wnemDamageTransactorImplFP16soModuleAccesser();
+virtual void onDamageChangeStatusRequest__24wnemDamageTransactorImplFiP16soModuleAccesserP11soDamageLog();
+virtual void getDamageStatusKind__24wnemDamageTransactorImplFP16soModuleAccesser();
+virtual void isUseTurnDamage__24wnemDamageTransactorImplFP16soModuleAccesser();
+virtual void isUseTurn__24wnemDamageTransactorImplFP16soModuleAccesser();
+virtual void isApplyTurnDamage__24wnemDamageTransactorImplFP16soModuleAccesser();
+virtual void getDamageHeight__24wnemDamageTransactorImplFP16soModuleAccesserUc();
+virtual void getHitStopMul__23soDamageTransactorActorFP16soModuleAccesser();
+virtual void isSlip__24wnemDamageTransactorImplFP16soModuleAccesserf();
+virtual void isSleepStatus__24wnemDamageTransactorImplFP16soModuleAccesser();
+virtual void isParalyzeDamage__24wnemDamageTransactorImplFP16soModuleAccesser();
+virtual void addSleepTime__24wnemDamageTransactorImplFP16soModuleAccesserP8soDamageP11soDamageLog();
+virtual void onFlowerDamage__24wnemDamageTransactorImplFP16soModuleAccesserP8soDamage();
+virtual void onParalyzeDamage__24wnemDamageTransactorImplFP16soModuleAccesserP8soDamageP11soDamageLog();
+virtual void setFlagDownDamage3__24wnemDamageTransactorImplFP16soModuleAccesserb(int, Message*);
+};
+struct Prefix8 { char padding[8]; };
+class ReflectModule : public Prefix8 {public:
+virtual void slot0();
+virtual void slot1();
+virtual void slot2();
+virtual void slot3();
+virtual void slot4();
+virtual void slot5();
+virtual void slot6();
+virtual void slot7();
+virtual void slot8();
+virtual void slot9();
+virtual void slot10();
+virtual void slot11();
+virtual void slot12();
+virtual unsigned int test();
+};
+struct Modules {
+char pad0[0x1c];
+soAnimCmdEventObserver* m1c;
+char pad20[0x44-0x20];
+soNullable* m44;
+char pad48[0x54-0x48];
+Class_6E20* m54;
+char pad58[0xbc-0x58];
+ReflectModule* mbc;
+};
+struct Accessor { char pad[0xd8]; Modules* modules; };
+struct Prefix3C { char padding[0x3c]; };
+class Inner : public Prefix3C {public:
+virtual void slot0();
+virtual void slot1();
+virtual void slot2();
+virtual void slot3();
+virtual void slot4();
+virtual void slot5();
+virtual void slot6();
+virtual void slot7();
+virtual void slot8();
+virtual void slot9();
+virtual void slot10();
+virtual void slot11();
+virtual void slot12();
+virtual void slot13();
+virtual void slot14();
+virtual void slot15();
+virtual void slot16();
+virtual void slot17();
+virtual void slot18();
+virtual void slot19();
+virtual void slot20();
+virtual void slot21();
+virtual void slot22();
+virtual void slot23();
+virtual void slot24();
+virtual void slot25();
+virtual void slot26();
+virtual void slot27();
+virtual void slot28();
+virtual void slot29();
+virtual void slot30();
+virtual void slot31();
+virtual void slot32();
+virtual void slot33();
+virtual void slot34();
+virtual void slot35();
+virtual void slot36();
+virtual void slot37();
+virtual void slot38();
+virtual void slot39();
+virtual void slot40();
+virtual void slot41();
+virtual void slot42();
+virtual void slot43();
+virtual void slot44();
+virtual void slot45();
+virtual void slot46();
+virtual void slot47();
+virtual void slot48();
+virtual void slot49();
+virtual void slot50();
+virtual void slot51();
+virtual void slot52();
+virtual void slot53();
+virtual void slot54();
+virtual void slot55();
+virtual void slot56();
+virtual void slot57();
+virtual void slot58();
+virtual void slot59();
+virtual void slot60();
+virtual void slot61();
+virtual void slot62();
+virtual void slot63();
+virtual void slot64();
+virtual void slot65();
+virtual void slot66();
+virtual void slot67();
+virtual void slot68();
+virtual void slot69();
+virtual void slot70();
+virtual void slot71();
+virtual void slot72();
+virtual void slot73();
+virtual void slot74();
+virtual void slot75();
+virtual void slot76();
+virtual void slot77();
+virtual void slot78();
+virtual void slot79();
+virtual void slot80();
+virtual void slot81();
+virtual void slot82();
+virtual void slot83();
+virtual void slot84();
+virtual void slot85();
+virtual void slot86();
+virtual void slot87();
+virtual void slot88();
+virtual void slot89();
+virtual void slot90();
+virtual void slot91();
+virtual void slot92();
+virtual void slot93();
+virtual void slot94();
+virtual void slot95();
+virtual void slot96();
+virtual void slot97();
+virtual void slot98();
+virtual void slot99();
+virtual void slot100();
+virtual void slot101();
+virtual void slot102();
+virtual void slot103();
+virtual void slot104();
+virtual void slot105();
+virtual void slot106();
+virtual void slot107();
+virtual void slot108();
+virtual void slot109();
+virtual void slot110();
+virtual void slot111();
+virtual void slot112();
+virtual void slot113();
+virtual void slot114();
+virtual void slot115();
+virtual void slot116();
+virtual void slot117();
+virtual void slot118();
+virtual void slot119();
+virtual void slot120();
+virtual void slot121();
+virtual void slot122();
+virtual void slot123();
+virtual void slot124();
+virtual void slot125();
+virtual void slot126();
+virtual void slot127();
+virtual void slot128();
+virtual void slot129();
+virtual void slot130();
+virtual void slot131();
+virtual void slot132();
+virtual void slot133();
+virtual void slot134();
+virtual void slot135();
+virtual void slot136();
+virtual void reverse();
+const float& getValue() const { return *(const float*)((const char*)this + 0x21d8); }
+};
+class Object : public Prefix8 {public:
+virtual void slot0();
+virtual void slot1();
+virtual void slot2();
+virtual void slot3();
+virtual void slot4();
+virtual void slot5();
+virtual void slot6();
+virtual void slot7();
+virtual void slot8();
+virtual void slot9();
+virtual void slot10();
+virtual void slot11();
+virtual void slot12();
+virtual void slot13();
+virtual void slot14();
+virtual void slot15();
+virtual void slot16();
+virtual void slot17();
+virtual void slot18();
+virtual void slot19();
+virtual void slot20();
+virtual void slot21();
+virtual void slot22();
+virtual void slot23();
+virtual void slot24();
+virtual void slot25();
+virtual void slot26();
+virtual void slot27();
+virtual void slot28();
+virtual void slot29();
+virtual void slot30();
+virtual void slot31();
+virtual void slot32();
+virtual void slot33();
+virtual void slot34();
+virtual void slot35();
+virtual void slot36();
+virtual void slot37();
+virtual void slot38();
+virtual void slot39();
+virtual void slot40();
+virtual void slot41();
+virtual void slot42();
+virtual void slot43();
+virtual void slot44();
+virtual void slot45();
+virtual void slot46();
+virtual void slot47();
+virtual void slot48();
+virtual void slot49();
+virtual void slot50();
+virtual void slot51();
+virtual void slot52();
+virtual void slot53();
+virtual void slot54();
+virtual void slot55();
+virtual void slot56();
+virtual void slot57();
+virtual void slot58();
+virtual void slot59();
+virtual void slot60();
+virtual void slot61();
+virtual void slot62();
+virtual void slot63();
+virtual void slot64();
+virtual void slot65();
+virtual void slot66();
+virtual void slot67();
+virtual void slot68();
+virtual void slot69();
+virtual void slot70();
+virtual void slot71();
+virtual void slot72();
+virtual void slot73();
+virtual void slot74();
+virtual void slot75();
+virtual void slot76();
+virtual void slot77();
+virtual void slot78();
+virtual void slot79();
+virtual void slot80();
+virtual void slot81();
+virtual void slot82();
+virtual void slot83();
+virtual void slot84();
+virtual void slot85();
+virtual void slot86();
+virtual void slot87();
+virtual void slot88();
+virtual void slot89();
+virtual void slot90();
+virtual void slot91();
+virtual void slot92();
+virtual void slot93();
+virtual void slot94();
+virtual void slot95();
+virtual void slot96();
+virtual void slot97();
+virtual void slot98();
+virtual void slot99();
+virtual void slot100();
+virtual void slot101();
+virtual void slot102();
+virtual void slot103();
+virtual void slot104();
+virtual void slot105();
+virtual void slot106();
+virtual void slot107();
+virtual void slot108();
+virtual void slot109();
+virtual void slot110();
+virtual void slot111();
+virtual void slot112();
+virtual void slot113();
+virtual void slot114();
+virtual void slot115();
+virtual void slot116();
+virtual void slot117();
+virtual void slot118();
+virtual void slot119();
+virtual void slot120();
+virtual void slot121();
+virtual void slot122();
+virtual void slot123();
+virtual void slot124();
+virtual void slot125();
+virtual void slot126();
+virtual void slot127();
+virtual void slot128();
+virtual void slot129();
+virtual void slot130();
+virtual void slot131();
+virtual void slot132();
+virtual void slot133();
+virtual void slot134();
+virtual void slot135();
+virtual void slot136();
+virtual void slot137();
+virtual void slot138();
+virtual void slot139();
+virtual void slot140();
+virtual void slot141();
+virtual void slot142();
+virtual void slot143();
+virtual void slot144();
+virtual void slot145();
+virtual void slot146();
+virtual void slot147();
+virtual void slot148();
+virtual void slot149();
+virtual void slot150();
+virtual void slot151();
+virtual void slot152();
+virtual void slot153();
+virtual void slot154();
+virtual void slot155();
+virtual void slot156();
+virtual void slot157();
+virtual void slot158();
+virtual void slot159();
+virtual void slot160();
+virtual void slot161();
+virtual void slot162();
+virtual void slot163();
+virtual void slot164();
+virtual void slot165();
+virtual void slot166();
+virtual void slot167();
+virtual void slot168();
+virtual void slot169();
+virtual void slot170();
+virtual void slot171();
+virtual int finish();
+Inner inner;
+char pad4c[0x6c-0x4c];
+Accessor* accesser;
+char pad70[0x21b6-0x70];
+unsigned char flag21b6;
+char pad21b7[0x21c8-0x21b7];
+unsigned int proc;
+char pad21cc[0x21dc-0x21cc];
+int state;
+char pad21e0[4];
+float value;
+char pad21e8[0x2215-0x21e8];
+unsigned char flag2215;
+char pad2216[3];
+unsigned char flag2219;
+};
+extern "C" {
+extern char lbl_41_data_4018[];
+extern const float lbl_41_rodata_E28;
+extern const float lbl_41_rodata_E30;
+void reqCommonEffect__10wnemSimpleFl(Object*, int);
+int changeProcFnc1__10wnemSimpleFPvl(Object*, unsigned int, int);
+void setHitStop__6WeaponFfif(Inner*, float, int, float);
+}
+extern "C" int fn_41_32D1C(Object* self, unsigned int flags) {
+char* base = lbl_41_data_4018;
+switch (self->state) {
+case 0: break;
+case 1:
+if (flags & 0x17) {
+wnemReport(base + 0xc1a);
+self->flag2215 = 1;
+if (flags & 1) {
+wnemReport(base + 0xc6a);
+reqCommonEffect__10wnemSimpleFl(self, 0x17);
+self->flag2219 = 1;
+return 1;
+}
+if (flags & 0x10) {
+wnemReport(base + 0xce3);
+self->flag2219 = 1;
+return 1;
+}
+if (self->proc == 0) {
+if (self->flag21b6 == 0) {
+self->flag2219 = 1;
+wnemReport(base + 0xd55);
+}
+} else {
+self->accesser->modules->m1c->slot4();
+changeProcFnc1__10wnemSimpleFPvl(self, self->proc, 1);
+wnemReport(base + 0xdb0);
+}
+return 1;
+}
+if (flags & 8) {
+if (self->accesser->modules->mbc->test() == 1) {
+self->inner.reverse();
+return self->finish();
+}
+}
+break;
+case 2:
+if (flags & 0x17) {
+wnemReport(base + 0xe09);
+self->flag2215 = 1;
+if (flags & 1) {
+wnemReport(base + 0xe59);
+self->accesser->modules->m1c->slot4();
+return 1;
+}
+if (self->value > lbl_41_rodata_E28) {
+setHitStop__6WeaponFfif(&self->inner, self->inner.getValue(), 0, lbl_41_rodata_E30);
+if (self->accesser->modules->m44->slot15() > 0 && self->state == 2) {
+Message msg;
+msg.id = 0x13f7;
+msg.result = 0;
+msg.type = 3;
+self->accesser->modules->m54->setFlagDownDamage3__24wnemDamageTransactorImplFP16soModuleAccesserb(3, &msg);
+if (msg.result == 1) {
+wnemReport(base + 0xed2);
+}
+}
+}
+}
+break;
+}
+return 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_337E8 {
+typedef unsigned int u32;
+typedef unsigned char u8;
+
+extern "C" {
+extern float lbl_41_rodata_E28;
+extern char lbl_41_data_4018[];
+void wnemReport__FPCce(const char*, ...);
+float getValueFloat__15soValueAccesserFP16soModuleAccesserUlUl(void*, u32, u32);
+float mtCosf__Ff(float);
+float mtSinf__Ff(float);
+float fn_27_60AF4(void*, float, int, int, int*, float, float, float, float, float, int);
+void setDamage__10wnemSimpleFf(void*, float);
+}
+
+struct Pair { int a; int b; };
+
+struct SubObj {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual int vf3();
+};
+
+struct Vec4Obj {
+    virtual void v0();
+    virtual float* get(int);
+    virtual void v2();
+    virtual void v3();
+};
+
+struct WnemSelf {
+    char pad[0x21b8];
+    u8 f21b8;
+    char pad2[0x21d4 - 0x21b9];
+    float f21d4;
+    float f21d8;
+    char pad3[0x2216 - 0x21dc];
+    u8 f2216;
+    char pad4[0x224c - 0x2217];
+    Vec4Obj obj224c;
+};
+
+extern "C" void fn_41_337E8(WnemSelf* self, char* arg1, void* dummy, void* accp) {
+    char* base;
+    float* rodata;
+
+    rodata = &lbl_41_rodata_E28;
+    base = lbl_41_data_4018;
+
+    if (self->f21b8 == 0) return;
+
+    wnemReport__FPCce(base + 0x1259);
+
+    float f31 = *(float*)(arg1 + 0xc);
+    float f30 = rodata[1] * *(float*)(arg1 + 0x7c);
+
+    float f29 = getValueFloat__15soValueAccesserFP16soModuleAccesserUlUl(accp, 0x7d6, 0);
+    float f28 = getValueFloat__15soValueAccesserFP16soModuleAccesserUlUl(accp, 0x7d8, 0);
+    float f27 = getValueFloat__15soValueAccesserFP16soModuleAccesserUlUl(accp, 0x7d9, 0);
+    float f26 = getValueFloat__15soValueAccesserFP16soModuleAccesserUlUl(accp, 0x7d7, 0);
+
+    Pair pair = *(Pair*)(arg1 + 0x8c);
+
+    SubObj* sub = *(SubObj**)((char*)*(void**)((char*)accp + 0xd8) + 0x14);
+    int subval = sub->vf3();
+
+    f26 = fn_27_60AF4(accp, f31, *(int*)(arg1 + 0x50), subval,
+                      &pair.a, f30, f29, f28, f27, f26, 0);
+
+    f31 = f30 * mtCosf__Ff(f26);
+    self->obj224c.get(0)[0] = f31;
+
+    f31 = mtSinf__Ff(f26);
+    self->obj224c.get(1)[0] = f31;
+
+    float* p2 = self->obj224c.get(2);
+    *p2 = rodata[12];
+    float* p3 = self->obj224c.get(3);
+    *p3 = rodata[0];
+
+    wnemReport__FPCce(base + 0x1289, f26);
+    wnemReport__FPCce(base + 0x12be, f30);
+
+    self->f2216 = 1;
+    setDamage__10wnemSimpleFf(self, *(float*)(arg1 + 0x4));
+    wnemReport__FPCce(base + 0x12f3, self->f21d4, self->f21d8,
+                      *(float*)(arg1 + 0x4));
+}
+}
+

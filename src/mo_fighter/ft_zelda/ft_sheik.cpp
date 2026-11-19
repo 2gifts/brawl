@@ -501,3 +501,105 @@ bool ftSheikArticleMediator::shoot(soModuleAccesser* acc, soArticle* article) {
     default: return false;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_19668 {
+extern "C" void* fn_104_196C8(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_104_19668(void* object, short deleting) {
+    if (object != 0) {
+        fn_104_196C8(static_cast<unsigned char*>(object) + 8, -1);
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_196C8 {
+extern "C" void __dt__18wnZeldaLightingBowFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_104_196C8(void* object, short deleting) {
+    if (object != 0) {
+        __dt__18wnZeldaLightingBowFv(static_cast<unsigned char*>(object) + 4, -1);
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1978C {
+extern "C" void* fn_104_197EC(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_104_1978C(void* object, short deleting) {
+    if (object != 0) {
+        fn_104_197EC(static_cast<unsigned char*>(object) + 4, -1);
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1B37C {
+extern "C" {
+struct DestructorChain;
+void __ct__17ftSheikTransactorFv(void*);
+void* __dt__17ftSheikTransactorFv(void*, int);
+void* __register_global_object(void*, void*, DestructorChain*);
+extern signed char lbl_104_bss_4DC;
+extern unsigned char lbl_104_bss_4E0[8];
+extern unsigned char lbl_104_bss_4C8[20];
+void* fn_104_1B37C();
+}
+
+struct DestructorChain {
+    DestructorChain* next;
+    void* destructor;
+    void* object;
+};
+
+extern "C" void* fn_104_1B37C() {
+    if (lbl_104_bss_4DC == 0) {
+        __ct__17ftSheikTransactorFv(lbl_104_bss_4E0);
+        __register_global_object(
+            lbl_104_bss_4E0,
+            (void*)__dt__17ftSheikTransactorFv,
+            (DestructorChain*)lbl_104_bss_4C8
+        );
+        lbl_104_bss_4DC = 1;
+    }
+    return lbl_104_bss_4E0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1D064 {
+extern "C" void* getInstanceAt__21ftPurinArticleSubPoolFl(void* object, int index) {
+    if (index == 0) {
+        return static_cast<char*>(object) + 0x0c;
+    }
+    return 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1D07C {
+extern "C" void* fn_104_1D07C(void* object, int index) {
+    if (index == 0) {
+        return static_cast<char*>(object) + 0x0c;
+    }
+    return 0;
+}
+}
+

@@ -161,3 +161,232 @@ void muSelectStageFileTask::initStepEditDataLoading() {
     }
     m_editState = 2;
 }
+
+#include <gf/gf_heap_manager.h>
+#include <string.h>
+#include <cstring>
+// TODO: clean up, give variables real names
+namespace jj_7600 {
+
+extern "C" {
+extern const char lbl_11_data_668[];
+extern char lbl_11_data_688[];
+
+struct Counts {
+    int a;
+    int b;
+};
+
+extern Counts lbl_11_rodata_248;
+
+void* __ct__6gfTaskFPCcQ26gfTask8Categoryiib(
+    void*, const char*, gfTask::Category, int, int, bool);
+void* __ct__14gfCollectionIOFQ25Heaps8HeapType(void*, int);
+}
+
+extern "C" void* __ct__21muSelectStageFileTaskFv(void* self) {
+    char* p = (char*)self;
+
+    __ct__6gfTaskFPCcQ26gfTask8Categoryiib(
+        self, lbl_11_data_668, gfTask::Category_Menu, 15, 8, true);
+
+    *(void**)(p + 0x3C) = lbl_11_data_688;
+    *(int*)(p + 0x40) = 0;
+    *(int*)(p + 0x44) = 0;
+    *(int*)(p + 0x68) = 0;
+    *(char*)(p + 0x398) = 0;
+
+    Counts counts = lbl_11_rodata_248;
+    *(unsigned char*)(p + 0x2C) &= ~2;
+    memset(p + 0x48, 0, 0x20);
+
+    int i = 0;
+    int* cur = &counts.a;
+    int offset = 0;
+    do {
+        void* ptr = gfHeapManager::alloc(
+            (Heaps::HeapType)0x2A, *cur * 0x18);
+        ++i;
+        *(void**)(p + offset + 0x54) = ptr;
+        ++cur;
+        offset += 0x10;
+    } while (i < 2);
+
+    memset(p + 0x70, 0, 0x318);
+
+    offset = 0;
+    i = 0;
+    do {
+        void* ptr = gfHeapManager::alloc(
+            (Heaps::HeapType)0x2A, 0x12C00, 0x20);
+        ++offset;
+        *(void**)(p + i + 0x80) = ptr;
+        i += 0x58;
+    } while (offset < 9);
+
+    memset(p + 0x388, 0, 0x10);
+
+    void* obj = operator new(0x194, (Heaps::HeapType)0x2A);
+    if (obj) {
+        obj = __ct__14gfCollectionIOFQ25Heaps8HeapType(obj, 0x2A);
+    }
+    *(void**)(p + 0x68) = obj;
+
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_775C {
+typedef unsigned char u8;
+
+extern "C" {
+extern u8 lbl_11_data_688[];
+
+void free__13gfHeapManagerFPv(void*);
+void __dt__6gfTaskFv(void*, int);
+void __dl__FPv(void*);
+}
+
+extern "C" void* __dt__21muSelectStageFileTaskFv(u8* self, int deleting)
+{
+    if (self) {
+        *reinterpret_cast<void**>(self + 0x3C) = lbl_11_data_688;
+
+        u8* cursor = self;
+        for (int i = 0; i < 9; ++i, cursor += 0x58) {
+            void* heap = *reinterpret_cast<void**>(cursor + 0x80);
+            if (heap) {
+                free__13gfHeapManagerFPv(heap);
+            }
+        }
+
+        cursor = self;
+        for (int i = 0; i < 2; ++i, cursor += 0x10) {
+            void* heap = *reinterpret_cast<void**>(cursor + 0x54);
+            if (heap) {
+                free__13gfHeapManagerFPv(heap);
+            }
+        }
+
+        __dt__6gfTaskFv(self, 0);
+
+        if (deleting > 0) {
+            __dl__FPv(self);
+        }
+    }
+
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7870 {
+extern "C" unsigned char lbl_80423690[];
+
+extern "C" unsigned char* fn_11_7870() {
+    return lbl_80423690;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7BE4 {
+extern "C" int getDeliveryFileName__14gfCollectionIOFi(int);
+extern "C" int makeFileList__21muSelectStageFileTaskFv(void* self, int type, unsigned int count, const char* strings) {
+    char* base = (char*)self + type * 16;
+    int offset;
+    char* entry;
+    int accepted;
+    unsigned int i;
+    int found;
+    accepted = 0;
+    found = 0;
+    i = 0;
+    offset = 0;
+    while (i < count && accepted < 1000) {
+        int len = strlen(strings);
+        if (len <= 22) {
+            entry = *(char**)(base + 0x54) + offset;
+            strcpy(entry, strings);
+            entry[0x17] &= ~0x80;
+            if (type == 0 && found == 0 && strcmp(strings, (const char*)getDeliveryFileName__14gfCollectionIOFi(3)) == 0) {
+                found = 1;
+                entry[0x17] |= 0x80;
+            }
+            offset += 24;
+            accepted++;
+        }
+        i++;
+        strings += len + 1;
+    }
+    return accepted;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7CF0 {
+#pragma scheduling off
+
+typedef int s32;
+
+struct StageEntry {
+    s32 active;
+    s32 arg1;
+    s32 arg2;
+    char padding[0x4C];
+};
+
+extern "C" s32 loadFileData__21muSelectStageFileTaskFv(void* arg0, s32 arg1, s32 arg2) {
+    StageEntry* entry = (StageEntry*)((char*)arg0 + 0xC8);
+    s32 result = 1;
+
+    if (entry->active != 0) {
+        s32 active2 = (++entry)->active;
+        result = 2;
+        if (active2 != 0) {
+            s32 active3 = (++entry)->active;
+            result = 3;
+            if (active3 != 0) {
+                s32 active4 = (++entry)->active;
+                result = 4;
+                if (active4 != 0) {
+                    s32 active5 = (++entry)->active;
+                    result = 5;
+                    if (active5 != 0) {
+                        s32 active6 = (++entry)->active;
+                        result = 6;
+                        if (active6 != 0) {
+                            s32 active7 = (++entry)->active;
+                            result = 7;
+                            if (active7 != 0) {
+                                s32 active8 = (++entry)->active;
+                                result = 8;
+                                if (active8 != 0) {
+                                    result = 9;
+                                    ++entry;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (result >= 9)
+        return -1;
+
+    entry->active = 1;
+    entry->arg1 = arg1;
+    entry->arg2 = arg2;
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_85E8 {
+extern "C" s32 MuStageTblAcces_GetForceExistFlag__14MuStageTblPageFv(void) {
+    return 0x0;
+}
+}
+

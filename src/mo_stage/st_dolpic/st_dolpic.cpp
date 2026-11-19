@@ -1695,3 +1695,11 @@ void stDolpic::setStateGroundCollision(u32 scene, u32 enable) {
         }
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_44AC {
+extern "C" void setMdlIndex__6GroundFi(void* self, u16 value) {
+    *reinterpret_cast<u16*>(reinterpret_cast<u8*>(self) + 0x5c) = value;
+}
+}
+

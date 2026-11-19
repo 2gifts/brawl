@@ -65,3 +65,67 @@ void sqWriteMetamorphosisHumanFighter() {
         }
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_3D2D8 {
+
+extern "C" void fn_1_3D2D8() {
+    if (!g_stLoaderManager) return;
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        stLoaderPlayer* p = g_stLoaderManager->m_loaderPlayers[i];
+        if (p) p->_0x54[1] = 0;
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3D3EC {
+
+extern "C" void fn_1_3D3EC() {
+    if (!g_stLoaderManager) return;
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        stLoaderPlayer* p = g_stLoaderManager->m_loaderPlayers[i];
+        if (p && g_GameGlobal->m_modeMelee->m_playersInitData[i].m_state == 1) {
+            p->_0x54[1] = 0;
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3D450 {
+namespace Heaps {
+enum HeapType { HEAP_6 = 6 };
+}
+
+class gfHeapManager {
+public:
+    static void* getHeap(Heaps::HeapType heap);
+};
+
+class gfHomeMenu {
+public:
+    void setBan(u32 a, u32 b);
+};
+
+extern "C" void destroy__19muWifiInterfaceTaskFv();
+extern "C" void clear__12gfMemoryPoolFv(void*);
+extern "C" void loadResource__10gfHomeMenuFv(gfHomeMenu*);
+
+extern void* g_muWifiInterfaceTask;
+extern gfHomeMenu* g_gfHomeMenu;
+
+extern "C" {
+void fn_1_3D450() {
+    if (g_muWifiInterfaceTask != nullptr) {
+        destroy__19muWifiInterfaceTaskFv();
+        clear__12gfMemoryPoolFv(gfHeapManager::getHeap(Heaps::HEAP_6));
+    }
+    if (g_gfHomeMenu != nullptr) {
+        g_gfHomeMenu->setBan(0, 2);
+        loadResource__10gfHomeMenuFv(g_gfHomeMenu);
+    }
+}
+}
+}
+

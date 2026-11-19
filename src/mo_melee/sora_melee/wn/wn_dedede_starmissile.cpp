@@ -133,3 +133,18 @@ bool wnDededeStarmissile::notifyEventCollisionAttackCheck(u32 flags) {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_398464 {
+extern "C" void* fn_27_398464(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x7f8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_398FCC {
+extern "C" void* fn_27_398FCC(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x110;
+}
+}
+

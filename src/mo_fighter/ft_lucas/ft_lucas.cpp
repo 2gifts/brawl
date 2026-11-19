@@ -863,3 +863,111 @@ void ftLucas::notifyEventCollisionAbsorber(soCollisionAttackModule* attackModule
     }
     Fighter::notifyEventCollisionAbsorber(attackModule, power, collisionLog, groupIndex, posX, posY, moduleAccesser);
 }
+
+#include <so/work/so_work_manage_module_impl.h>
+// TODO: clean up, give variables real names
+namespace jj_AEAC {
+extern "C" void processUpdate__7FighterFv(void* self);
+
+extern "C" void fn_114_AEAC(void* self) {
+    processUpdate__7FighterFv(self);
+    unsigned char* p = (unsigned char*)self;
+    p += 0x50000;
+    p[-0x733B] = 0;
+    p[-0x733C] = 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_AEE8 {
+
+class Class_9054 {
+public:
+    virtual void isNull__10soNullableCFv();
+    virtual void __dt__24soResourceIdAccesserImplFv();
+    virtual void setResIdPacked__24soResourceIdAccesserImplFUl();
+    virtual void setAnmResId__24soResourceIdAccesserImplFUl();
+    virtual int setMdlResId__24soResourceIdAccesserImplFUl(unsigned int);
+    virtual void setTexResId__24soResourceIdAccesserImplFUl(int, unsigned int);
+    virtual void setMdlResIndex__24soResourceIdAccesserImplFUs();
+    virtual void setTexResIndex__24soResourceIdAccesserImplFUs();
+    virtual void getTexResId__24soResourceIdAccesserImplFv();
+    virtual void getTexResIndex__24soResourceIdAccesserImplFv();
+    virtual void getMdlResId__24soResourceIdAccesserImplFv();
+    virtual void getMdlResIndex__24soResourceIdAccesserImplFv();
+    virtual float getAnmResId__24soResourceIdAccesserImplFv(unsigned int);
+    virtual void getBinResId__24soResourceIdAccesserImplFv(float, unsigned int);
+    virtual void getArchiveId__24soResourceIdAccesserImplFv();
+    virtual void getEtcResId__24soResourceIdAccesserImplFv();
+    virtual void getMdlArchiveId__24soResourceIdAccesserImplFv();
+    virtual bool getTexArchiveId__24soResourceIdAccesserImplFv(unsigned int);
+    virtual void getAnmArchiveId__24soResourceIdAccesserImplFv();
+    virtual void getEtcArchiveId__24soResourceIdAccesserImplFv(unsigned int);
+};
+
+class LucasRecoveryArticleManager {
+    virtual void slot_08() = 0;
+    virtual void slot_0c() = 0;
+    virtual void slot_10() = 0;
+public:
+    virtual void generate(int article, bool persistent, bool variant) = 0;
+};
+
+extern "C" {
+extern void* ms_instance__6soSlow;
+void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+void* __ct__6soSlowFv(void*);
+unsigned int isAdjust__6soSlowFv(void*);
+void processFixPosition__7FighterFv(void*);
+extern const float lbl_114_rodata_4;
+extern const float lbl_114_rodata_8;
+}
+
+extern "C" void fn_114_AEE8(void* object) {
+    if (ms_instance__6soSlow == 0) {
+        void* singleton = __nw__FUlQ25Heaps8HeapType(0x4c, 2);
+        if (singleton != 0) {
+            singleton = __ct__6soSlowFv(singleton);
+        }
+        ms_instance__6soSlow = singleton;
+    }
+    if (isAdjust__6soSlowFv(ms_instance__6soSlow) == 1) {
+        unsigned char* storage = static_cast<unsigned char*>(object);
+        unsigned char* accesser = *reinterpret_cast<unsigned char**>(storage + 0x60);
+        unsigned char* modules = *reinterpret_cast<unsigned char**>(accesser + 0xd8);
+        soWorkManageModule* work = *reinterpret_cast<soWorkManageModule**>(modules + 0x64);
+        if (work->isFlag(0x1200003d)) {
+            accesser = *reinterpret_cast<unsigned char**>(storage + 0x60);
+            modules = *reinterpret_cast<unsigned char**>(accesser + 0xd8);
+            LucasRecoveryArticleManager* articles = *reinterpret_cast<LucasRecoveryArticleManager**>(modules + 0x84);
+            unsigned char* data = *reinterpret_cast<unsigned char**>(storage + 0x48cc0);
+            const float* parameters = *reinterpret_cast<const float**>(data + 0x90);
+            float interval = work->getFloat(0x11000015);
+            float elapsed = work->getFloat(0x11000016);
+            int count = work->getInt(0x10000040);
+            if (static_cast<float>(count) < parameters[5]) {
+                elapsed += lbl_114_rodata_4;
+                if (elapsed >= interval) {
+                    articles->generate(3, false, false);
+                    elapsed = lbl_114_rodata_8;
+                    interval -= parameters[4];
+                    if (interval < lbl_114_rodata_4) {
+                        interval = lbl_114_rodata_4;
+                    }
+                    ++count;
+                }
+                work->setFloat(interval, 0x11000015);
+                work->setFloat(elapsed, 0x11000016);
+                work->setInt(count, 0x10000040);
+            } else {
+                work->offFlag(0x1200003d);
+                work->setFloat(lbl_114_rodata_8, 0x11000015);
+                work->setFloat(lbl_114_rodata_8, 0x11000016);
+                work->setInt(0, 0x10000040);
+            }
+        }
+    }
+    processFixPosition__7FighterFv(object);
+}
+}
+

@@ -197,3 +197,136 @@ void soPostureModuleImpl::initRot(u32 index) {
     soInterpolation<Vec3f>& second = m_interpolationArray->at(index);
     second.m_elements[3] = last;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_2370C {
+struct Fields
+{
+    unsigned int field0;
+    unsigned int field1;
+    unsigned int field2;
+};
+
+extern "C" void fn_27_2370C(Fields* dst, const Fields* src)
+{
+    const Fields* fields = reinterpret_cast<const Fields*>(
+        reinterpret_cast<const unsigned char*>(src) + 0x6C);
+
+    dst->field0 = fields->field0;
+    dst->field1 = fields->field1;
+    dst->field2 = fields->field2;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23744 {
+class VBase {
+public:
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+    virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
+    virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
+    virtual void v28(); virtual void v29(); virtual void v30(); virtual void v31();
+    virtual float getValue();
+};
+struct Inner { char pad[0x54]; VBase* m_54; };
+struct Mid { char pad[0xd8]; Inner* m_d8; };
+struct Outer { char pad[8]; Mid* m_08; char pad2[0x3c-0xc]; float m_3c; char pad3[0x68-0x40]; float m_68; };
+
+extern const float lbl_27_rodata_38C;
+
+extern "C" float fn_27_23744(const Outer* p) {
+    float v = p->m_08->m_d8->m_54->getValue();
+    if (lbl_27_rodata_38C != v) {
+        return p->m_3c * v;
+    }
+    return p->m_3c * p->m_68;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_25088 {
+extern "C" void fn_27_25088(void *dst, const void *src)
+{
+    const unsigned int *s = (const unsigned int *)src;
+    unsigned int *d = (unsigned int *)dst;
+    d[0] = s[3];
+    d[1] = s[4];
+    d[2] = s[5];
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_25184 {
+struct Data3
+{
+    unsigned char padding[0x18];
+    unsigned int unk18;
+    unsigned int unk1C;
+    unsigned int unk20;
+};
+
+struct Data3Out
+{
+    unsigned int unk0;
+    unsigned int unk4;
+    unsigned int unk8;
+};
+
+extern "C" void fn_27_25184(Data3Out *out, const Data3 *in)
+{
+    out->unk0 = in->unk18;
+    out->unk4 = in->unk1C;
+    out->unk8 = in->unk20;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_251B8 {
+extern "C" int fn_27_251B8(const float *p)
+{
+    extern const float lbl_27_rodata_388[];
+
+    float value = p[0x40 / sizeof(float)];
+    float reference = lbl_27_rodata_388[1];
+    float threshold;
+
+    if (reference == value)
+        threshold = lbl_27_rodata_388[2];
+    else
+        threshold = lbl_27_rodata_388[8];
+
+    return p[0x60 / sizeof(float)] != threshold;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_251F4 {
+extern "C" void notifyEventChangeStatus__19soPostureModuleImplFiiP12soStatusDataP16soModuleAccesser(void*);
+
+extern "C" void fn_27_251F4(void* self) {
+    notifyEventChangeStatus__19soPostureModuleImplFiiP12soStatusDataP16soModuleAccesser(reinterpret_cast<u8*>(self) - 0x44);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_251FC {
+extern "C" void fn_27_23EE0(void*);
+
+extern "C" void fn_27_251FC(void* self) {
+    fn_27_23EE0(reinterpret_cast<u8*>(self) - 0x50);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_25204 {
+extern "C" void isObserv__19soPostureModuleImplFc(void*);
+
+extern "C" void fn_27_25204(void* self) {
+    isObserv__19soPostureModuleImplFc(reinterpret_cast<u8*>(self) - 0x50);
+}
+}
+

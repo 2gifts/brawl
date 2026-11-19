@@ -225,3 +225,42 @@ void soAnimCmdInterpreter::systemCmdFuncWaitRnadf() {
     }
     systemCmdFuncWaitSub(minimum);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_70454 {
+extern "C" {
+void __dl__FPv(void* p);
+
+void* fn_27_70454(void* p, int n) {
+    if (p != 0 && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_708D8 {
+class fnBase {
+public:
+    virtual void f0();
+    virtual void f1();
+    virtual void f2();
+    virtual void f3();
+};
+
+extern "C" void fn_27_708D8(fnBase* p) {
+    p->f1();
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_711DC {
+extern "C" void __dt__20soAnimCmdInterpreterFv(void*);
+
+extern "C" void fn_27_711DC(void* self) {
+    __dt__20soAnimCmdInterpreterFv(reinterpret_cast<u8*>(self) - 0x34);
+}
+}
+

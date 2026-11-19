@@ -125,3 +125,159 @@ bool wnPokeFushigisouLeafCutter::notifyEventCollisionAttackCheck(u32 flags) {
     if (flags & 6) return false;
     return Weapon::notifyEventCollisionAttackCheck(flags);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_22E10 {
+extern "C" void* fn_116_3884(void*, short);
+extern "C" void* fn_116_12F0C(void*, short);
+extern "C" void* fn_116_12F98(void*, short);
+extern "C" void* fn_116_13024(void*, short);
+extern "C" void* fn_116_22EA0(void*, short);
+
+extern "C" void* fn_116_22E10(void* object, short deleting) {
+    if (object != 0) {
+        unsigned char* storage = static_cast<unsigned char*>(object);
+        fn_116_3884(storage + 0x2bc, -1);
+        fn_116_12F0C(storage + 0x208, -1);
+        fn_116_12F98(storage + 0x154, -1);
+        fn_116_13024(storage + 0xa0, -1);
+        fn_116_22EA0(object, -1);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_230AC {
+extern "C" void __dt__19soGeneralWorkSimpleFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_116_230AC(void* object, short deleting) {
+    if (object != 0) {
+        __dt__19soGeneralWorkSimpleFv(static_cast<char*>(object) + 0x54, -1);
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23AB0 {
+struct Storage { void* primary; void* secondary; };
+struct Registration { void* next; void* object; void* destructor; };
+class View {
+public:
+    virtual void slot00(); virtual void slot01(); virtual void slot02();
+    virtual void slot03(); virtual void slot04(); virtual void slot05();
+    virtual void dispatch();
+};
+extern "C" {
+extern signed char lbl_116_bss_1F4;
+extern Storage lbl_116_bss_1F8;
+extern Registration lbl_116_bss_5B0;
+extern unsigned char lbl_116_data_26C4[], lbl_116_data_2698[];
+extern unsigned char lbl_116_data_2630[], lbl_116_data_74F8[];
+void* __dt__21soArticleMediatorNullFv(void*, short);
+void __register_global_object(void*, void*, void*);
+void fn_116_23AB0() {
+    if (lbl_116_bss_1F4 == 0) {
+        lbl_116_bss_1F8.primary = lbl_116_data_26C4;
+        lbl_116_bss_1F8.secondary = lbl_116_data_2698;
+        lbl_116_bss_1F8.primary = lbl_116_data_2630;
+        lbl_116_bss_1F8.secondary = lbl_116_data_2630 + 0x10;
+        lbl_116_bss_1F8.primary = lbl_116_data_74F8;
+        lbl_116_bss_1F8.secondary = lbl_116_data_74F8 + 0x10;
+        __register_global_object(&lbl_116_bss_1F8, reinterpret_cast<void*>(__dt__21soArticleMediatorNullFv), &lbl_116_bss_5B0);
+        lbl_116_bss_1F4 = 1;
+    }
+    reinterpret_cast<View*>(&lbl_116_bss_1F8)->dispatch();
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B5C {
+extern "C" void fn_116_22D18(void*);
+
+extern "C" void fn_116_23B5C(void* self) {
+    fn_116_22D18(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B64 {
+extern "C" void fn_116_22D18(void*);
+
+extern "C" void fn_116_23B64(void* self) {
+    fn_116_22D18(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B6C {
+extern "C" void fn_116_22D18(void*);
+
+extern "C" void fn_116_23B6C(void* self) {
+    fn_116_22D18(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B74 {
+extern "C" void fn_116_1D740(void*);
+
+extern "C" void fn_116_23B74(void* self) {
+    fn_116_1D740(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B7C {
+extern "C" void notifyEventAnimCmd__26wnPokeFushigisouLeafCutterFP9acAnimCmdP16soModuleAccesseri(void*);
+
+extern "C" void fn_116_23B7C(void* self) {
+    notifyEventAnimCmd__26wnPokeFushigisouLeafCutterFP9acAnimCmdP16soModuleAccesseri(reinterpret_cast<u8*>(self) - 0x48);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B84 {
+extern "C" void notifyEventCollisionAttackCheck__26wnPokeFushigisouLeafCutterFUl(void*);
+
+extern "C" void fn_116_23B84(void* self) {
+    notifyEventCollisionAttackCheck__26wnPokeFushigisouLeafCutterFUl(reinterpret_cast<u8*>(self) - 0x70);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B8C {
+extern "C" void fn_116_1D740(void*);
+
+extern "C" void fn_116_23B8C(void* self) {
+    fn_116_1D740(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B94 {
+extern "C" void fn_116_23AB0(void*);
+
+extern "C" void fn_116_23B94(void* self) {
+    fn_116_23AB0(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23B9C {
+extern "C" void fn_116_1D740(void*);
+
+extern "C" void fn_116_23B9C(void* self) {
+    fn_116_1D740(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

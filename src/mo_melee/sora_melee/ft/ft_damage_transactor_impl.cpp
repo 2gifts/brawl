@@ -214,3 +214,68 @@ int ftDamageTransactorImpl::checkDownDamage(float reaction, float speed, soModul
 }
 
 ftDamageTransactorImpl g_soDamageModuleNullB;
+
+// TODO: clean up, give variables real names
+namespace jj_1520C0 {
+
+extern "C" const float lbl_27_rodata_1E64[];
+
+class VT {
+public:
+    virtual void s0(); virtual void s1(); virtual void s2(); virtual void s3();
+    virtual void s4(); virtual void s5(); virtual void s6(); virtual void s7();
+    virtual void s8(); virtual void s9(); virtual void s10(); virtual void s11();
+    virtual void s12(); virtual void s13(); virtual void s14(); virtual void s15();
+    virtual void s16();
+    virtual unsigned int s17(unsigned int a);
+};
+
+extern "C" float getReactionSub__22ftDamageTransactorImplFP16soModuleAccesser(void* unused, soModuleAccesser* accesser, char* arg) {
+    float v = lbl_27_rodata_1E64[0];
+    VT* obj = *(VT**)(*(char**)((char*)accesser + 0xd8) + 0x64);
+    unsigned int r = obj->s17(0x12000012U);
+    if (r == 1) {
+        unsigned long op = *(unsigned long*)(arg + 0x30) & 0x1F;
+        if (op != 0x9 && op != 0xA && op != 0xB && op != 0x16) {
+            v = soValueAccesser::getConstantFloat(accesser, 0xd9e, 0);
+        }
+    }
+    return v;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_152174 {
+extern "C" unsigned int getReactionMul__6ftUtilFP16soModuleAccesserP21soCollisionAttackData(unsigned int, unsigned int);
+
+extern "C" unsigned int getReactionMul__22ftDamageTransactorImplFP16soModuleAccesser(unsigned int, unsigned int a, unsigned int b) {
+    return getReactionMul__6ftUtilFP16soModuleAccesserP21soCollisionAttackData(a, b);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_152180 {
+extern "C" float getWeightReactionMul__6ftUtilFP16soModuleAccesser(void*);
+
+extern const float lbl_27_rodata_1E60;
+extern const float lbl_27_rodata_1E7C;
+
+struct State {
+    unsigned char padding[0x38];
+    unsigned int : 26;
+    unsigned int flag : 1;
+    unsigned int : 5;
+};
+
+#pragma fp_contract off
+
+extern "C" float getWeightReactionMul__22ftDamageTransactorImplFP16soModuleAccesser(void*, void* arg, State* state) {
+    float value = getWeightReactionMul__6ftUtilFP16soModuleAccesser(arg);
+    if (state->flag) {
+        value *= (lbl_27_rodata_1E60 -
+                  lbl_27_rodata_1E7C * (lbl_27_rodata_1E60 - value)) / value;
+    }
+    return value;
+}
+}
+

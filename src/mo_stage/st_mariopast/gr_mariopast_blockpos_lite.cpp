@@ -923,3 +923,21 @@ void grMarioPastBlockPosLite::drawProcBlocks() {
         stMarioPastBlockDt::drawBlocks(darkNum, blocks, darkOrder, 1);
     }
 }
+
+#include <stddef.h>
+// TODO: clean up, give variables real names
+namespace jj_7CB8 {
+
+typedef unsigned int u32;
+
+struct FnTable48 {
+    char pad[0x44];
+    u32 *table;
+};
+
+extern "C" u32 fn_48_7CB8(const FnTable48 *self, u32 index)
+{
+    return self->table[index];
+}
+}
+

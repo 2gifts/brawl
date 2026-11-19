@@ -1556,3 +1556,37 @@ void grPictchatPict027::setAttack1(int index) {
         }
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_39CC {
+extern "C" int getModel__6GroundFUl(void* obj, int index) {
+    int** slot = (int**)((char*)obj + 0x44);
+    return (*slot)[index];
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_41D4 {
+extern "C" void __ct__5Vec3fFfff(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_41D8 {
+struct Vec3f {
+    float x, y, z;
+};
+
+extern "C" void set__5Vec3fFfff(Vec3f* v, float x, float y, float z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_96E4 {
+extern "C" s32 getContNo__5InputCFv(void) {
+    return -0x1;
+}
+}
+

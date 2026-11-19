@@ -160,3 +160,103 @@ void stBattleField::getFighterStartPos(Vec3f* startPos, int fighterIndex) {
         stMelee::getFighterStartPos(startPos, fighterIndex);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_AE0 {
+extern "C" s32 adventureEventGetItem__6GroundFiP13stTriggerData(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_AE8 {
+extern "C" s32 getInitializeInfo__6GroundFi(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_AF0 {
+extern "C" void setInitializeInfo__6GroundFi(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_AF4 {
+extern "C" void setInitializeFlag__6GroundFv(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_AF8 {
+extern "C" void disableCalcCollision__6GroundFv(unsigned char* self)
+{
+    self[0x6C] &= ~0x08;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B08 {
+struct StObj {
+    char pad[0x6c];
+    unsigned char flags;
+};
+
+extern "C" {
+void enableCalcCollision__6GroundFv(StObj *self)
+{
+    self->flags |= 0x8;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B18 {
+extern "C" unsigned char isEnableCalcCollision__6GroundFv(unsigned char *arg0)
+{
+    return (arg0[0x6c] >> 3) & 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B24 {
+extern "C" s16 getMdlIndex__6GroundFv(void* self) {
+    return *reinterpret_cast<s16*>(reinterpret_cast<u8*>(self) + 0x5c);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B2C {
+extern "C" void setMdlIndex__6GroundFi(void* self, u16 value) {
+    *reinterpret_cast<u16*>(reinterpret_cast<u8*>(self) + 0x5c) = value;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B34 {
+extern "C" void initStageData__6GroundFv(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B38 {
+extern "C" u32 getStageData__6GroundFv(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x60);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B40 {
+struct ResObject
+{
+    unsigned char padding[0x40];
+    unsigned int file;
+};
+
+extern "C" unsigned int GetResMdlNumEntries__Q34nw4r3g3d7ResFileCFv(const void*);
+
+extern "C" unsigned int getModelCount__6GroundFv(ResObject* self)
+{
+    if (self->file != 0)
+        return GetResMdlNumEntries__Q34nw4r3g3d7ResFileCFv(&self->file);
+    return 0;
+}
+}
+

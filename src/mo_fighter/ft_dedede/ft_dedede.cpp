@@ -663,3 +663,110 @@ void ftDedede::notifyEventChangeStatus(int statusKind, int prevStatusKind, soSta
     }
     Fighter::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_9E84 {
+extern "C" void* getInstance__18ftDededeTransactorFv();
+extern "C" void notifyEventCollisionSearch__7FighterFP14soCollisionLogP16soModuleAccesser(void*, void*, void*);
+
+namespace {
+struct DededeDispatch {
+    virtual void slot0();
+    virtual void slot1();
+    virtual void slot2();
+    virtual void slot3();
+    virtual void slot4();
+    virtual void slot5();
+    virtual void slot6();
+    virtual void slot7();
+    virtual void slot8();
+    virtual void slot9();
+    virtual void slot10(void*, void*);
+};
+}
+
+extern "C" void fn_117_9E84(void* self, void* a, void* b) {
+    DededeDispatch* obj = static_cast<DededeDispatch*>(getInstance__18ftDededeTransactorFv());
+    obj->slot10(a, b);
+    notifyEventCollisionSearch__7FighterFP14soCollisionLogP16soModuleAccesser(self, a, b);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_E1F0 {
+// The interface pointer for this entry points 0x54 bytes past the complete
+// object (the secondary vtable header stores an offset-to-top of -0x54
+// immediately before this slot); the entry re-derives the complete object
+// pointer and tail-calls fn_117_94DC, which forwards the event to the
+// DededeEventHandler::handle member function.
+struct DededeEvent;
+struct DededeEventHandler;
+class soModuleAccesser;
+
+extern "C" void fn_117_94DC(DededeEventHandler*, DededeEvent*,
+                            soModuleAccesser*, void*, int);
+
+extern "C" void fn_117_E1F0(void* object, DededeEvent* event,
+                            soModuleAccesser* accesser, void* param, int kind) {
+    fn_117_94DC(reinterpret_cast<DededeEventHandler*>(
+                    static_cast<unsigned char*>(object) - 0x54),
+                event, accesser, param, kind);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_E268 {
+// The interface pointer for this entry points 0xB8 bytes past the complete
+// object; this entry slot re-derives the complete object pointer and
+// tail-calls the in-module handler fn_117_9E84.
+//
+// Target evidence (original ft_dedede.rel): .text[0xE268,0xE270) is the raw
+// word pair 3863ff48 4bffbc18 = addi r3,r3,-0xB8 ; b 0x9E84. No relocation
+// of any import stream patches the branch word, so the displacement is the
+// link-time-resolved intra-module branch, unlike the sibling thunks E208 /
+// E210 / E218 whose branches carry module-27 REL24 relocations.
+//
+// Referencing-slot context (original ft_dedede.rel, self-stream records):
+// exactly one record references 0xE268, the ADDR32 slot at .data 0x330. The
+// recorded physical slot values around it: .data 0x32C points to .text
+// 0xA358, whose bytes disassemble as the five-instruction sequence
+// extsh r4,r4 ; mr r0,r5 ; mr r5,r3 ; extsb r6,r0 ; b <link-patched>
+// (the same instruction sequence recurs at .text 0xA330/0xA344/0xA36C);
+// .data 0x334 points to E260; .data 0x338 points to .data 0x698; raw words
+// -0xB8 and -0xC4 sit at .data 0x328 and 0x33C, and the negative words
+// across this table step by 0xC (-0xA0/-0xAC/-0xB8/-0xC4); the same slot
+// values recur in a second copy (.data 0x814/0x818/0x81C -> .text
+// 0xA358/E1D0/E1C8 and 0x820 -> .data 0xB94), which has no E268 entry.
+// Because the bytes at .text 0xA358 are executable code, the initial
+// draft's "typeinfo" label for slot 0x32C is withdrawn. Whether this region
+// is a C++ vtable or some other structure is not resolved by this evidence;
+// no structural classification of the surrounding records is asserted, and
+// the reconstruction relies only on the single E268 reference and the 8
+// target bytes.
+//
+// fn_117_9E84, from the disassembly of its preserved 0x64 bytes
+// (evidence/fn_117_9E84.disasm.txt): it saves the incoming r3/r4/r5 into
+// r29/r30/r31, calls the local function at 0x946C, restores r4/r5 and makes
+// a virtual slot-12 call, then restores r3/r4/r5 and invokes notifyEventCollisionSearch__7FighterFP14soCollisionLogP16soModuleAccesser
+// with the original first three arguments. No instruction of fn_117_9E84
+// reads or writes r6/r7, so its own code passes the incoming r6/r7 to that
+// call site unchanged; r6/r7 are caller-saved in this ABI, however, and
+// fn_117_9E84 makes intervening calls (0x946C and the virtual call) before
+// it, so whether notifyEventCollisionSearch__7FighterFP14soCollisionLogP16soModuleAccesser observes E268's original r6/r7 values is not
+// established by this evidence. The declaration mirrors the shape already
+// accepted for E1D0's direct notifyEventCollisionSearch__7FighterFP14soCollisionLogP16soModuleAccesser tail call (void* event,
+// soModuleAccesser* accesser, int kind, int index); the only semantically
+// guaranteed transformation in E268's own 8 bytes is r3 -= 0xB8 with every
+// other incoming register passed through unchanged.
+class soModuleAccesser;
+
+extern "C" void fn_117_9E84(void* object, void* event,
+        soModuleAccesser* accesser, int kind, int index);
+
+extern "C" void fn_117_E268(void* interface, void* event,
+                            soModuleAccesser* accesser, int kind, int index) {
+    fn_117_9E84(static_cast<unsigned char*>(interface) - 0xB8, event, accesser,
+                kind, index);
+}
+}
+

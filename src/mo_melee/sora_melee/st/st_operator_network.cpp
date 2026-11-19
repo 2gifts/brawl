@@ -181,3 +181,284 @@ void NtShared::ntSetStopCallback(ntStopCallback_t cb) {
 void NtShared::ntSetExitCallback(ntExitCallback_t cb) {
     NtExitCallback = cb;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_254AC8 {
+extern "C" {
+void __ct__10stOperatorFPCc(void*, const char*);
+int isNetCondOnline__6NtBaseFv();
+extern char lbl_27_data_52B7C[];
+extern char lbl_27_data_52C28[];
+extern int lbl_27_data_52B78;
+extern char g_Network[];
+extern void* g_muWifiInterfaceTask;
+extern int lbl_27_bss_59C0;
+}
+
+extern "C" void* fn_27_254AC8(void* p) {
+    char* self = (char*)p;
+    __ct__10stOperatorFPCc(p, lbl_27_data_52B7C);
+    *(void**)(self + 0x3C) = lbl_27_data_52C28;
+    self[0x48] = 0;
+    self[0x49] = 0;
+    self[0x4A] = 0;
+    self[0x4B] = 0;
+    self[0x4C] = 0;
+    self[0x4D] = 0;
+    *(int*)(self + 0x50) = 0;
+    *(int*)(self + 0x54) = 0;
+    *(int*)(self + 0x58) = 0;
+    *(int*)(self + 0x5C) = 0;
+    *(int*)(self + 0x60) = 0;
+    *(int*)(self + 0x64) = 0;
+    *(int*)(self + 0x68) = 0;
+    *(int*)(self + 0x6C) = lbl_27_data_52B78;
+    *(int*)(self + 0x70) = 0;
+
+    bool online = g_Network != 0 && g_muWifiInterfaceTask != 0;
+    self[0x48] = online;
+    bool active = online && isNetCondOnline__6NtBaseFv() != 0;
+    self[0x49] = active;
+
+    *(int*)(self + 0x6C) = lbl_27_data_52B78;
+    *(int*)(self + 0x70) = 0;
+    lbl_27_bss_59C0 = 0;
+    self[0x2C] &= ~2;
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_254C44 {
+extern "C" {
+extern unsigned int lbl_27_bss_59C0;
+extern char g_Network[];
+extern char lbl_27_data_52C28[];
+
+void ntSetStopCallback__8NtSharedFPFUsUc_v(int);
+void ntSetExitCallback__8NtSharedFPFUcUsUc_v(void (*)(void*));
+void* __dt__10stOperatorFv(void*, int);
+void __dl__FPv(void*);
+
+void* fn_27_254C44(void* self, int flag) {
+    if (self) {
+        *(void**)((char*)self + 0x3C) = lbl_27_data_52C28;
+        lbl_27_bss_59C0 = 0;
+        if (g_Network) {
+            ntSetStopCallback__8NtSharedFPFUsUc_v(0);
+            ntSetExitCallback__8NtSharedFPFUcUsUc_v(0);
+        }
+        if (self)
+            __dt__10stOperatorFv(self, 0);
+        if (flag > 0)
+            __dl__FPv(self);
+    }
+    return self;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_254CF4 {
+extern "C" void ntSetStopCallback__8NtSharedFPFUsUc_v(int);
+extern "C" void ntSetExitCallback__8NtSharedFPFUcUsUc_v(void (*)(void*));
+extern "C" int fn_800CBCB0(int, int*);
+extern "C" int g_muWifiInterfaceTask;
+extern "C" char lbl_27_data_52B94[];
+extern "C" char lbl_27_data_52BD0[];
+extern "C" void OSReport(const char* fmt, ...);
+
+extern "C" void fn_27_254CF4(void* arg0) {
+    unsigned char* self = (unsigned char*)arg0;
+    int result;
+
+    if (self[0x49] != 0) {
+        result = fn_800CBCB0(g_muWifiInterfaceTask, (int*)(self + 0x68));
+        *(int*)(self + 0x64) = result;
+        if (result != 0) {
+            self[0x48] = 0;
+            self[0x49] = 0;
+            if (result <= 6) {
+                *(int*)(self + 0x50) = 2;
+                OSReport(lbl_27_data_52B94);
+            } else {
+                *(int*)(self + 0x50) = 1;
+                OSReport(lbl_27_data_52BD0);
+            }
+            ntSetStopCallback__8NtSharedFPFUsUc_v(0);
+            ntSetExitCallback__8NtSharedFPFUcUsUc_v(0);
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_254ED0 {
+extern "C" {
+int isPreparedLoadAllStage__19muWifiInterfaceTaskFv(void*);
+int testSendAIDInfoDone__19muWifiInterfaceTaskFv(void*);
+void fn_8013FDD4(void*);
+extern char lbl_27_data_52B78[];
+extern char g_Network[];
+extern void* g_muWifiInterfaceTask;
+}
+
+extern "C" int fn_27_254ED0(void* p) {
+    unsigned char* self = (unsigned char*)p;
+    char* d = lbl_27_data_52B78;
+    if (self[0x49] != 0) {
+        switch (*(int*)(self + 0x70)) {
+        case 0:
+            *(int*)(self + 0x6C) = *(int*)(d + 0xA0);
+            *(int*)(self + 0x70) = 0x98;
+            goto c1;
+        l9c:
+            *(int*)(self + 0x6C) = *(int*)(d + 0xA4);
+            *(int*)(self + 0x70) = 0x9C;
+            break;
+        case 0x98:
+        case 0x9C:
+        c1:
+            if (isPreparedLoadAllStage__19muWifiInterfaceTaskFv(g_muWifiInterfaceTask) == 0) goto l9c;
+            goto c2;
+        la1:
+            *(int*)(self + 0x6C) = *(int*)(d + 0xA8);
+            *(int*)(self + 0x70) = 0xA1;
+            break;
+        case 0xA1:
+        c2:
+            if (testSendAIDInfoDone__19muWifiInterfaceTaskFv(g_muWifiInterfaceTask) == 0) goto la1;
+            fn_8013FDD4(*(void**)(g_Network + 0x34));
+            *(int*)(self + 0x6C) = *(int*)(d + 0xAC);
+            *(int*)(self + 0x70) = 0xA6;
+            break;
+        }
+        return *(int*)(self + 0x6C) == 2;
+    }
+    return 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2550F4 {
+
+struct fn_27_flags {
+    u8 _0 : 4;
+    u8 m_bit : 1;
+    u8 _1 : 3;
+};
+
+extern "C" void fn_27_2550F4(void* unused, u32 flag) {
+    fn_27_flags* f = (fn_27_flags*)((u8*)ipSwitch::getInstance() + 0x24);
+    f->m_bit = flag;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_255348 {
+extern "C" unsigned char lbl_8059E742;
+
+typedef unsigned char u8;
+typedef unsigned int u32;
+
+extern "C" void fn_27_255348(u8* self, u32 p4, u32 p5) {
+    if (self[0x49] == 0) {
+        return;
+    }
+    if (self[0x4B] != 0) {
+        return;
+    }
+    if (p4 != lbl_8059E742) {
+        return;
+    }
+    *(u32*)(self + 0x60) = p5;
+    self[0x4B] = 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553C8 {
+extern "C" void fn_27_2553C8(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553CC {
+extern "C" s32 fn_27_2553CC(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553D4 {
+extern "C" s32 fn_27_2553D4(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553DC {
+extern "C" s32 fn_27_2553DC(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553E4 {
+extern "C" s32 fn_27_2553E4(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553EC {
+extern "C" void fn_27_2553EC(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553F0 {
+extern "C" s32 fn_27_2553F0(void) {
+    return 0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553F8 {
+extern "C" void fn_27_2553F8(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2553FC {
+extern "C" s32 fn_27_2553FC(void) {
+    return 0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_255404 {
+extern "C" void fn_27_255404(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_255408 {
+extern "C" s32 fn_27_255408(void) {
+    return 0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_255410 {
+extern "C" s32 fn_27_255410(void) {
+    return 0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_255418 {
+extern "C" void fn_27_255418(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_25541C {
+extern "C" void fn_27_25541C(void) {}
+}
+

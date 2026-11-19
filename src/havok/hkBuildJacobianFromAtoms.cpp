@@ -615,3 +615,195 @@ extern "C" void* fn_80289814(const hkPadSpu<void*>* p) {
 extern "C" int fn_8028981C(const hkEnum<hkConstraintAtom::AtomType, u16>* e) {
     return e->m_storage;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_80288BC8 {
+#pragma use_lmw_stmw on
+
+typedef unsigned int u32;
+
+extern void fn_8028965C(void *, void *);
+extern u32 fn_8028D8AC(u32, int);
+extern int fn_8028980C(void *);
+extern void __ct__11hkTransformFRC11hkTransform(void *, int);
+extern int fn_80289814(void *);
+extern void _hkBeginConstraints__FRC19hkConstraintQueryInR20hkConstraintQueryOutPvi(void *, int, int, int);
+extern u32 fn_8028981C(u32);
+extern int fn_8028D8A4(int, int);
+extern void fn_8028D8B4(void *, int);
+extern void hkEndConstraints__Fv(void);
+extern void fn_802883C8(void *, void *, int);
+extern void hkSkipSolverResults__FiR20hkConstraintQueryOut(int, int);
+
+#define DECLARE_HANDLER(handler, length) \
+    extern void handler(u32, void *, void *, void *, int); \
+    extern int length(u32)
+
+DECLARE_HANDLER(callBridgeFromAtom__22hkBridgeConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransformR20hkConstraintQueryOut, numSolverResults__22hkBridgeConstraintAtomCFv);
+DECLARE_HANDLER(setLocalTransformsFromAtom__34hkSetLocalTransformsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__34hkSetLocalTransformsConstraintAtomCFv);
+DECLARE_HANDLER(setLocalTranslationsFromAtom__36hkSetLocalTranslationsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__36hkSetLocalTranslationsConstraintAtomCFv);
+DECLARE_HANDLER(setLocalRotationsFromAtom__33hkSetLocalRotationsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__33hkSetLocalRotationsConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028A048, fn_8028A52C);
+DECLARE_HANDLER(fn_8028A534, fn_8028A6F0);
+DECLARE_HANDLER(buildJacobianFromLinAtom__19hkLinConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, fn_8028A7A0);
+DECLARE_HANDLER(buildJacobianFromLinSoftAtom__23hkLinSoftConstraintAtomFPvPC9hkVector4PC9hkVector4Pv, numSolverResults__23hkLinSoftConstraintAtomCFv);
+DECLARE_HANDLER(buildJacobianFromLinLimitAtom__24hkLinLimitConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, numSolverResults__24hkLinLimitConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028A91C, numSolverResults__27hkLinFrictionConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028AA10, numSolverResults__24hkLinMotorConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028ABE0, numSolverResults__21hk2dAngConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028AD28, numSolverResults__19hkAngConstraintAtomCFv);
+DECLARE_HANDLER(buildJacobianFromAngFrictionAtom__27hkAngFrictionConstraintAtomCFRC19hkConstraintQueryInRC10hkRotationRC10hkRotationR20hkConstraintQueryOut, numSolverResults__27hkAngFrictionConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028B674, numSolverResults__24hkAngMotorConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028BCD0, numSolverResults__28hkRagdollMotorConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028C680, numSolverResults__22hkPulleyConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028CFAC, numSolverResults__35hkSoftContactModifierConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028D18C, numSolverResults__35hkMassChangerModifierConstraintAtomCFv);
+DECLARE_HANDLER(fn_8028D474, fn_8028D5C8);
+DECLARE_HANDLER(fn_8028D5D0, fn_8028D898);
+
+extern int fn_8028AE3C(u32, void *, void *, void *, void *, int);
+extern int numSolverResults__24hkAngLimitConstraintAtomCFv(u32);
+extern int fn_8028B0F0(u32, void *, void *, void *, void *, int);
+extern int numSolverResults__25hkConeLimitConstraintAtomCFv(u32);
+extern int fn_8028B330(u32, void *, void *, void *, void *, int);
+extern int numSolverResults__26hkTwistLimitConstraintAtomCFv(u32);
+
+#define ADVANCE(length, amount) \
+    { \
+        int n; \
+        old = p; \
+        p += amount; \
+        n = length(old) * 8; \
+        fn_8028D8B4(st.f4, fn_8028D8A4(fn_80289814(st.f4), n)); \
+        fn_8028D8B4(st.f100, fn_8028D8A4(fn_80289814(st.f100), n)); \
+    }
+
+#define HANDLE(value, handler, length, amount) \
+    case value: \
+        handler(p, st.copy, st.mat1, st.mat2, context); \
+        ADVANCE(length, amount); \
+        break
+
+#define HANDLE_RESULT(value, handler, length, amount) \
+    case value: \
+        result = handler(p, st.copy, st.mat1, st.mat2, st.tmp, context); \
+        ADVANCE(length, amount); \
+        if (result) goto pass; else goto fail; \
+        break
+
+extern "C" void fn_80288BC8(u32 p, int size, void *input, int context)
+{
+    struct {
+        char tmp[0x20];
+        char mat2[0x40];
+        char mat1[0x40];
+        char copy[0x30];
+        int e0;
+        char e4[0x10];
+        char f4[0xc];
+        char f100[0xc];
+    } st __attribute__((aligned(16)));
+    u32 end, old;
+    int result;
+
+    fn_8028965C(st.copy, input);
+    end = fn_8028D8AC(p, size);
+    __ct__11hkTransformFRC11hkTransform(st.mat1, fn_8028980C(&st.e0));
+    __ct__11hkTransformFRC11hkTransform(st.mat2, fn_8028980C(st.e4));
+    _hkBeginConstraints__FRC19hkConstraintQueryInR20hkConstraintQueryOutPvi(st.copy, context, fn_80289814(st.f4), 8);
+
+    while (p < end) {
+again:
+        switch (fn_8028981C(p)) {
+        case 0:
+            p = (p + 15) & ~15;
+            goto again;
+        HANDLE(1, callBridgeFromAtom__22hkBridgeConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransformR20hkConstraintQueryOut, numSolverResults__22hkBridgeConstraintAtomCFv, 12);
+        HANDLE(2, setLocalTransformsFromAtom__34hkSetLocalTransformsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__34hkSetLocalTransformsConstraintAtomCFv, 144);
+        HANDLE(3, setLocalTranslationsFromAtom__36hkSetLocalTranslationsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__36hkSetLocalTranslationsConstraintAtomCFv, 48);
+        HANDLE(4, setLocalRotationsFromAtom__33hkSetLocalRotationsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__33hkSetLocalRotationsConstraintAtomCFv, 112);
+        HANDLE(5, fn_8028A048, fn_8028A52C, 2);
+        HANDLE(6, fn_8028A534, fn_8028A6F0, 8);
+        HANDLE(7, buildJacobianFromLinAtom__19hkLinConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, fn_8028A7A0, 4);
+        HANDLE(8, buildJacobianFromLinSoftAtom__23hkLinSoftConstraintAtomFPvPC9hkVector4PC9hkVector4Pv, numSolverResults__23hkLinSoftConstraintAtomCFv, 12);
+        HANDLE(9, buildJacobianFromLinLimitAtom__24hkLinLimitConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, numSolverResults__24hkLinLimitConstraintAtomCFv, 12);
+        HANDLE(10, fn_8028A91C, numSolverResults__27hkLinFrictionConstraintAtomCFv, 8);
+        HANDLE(11, fn_8028AA10, numSolverResults__24hkLinMotorConstraintAtomCFv, 16);
+        HANDLE(12, fn_8028ABE0, numSolverResults__21hk2dAngConstraintAtomCFv, 4);
+        HANDLE(13, fn_8028AD28, numSolverResults__19hkAngConstraintAtomCFv, 4);
+        HANDLE_RESULT(14, fn_8028AE3C, numSolverResults__24hkAngLimitConstraintAtomCFv, 16);
+        HANDLE_RESULT(16, fn_8028B0F0, numSolverResults__25hkConeLimitConstraintAtomCFv, 20);
+        HANDLE_RESULT(15, fn_8028B330, numSolverResults__26hkTwistLimitConstraintAtomCFv, 20);
+        HANDLE(17, buildJacobianFromAngFrictionAtom__27hkAngFrictionConstraintAtomCFRC19hkConstraintQueryInRC10hkRotationRC10hkRotationR20hkConstraintQueryOut, numSolverResults__27hkAngFrictionConstraintAtomCFv, 12);
+        HANDLE(18, fn_8028B674, numSolverResults__24hkAngMotorConstraintAtomCFv, 20);
+        HANDLE(19, fn_8028BCD0, numSolverResults__28hkRagdollMotorConstraintAtomCFv, 80);
+        HANDLE(20, fn_8028C680, numSolverResults__22hkPulleyConstraintAtomCFv, 64);
+        HANDLE(23, fn_8028CFAC, numSolverResults__35hkSoftContactModifierConstraintAtomCFv, 32);
+        HANDLE(24, fn_8028D18C, numSolverResults__35hkMassChangerModifierConstraintAtomCFv, 32);
+        HANDLE(25, fn_8028D474, fn_8028D5C8, 16);
+        HANDLE(26, fn_8028D5D0, fn_8028D898, 32);
+        }
+        continue;
+fail:
+        fn_802883C8(st.tmp, st.copy, context);
+        continue;
+pass:
+        hkSkipSolverResults__FiR20hkConstraintQueryOut(1, context);
+    }
+    hkEndConstraints__Fv();
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8028965C {
+typedef float f32;
+
+struct CopyStruct {
+    f32 f0;
+    f32 f4;
+    f32 f8;
+    f32 fC;
+    f32 f10;
+    f32 f14;
+    f32 f18;
+    f32 f1C;
+    f32 f20;
+    f32 f24;
+    int v28;
+    int v2C;
+    int v30;
+    int v34;
+    f32 f38;
+    f32 f3C;
+    int v40;
+    int v44;
+    int v48;
+    int v4C;
+    int v50;
+};
+
+extern "C" void fn_8028965C(struct CopyStruct* dst, const struct CopyStruct* src) {
+    dst->f0 = src->f0;
+    dst->f4 = src->f4;
+    dst->f8 = src->f8;
+    dst->fC = src->fC;
+    dst->f10 = src->f10;
+    dst->f14 = src->f14;
+    dst->f18 = src->f18;
+    dst->f1C = src->f1C;
+    dst->f20 = src->f20;
+    dst->f24 = src->f24;
+    dst->v28 = src->v28;
+    dst->v2C = src->v2C;
+    dst->v30 = src->v30;
+    dst->v34 = src->v34;
+    dst->f38 = src->f38;
+    dst->f3C = src->f3C;
+    dst->v40 = src->v40;
+    dst->v44 = src->v44;
+    dst->v48 = src->v48;
+    dst->v4C = src->v4C;
+    dst->v50 = src->v50;
+}
+}
+

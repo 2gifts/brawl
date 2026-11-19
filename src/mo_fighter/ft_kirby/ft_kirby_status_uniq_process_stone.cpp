@@ -484,3 +484,25 @@ void ftKirbySpecialLw_LogNormalBuffer(soModuleAccesser* moduleAccesser) {
 ftKirbyStatusUniqProcessStoneStart g_ftKirbyStatusUniqProcessStoneStart;
 ftKirbyStatusUniqProcessStoneStone g_ftKirbyStatusUniqProcessStoneStone;
 ftKirbyStatusUniqProcessStoneEnd g_ftKirbyStatusUniqProcessStoneEnd;
+
+#include <sr/sr_common.h>
+// TODO: clean up, give variables real names
+namespace jj_14454 {
+
+extern "C" {
+extern void* g_soCollisionManager;
+void* __ct__18soCollisionManagerFv(void* manager);
+
+void* getInstance__18soCollisionManagerFv() {
+    if (!g_soCollisionManager) {
+        void* manager = operator new(0x1508, Heaps::System);
+        if (manager) {
+            manager = __ct__18soCollisionManagerFv(manager);
+        }
+        g_soCollisionManager = manager;
+    }
+    return g_soCollisionManager;
+}
+}
+}
+

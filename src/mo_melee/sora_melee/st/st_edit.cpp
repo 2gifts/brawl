@@ -2079,3 +2079,136 @@ void stEdit::setCameraParamDistance(float nearDistance, float farDistance) {
 }
 
 void stObsTriggerCB::setAreaSleep(bool isSleep) { }
+
+#include <st/st_utility.h>
+#include <nw4r/math/math_arithmetic.h>
+// TODO: clean up, give variables real names
+namespace jj_22FD24 {
+extern "C" {
+void free__13gfHeapManagerFPv(void*);
+void deleteBlock__6stEditFP11stEditBlock(void*, void*);
+void fn_27_232C18(void*);
+void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+void* __ct__13stAreaManagerFv(void*);
+void eraseAll__13stAreaManagerFv(void*);
+void stopSE__14snd3DGeneratorFll(void*, int, int);
+extern void* lbl_27_bss_5780;
+}
+
+struct Entry { char data[0x18]; };
+struct Sound { char data[8]; };
+struct Object {
+    char pad0[0xa0];
+    void* a0;
+    char padA4[0x142];
+    unsigned char flag;
+    char pad1E7[0xd];
+    void* p1f4;
+    void* p1f8;
+    void* p1fc;
+    void* p200;
+    void* p204;
+    int soundCount;
+    int handles[8];
+    Sound sounds[8];
+    char pad26C[0x54];
+    unsigned int count;
+    char pad2C4[0x230];
+    Entry entries[1];
+};
+
+extern "C" void fn_27_22FD24(Object* self) {
+    unsigned int i;
+    Entry* entry;
+    unsigned int count = self->count;
+    if (count) {
+        if (self->p1f4) {
+            free__13gfHeapManagerFPv(self->p1f4);
+            self->p1f4 = 0;
+            self->flag = 0;
+        }
+        if (self->p1f8) {
+            free__13gfHeapManagerFPv(self->p1f8);
+            self->p1f8 = 0;
+        }
+        if (self->p1fc) {
+            free__13gfHeapManagerFPv(self->p1fc);
+            self->p1fc = 0;
+        }
+        if (self->p200) {
+            free__13gfHeapManagerFPv(self->p200);
+            self->p200 = 0;
+        }
+        if (self->p204) {
+            free__13gfHeapManagerFPv(self->p204);
+            self->p204 = 0;
+        }
+        entry = self->entries;
+        for (i = 0; i < count; ++i, ++entry)
+            deleteBlock__6stEditFP11stEditBlock(self, entry);
+        self->count = 0;
+        fn_27_232C18(self->a0);
+        if (!lbl_27_bss_5780) {
+            void* p = __nw__FUlQ25Heaps8HeapType(0x54, 2);
+            if (p)
+                p = __ct__13stAreaManagerFv(p);
+            lbl_27_bss_5780 = p;
+        }
+        eraseAll__13stAreaManagerFv(lbl_27_bss_5780);
+    }
+    Sound* sound = self->sounds;
+    Object* cursor = self;
+    int j = 0;
+    for (; j < self->soundCount; ++j) {
+        stopSE__14snd3DGeneratorFll(sound, cursor->handles[0], 0);
+        cursor = (Object*)((char*)cursor + 4);
+        sound++;
+    }
+    self->soundCount = 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23087C {
+// Status: 99.0% match (6 lines differ). Remaining diff: the original has `frsp`
+// after `fabs` on the |normal.y| test.
+
+extern "C" {
+extern const float lbl_27_rodata_3798[];
+}
+
+extern "C" void fn_27_23087C(void* arg0) {
+    Vec3f dir;
+    Vec3f hit;
+    Vec3f normal;
+    Vec3f hit2;
+
+    dir.m_x = lbl_27_rodata_3798[27];
+    dir.m_y = lbl_27_rodata_3798[69];
+    dir.m_z = lbl_27_rodata_3798[27];
+
+    char* p = (char*)arg0;
+    u32 i = 0;
+    do {
+        Vec3f pos = *(Vec3f*)(p + 0x26C);
+        pos.m_y += lbl_27_rodata_3798[28];
+        if (stRayCheck(&pos, &dir, &hit, &normal, true, 0, false, 7)) {
+            float ay = (float)(double)nw4r::math::FAbs(normal.m_y);
+            if (ay < lbl_27_rodata_3798[70]) {
+                if (normal.m_x > lbl_27_rodata_3798[27]) {
+                    pos.m_x += lbl_27_rodata_3798[49];
+                } else {
+                    pos.m_x -= lbl_27_rodata_3798[49];
+                }
+                if (stRayCheck(&pos, &dir, &hit2, &normal, true, 0, false, 7)) {
+                    hit = hit2;
+                }
+            }
+            *(Vec3f*)(p + 0x26C) = hit;
+        }
+        i++;
+        p += 12;
+    } while (i < 4);
+}
+}
+

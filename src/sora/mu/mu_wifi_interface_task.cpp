@@ -4008,3 +4008,547 @@ extern "C" void fn_800CD934(void* self, u8 count) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_800CBCB0 {
+struct NameTable { const char* names[15]; };
+struct State { u8 padding[0xFCB]; u8 initialized : 1; u8 otherFlags : 7; };
+
+extern "C" {
+int _getNetworkError__19muWifiInterfaceTaskFPi(u8*, int*);
+int _getNetworkErrorLevel__19muWifiInterfaceTaskFv(void*);
+void flushLogToSDCard__Fv();
+void netReport__FPCce(const char*, ...);
+int isNetCondOnline__6NtBaseFv();
+void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+void* __ct__16ntFriendInfoSaveFv(void*);
+void startSave__16ntFriendInfoSaveFQ25Heaps8HeapTypeb(void*, int, int);
+void netMinReport__FPCce(const char*, ...);
+extern NameTable lbl_80408500;
+extern char lbl_80457158[];
+extern int s_savingCount__16ntFriendInfoSave;
+}
+
+inline const char* errorName(int idx, const char* base) {
+    NameTable table = lbl_80408500;
+    if (idx < 0 || idx >= 15)
+        return base + 0xA78;
+    return table.names[idx];
+}
+
+extern "C" int fn_800CBCB0(void* self, int* arg1) {
+    const char* base = lbl_80457158;
+    int idx = _getNetworkError__19muWifiInterfaceTaskFPi((u8*)self, arg1);
+    if (idx == 0)
+        return idx;
+    int r = _getNetworkErrorLevel__19muWifiInterfaceTaskFv(self);
+    if (!((State*)self)->initialized) {
+        flushLogToSDCard__Fv();
+        if (r != 1) {
+            netReport__FPCce(base + 0xA8C, errorName(idx, base), *arg1, r);
+            netMinReport__FPCce(base + 0xAB4, errorName(idx, base), *arg1, r);
+            return idx;
+        }
+        ((u8*)self)[0xFCB] |= 0x80;
+        if (isNetCondOnline__6NtBaseFv() && s_savingCount__16ntFriendInfoSave == 0) {
+            void* obj = __nw__FUlQ25Heaps8HeapType(0x48, 6);
+            if (obj) obj = __ct__16ntFriendInfoSaveFv(obj);
+            if (obj) startSave__16ntFriendInfoSaveFQ25Heaps8HeapTypeb(obj, 6, 1);
+        }
+    }
+    if (s_savingCount__16ntFriendInfoSave != 0) {
+        netReport__FPCce(base + 0xAD8);
+        return 0;
+    }
+    netReport__FPCce(base + 0xA8C, errorName(idx, base), *arg1, r);
+    netMinReport__FPCce(base + 0xAB4, errorName(idx, base), *arg1, r);
+    return idx;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800D051C {
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef signed int s32;
+
+extern "C" u8 getParentAID__7NetworkFv();
+extern "C" u8 getMyAID__7NetworkFv();
+extern "C" void netReport__FPCce(const char*, ...);
+extern char lbl_80457158[];
+
+struct Slot {
+    u8 player;
+    u8 sub;
+    u8 padding[2];
+    signed int state : 8;
+    unsigned int reserved : 24;
+};
+
+struct FlagByte {
+    u8 flag : 1;
+    u8 rest : 7;
+};
+
+struct Entry {
+    u8 data[0x68];
+    u8 states[4];
+    u8 padding[0xC];
+    u8 active : 1;
+    u8 flags : 7;
+    u8 remaining[0x218 - 0x79];
+};
+
+struct Parent {
+    u8 padding[0x70];
+    Entry entries[5];
+};
+
+inline u8 localIdx() {
+    u8 l = getMyAID__7NetworkFv();
+    if (l == 0xFF)
+        l = 4;
+    return l;
+}
+
+inline u8* localEntry(u8* self) {
+    return (u8*)&((Parent*)self)->entries[localIdx()];
+}
+
+inline Entry* selectedEntry(u8* self) {
+    u8 idx = getParentAID__7NetworkFv();
+    if (idx == 0xFF)
+        return (Entry*)localEntry(self);
+    Entry* entry = (Entry*)((unsigned int)self + idx * 0x218 + 0x70);
+    if (!entry->active)
+        return (Entry*)localEntry(self);
+    return entry;
+}
+
+inline void markPlayer(u8* p, int value) {
+    if (p[0xC5] == 0)
+        p[0xC5] = value;
+}
+
+inline int perform(int sub, void* arg0, unsigned int player) {
+    int i;
+    Slot* slot;
+    u8 pi;
+    u8* e;
+    char* text = lbl_80457158;
+    u8* base = (u8*)arg0;
+    slot = (Slot*)(base + 0x4C);
+
+    for (i = 0; i < 4; ++i, ++slot) {
+        if (slot->player == player && slot->sub == sub &&
+            slot->state == 1) {
+            netReport__FPCce(text + 0x11CC, i, player, sub);
+            return 1;
+        }
+    }
+
+    slot = (Slot*)(base + 0x4C);
+    for (i = 0; i < 4; ++i, ++slot) {
+        if (slot->player == player && slot->sub == sub &&
+            slot->state == 3) {
+            netReport__FPCce(text + 0x120C, i, player, sub);
+            slot->state = 1;
+            if (sub == 0) {
+                u16 v = *(u16*)(base + 0x1050);
+                *(u16*)(base + 0xFDA) = v * 0x3C;
+                netReport__FPCce(text + 0x1050, v);
+            }
+            return 1;
+        }
+    }
+
+    slot = (Slot*)(base + 0x4C);
+    for (i = 0; i < 4; ++i, ++slot) {
+        if (slot->player == 0xFF) {
+            netReport__FPCce(text + 0x1254, i, player, sub);
+            slot->player = player;
+            slot->sub = sub;
+            slot->state = 1;
+            ((FlagByte*)((u8*)slot + 5))->flag = 0;
+            if (sub == 0) {
+                markPlayer(base + player * 0x218, 1);
+                u16 v = *(u16*)(base + 0x1050);
+                *(u16*)(base + 0xFDA) = v * 0x3C;
+                netReport__FPCce(text + 0x1050, v);
+            }
+            return 1;
+        }
+    }
+
+    int do4 = (base[0xFCA] >> 5) & 1;
+    if (do4 == 0) {
+        u8 idx = getParentAID__7NetworkFv();
+        if (idx == 0xFF)
+            e = 0;
+        else
+            e = (u8*)&((Parent*)base)->entries[idx];
+        if (e == 0)
+            e = localEntry(base);
+        pi = e[0x79];
+        int m;
+        if (pi >= 4) {
+            m = 0;
+        } else {
+            Entry* selected = selectedEntry(base);
+            m = selected->states[pi] == 1;
+        }
+        u8 target = m ? e[0x79] : 0xFF;
+        do4 = target == localIdx();
+    }
+
+    if (do4) {
+        slot = (Slot*)(base + 0x4C);
+        for (i = 0; i < 4; ++i, ++slot) {
+            u8 loc = localIdx();
+            if (slot->player == loc && ((FlagByte*)((u8*)slot + 5))->flag) {
+                netReport__FPCce(text + 0x129C, i, player, sub);
+                slot->player = player;
+                slot->sub = sub;
+                slot->state = 1;
+                ((FlagByte*)((u8*)slot + 5))->flag = 0;
+                if (sub == 0) {
+                    markPlayer(base + player * 0x218, 1);
+                    u16 v = *(u16*)(base + 0x1050);
+                    *(u16*)(base + 0xFDA) = v * 0x3C;
+                    netReport__FPCce(text + 0x1050, v);
+                }
+                return 1;
+            }
+        }
+    }
+
+    netReport__FPCce(text + 0x12EC, player, sub);
+    return 0;
+}
+
+extern "C" int fn_800D051C(void* arg0, short arg1, int arg2) {
+    return perform(arg2, arg0, arg1);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800D5C58 {
+
+extern "C" u8 getMyAID__7NetworkFv();
+extern "C" int isParent__6NtBaseFv();
+extern "C" u8 getParentAID__7NetworkFv();
+extern "C" void fn_800CD934(void*, u8);
+extern "C" void fn_800D0AE0(void*, void*);
+extern "C" void fn_80145B98(int, u8);
+extern char lbl_80457158[];
+extern int lbl_805A03A8;
+extern signed char lbl_805A0414;
+
+struct StatusWord {
+    signed int state : 8;
+    unsigned int rest : 24;
+};
+struct Slot {
+    StatusWord w;
+    u32 x;
+};
+struct Group {
+    Slot s[3];
+};
+struct Entry {
+    u8 pad[0x84];
+    Group g[4];
+};
+inline u8 localIndex() {
+    u8 index = getMyAID__7NetworkFv();
+    if (index == 0xFF) index = 4;
+    return index;
+}
+inline u8* selectedEntry(u8* self) {
+    u8 index = getParentAID__7NetworkFv();
+    if (index == 0xFF) return 0;
+    return (u8*)((u32)self + 0x70 + index * 0x218);
+}
+inline int countSelected(u8* self) {
+    int count;
+    u8 i;
+    Entry* entry = (Entry*)selectedEntry(self);
+    if (entry == 0) {
+        count = -1;
+    } else {
+        count = 0;
+        for (i = 0; i < 4; i++) {
+            for (u8 j = 0; j < 3; j++) {
+                if (entry->g[i].s[j].w.state != 0) count++;
+            }
+        }
+    }
+    return count;
+}
+extern "C" int requestApproval__19muWifiInterfaceTaskFi(u8* self, int slotIndex) {
+    u8* slot;
+    const char* const base = lbl_80457158;
+    u8* selected;
+    int offset;
+    u8 value;
+    if ((isParent__6NtBaseFv() != 0 && lbl_805A0414 == 1) || localIndex() == 4) {
+        if (slotIndex == 0 || slotIndex >= 4) return 0;
+        u8* local = self + localIndex() * 0x218;
+        u8* sel = self + localIndex() * 0x218;
+        u8* slots = local + 0xA8;
+        if (sel[0xDC] != 0xFF) {
+            netReport(base + 0x1E30, sel[0xDC], sel[0xDD]);
+            return 0;
+        }
+        if (countSelected(self) >= 4) {
+            netReport(base + 0x1E6C);
+            return 0;
+        }
+        int first = ((StatusWord*)(slots + 8))->state;
+        int second;
+        if (first > 1 || (second = ((StatusWord*)(slots + 0x10))->state) > 1) {
+            netReport(base + 0x1E98);
+            return 0;
+        }
+        u8 index = 0;
+        if (first == 0) index = 1;
+        else if (second == 0) index = 2;
+        if (index == 0) {
+            netReport(base + 0x1EDC);
+            return 0;
+        }
+        ((StatusWord*)(slots + index * 8))->state = 1;
+        slotIndex *= 8;
+        ((StatusWord*)(self + slotIndex + 0x50))->state = 1;
+        *(self + slotIndex + 0x4C) = localIndex();
+        *(self + slotIndex + 0x4D) = index;
+        netReport(base + 0x1F10, localIndex(), index);
+        u8 count = 0;
+        for (int i = 0; i < 4; i++) {
+            if (((StatusWord*)(slots + i * 8))->state != 0) count++;
+        }
+        if (self[0xFD5] != count) {
+            netReport(base + 0x1194, self[0xFD5], count);
+            self[0xFD5] = count;
+            self[0xFCA] |= 4;
+            fn_800CD934(self, count);
+        }
+        return 1;
+    }
+    if (localIndex() == 4) {
+        netReport(base + 0x1B78);
+        return 0;
+    }
+    if (slotIndex != 0) {
+        s8* e = (s8*)selectedEntry(self);
+        int n;
+        if (e == 0) n = 1;
+        else {
+            n = 0;
+            if (e[0x68] == 1) n = 1;
+            if (e[0x69] == 1) n++;
+            if (e[0x6A] == 1) n++;
+            if (e[0x6B] == 1) n++;
+        }
+        if (n < 2) {
+            netReport(base + 0x1F50);
+            return 0;
+        }
+    }
+    {
+        u8* local = self + localIndex() * 0x218;
+        u8 host = getParentAID__7NetworkFv();
+        if (host == 0xFF)
+            selected = 0;
+        else
+            selected = (u8*)((u32)self + 0x70 + host * 0x218);
+        if (selected == 0) {
+            netReport(base + 0x1B90);
+            return 0;
+        }
+        u8* slots = local + 0xA8;
+        if (slotIndex == 0) {
+            if ((self[0xFC9] >> 3) & 1) {
+                u8* p = selected + localIndex() * 0x18;
+                u8 hv = p[0x85];
+                p[0x85] = 0x7B;
+                *(selected + localIndex() + 0x68) = 2;
+                hv = (hv + 1) % 255;
+                ((StatusWord*)slots)->state = 2;
+                slots[1] = hv;
+                ((StatusWord*)(self + 0x50))->state = 3;
+                self[0x4C] = localIndex();
+                self[0x4D] = 0;
+                self[0x4F] = hv;
+                netReport(base + 0x1F70, localIndex(), hv);
+            }
+            u8 hostIndex = getParentAID__7NetworkFv();
+            u8* q = self + localIndex() * 0x218;
+            q[0xC6] |= 1;
+            fn_800D0AE0(self, q);
+            fn_80145B98(lbl_805A03A8, hostIndex);
+            *(u16*)(self + 0xFDC) = 0x12C0;
+            return 1;
+        }
+        if (selected[0x6C] != 0xFF) {
+            netReport(base + 0x1FB8, selected[0x6C], selected[0x6D]);
+            return 0;
+        }
+        offset = slotIndex * 8;
+        slot = self + offset;
+        if (slot[0x4C] != 0xFF) return 0;
+        int state = ((StatusWord*)(slot + 0x50))->state;
+        if (state == 1) {
+            netReport(base + 0x1FF0, selected[0x6C], selected[0x6D]);
+            return 0;
+        }
+        if (state == 3) {
+            netReport(base + 0x2040);
+            return 0;
+        }
+        if (countSelected(self) >= 4) {
+            netReport(base + 0x1E6C);
+            return 0;
+        }
+        int first = ((StatusWord*)(slots + 8))->state;
+        int second;
+        if (first > 1 || (second = ((StatusWord*)(slots + 0x10))->state) > 1) {
+            netReport(base + 0x1E98);
+            return 0;
+        }
+        u8 index = 0;
+        if (first == 0) index = 1;
+        else if (second == 0) index = 2;
+        if (index == 0) {
+            netReport(base + 0x1EDC);
+            return 0;
+        }
+        Slot* remoteSlot = &((Entry*)selected)->g[localIndex()].s[index];
+        value = (((u8*)remoteSlot)[1] + 1) % 255;
+        ((StatusWord*)(slots + index * 8))->state = 2;
+        ((u8*)&((Slot*)slots)[index])[1] = value;
+        ((StatusWord*)(slot + 0x50))->state = 3;
+        slot[0x4C] = localIndex();
+        (self + offset)[0x4D] = index;
+        (self + offset)[0x4F] = value;
+        u8 selectedIndex = getParentAID__7NetworkFv();
+        u8* q = self + localIndex() * 0x218;
+        q[0xC6] |= 1;
+        fn_800D0AE0(self, q);
+        fn_80145B98(lbl_805A03A8, selectedIndex);
+        netReport(base + 0x2068, localIndex(), index, value);
+        return 1;
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800D64A8 {
+extern "C" {
+u8 getMyAID__7NetworkFv();
+u8 getParentAID__7NetworkFv();
+void netReport__FPCce(const char*, ...);
+extern char lbl_80457158[];
+extern u8 lbl_805A0414;
+}
+inline void countPlayers(s32& count, u8& i, u8* p) {
+    if (p == 0) count = -1;
+    else {
+        count = 0;
+        for (i = 0; i < 4; i++) {
+            u8* q = p + i * 0x18;
+            for (int j = 0; j < 3; j++) {
+                if ((*(s32*)(q + 0x84 + j * 8) >> 24) != 0) count++;
+            }
+        }
+    }
+}
+extern "C" s32 testRequestApproval__19muWifiInterfaceTaskFi(u8* self, s32 slot) {
+u8* gg;
+u8 idx;
+u8 l;
+u32 ctr;
+u8 kk;
+u8 kkb;
+u8* e;
+u8* sub;
+u8* p;
+s32 r6;
+s32 r6b;
+s32 cnt;
+s32 r;
+s32 b0;
+s32 b8;
+s32 r3;
+const char* base;
+base = lbl_80457158;
+gg = (u8*)g_GameGlobal->m_selCharData;
+if (gg[6] != 0) return 0;
+idx = getMyAID__7NetworkFv();
+if (idx == 0xFF) idx = 4;
+e = self + idx * 0x218;
+if (!((e[0xE8] >> 7) & 1) || (s32)lbl_805A0414 > 1) {
+    l = getMyAID__7NetworkFv();
+    if (l == 0xFF) l = 4;
+    if (l != 4) goto D;
+}
+if (slot == 0 && slot >= 4) return 0;
+if ((*(s32*)(self + slot * 8 + 0x50) >> 24) == 1) return 0;
+idx = getParentAID__7NetworkFv();
+p = (idx == 0xFF) ? 0 : (u8*)((s32)self + idx * 0x218 + 0x70);
+countPlayers(r6, kk, p);
+if (r6 >= 4) return 0;
+b0 = *(s32*)(e + 0xB0) >> 24;
+r3 = 0;
+if (b0 == 0) r3 = 1;
+else {
+    b8 = *(s32*)(e + 0xB8) >> 24;
+    if (b8 == 0) r3 = 2;
+}
+return r3 != 0;
+D:
+l = getMyAID__7NetworkFv();
+if (l == 0xFF) l = 4;
+if (l == 4) return 0;
+if (slot != 0) {
+    idx = getParentAID__7NetworkFv();
+    sub = (idx == 0xFF) ? 0 : self + idx * 0x218 + 0x70;
+    if (sub == 0) cnt = 1;
+    else {
+        cnt = 0;
+        if ((s32)sub[0x68] == 1) cnt = 1;
+        if ((s32)sub[0x69] == 1) cnt++;
+        if ((s32)sub[0x6A] == 1) cnt++;
+        if ((s32)sub[0x6B] == 1) cnt++;
+    }
+    if (cnt < 2) return 0;
+}
+idx = getParentAID__7NetworkFv();
+sub = (idx == 0xFF) ? 0 : (u8*)((s32)self + idx * 0x218 + 0x70);
+if (sub == 0) return 0;
+if (sub[0x6C] != 0xFF) return 0;
+if ((self + slot * 8)[0x4C] != 0xFF) return 0;
+r = *(s32*)(self + slot * 8 + 0x50) >> 24;
+if (r == 1) {
+    netReport__FPCce(base + 0x20B8, sub[0x6C], sub[0x6D]);
+    return 0;
+}
+if (r == 3) {
+    netReport__FPCce(base + 0x2100, sub[0x6C], sub);
+    return 0;
+}
+idx = getParentAID__7NetworkFv();
+p = (idx == 0xFF) ? 0 : (u8*)((s32)self + idx * 0x218 + 0x70);
+countPlayers(r6b, kkb, p);
+if (r6b >= 4) return 0;
+b0 = *(s32*)(e + 0xB0) >> 24;
+if (b0 > 1 || (b8 = *(s32*)(e + 0xB8) >> 24) > 1) {
+    netReport__FPCce(base + 0x2120);
+    return 0;
+}
+r3 = 0;
+if (b0 == 0) r3 = 1;
+else if (b8 == 0) r3 = 2;
+return r3 != 0;
+}
+}
+

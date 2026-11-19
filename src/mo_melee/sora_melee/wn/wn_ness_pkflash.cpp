@@ -103,3 +103,68 @@ void wnNessPKFlash::onDeactivate() {
 void wnNessPKFlash::shoot() {
     m_moduleAccesser->getStatusModule().changeStatusForce(1, m_moduleAccesser);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_32AC70 {
+extern "C" void* fn_27_32AC70(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x7f8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_32B7D8 {
+extern "C" void* fn_27_32B7D8(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x9c;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_32B7E0 {
+extern "C" void* fn_27_32B7E0(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x4;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_32B7E8 {
+extern "C" void* fn_27_32B7E8(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x120;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_32DCC8 {
+extern "C" void fn_27_32A724(void*);
+
+extern "C" void fn_27_32DCC8(void* self) {
+    fn_27_32A724(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_32DCD0 {
+extern "C" void fn_27_32A724(void*);
+
+extern "C" void fn_27_32DCD0(void* self) {
+    fn_27_32A724(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_32DCD8 {
+extern "C" void fn_27_32A724(void*);
+
+extern "C" void fn_27_32DCD8(void* self) {
+    fn_27_32A724(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_32DCF0 {
+extern "C" void fn_27_32DA50(void*);
+
+extern "C" void fn_27_32DCF0(void* self) {
+    fn_27_32DA50(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

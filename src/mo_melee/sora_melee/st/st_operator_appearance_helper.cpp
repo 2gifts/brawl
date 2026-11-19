@@ -24,3 +24,32 @@ void stOperatorAppearanceHelper::startOperator() {
         }
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_2450E4 {
+extern "C" {
+    extern u8* g_IfAdvMngr;
+    void* getPlayerLocator__8IfPlayerFv();
+    void addPressStart__10IfAdvGaugeFPQ34nw4r3g3d12ScnMdlExpand(void* a, void* b);
+    void removePressStart__10IfAdvGaugeFPQ34nw4r3g3d12ScnMdlExpand(void* a, void* b);
+}
+
+extern "C" void endOperator__26stOperatorAppearanceHelperFv(u8* self) {
+    u8* mgr = g_IfAdvMngr;
+    if (mgr) {
+        mgr[0x48] &= ~0x40;
+        if (*(void**)(mgr + 0x104)) {
+            u32 flag = (u32)(mgr[0x48] >> 6) & 1u;
+            if (flag == 1u) {
+                void* r = getPlayerLocator__8IfPlayerFv();
+                addPressStart__10IfAdvGaugeFPQ34nw4r3g3d12ScnMdlExpand(*(void**)(mgr + 0x104), r);
+            } else {
+                void* r = getPlayerLocator__8IfPlayerFv();
+                removePressStart__10IfAdvGaugeFPQ34nw4r3g3d12ScnMdlExpand(*(void**)(mgr + 0x104), r);
+            }
+        }
+    }
+    self[0x50] = 0;
+}
+}
+

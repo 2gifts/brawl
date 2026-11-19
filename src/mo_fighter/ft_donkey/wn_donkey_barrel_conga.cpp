@@ -38,3 +38,11 @@ void wnDonkeyBarrelConga::activate(int founderTaskId, int resourceId, int team) 
     Weapon::activate(&desc);
     updateNodeSRT();
 }
+
+// TODO: clean up, give variables real names
+namespace jj_12A38 {
+extern "C" s32 fn_92_12A38(void) {
+    return -0x1;
+}
+}
+

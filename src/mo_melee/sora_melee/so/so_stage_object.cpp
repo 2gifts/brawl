@@ -612,3 +612,132 @@ void StageObject::processUpdate() {
     acc->getGroundModule().update(soSlow::getInstance()->isAdjust() == 1);
     acc->getGroundModule().updateGrCollisionMatrix();
 }
+
+// TODO: clean up, give variables real names
+namespace jj_3AD0 {
+extern "C" {
+void initialize__7soWorldFv();
+void* __ct__18soCollisionManagerFv(void*);
+void fn_27_4FE14(void*, void*, void*, void*, void*);
+void* fn_27_C152C(void*);
+void fn_27_C673C();
+void initialize__14soSoundManagerFiQ25Heaps8HeapType(void*, int, int);
+void fn_27_C2CA8(void*, int, int);
+void* __ct__21soEffectScreenManagerFv(void*);
+void initialize__21soEffectScreenManagerFv(void*);
+void* __ct__14soCatchManagerFv(void*);
+void* __ct__6soSlowFv(void*);
+
+extern void* ms_instance__6soSlow;
+extern void* g_soCollisionManager;
+extern void* lbl_27_bss_2BD8;
+extern void* lbl_27_bss_D0;
+extern void* lbl_27_bss_2BEC;
+extern void* lbl_27_bss_2B78;
+extern void* lbl_27_bss_F8;
+
+void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+}
+
+extern "C" void fn_27_3AD0(void* arg0, void* arg1, void* arg2, void* arg3) {
+    initialize__7soWorldFv();
+    if (ms_instance__6soSlow == 0) {
+        void* ptr = __nw__FUlQ25Heaps8HeapType(0x4c, 2);
+        if (ptr != 0) {
+            ptr = __ct__6soSlowFv(ptr);
+        }
+        ms_instance__6soSlow = ptr;
+    }
+    if (g_soCollisionManager == 0) {
+        void* ptr = __nw__FUlQ25Heaps8HeapType(0x1508, 2);
+        if (ptr != 0) {
+            ptr = __ct__18soCollisionManagerFv(ptr);
+        }
+        g_soCollisionManager = ptr;
+    }
+    fn_27_4FE14(g_soCollisionManager, arg0, arg1, arg2, arg3);
+    if (lbl_27_bss_2BD8 == 0) {
+        void* ptr = __nw__FUlQ25Heaps8HeapType(0xa4, 2);
+        if (ptr != 0) {
+            ptr = fn_27_C152C(ptr);
+        }
+        lbl_27_bss_2BD8 = ptr;
+    }
+    fn_27_C673C();
+    initialize__14soSoundManagerFiQ25Heaps8HeapType(&lbl_27_bss_D0, 0x80, 2);
+    fn_27_C2CA8(&lbl_27_bss_2BEC, 0xbb8, 2);
+    if (lbl_27_bss_2B78 == 0) {
+        void* ptr = __nw__FUlQ25Heaps8HeapType(0x140, 2);
+        if (ptr != 0) {
+            ptr = __ct__21soEffectScreenManagerFv(ptr);
+        }
+        lbl_27_bss_2B78 = ptr;
+    }
+    initialize__21soEffectScreenManagerFv(lbl_27_bss_2B78);
+    if (lbl_27_bss_F8 == 0) {
+        void* ptr = __nw__FUlQ25Heaps8HeapType(0x4c, 2);
+        if (ptr != 0) {
+            ptr = __ct__14soCatchManagerFv(ptr);
+        }
+        lbl_27_bss_F8 = ptr;
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_6610 {
+extern "C" {
+void __dl__FPv(void* p);
+}
+
+extern "C" void* __dt__19soMotionChangeParamFv(void* p, s32 n) {
+    if (p) {
+        if (n > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_71BC {
+extern "C" {
+void __dl__FPv(void* p);
+void* fn_27_71BC(void* p, s32 n);
+}
+
+void* fn_27_71BC(void* p, s32 n) {
+    if (p != nullptr && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7230 {
+#pragma inline_depth(3)
+struct Item { int pad0; int key; };
+class Object_vptr_0 {
+public:
+ virtual void slot0();
+ virtual void slot1();
+ virtual Item* slot2(int);
+};
+struct Compare {
+ int operator()(Item* a, Item* b) const {
+  if (a->key == b->key) return 0;
+  return a->key < b->key ? -1 : 1;
+ }
+};
+extern "C" int fn_27_7230(Item* item, Object_vptr_0* source, Compare cmp, int lo, int hi) {
+ int mid = lo + (hi-lo)/2;
+ int c = cmp(item, source->slot2(mid));
+ if (c == 0) return mid;
+ if (lo == hi) return -(lo+1);
+ if (c > 0) return fn_27_7230(item,source,cmp,mid+1,hi);
+ return fn_27_7230(item,source,cmp,lo,mid);
+}
+}
+

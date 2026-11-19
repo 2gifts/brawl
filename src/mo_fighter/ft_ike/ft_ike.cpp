@@ -559,3 +559,240 @@ bool ftIke::notifyEventCollisionShieldCheck() {
     }
     return Fighter::notifyEventCollisionShieldCheck();
 }
+
+#include <so/so_module_accesser.h>
+#include <cmath>
+#include <mt/mt_vector.h>
+// TODO: clean up, give variables real names
+namespace jj_7980 {
+
+extern "C" {
+extern const float lbl_119_rodata_1C;
+extern const float lbl_119_rodata_20;
+void __as__5Vec3fFRC5Vec3f(Vec3f*, const Vec3f&);
+Vec3f getFinalTargetPosBaseWork__5ftIkeFP16soModuleAccesser(soModuleAccesser*);
+float fn_119_7C5C(float);
+void fn_119_12ED0(void*, Vec3f*, float, Vec3f*, Vec3f*, float, int);
+}
+
+extern "C" int shootArticle__5ftIkeFP10wnIkeSwordP16soModuleAccesser(void* self, soModuleAccesser* accesser) {
+    float scale = accesser->getPostureModule().getLr();
+    Vec3f start;
+    Vec3f offset;
+    offset.m_x = lbl_119_rodata_1C;
+    offset.m_y = soValueAccesser::getConstantFloat(accesser, 0xfcd, 0);
+    offset.m_z = soValueAccesser::getConstantFloat(accesser, 0xfcc, 0);
+    __as__5Vec3fFRC5Vec3f(&start, accesser->getModelModule().getNodeGlobalPosition(0, &offset, false, false));
+    Vec3f end = getFinalTargetPosBaseWork__5ftIkeFP16soModuleAccesser(accesser);
+    float lr = accesser->getPostureModule().getScale();
+    float work = accesser->getWorkManageModule().getFloat(0x2100000b);
+    float x = lr * soValueAccesser::getConstantFloat(accesser, 0xfc3, 0);
+    end.m_x += x * work;
+    end.m_y += lr * soValueAccesser::getConstantFloat(accesser, 0xfc4, 0);
+    Vec3f middle;
+    middle.m_x = start.m_x + lbl_119_rodata_20 * (end.m_x - start.m_x);
+    float high;
+    float low = start.m_y;
+    if (low > end.m_y) {
+        high = low;
+        low = end.m_y;
+    } else {
+        high = end.m_y;
+    }
+    float limit = soValueAccesser::getConstantFloat(accesser, 0xfca, 0);
+    if (fn_119_7C5C(end.m_y - start.m_y) >= limit) {
+        middle.m_y = high + soValueAccesser::getConstantFloat(accesser, 0xfcb, 0);
+    } else {
+        middle.m_y = low + soValueAccesser::getConstantFloat(accesser, 0xfca, 0);
+        float other = soValueAccesser::getConstantFloat(accesser, 0xfcb, 0);
+        if (fn_119_7C5C(high - middle.m_y) < other)
+            middle.m_y = high + soValueAccesser::getConstantFloat(accesser, 0xfcb, 0);
+    }
+    middle.m_z = start.m_z;
+    float value = soValueAccesser::getConstantFloat(accesser, 0xfce, 0);
+    int id = soValueAccesser::getConstantInt(accesser, 0x5dc9, 0);
+    fn_119_12ED0(self, &start, scale, &middle, &end, value, id);
+    return 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7C40 {
+struct Vec3f {
+    float m_x;
+    float m_y;
+    float m_z;
+};
+
+extern "C" void __as__5Vec3fFRC5Vec3f(Vec3f* object, const Vec3f* value) {
+    object->m_x = value->m_x;
+    object->m_y = value->m_y;
+    object->m_z = value->m_z;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7C5C {
+
+extern "C" float fn_119_7C5C(float value) {
+    return __fabsf(value);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8398 {
+
+struct IkeEvent {
+    int kind;
+    char flag;
+    char pad[3];
+    int target;
+    int action;
+    int owner;
+    float value;
+    char extra[8];
+};
+
+extern "C" {
+extern const float lbl_119_rodata_0[];
+extern char __RTTI__11StageObject[], __RTTI__6gfTask[];
+
+void* __dynamic_cast(void*, long, const void*, const void*, short);
+void sub__5Vec3fFPC5Vec3fP5Vec3f(const Vec3f*, const Vec3f*, Vec3f*);
+float length__5Vec3fFv(Vec3f*);
+void __ct__19soLinkEventIkeFinalFii(IkeEvent*, int, int);
+int getLoopDamageMotionVariation__5ftIkeFv(void*);
+Vec3f getFinalTargetPosBaseWork__5ftIkeFP16soModuleAccesser(soModuleAccesser*);
+float getTargetLr__27ftIkeStatusUniqProcessFinalFP5Vec3fP5Vec3fP16soModuleAccesser(Vec3f*, Vec3f*, soModuleAccesser*);
+void notifyEventCollisionAttackCheck__7FighterFUl(void*, int);
+}
+
+extern "C" void fn_119_8398(void* self, int arg) {
+    const float* constants = lbl_119_rodata_0;
+    soModuleAccesser* accesser = *(soModuleAccesser**)((char*)self + 0x60);
+
+    if (accesser->getWorkManageModule().isFlag(0x22000014)) {
+        if (accesser->getStatusModule().getStatusKind() == 0x116 ||
+            accesser->getStatusModule().getStatusKind() == 0x124) {
+            Vec3f position = accesser->getPostureModule().getPos();
+            int count = accesser->getWorkManageModule().getInt(0x20000001);
+            IkeEvent event;
+            unsigned int ids[6];
+            float distances[6];
+
+            long i = 0;
+            while (i < count) {
+                (ids + i)[0] =
+                    accesser->getWorkManageModule().getInt(0x20000002 + i);
+                gfTask* task = gfTaskScheduler::getInstance()->getTaskById(
+                    (gfTask::Category)10, i[ids]);
+                StageObject* object = (StageObject*)__dynamic_cast(
+                    task, 0x3c, __RTTI__11StageObject, __RTTI__6gfTask, 1);
+                Vec3f target = soExternalValueAccesser::getPos(object);
+                Vec3f delta;
+                sub__5Vec3fFPC5Vec3fP5Vec3f(&target, &position, &delta);
+                delta.m_z = constants[7];
+                delta.m_y = constants[7];
+                i[distances] = length__5Vec3fFv(&delta);
+                i++;
+            }
+
+            __ct__19soLinkEventIkeFinalFii(&event, 0x28, -1);
+            if (accesser->getWorkManageModule().isFlag(0x22000015)) {
+                event.action = 0xf9;
+                accesser->getWorkManageModule().offFlag(0x22000015);
+            } else if (accesser->getStatusModule().getStatusKind() == 0x116) {
+                event.action = 0xf7;
+                if (count > 1) {
+                    unsigned int id;
+                    for (long i = 0; i < count - 1; i++) {
+                        int j = i + 1;
+                        float distance;
+                        while (j < count) {
+                            if (distances[j] < distances[i]) {
+                                id = i[ids];
+                                distance = distances[i];
+                                i[ids] = ids[j];
+                                distances[i] = distances[j];
+                                ids[j] = id;
+                                distances[j] = distance;
+                            }
+                            j++;
+                        }
+                    }
+                }
+
+                Vec3f point = getFinalTargetPosBaseWork__5ftIkeFP16soModuleAccesser(accesser);
+                soWorkManageModule& work = accesser->getWorkManageModule();
+                work.setFloat(
+                    getTargetLr__27ftIkeStatusUniqProcessFinalFP5Vec3fP5Vec3fP16soModuleAccesser(&point, &position, accesser), 0x21000011);
+            } else if (accesser->getStatusModule().getStatusKind() == 0x124) {
+                event.action = 0xf8;
+            }
+
+            if (accesser->getWorkManageModule().isFlag(0x22000017))
+                event.target = accesser->getWorkManageModule().getInt(0x20000008);
+
+            event.owner = *(int*)((char*)accesser->m_stageObject + 0x28);
+            float multiplier =
+                accesser->getWorkManageModule().getFloat(0x21000011);
+            float previous = constants[5];
+
+            for (int i = 0;
+                 i < accesser->getWorkManageModule().getInt(0x20000001);
+                 i++) {
+                accesser->getLinkModule().link(6, i[ids]);
+
+                if (accesser->getWorkManageModule().isFlag(0x22000018))
+                    event.target = getLoopDamageMotionVariation__5ftIkeFv(self);
+
+                if (i == 0) {
+                    accesser->getWorkManageModule().setFloat(
+                        constants[7], 0x21000010);
+                } else {
+                    float offset =
+                        accesser->getWorkManageModule().getFloat(0x21000010);
+                    previous = constants[8] *
+                        (previous + accesser->getLinkModule().getParentScale(6));
+                    float result = offset + multiplier *
+                        (previous * soValueAccesser::getConstantFloat(
+                            accesser, 0xfc2, 0));
+                    accesser->getWorkManageModule().setFloat(result, 0x21000010);
+                }
+
+                previous = accesser->getLinkModule().getParentScale(6);
+                accesser->getLinkModule().sendEventParents(
+                    6, *(soLinkEventArgs*)&event);
+                accesser->getLinkModule().unlink(6);
+            }
+        } else {
+            accesser->getStatusModule().getStatusKind();
+        }
+
+        accesser->getWorkManageModule().setInt(0, 0x20000001);
+        accesser->getWorkManageModule().offFlag(0x22000014);
+    }
+
+    notifyEventCollisionAttackCheck__7FighterFUl(self, arg);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8958 {
+
+extern "C" void sub__5Vec3fFPC5Vec3fP5Vec3f(const Vec3f* lhs, const Vec3f* rhs, Vec3f* pOut)
+{
+    Vec3fSub(pOut, lhs, rhs);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_C604 {
+extern "C" void fn_119_C604(void *p1, unsigned int p2, unsigned int p3)
+{
+    unsigned int *p = (unsigned int *)p1;
+    p[0] = p2;
+    p[1] = p3;
+}
+}
+

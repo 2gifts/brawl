@@ -1256,3 +1256,27 @@ void* fn_113_35F8(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_113_47B0(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_113_47F0(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+// TODO: clean up, give variables real names
+namespace jj_2F3C {
+extern "C" {
+void* __dt__22soControllerModuleImplFv(void*, short);
+void __dl__FPv(void*);
+
+void* __dt__25soControllerModuleLinkRefFv(void* object, short deleting) {
+    if (object != 0) {
+        __dt__22soControllerModuleImplFv(object, static_cast<short>(0));
+        if (deleting > 0) __dl__FPv(object);
+    }
+    return object;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80E8 {
+extern "C" const float lbl_113_rodata_8;
+
+extern "C" float getSlopeAngleLimit__25soModuleAccesserBuildDataCFv() { return lbl_113_rodata_8; }
+}
+

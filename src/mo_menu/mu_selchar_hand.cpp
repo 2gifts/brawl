@@ -336,3 +336,171 @@ int muSelCharHand::loadCollKind(int* arg, float* rect) {
     }
     return m_collKind;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_19FF4 {
+struct RO {
+    float a;
+    float b;
+    u8 pad[0x28];
+    u8 tbl[16];
+};
+extern "C" const RO lbl_10_rodata_7D0;
+
+struct VObj {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4();
+    virtual void f1c(float f);
+    virtual void v6(); virtual void v7(); virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+    virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
+    virtual void f48(int i, float f);
+};
+
+struct Inner { u8 pad[0x20]; int val; };
+
+static inline bool chk(const RO* r, u8* self, int idx, int flag) {
+    const u8* t;
+    if (!(flag == 0 && (t = r->tbl, t[*(int*)(self + 0x80)] != 0) && t[idx] != 0)) {
+        return false;
+    }
+    return true;
+}
+
+extern "C" {
+void setCharAnimID__13muSelCharHandFib(u8* self, int idx, int flag) {
+    const RO* r = &lbl_10_rodata_7D0;
+    if (!chk(r, self, idx, flag)) {
+        for (int i = 0; i < 11; i++) {
+            VObj* o = *(VObj**)(self + 0x7c);
+            o->f48(i, i == idx ? r->a : r->b);
+        }
+    }
+    u8* p = *(u8**)(self + idx * 4 + 0x50);
+    if (((Inner*)*(u8**)(p + 0x2c))->val == 0) {
+        ((VObj*)p)->f1c(r->b);
+    }
+    *(int*)(self + 0x80) = idx;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1A408 {
+
+
+struct RO {
+    float one;
+    float zero;
+    float small;
+};
+
+extern "C" {
+extern const RO lbl_10_rodata_7D0;
+
+void setHand__13muSelCharCoinFP13muSelCharHand(void*, int);
+void closeHandiList__19muSelCharPlayerAreaFv(void*);
+void closeCpLevelList__19muSelCharPlayerAreaFv(void*);
+void closeNameList__19muSelCharPlayerAreaFv(void*);
+void closeNameEntry__19muSelCharPlayerAreaFv(void*);
+void setRuleNumHoldCursorVisible__13muSelCharTaskFb(void*, int);
+void ScnMdl_SetNodeMtx__FPQ34nw4r3g3d6ScnMdlUlPC6Matrix(void*, int, Matrix*);
+}
+
+struct MenuObject {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void f34(void*, void*);
+    virtual void v14();
+    virtual void f3c(void*);
+};
+
+extern "C" void setForceNomalMode__13muSelCharHandFv(void* self) {
+    u8* p = reinterpret_cast<u8*>(self);
+    const float* values = &lbl_10_rodata_7D0.one;
+    u32 item;
+    if (&item != 0)
+        item = *reinterpret_cast<u32*>(p + 0xA8);
+    u32 action = *reinterpret_cast<u32*>(p + 0xA4);
+
+    switch (action) {
+    case 0:
+        break;
+    case 1:
+    case 2: {
+        setHand__13muSelCharCoinFP13muSelCharHand(*reinterpret_cast<void**>(p + 0xA0), 0);
+        *reinterpret_cast<void**>(p + 0xA0) = 0;
+
+        *reinterpret_cast<float*>(p + 0xCC) = values[2];
+
+        Vec3f rotation;
+        Vec3f scale;
+        scale.m_x = values[2];
+        scale.m_y = values[2];
+        scale.m_z = values[0];
+        rotation.m_x = values[1];
+        rotation.m_y = values[1];
+        rotation.m_z = values[1];
+
+        Matrix matrix(true);
+        matrix.setIdentity();
+        matrix.setSRT(scale, rotation, *reinterpret_cast<Vec3f*>(p + 0x90));
+        ScnMdl_SetNodeMtx__FPQ34nw4r3g3d6ScnMdlUlPC6Matrix(*reinterpret_cast<void**>(p + 0x44), 0, &matrix);
+        break;
+    }
+    case 3:
+        break;
+    case 5:
+        closeHandiList__19muSelCharPlayerAreaFv(*reinterpret_cast<void**>(
+            *reinterpret_cast<u8**>(*reinterpret_cast<u8**>(p + 0x9C) + 0x1F4)
+            + item * 4 + 0x44));
+        break;
+    case 6:
+        closeCpLevelList__19muSelCharPlayerAreaFv(*reinterpret_cast<void**>(
+            *reinterpret_cast<u8**>(*reinterpret_cast<u8**>(p + 0x9C) + 0x1F4)
+            + item * 4 + 0x44));
+        break;
+    case 7:
+        closeNameList__19muSelCharPlayerAreaFv(*reinterpret_cast<void**>(
+            *reinterpret_cast<u8**>(*reinterpret_cast<u8**>(p + 0x9C) + 0x1F4)
+            + item * 4 + 0x44));
+        break;
+    case 8:
+        closeNameEntry__19muSelCharPlayerAreaFv(*reinterpret_cast<void**>(
+            *reinterpret_cast<u8**>(*reinterpret_cast<u8**>(p + 0x9C) + 0x1F4)
+            + item * 4 + 0x44));
+        break;
+    case 4:
+        setRuleNumHoldCursorVisible__13muSelCharTaskFb(*reinterpret_cast<void**>(
+                       *reinterpret_cast<u8**>(p + 0x9C) + 0x1F4),
+                   0);
+        break;
+    }
+
+    MenuObject* object = *reinterpret_cast<MenuObject**>(p + 0x40);
+    u8* owner = *reinterpret_cast<u8**>(p + 0x9C);
+    u32 enabled = (*reinterpret_cast<u32*>(owner + 0x1DC) >> 31) ^ 1;
+
+    object->f3c(*reinterpret_cast<void**>(p + 0x44));
+
+    if (enabled && !p[0xDC]) {
+        object = *reinterpret_cast<MenuObject**>(p + 0x40);
+        object->f34(*reinterpret_cast<void**>(
+                        reinterpret_cast<u8*>(object) + 0xE4),
+                    *reinterpret_cast<void**>(p + 0x44));
+    }
+
+    p[0xD0] = enabled;
+    *reinterpret_cast<u32*>(p + 0xA4) = 0;
+    *reinterpret_cast<u32*>(p + 0xA8) = 0;
+}
+}
+

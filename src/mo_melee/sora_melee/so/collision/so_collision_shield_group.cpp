@@ -78,3 +78,52 @@ soCollisionShieldGroup::soCollisionShieldGroup() {
 Vec3f soCollisionShieldGroup::getCenterPos(soCollision* collision, u32 index) {
     return collision->getCollision(index, unk0)->getCenterPos();
 }
+
+// TODO: clean up, give variables real names
+namespace jj_46AE0 {
+extern "C" void __dl__FPv(void* p);
+
+extern "C" void* fn_27_46AE0(void* p, s32 n) {
+    if (p != 0 && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_46BB4 {
+struct Self {
+    s32 id;
+    s16 off;
+    s16 cnt;
+    char pad[0x88];
+    float x, y, z;
+};
+
+class Class_3FE0 {
+public:
+    virtual void __dt__37soCollisionShieldEventPresenterShieldFv();
+    virtual void* fn_27_4746C(s32);
+};
+
+extern "C" void* getCollision__11soCollisionFUlUl(void*, s32, s32);
+extern "C" void reset__21soCollisionShieldPartFP25soCollisionShieldPartUnit(void*, void*);
+
+extern "C" void fn_27_46BB4(Self* self, void* arg1, Class_3FE0* arg2, float x, float y, float z) {
+    self->x = x;
+    self->y = y;
+    self->z = z;
+    if (self->id != -1) {
+        void* p;
+        s32 i = 0;
+        while (i < self->cnt) {
+            p = arg2->fn_27_4746C(self->off + i);
+            void* q = getCollision__11soCollisionFUlUl(arg1, i, self->id);
+            reset__21soCollisionShieldPartFP25soCollisionShieldPartUnit(p, q);
+            i++;
+        }
+    }
+}
+}
+

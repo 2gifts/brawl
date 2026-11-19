@@ -306,3 +306,76 @@ extern "C" void fn_8005D7D8(Self* self, float delta) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_8005D5C8 {
+struct Slot {
+    u8 flag;
+    s8 ids[16];
+};
+
+struct Entry {
+    u8 b0;
+    u8 f : 8;
+    u8 b2;
+    u8 b3;
+    u8 b4;
+    u8 b5;
+    u8 b6;
+    u8 rest[25];
+};
+
+struct Screen {
+    Slot slots[9];
+    u8 pad[3];
+    Entry entries[10];
+    s32 x1DC;
+    u8 b1E0[9];
+};
+
+extern "C" void reset__8efScreenFv(Screen* self) {
+    int i;
+    int j;
+    self->x1DC = 0;
+    for (i = 0; i < 9; i++) {
+        self->b1E0[i] = 0;
+    }
+    for (i = 0; i < 9; i++) {
+        self->slots[i].flag = 0;
+        for (j = 0; j < 16; j++) {
+            self->slots[i].ids[j] = -1;
+        }
+    }
+    for (i = 0; i < 10; i++) {
+        self->entries[i].f = 0;
+        self->entries[i].b3 = 0;
+        self->entries[i].b4 = 0;
+        self->entries[i].b6 = 0;
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8005E344 {
+extern float lbl_805A1918;
+struct Col { unsigned char r, g, b, a; };
+struct Ent {
+    unsigned char pad[0x9D]; unsigned char k; unsigned char pad2[3]; unsigned char m;
+    unsigned char pad3[2]; unsigned char flags; unsigned char pad5[3]; float a8; float ac; Col c0; Col c1; Col c2;
+};
+struct Base { unsigned char b[0x20]; };
+
+extern "C" {
+void requestFill__8efScreenF14efScreenHandlefP8_GXColor(Base *base, signed char *idx, Col src, float farg0) {
+    Ent *p = (Ent *)(base + *idx);
+    if (p->k == 1 && p->m == 2) {
+        float f = lbl_805A1918;
+        p->flags &= 0xFFFFFF00;
+        p->ac = f;
+        p->a8 = farg0;
+        p->c0 = p->c2;
+        p->c1 = src;
+    }
+}
+}
+}
+

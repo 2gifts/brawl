@@ -107,3 +107,21 @@ bool wnKirbyFinalCutter::hop() {
     work.setFloat(length, 0x11000002);
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_23C94 {
+extern "C" void fn_96_23C94(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23C98 {
+extern "C" void fn_96_23C98(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23D24 {
+extern "C" u32 fn_96_23D24(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x10);
+}
+}
+

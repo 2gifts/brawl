@@ -390,3 +390,165 @@ wnRobotGyroStatusUniqProcessHold::~wnRobotGyroStatusUniqProcessHold() { }
 wnRobotGyroStatusUniqProcessMove::~wnRobotGyroStatusUniqProcessMove() { }
 
 wnRobotGyroStatusUniqProcessStop::~wnRobotGyroStatusUniqProcessStop() { }
+
+// TODO: clean up, give variables real names
+namespace jj_12540 {
+extern "C" void* fn_120_12540(void* p, short n) {
+    if (p != 0 && n > 0) {
+        ::operator delete(p);
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_13DC4 {
+struct RobotArticleMediatorStorage { void* primary; void* secondary; };
+struct RobotArticleMediatorRegistration { void* next; void* object; void* destructor; };
+
+class RobotArticleMediatorView {
+public:
+    virtual void slot00();
+    virtual void slot01();
+    virtual void slot02();
+    virtual void slot03();
+    virtual void slot04();
+    virtual void slot05();
+    virtual void dispatch();
+};
+
+extern "C" {
+extern signed char lbl_120_bss_384;
+extern RobotArticleMediatorStorage lbl_120_bss_388;
+extern RobotArticleMediatorRegistration lbl_120_bss_324;
+extern unsigned char __vt__18soArticleGenerator[], __vt__17soArticleOperator[];
+extern unsigned char __vt__17soArticleMediator[], lbl_120_data_78D8[];
+void* __dt__21soArticleMediatorNullFv(void*, short);
+void __register_global_object(void*, void*, void*);
+
+void fn_120_13DC4() {
+    if (lbl_120_bss_384 == 0) {
+        lbl_120_bss_388.primary = __vt__18soArticleGenerator;
+        lbl_120_bss_388.secondary = __vt__17soArticleOperator;
+        lbl_120_bss_388.primary = __vt__17soArticleMediator;
+        lbl_120_bss_388.secondary = __vt__17soArticleMediator + 0x10;
+        lbl_120_bss_388.primary = lbl_120_data_78D8;
+        lbl_120_bss_388.secondary = lbl_120_data_78D8 + 0x10;
+        __register_global_object(&lbl_120_bss_388,
+                                 reinterpret_cast<void*>(__dt__21soArticleMediatorNullFv),
+                                 &lbl_120_bss_324);
+        lbl_120_bss_384 = 1;
+    }
+    reinterpret_cast<RobotArticleMediatorView*>(&lbl_120_bss_388)->dispatch();
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_15F54 {
+struct RobotStorage {
+    void* primary;
+    void* secondary;
+};
+
+struct RobotRegistration {
+    void* next;
+    void* object;
+    void* destructor;
+};
+
+class RobotView {
+public:
+    virtual void slot00();
+    virtual void slot01();
+    virtual void slot02();
+    virtual void slot03();
+    virtual void slot04();
+    virtual void slot05();
+    virtual void dispatch();
+};
+
+extern "C" {
+extern signed char lbl_120_bss_384;
+extern RobotStorage lbl_120_bss_388;
+extern RobotRegistration lbl_120_bss_3C0;
+extern unsigned char __vt__18soArticleGenerator[];
+extern unsigned char __vt__17soArticleOperator[];
+extern unsigned char __vt__17soArticleMediator[];
+extern unsigned char lbl_120_data_78D8[];
+
+void __register_global_object(void*, void*, void*);
+void* __dt__21soArticleMediatorNullFv(void*, short);
+
+void fn_120_15F54() {
+    if (lbl_120_bss_384 == 0) {
+        lbl_120_bss_388.primary = __vt__18soArticleGenerator;
+        lbl_120_bss_388.secondary = __vt__17soArticleOperator;
+        lbl_120_bss_388.primary = __vt__17soArticleMediator;
+        lbl_120_bss_388.secondary = __vt__17soArticleMediator + 0x10;
+        lbl_120_bss_388.primary = lbl_120_data_78D8;
+        lbl_120_bss_388.secondary = lbl_120_data_78D8 + 0x10;
+
+        __register_global_object(&lbl_120_bss_388,
+                                 reinterpret_cast<void*>(__dt__21soArticleMediatorNullFv),
+                                 &lbl_120_bss_3C0);
+        lbl_120_bss_384 = 1;
+    }
+
+    reinterpret_cast<RobotView*>(&lbl_120_bss_388)->dispatch();
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_183D4 {
+struct RobotArticleMediatorStorage {
+    void* primary;
+    void* secondary;
+};
+
+struct RobotArticleMediatorRegistration {
+    void* next;
+    void* object;
+    void* destructor;
+};
+
+class RobotArticleMediatorView {
+public:
+    virtual void slot00();
+    virtual void slot01();
+    virtual void slot02();
+    virtual void slot03();
+    virtual void slot04();
+    virtual void slot05();
+    virtual void dispatch();
+};
+
+extern "C" {
+extern signed char lbl_120_bss_384;
+extern RobotArticleMediatorStorage lbl_120_bss_388;
+extern RobotArticleMediatorRegistration lbl_120_bss_418;
+extern unsigned char __vt__18soArticleGenerator[], __vt__17soArticleOperator[];
+extern unsigned char __vt__17soArticleMediator[], lbl_120_data_78D8[];
+
+void* __dt__21soArticleMediatorNullFv(void*, short);
+void __register_global_object(void*, void*, void*);
+
+void fn_120_183D4() {
+    if (lbl_120_bss_384 == 0) {
+        lbl_120_bss_388.primary = __vt__18soArticleGenerator;
+        lbl_120_bss_388.secondary = __vt__17soArticleOperator;
+        lbl_120_bss_388.primary = __vt__17soArticleMediator;
+        lbl_120_bss_388.secondary = __vt__17soArticleMediator + 0x10;
+        lbl_120_bss_388.primary = lbl_120_data_78D8;
+        lbl_120_bss_388.secondary = lbl_120_data_78D8 + 0x10;
+        __register_global_object(&lbl_120_bss_388,
+                                 reinterpret_cast<void*>(__dt__21soArticleMediatorNullFv),
+                                 &lbl_120_bss_418);
+        lbl_120_bss_384 = 1;
+    }
+    reinterpret_cast<RobotArticleMediatorView*>(&lbl_120_bss_388)->dispatch();
+}
+}
+}
+

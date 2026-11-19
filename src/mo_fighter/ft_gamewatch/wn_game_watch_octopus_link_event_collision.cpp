@@ -172,3 +172,49 @@ void wnWeaponBuilder<BC>::deactivateDescendantForce() {
     soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
 }
 template void wnWeaponBuilder<wnGameWatchOctopusModuleAccesserBuildConfig>::deactivateDescendantForce();
+
+// TODO: clean up, give variables real names
+namespace jj_1FB18 {
+extern "C" void __dt__18wnGameWatchOctopusFv(void*);
+
+extern "C" void fn_107_1FB18(void* self) {
+    __dt__18wnGameWatchOctopusFv(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1FB28 {
+extern "C" void notifyEventCollisionAttackCheck__18wnGameWatchOctopusFUl(void*);
+
+extern "C" void fn_107_1FB28(void* self) {
+    notifyEventCollisionAttackCheck__18wnGameWatchOctopusFUl(reinterpret_cast<u8*>(self) - 0x70);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1FB38 {
+extern "C" void notifyEventCollisionHit__18wnGameWatchOctopusFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog(void*);
+
+extern "C" void fn_107_1FB38(void* self) {
+    notifyEventCollisionHit__18wnGameWatchOctopusFfP21soCollisionAttackDataUliP16soModuleAccesserP14soCollisionLog(reinterpret_cast<u8*>(self) - 0x7c);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1FB40 {
+extern "C" void __dt__18wnGameWatchOctopusFv(void*);
+
+extern "C" void fn_107_1FB40(void* self) {
+    __dt__18wnGameWatchOctopusFv(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1FB50 {
+extern "C" void __dt__18wnGameWatchOctopusFv(void*);
+
+extern "C" void fn_107_1FB50(void* self) {
+    __dt__18wnGameWatchOctopusFv(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

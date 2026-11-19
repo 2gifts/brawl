@@ -216,3 +216,9 @@ void grPalutenaChain::updateCallBack(float deltaFrame) {
         }
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_B444 {
+extern "C" void __ct__5Vec3fFfff(void) {}
+}
+

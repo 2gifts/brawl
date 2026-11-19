@@ -777,3 +777,31 @@ extern "C" void* fn_801AB6CC(void* owner, unsigned int* outSize, unsigned int co
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_801AAF04 {
+extern "C" {
+
+void PSMTXCopy(int, char*);
+void PSMTXIdentity(char*);
+
+int ScnMdl_SetNodeMtx__FPQ34nw4r3g3d6ScnMdlUlPC6Matrix(char* arg0, unsigned arg1, int arg2) {
+    if (arg1 < 3) {
+        if (arg2 != 0) {
+            if (arg1 == 0) {
+                *(int*)(arg0 + 0xCC) &= 0x7FFFFFFF;
+            }
+            PSMTXCopy(arg2, arg0 + arg1 * 0x30 + 0xC);
+        } else {
+            if (arg1 == 0) {
+                *(int*)(arg0 + 0xCC) |= 0x80000000;
+            }
+            PSMTXIdentity(arg0 + arg1 * 0x30 + 0xC);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+}
+}
+

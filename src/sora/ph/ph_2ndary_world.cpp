@@ -1806,3 +1806,427 @@ next:
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_80082544 {
+extern "C" void deallocateChunk__14hkThreadMemoryFPvii(void*, void*, unsigned int, int);
+extern "C" void* __dt__16grCollCollectionFv(char*, int);
+extern "C" void __dl__FPv(void*);
+extern void* s_instance__14hkThreadMemory;
+
+struct Array {
+    void* data;
+    int size;
+    unsigned int raw;
+    unsigned int rawValue() const { return raw; }
+};
+struct Child {
+    char pad[0x1a];
+    unsigned short value;
+};
+struct Object {
+    Array a;
+    int unkC;
+    Child* child;
+    char pad[0xc];
+    Array b;
+    Array c;
+};
+extern "C" Object* __dt__13ph2ndaryWorldFv(Object* self, int flag) {
+    if (self) {
+        self->child->value = 0;
+        if (self->child) {
+            __dt__16grCollCollectionFv((char*)self->child, 1);
+            self->child = 0;
+        }
+        if (!(self->a.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->a.data, (self->a.rawValue() & 0x3fffffff) * 12, 0x15);
+        }
+        self->a.data = 0;
+        self->a.size = 0;
+        self->a.raw = (self->a.raw & 0x40000000) | 0x80000000;
+        if (!(self->c.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->c.data, self->c.rawValue() << 2, 0x15);
+        }
+        self->c.data = 0;
+        self->c.size = 0;
+        self->c.raw = (self->c.raw & 0x40000000) | 0x80000000;
+        if (!(self->b.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->b.data, self->b.rawValue() << 2, 0x15);
+        }
+        self->b.data = 0;
+        self->b.size = 0;
+        self->b.raw = (self->b.raw & 0x40000000) | 0x80000000;
+        if ((unsigned int)self + 0x2c != 0 && !(self->c.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->c.data, self->c.rawValue() << 2, 0x15);
+        }
+        if ((unsigned int)self + 0x20 != 0 && !(self->b.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->b.data, self->b.rawValue() << 2, 0x15);
+        }
+        if (self != 0 && !(self->a.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->a.data, (self->a.rawValue() & 0x3fffffff) * 12, 0x15);
+        }
+        if (flag > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800851C8 {
+
+using namespace nw4r::math;
+
+struct Node;
+struct Link {
+    Node* parent;
+    Node* child;
+    VEC3 axis0;
+    f32 limit0;
+    VEC3 axis1;
+    VEC3 axis2;
+    f32 limit1;
+    f32 limit2;
+};
+struct Node {
+    s32 kind;
+    char pad04[0x24];
+    VEC3 initial;
+    VEC3 position;
+    VEC3 anchor;
+    VEC3 previous;
+    VEC3 oldAnchor;
+    char pad64[0x20];
+    f32 length;
+    char pad88[0x28];
+    f32 weight;
+    char padB4[0x0c];
+    f32 blend;
+    f32 gravityThreshold;
+    char padC8[8];
+    f32 time;
+    f32 duration;
+    char padD8[4];
+    MTX34 matrix;
+    char pad10C[0x60];
+    MTX34 localMatrix;
+    char pad19C[0x28];
+    u8 matrixFlag;
+    char pad1C5[0x13];
+    VEC3 velocity;
+    char pad1E4[8];
+    f32 disturbance;
+    char pad1F0[5];
+    u8 movementFlag;
+    u8 collisionFlag;
+    char pad1F7;
+    Link* parent;
+    Link** children;
+    s32 childCount;
+};
+struct Context {
+    char pad00[0x48];
+    f32 scale;
+};
+extern "C" {
+void PSMTXIdentity(MTX34*);
+void PSMTXInverse(const MTX34*, MTX34*);
+void PSMTXConcat(const MTX34*, const MTX34*, MTX34*);
+void PSMTXTransApply(const MTX34*, MTX34*, f32, f32, f32);
+void PSMTXScaleApply(const MTX34*, MTX34*, f32, f32, f32);
+void copy__6MatrixCFP6Matrix(const MTX34*, MTX34*);
+void fn_8003E5B4(MTX34*);
+void getScalingFactor__FP6MatrixP5Vec3f(const MTX34*, VEC3*);
+void getNWMatrixSeparation__6phMathFPCQ34nw4r4math5MTX34PQ34nw4r4math5MTX34PQ34nw4r4math5MTX34(const MTX34*, MTX34*, MTX34*);
+f32 getAngleForNW2Vector__6phMathFPQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(VEC3, VEC3);
+void fn_8009BC34(MTX34*, VEC3, const f32&);
+void PSVECNormalize(const VEC3*, VEC3*);
+f32 PSVECMag(const VEC3*);
+void PSVECCrossProduct(const VEC3*, const VEC3*, VEC3*);
+void fn_800893F0(Context*, Node*);
+s32 fn_800867E8(Context*, Node*, u8, VEC2*);
+s32 fn_800879FC(Context*, Node*, u8, s32);
+void fn_80088FB8(Context*, Node*, s32);
+void updateMatrix__12ph2ndaryLineFPCQ34nw4r4math5MTX34PQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(Node*, const MTX34*, VEC3*, VEC3*);
+void updateMatrixForMyPosture__12ph2ndaryLineFv(Node*);
+s32 memcmp(const void*, const void*, u32);
+extern const f32 lbl_805A1BB8;
+extern const f32 lbl_805A1BBC;
+extern const f32 lbl_805A1BD8;
+extern const f32 lbl_805A1BEC;
+extern const f32 lbl_805A1BF0;
+extern const f32 lbl_805A1C10;
+extern const f32 lbl_805A1C14;
+extern const f32 lbl_805A1C18;
+extern const f32 lbl_805A1C1C;
+}
+static inline bool different(const MTX34& a, const MTX34& b) {
+    return memcmp(&a, &b, 0x30) != 0;
+}
+static inline bool isSmall(f32 value) {
+    bool result = false;
+    if (f32(fabs(value)) < lbl_805A1BF0)
+        result = true;
+    return result;
+}
+static inline bool isNan(f32 value) {
+    u32 bits = *(u32*)&value;
+    bool result = false;
+    if (((bits >> 23) & 255) == 255 && (bits & 0x7fffff) != 0)
+        result = true;
+    return result;
+}
+static inline bool matrixIsNan(const MTX34& matrix) {
+    bool result = isNan(matrix._00);
+    result = result || isNan(matrix._01);
+    result = result || isNan(matrix._02);
+    result = result || isNan(matrix._03);
+    result = result || isNan(matrix._10);
+    result = result || isNan(matrix._11);
+    result = result || isNan(matrix._12);
+    result = result || isNan(matrix._13);
+    result = result || isNan(matrix._20);
+    result = result || isNan(matrix._21);
+    result = result || isNan(matrix._22);
+    result = result || isNan(matrix._23);
+    return result;
+}
+extern "C" s32 operationGravity__13ph2ndaryWorldFP12ph2ndaryLineP12ph2ndaryLinePCfiiiiUcUcUcUc(
+    Context* self, Node* node, s32 arg2, f32* scale,
+    s32 useParentPosition, s32 useInitial, s32 suppressMovement,
+    s32 conditionalParent, u8 collisionMode, u8 timeMode,
+    u8 randomize, u8 constrain)
+{
+    s32 offset;
+    s32 result = 0;
+    s32 hit = 0;
+    s32 moved = 0;
+    MTX34 identity;
+    MTX34 parentMatrix, normalizedParent, scaled, normalizedScale;
+    MTX34 inverse, positionMatrix, anchorMatrix, rotation, unusedTranslation;
+    MTX34 localRotation, localScale, transformed;
+    MTX34 correctionResult, correctionCopy, correctionSecond, correctionThird;
+    MTX34 local, kindLocal, translated, rotationResult;
+    VEC2 contact;
+    PSMTXIdentity(&identity);
+    f32 time = node->time;
+    f32 duration = node->duration;
+    if (lbl_805A1BB8 != node->weight &&
+        (timeMode != 2 || time < duration * lbl_805A1C10) &&
+        node->parent != 0)
+    {
+        parentMatrix = node->parent->parent->matrix;
+        if (constrain) {
+
+            VEC3 unit(lbl_805A1BBC, lbl_805A1BBC, lbl_805A1BBC);
+            copy__6MatrixCFP6Matrix(&parentMatrix, &normalizedParent);
+            fn_8003E5B4(&normalizedParent);
+            scaled = normalizedParent;
+            PSMTXScaleApply(&scaled, &scaled, unit.x, unit.y, unit.z);
+            translated = scaled;
+            translated._03 = parentMatrix._03;
+            translated._13 = parentMatrix._13;
+            translated._23 = parentMatrix._23;
+            parentMatrix = translated;
+        }
+        if (node->kind == 0) {
+            VEC3 target;
+            if (useParentPosition)
+                target = node->parent->parent->position;
+            else if (lbl_805A1BB8 != node->parent->parent->weight)
+                target = node->parent->parent->position;
+            else if (useInitial)
+                target = node->initial;
+            else
+                target = node->anchor;
+            VEC3 delta = target - node->anchor;
+            node->anchor += delta;
+            if (randomize) {
+                f32 old = node->disturbance;
+                f32 adjustment;
+                if (lbl_805A1BBC * randf() > lbl_805A1C14) {
+                    if (old < lbl_805A1BB8)
+                        adjustment = old - self->scale *
+                            (lbl_805A1BD8 * (lbl_805A1BBC * randf()));
+                    else
+                        adjustment = old + self->scale *
+                            (lbl_805A1BD8 * (lbl_805A1BBC * randf()));
+                } else {
+                    adjustment = lbl_805A1BB8;
+                }
+                node->disturbance = node->disturbance - adjustment;
+                node->anchor.y += node->disturbance;
+            }
+            fn_800893F0(self, node);
+            bool limited = f32(fabs(node->gravityThreshold)) >= lbl_805A1C18;
+            if (!limited) {
+                node->position += VEC3(lbl_805A1BB8, lbl_805A1BEC, lbl_805A1BB8) *
+                    node->weight * *scale * self->scale;
+            }
+            VEC3 direction = node->position - node->anchor;
+            if (lbl_805A1BB8 != PSVECMag(&direction))
+                PSVECNormalize(&direction, &direction);
+            node->position = node->anchor + direction * node->length;
+            if (node->collisionFlag)
+                fn_80088FB8(self, node, arg2);
+            if (constrain &&
+                (node->childCount == 0 ||
+                 (node->childCount != 0 && node->children[0]->child->kind != 0)))
+                hit = fn_800867E8(self, node, collisionMode, &contact);
+            moved = fn_800879FC(self, node, constrain, 0);
+            if (!suppressMovement) {
+                if (hit) moved = 1;
+                if (!node->movementFlag) moved = 1;
+            } else {
+                moved = 0;
+            }
+            VEC3 oldStart;
+            VEC3 oldEnd;
+            updateMatrix__12ph2ndaryLineFPCQ34nw4r4math5MTX34PQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(node, &node->localMatrix, &oldStart, &oldEnd);
+            VEC3 matrixScale;
+            copy__6MatrixCFP6Matrix(&parentMatrix, &normalizedScale);
+            getScalingFactor__FP6MatrixP5Vec3f(&normalizedScale, &matrixScale);
+            if (isSmall(matrixScale.x) ||
+                isSmall(matrixScale.y) ||
+                isSmall(matrixScale.z))
+                parentMatrix = identity;
+            PSMTXInverse(&parentMatrix, &inverse);
+            PSMTXTransApply(&identity, &positionMatrix,
+                        node->position.x, node->position.y, node->position.z);
+            PSMTXTransApply(&identity, &anchorMatrix,
+                        node->anchor.x, node->anchor.y, node->anchor.z);
+            PSMTXConcat(&inverse, &positionMatrix, &positionMatrix);
+            PSMTXConcat(&inverse, &anchorMatrix, &anchorMatrix);
+            VEC3 localPosition;
+            localPosition.x = positionMatrix._03;
+            localPosition.y = positionMatrix._13;
+            localPosition.z = positionMatrix._23;
+            VEC3 localAnchor;
+            localAnchor.x = anchorMatrix._03;
+            localAnchor.y = anchorMatrix._13;
+            localAnchor.z = anchorMatrix._23;
+            VEC3 oldDirection = oldStart - oldEnd;
+            VEC3 newDirection = localPosition - localAnchor;
+            if (limited) {
+                VEC3 difference;
+                difference = newDirection - oldDirection;
+                difference *= node->blend;
+                newDirection = oldDirection + difference;
+            }
+            f32 angle = getAngleForNW2Vector__6phMathFPQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(oldDirection, newDirection);
+            VEC3 axis;
+            PSVECCrossProduct(&oldDirection, &newDirection, &axis);
+            fn_8009BC34(&rotationResult, axis, angle);
+            rotation = rotationResult;
+            PSMTXTransApply(&identity, &unusedTranslation,
+                        localAnchor.x, localAnchor.y, localAnchor.z);
+            if (different(rotation, identity)) {
+                getNWMatrixSeparation__6phMathFPCQ34nw4r4math5MTX34PQ34nw4r4math5MTX34PQ34nw4r4math5MTX34(&node->localMatrix, &localRotation, &localScale);
+                PSMTXConcat(&rotation, &localScale, &transformed);
+                VEC3 start;
+                VEC3 end;
+                updateMatrix__12ph2ndaryLineFPCQ34nw4r4math5MTX34PQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(node, &transformed, &start, &end);
+                VEC3 currentDirection = start - end;
+                if (!constrain) {
+                    f32 currentAngle = getAngleForNW2Vector__6phMathFPQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(node->parent->axis0, currentDirection);
+                    if (currentAngle > node->parent->limit0) {
+                        VEC3* reference = &node->parent->axis0;
+                        f32 correction = currentAngle - ((f32*)reference)[3];
+                        VEC3 correctionAxis;
+                        PSVECCrossProduct(reference, &currentDirection, &correctionAxis);
+                        fn_8009BC34(&correctionResult, correctionAxis, -correction);
+                        correctionCopy = correctionResult;
+                        PSMTXConcat(&correctionCopy, &transformed, &transformed);
+                        updateMatrix__12ph2ndaryLineFPCQ34nw4r4math5MTX34PQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(node, &transformed, &start, &end);
+                        currentDirection = start - end;
+                    }
+                }
+                if (!constrain) {
+                    f32 currentAngle = getAngleForNW2Vector__6phMathFPQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(node->parent->axis1, currentDirection);
+                    if (currentAngle < lbl_805A1C1C) {
+                        f32 difference = lbl_805A1C1C - currentAngle;
+                        if (difference > node->parent->limit1) {
+                            f32 correction = difference - node->parent->limit1;
+                            VEC3 correctionAxis;
+                            PSVECCrossProduct(&node->parent->axis1, &currentDirection, &correctionAxis);
+                            fn_8009BC34(&correctionSecond, correctionAxis, correction);
+                            PSMTXConcat(&correctionSecond, &transformed, &transformed);
+                        }
+                    } else {
+                        currentAngle = getAngleForNW2Vector__6phMathFPQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(node->parent->axis2, currentDirection);
+                        f32 limit = node->parent->limit2;
+                        f32 difference = lbl_805A1C1C - currentAngle;
+                        limit = f32(fabs(limit));
+                        if (difference > limit) {
+                            f32 correction = difference - limit;
+                            VEC3 correctionAxis;
+                            PSVECCrossProduct(&node->parent->axis2, &currentDirection, &correctionAxis);
+                            fn_8009BC34(&correctionThird, correctionAxis, correction);
+                            PSMTXConcat(&correctionThird, &transformed, &transformed);
+                        }
+                    }
+                }
+                PSMTXConcat(&localRotation, &transformed, &transformed);
+                local = transformed;
+                if (node->matrixFlag) {
+                    if (conditionalParent) {
+                        if (lbl_805A1BB8 != node->parent->parent->weight)
+                            node->matrix = parentMatrix;
+                    } else {
+                        node->matrix = parentMatrix;
+                    }
+                } else {
+                    PSMTXConcat(&parentMatrix, &local, &node->matrix);
+                }
+                updateMatrixForMyPosture__12ph2ndaryLineFv(node);
+            } else {
+                if (matrixIsNan(node->localMatrix)) {}
+                PSMTXConcat(&parentMatrix, &node->localMatrix, &node->matrix);
+                updateMatrixForMyPosture__12ph2ndaryLineFv(node);
+            }
+        } else {
+            kindLocal = node->localMatrix;
+            PSMTXConcat(&parentMatrix, &kindLocal, &node->matrix);
+            updateMatrixForMyPosture__12ph2ndaryLineFv(node);
+        }
+        VEC3 velocity;
+        velocity = node->position - node->previous;
+        node->velocity = velocity;
+        node->previous = node->position;
+        node->oldAnchor = node->anchor;
+    } else {
+        node->previous = node->position;
+        node->oldAnchor = node->anchor;
+    }
+    s32 i = 0;
+    offset = 0;
+    for (; i < *(s32*)((char*)node + 0x200); offset += 4, ++i) {
+        if (*(s32*)((char*)node->children + offset) != 0)
+            result = operationGravity__13ph2ndaryWorldFP12ph2ndaryLineP12ph2ndaryLinePCfiiiiUcUcUcUc(self,
+                                 (*(Link**)((char*)node->children + offset))->child, arg2, scale,
+                                 useParentPosition, useInitial, 0,
+                                 conditionalParent, collisionMode, timeMode,
+                                 randomize, constrain);
+    }
+    if (result % 10 != 0 && result / 10 != 0)
+        return result;
+    if (result % 10 == 0) {
+        if (hit) result += 2;
+        else if (moved &&
+                 (node->childCount == 0 ||
+                  (node->childCount != 0 && node->children[0]->child->kind != 0)))
+            result += 1;
+    }
+    if (result / 10 == 0 && moved) {
+        if ((lbl_805A1BB8 != node->weight && node->parent != 0) || node->kind != 0) {
+            if (node->parent == 0 || node->parent->parent->kind == 0)
+                goto done;
+        }
+        result += 10;
+    }
+done:
+    return result;
+}
+}
+

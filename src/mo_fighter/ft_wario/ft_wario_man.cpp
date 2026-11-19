@@ -247,3 +247,276 @@ void ftWarioMan::notifyEventCollisionSearch(soCollisionLog* log, soModuleAccesse
     Fighter::notifyEventCollisionSearch(log, acc);
 }
 #pragma pool_data reset
+
+#include <so/kinetic/so_kinetic_energy.h>
+#include <so/so_array.h>
+// TODO: clean up, give variables real names
+namespace jj_1E7D0 {
+extern "C" {
+void fn_110_1E82C(void*, short);
+void __dl__FPv(void*);
+
+void* fn_110_1E7D0(void* self, int flag) {
+    if (self != 0) {
+        fn_110_1E82C(self, -1);
+        if ((short)flag > 0)
+            __dl__FPv(self);
+    }
+    return self;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1E89C {
+extern "C" void fn_110_1E960(void*, short);
+
+static inline void destroyMotionPoolBase(void* object) {
+    if (object != 0) {
+        fn_110_1E960(static_cast<unsigned char*>(object) + 4,
+                     static_cast<short>(-1));
+    }
+}
+
+extern "C" void* fn_110_1E89C(void* object, short deleting) {
+    if (object != 0) {
+        destroyMotionPoolBase(object);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1E900 {
+extern "C" void fn_110_1E960(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_110_1E900(void* object, short deleting) {
+    if (object != 0) {
+        fn_110_1E960(static_cast<unsigned char*>(object) + 4, -1);
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1E960 {
+extern "C" void* fn_110_1E9C0(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_110_1E960(void* object, short deleting) {
+    if (object != 0) {
+        fn_110_1E9C0(static_cast<unsigned char*>(object) + 8, -1);
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1E9C0 {
+extern "C" void __dt__11wnWarioBikeFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_110_1E9C0(void* object, short deleting) {
+    if (object != 0) {
+        __dt__11wnWarioBikeFv(static_cast<unsigned char*>(object) + 4, -1);
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20348 {
+extern "C" int fn_110_20348(void* arg0, unsigned int articleId) {
+    switch (articleId) {
+    case 0: { char s[2] = {0, 0}; (void)s; return 1; }
+    case 1: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 2: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 3: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 4: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 5: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 6: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 7: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 8: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 9: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 10: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 11: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 12: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 13: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 14: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 15: { char s[2] = {0, 0}; (void)s; return 0; }
+    case 16: { char s[2] = {0, 0}; (void)s; return 0; }
+    default: return 0;
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_204CC {
+extern "C" {
+extern char __RTTI__11wnWarioBike[];
+extern char __RTTI__9soArticle[];
+void* __dynamic_cast(void*, long, const void*, const void*, short);
+}
+
+class Obj {
+public:
+    virtual void m0();
+    virtual void m1();
+    virtual void m2();
+    virtual void m3();
+    virtual void m4();
+    virtual void m5();
+    virtual unsigned int getType();
+};
+
+extern "C" int fn_110_204CC(void*, void*, void* self) {
+    unsigned char buf[40];
+    unsigned char* p = buf;
+    Obj* obj = reinterpret_cast<Obj*>(self);
+    switch (obj->getType()) {
+        case 0: p[32] = 0; p[33] = 0; __dynamic_cast(self, 0, __RTTI__11wnWarioBike, __RTTI__9soArticle, 1); return 1;
+        case 1: p[30] = 0; p[31] = 0; return 1;
+        case 2: p[28] = 0; p[29] = 0; return 1;
+        case 3: p[26] = 0; p[27] = 0; return 1;
+        case 4: p[24] = 0; p[25] = 0; return 1;
+        case 5: p[22] = 0; p[23] = 0; return 1;
+        case 6: p[20] = 0; p[21] = 0; return 1;
+        case 7: p[18] = 0; p[19] = 0; return 1;
+        case 8: p[16] = 0; p[17] = 0; return 1;
+        case 9: p[14] = 0; p[15] = 0; return 1;
+        case 10: p[12] = 0; p[13] = 0; return 1;
+        case 11: p[10] = 0; p[11] = 0; return 1;
+        case 12: p[8] = 0; p[9] = 0; return 1;
+        case 13: p[6] = 0; p[7] = 0; return 1;
+        case 14: p[4] = 0; p[5] = 0; return 1;
+        case 15: p[2] = 0; p[3] = 0; return 1;
+        case 16: p[0] = 0; p[1] = 0; return 1;
+        default: return 0;
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20704 {
+extern "C" s32 fn_110_20704(void) {
+    return 0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2070C {
+extern "C" void fn_110_2070C(void* self, u8 value) {
+    *reinterpret_cast<u8*>(reinterpret_cast<u8*>(self) + 0x2a60) = value;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20C7C {
+#pragma opt_propagation off
+
+
+extern "C" void fn_110_20C7C(void*, soArrayFixed<soKineticEnergy**>* energies,
+                             soModuleAccesser* accesser) {
+    for (int i = 0; i < energies->size(); ++i) {
+        soKineticEnergy* energy = *energies->at(i);
+        u32 disabled =
+            ((static_cast<u32>(reinterpret_cast<const u8*>(energy)[5]) & 0x80) >> 7) == 0;
+        u32 enabled = disabled == 0;
+        u32 suspension;
+
+        if (enabled && (suspension = reinterpret_cast<const u8*>(energy)[6]) != 1) {
+            if (enabled == true && suspension == 0) {
+                if (enabled == true && suspension == 0) {
+                    energy->updateEnergy(accesser);
+                }
+            }
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20D88 {
+extern "C" s32 fn_110_20D88(void) {
+    return 0x8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20FA0 {
+extern "C" void fn_110_204CC(void*);
+
+extern "C" void fn_110_20FA0(void* self) {
+    fn_110_204CC(reinterpret_cast<u8*>(self) - 0x4);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20FE8 {
+
+struct WarioDispatchSpeed { float x, y; };
+struct WarioResetContext {
+    unsigned char initialized;
+    WarioResetContext() { __memclr(&initialized, sizeof(initialized)); }
+    void resetIdle(int, const Vec2f*, soModuleAccesser*) {}
+};
+extern "C" {
+void changeKinetic__19ftKineticTransactorFiPvP16soModuleAccesser(int, int, soModuleAccesser*);
+WarioDispatchSpeed preHelpProcess__23ftKineticTransactHelperFP16soModuleAccesserbb(soModuleAccesser*, bool, bool);
+void enableOutsideEnergy__19ftKineticTransactorFP16soModuleAccesser(soModuleAccesser*);
+void fn_110_210D8(void*, int, const Vec2f*, soModuleAccesser*);
+}
+extern "C" void fn_110_20FE8(int kind, int resetKind, soModuleAccesser* accesser) {
+    if (kind <= 0x63) {
+        changeKinetic__19ftKineticTransactorFiPvP16soModuleAccesser(kind, resetKind, accesser);
+        return;
+    }
+    Vec2f speed;
+    WarioDispatchSpeed returnedSpeed = preHelpProcess__23ftKineticTransactHelperFP16soModuleAccesserbb(accesser, 1, 1);
+    __memcpy(&speed, &returnedSpeed, sizeof(speed));
+    switch (kind) {
+    case 0x64: {
+        WarioResetContext context;
+        fn_110_210D8(&context, resetKind, &speed, accesser);
+        break;
+    }
+    case 0x65: {
+        WarioResetContext context;
+        context.resetIdle(resetKind, &speed, accesser);
+        break;
+    }
+    case 0x66: {
+        WarioResetContext context;
+        context.resetIdle(resetKind, &speed, accesser);
+        break;
+    }
+    case 0x67: {
+        WarioResetContext context;
+        context.resetIdle(resetKind, &speed, accesser);
+        break;
+    }
+    case 0x68: {
+        WarioResetContext context;
+        context.resetIdle(resetKind, &speed, accesser);
+        break;
+    }
+    default:
+        return;
+    }
+    enableOutsideEnergy__19ftKineticTransactorFP16soModuleAccesser(accesser);
+}
+}
+

@@ -497,3 +497,31 @@ void grPiratesShip::setMotion(u32 animId, bool loop, bool force, float* frameCou
             break;,
         unk198 = 0; unk1A0 = 0;)
 }
+
+// TODO: clean up, give variables real names
+namespace jj_7490 {
+extern "C" void fn_52_7490(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7494 {
+extern "C" void fn_52_7494(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7498 {
+extern "C" void fn_52_7498(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_74AC {
+extern "C" void fn_52_74AC(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_7530 {
+extern "C" s32 fn_52_7530(void) {
+    return 0x1;
+}
+}
+

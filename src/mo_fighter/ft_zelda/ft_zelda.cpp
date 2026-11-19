@@ -586,3 +586,380 @@ extern int g_soValueVariation;
 #pragma dont_inline on
 int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #pragma dont_inline off
+
+// TODO: clean up, give variables real names
+namespace jj_3270 {
+extern "C" void __dt__22ftZeldaArticleMediatorFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_104_3270(void* self, short flag) {
+    if (self != 0) {
+        __dt__22ftZeldaArticleMediatorFv(self, -1);
+        if (flag > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9984 {
+extern "C" void onStart__7FighterFi(void* object, int param);
+
+struct VBase {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5(int a, unsigned int b);
+};
+
+extern "C" {
+void onStart__5ftIkeFi(void* object, int param) {
+    onStart__7FighterFi(object, param);
+    unsigned char* p = static_cast<unsigned char*>(object);
+    void* a = *reinterpret_cast<void**>(p + 0x60);
+    void* b = *reinterpret_cast<void**>(static_cast<unsigned char*>(a) + 0xd8);
+    VBase* c = *reinterpret_cast<VBase**>(static_cast<unsigned char*>(b) + 0x64);
+    c->v5(0, 0x10000040u);
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9A14 {
+class Command {
+public:
+    virtual void f0();
+    virtual signed char getGroup();
+    virtual signed char getType();
+};
+
+class SelfCall {
+public:
+    char pad[0x3c];
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual bool check(signed char);
+};
+
+extern "C" {
+extern void* g_ftManager;
+int getFighterCount__9ftManagerCFi(void*, int);
+int getFighterNo__9ftManagerCFii(void*, int, int);
+void toChange__9ftManagerFiibb(void*, int, unsigned char, int, int);
+bool notifyEventAnimCmd__7FighterFP9acAnimCmdP16soModuleAccesserl(void*, void*, void*, int);
+
+bool fn_104_9A14(void* self, Command* command, void* accesser, int kind) {
+    signed char group = command->getGroup();
+    bool valid = reinterpret_cast<SelfCall*>(self)->check(group);
+    if (!valid)
+        return false;
+
+    switch (command->getType()) {
+    case 5: {
+        unsigned char count = (unsigned char)getFighterCount__9ftManagerCFi(
+            g_ftManager, *(int*)((char*)self + 0x10c));
+        if (count > 1) {
+            int enabled = getFighterNo__9ftManagerCFii(
+                g_ftManager, *(int*)((char*)self + 0x10c),
+                *(int*)((char*)self + 0x28));
+            toChange__9ftManagerFiibb(
+                g_ftManager, *(int*)((char*)self + 0x10c),
+                !((unsigned char)enabled), 1, 0);
+        }
+        return true;
+    }
+    default:
+        return notifyEventAnimCmd__7FighterFP9acAnimCmdP16soModuleAccesserl(self, command, accesser, kind);
+    }
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9C24 {
+extern "C" void notifyEventCollisionSearchCheck__7FighterFv(void);
+
+extern "C" void fn_104_9C24(void) {
+    notifyEventCollisionSearchCheck__7FighterFv();
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9E38 {
+typedef unsigned long long u64;
+
+struct Vec2f {
+    float m_x;
+    float m_y;
+};
+
+struct Vec3f {
+    float m_x;
+    float m_y;
+    float m_z;
+};
+
+struct Parameters {
+    Vec2f p[4];
+};
+
+struct Posture {
+    virtual void unused0();
+    virtual void unused1();
+    virtual void unused2();
+    virtual void unused3();
+    virtual Vec3f getPos();
+    virtual void unused4();
+    virtual void unused5();
+    virtual void unused6();
+    virtual void unused7();
+    virtual float getLr();
+    virtual void unused8();
+    virtual void unused9();
+    virtual void unused10();
+    virtual void unused11();
+    virtual void unused12();
+    virtual void unused13();
+    virtual void unused14();
+    virtual void unused15();
+    virtual void unused16();
+    virtual void unused17();
+    virtual void unused18();
+    virtual void unused19();
+    virtual float getScale();
+};
+
+struct Kinetic {
+    virtual void unused0();
+    virtual void unused1();
+    virtual void unused2();
+    virtual void unused3();
+    virtual void unused4();
+    virtual void unused5();
+    virtual void unused6();
+    virtual void unused7();
+    virtual void unused8();
+    virtual void unused9();
+    virtual void unused10();
+    virtual void unused11();
+    virtual void unused12();
+    virtual u64 getSpeed(const short*);
+};
+
+struct WorkModule {
+    virtual void unused0();
+    virtual void unused1();
+    virtual void unused2();
+    virtual void unused3();
+    virtual unsigned int getFloat(unsigned int);
+};
+
+struct Modules {
+    char pad0[0x0c];
+    Posture* posture;
+    char pad1[0x54];
+    WorkModule* work;
+    char pad2[0x14];
+    Kinetic* kinetic;
+};
+
+struct Accesser {
+    char pad[0xd8];
+    Modules* modules;
+};
+
+struct DataContainer {
+    char pad[0x88];
+    float* data;
+};
+
+struct Object {
+    char pad0[0x60];
+    Accesser* accesser;
+    char pad1[0x1860c];
+    DataContainer* dataContainer;
+};
+
+extern "C" {
+void setupChangeSucceedWork__7FighterFPv(void*);
+void fn_104_A024(Parameters*);
+void activateDummyFighter__19ftChangeSucceedWorkFP5Vec3fffP5Vec2fPfPfi(void*, const Vec3f&, float, float, const Vec2f&,
+                   const Parameters&, const Parameters&, int);
+float getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(
+    Accesser*, unsigned long, unsigned long);
+extern const float lbl_104_rodata_8;
+extern const float lbl_104_rodata_10;
+}
+
+extern "C" void fn_104_9E38(Object* object, void* output) {
+    Posture* posture;
+    setupChangeSucceedWork__7FighterFPv(object);
+
+    Accesser* accesser = object->accesser;
+    const float* data = object->dataContainer->data;
+
+    Parameters b;
+    fn_104_A024(&b);
+    b.p[0].m_x = lbl_104_rodata_8;
+    b.p[1].m_x =
+        getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(
+            accesser, 0xbd6, 0);
+    b.p[2].m_x = lbl_104_rodata_8;
+    b.p[3].m_x =
+        getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(
+            accesser, 0xbd8, 0);
+    b.p[0].m_y = -data[2];
+    b.p[1].m_y =
+        getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(
+            accesser, 0xbd1, 0);
+    b.p[2].m_y = data[3];
+    b.p[3].m_y = data[3];
+
+    Parameters a;
+    fn_104_A024(&a);
+    a.p[0].m_x = lbl_104_rodata_8;
+    a.p[1].m_x =
+        getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(
+            accesser, 0xbbc, 0);
+    a.p[2].m_x = lbl_104_rodata_8;
+    a.p[3].m_x = lbl_104_rodata_10;
+    a.p[0].m_y = lbl_104_rodata_8;
+    a.p[1].m_y = lbl_104_rodata_8;
+    a.p[2].m_y = lbl_104_rodata_8;
+    a.p[3].m_y = lbl_104_rodata_8;
+
+    short flag = -1;
+    Vec2f speed;
+    *(u64*)&speed = accesser->modules->kinetic->getSpeed(&flag);
+
+    posture = accesser->modules->posture;
+    activateDummyFighter__19ftChangeSucceedWorkFP5Vec3fffP5Vec2fPfPfi(output, posture->getPos(), posture->getScale(),
+                 posture->getLr(), speed, a, b, 0xe0013);
+
+    *(unsigned int*)((char*)output + 0x100) =
+        accesser->modules->work->getFloat(0x10000040);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_D4BC {
+struct Vec2f;
+class soModuleAccesser;
+
+extern "C" void addSpeed__19ftKineticTransactorFPvPvP16soModuleAccesser(const Vec2f* vector, void* state, soModuleAccesser* accesser);
+
+extern "C" void addSpeed__21ftKineticMediatorImplFPvP16soModuleAccesser(void* object, const Vec2f* vector, soModuleAccesser* accesser) {
+    addSpeed__19ftKineticTransactorFPvPvP16soModuleAccesser(vector, static_cast<unsigned char*>(object) + 4, accesser);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_DD58 {
+struct FtClassInfoObj {
+    const void* vtable;
+    unsigned int baseState;
+    const void* typeInfo;
+};
+
+extern "C" {
+extern const unsigned char lbl_104_data_7184[];
+extern unsigned char g_ftClassInfoNull[];
+void setClassInfo__11ftClassInfoF6ftKindP11ftClassInfo(FtClassInfoObj*, int, void*);
+void __dt__11ftClassInfoFv(FtClassInfoObj*, short);
+void __dl__FPv(void*);
+}
+
+extern "C" FtClassInfoObj* fn_104_DD58(FtClassInfoObj* info, short deleting) {
+    if (info) {
+        info->typeInfo = lbl_104_data_7184;
+        info->vtable = lbl_104_data_7184 + 8;
+        setClassInfo__11ftClassInfoF6ftKindP11ftClassInfo(info, 13, g_ftClassInfoNull);
+        __dt__11ftClassInfoFv(info, 0);
+        if (deleting > 0) operator delete(info);
+    }
+    return info;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_DDDC {
+extern "C" {
+void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+void __ct__7ftZeldaFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25Heaps8HeapType(void*, void*, int, void*, void*);
+}
+
+extern "C" void fn_104_DDDC(void*, void* a, int heap, void* b, void* c) {
+    void* obj = __nw__FUlQ25Heaps8HeapType(0x18678, heap);
+    if (obj != 0) {
+        __ct__7ftZeldaFlQ25Heaps8HeapTypeQ25Heaps8HeapTypeQ25Heaps8HeapType(obj, a, heap, b, c);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_DE94 {
+extern "C" void fn_104_9A14(void*);
+
+extern "C" void fn_104_DE94(void* self) {
+    fn_104_9A14(reinterpret_cast<u8*>(self) - 0x48);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_DF14 {
+extern "C" void fn_104_9C24(void*);
+
+extern "C" void fn_104_DF14(void* self) {
+    fn_104_9C24(reinterpret_cast<u8*>(self) - 0xb8);
+}
+}
+

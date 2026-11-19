@@ -1486,3 +1486,423 @@ extern int g_soValueVariation;
 #pragma dont_inline on
 int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #pragma dont_inline off
+
+// TODO: clean up, give variables real names
+namespace jj_6C64 {
+extern "C" void* __dt__22soColorBlendModuleImplFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_96_6C64(void* object, short deleting) {
+    if (object != 0) {
+        __dt__22soColorBlendModuleImplFv(object, static_cast<short>(-1));
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_F970 {
+
+class Class_CD28 {
+public:
+    virtual void isNull__10soNullableCFv();
+    virtual void __dt__24soResourceIdAccesserImplFv();
+    virtual void setResIdPacked__24soResourceIdAccesserImplFUl();
+    virtual void setAnmResId__24soResourceIdAccesserImplFUl();
+    virtual void setMdlResId__24soResourceIdAccesserImplFUl();
+    virtual void setTexResId__24soResourceIdAccesserImplFUl();
+    virtual void setMdlResIndex__24soResourceIdAccesserImplFUs();
+    virtual void setTexResIndex__24soResourceIdAccesserImplFUs();
+    virtual void getTexResId__24soResourceIdAccesserImplFv();
+    virtual void getTexResIndex__24soResourceIdAccesserImplFv();
+    virtual void getMdlResId__24soResourceIdAccesserImplFv();
+    virtual void getMdlResIndex__24soResourceIdAccesserImplFv();
+    virtual void getAnmResId__24soResourceIdAccesserImplFv();
+    virtual void getBinResId__24soResourceIdAccesserImplFv();
+    virtual void getArchiveId__24soResourceIdAccesserImplFv();
+    virtual void fn_96_23D24();
+    virtual void getMdlArchiveId__24soResourceIdAccesserImplFv();
+    virtual void getTexArchiveId__24soResourceIdAccesserImplFv();
+    virtual void getAnmArchiveId__24soResourceIdAccesserImplFv();
+    virtual int getEtcArchiveId__24soResourceIdAccesserImplFv(int);
+};
+
+struct KirbyInputA {
+    char pad[0x28];
+    int unk28;
+    int getId() const { return unk28; }
+};
+
+struct KirbyInputB {
+    char pad[0x84];
+    Class_CD28* obj84;
+};
+
+struct KirbyInput {
+    char pad0[0x8];
+    KirbyInputA* unk8;
+    char pad1[0xCC];
+    KirbyInputB* unkD8;
+};
+
+extern "C" {
+extern unsigned char g_ftRobotNullArticleStorage[];
+void __ct__26soArticleDeactivateCheckerFv(void*);
+void __dt__26soArticleDeactivateCheckerFv(void*, short);
+bool __cl__26soArticleDeactivateCheckerFP9soArticle(void*, soArticle*);
+int createItem__23soArticleMediatorHelperFiii(int, int, int);
+void* castArticle__23soArticleMediatorHelperFP8BaseItem();
+unsigned int activeArticle__7ftKirbyFP13wnKirbyHammerP16soModuleAccesser(Weapon*, KirbyInput*);
+unsigned int activeArticle__7ftKirbyFP18wnKirbyFinalCutterP16soModuleAccesser(Weapon*, KirbyInput*);
+unsigned int activeArticle__7ftKirbyFP18wnKirbyStarmissileP16soModuleAccesser(Weapon*, KirbyInput*);
+unsigned int activeArticle__7ftKirbyFP12wnKirbyStoneP16soModuleAccesser(Weapon*, KirbyInput*);
+unsigned int activeArticle__7ftKirbyFP11wnKirbyNabeP16soModuleAccesser(Weapon*, KirbyInput*);
+unsigned int activeArticle__7ftKirbyFP14wnKirbyCookHatP16soModuleAccesser(Weapon*, KirbyInput*);
+unsigned int activeArticle__7ftKirbyFP8wnSimpleP16soModuleAccesser(Weapon*, KirbyInput*);
+}
+
+namespace {
+struct Status {
+    bool flags[2];
+    Status() {
+        flags[0] = false;
+        flags[1] = false;
+    }
+};
+
+struct StatusBig : Status {
+    char pad[12];
+};
+
+template <unsigned Kind>
+struct Activation {
+    unsigned int operator()(Weapon* owner, KirbyInput* input) const {
+        return activeArticle__7ftKirbyFP8wnSimpleP16soModuleAccesser(owner, input);
+    }
+};
+
+template <>
+struct Activation<0> {
+    unsigned int operator()(Weapon* owner, KirbyInput* input) const {
+        return activeArticle__7ftKirbyFP13wnKirbyHammerP16soModuleAccesser(owner, input);
+    }
+};
+
+template <>
+struct Activation<1> {
+    unsigned int operator()(Weapon* owner, KirbyInput* input) const {
+        return activeArticle__7ftKirbyFP18wnKirbyFinalCutterP16soModuleAccesser(owner, input);
+    }
+};
+
+template <>
+struct Activation<2> {
+    unsigned int operator()(Weapon* owner, KirbyInput* input) const {
+        return activeArticle__7ftKirbyFP18wnKirbyStarmissileP16soModuleAccesser(owner, input);
+    }
+};
+
+template <>
+struct Activation<3> {
+    unsigned int operator()(Weapon* owner, KirbyInput* input) const {
+        return activeArticle__7ftKirbyFP12wnKirbyStoneP16soModuleAccesser(owner, input);
+    }
+};
+
+template <>
+struct Activation<4> {
+    unsigned int operator()(Weapon* owner, KirbyInput* input) const {
+        return activeArticle__7ftKirbyFP11wnKirbyNabeP16soModuleAccesser(owner, input);
+    }
+};
+
+template <>
+struct Activation<5> {
+    unsigned int operator()(Weapon* owner, KirbyInput* input) const {
+        return activeArticle__7ftKirbyFP14wnKirbyCookHatP16soModuleAccesser(owner, input);
+    }
+};
+
+struct Deactivation {
+    void operator()(Weapon* owner) const {
+        owner->deactivateArticle();
+    }
+};
+
+class Selector {
+public:
+    soArticle* article;
+
+    Selector() {
+        __ct__26soArticleDeactivateCheckerFv(this);
+    }
+
+    void release(short destroy) {
+        __dt__26soArticleDeactivateCheckerFv(this, destroy);
+    }
+
+    bool select(soArticle* candidate) {
+        return __cl__26soArticleDeactivateCheckerFP9soArticle(this, candidate);
+    }
+};
+
+class SelectorBig {
+public:
+    soArticle* article;
+
+    SelectorBig() {
+        __ct__26soArticleDeactivateCheckerFv(&article);
+    }
+
+    void release(short destroy) {
+        __dt__26soArticleDeactivateCheckerFv(&article, destroy);
+    }
+
+    bool select(soArticle* candidate) {
+        return __cl__26soArticleDeactivateCheckerFP9soArticle(&article, candidate);
+    }
+};
+
+template <unsigned Kind>
+struct SelectorType {
+    typedef Selector Type;
+};
+
+template <>
+struct SelectorType<0> {
+    typedef SelectorBig Type;
+};
+
+struct Search {
+    bool operator()(Selector& selector, soArticle* candidate) const {
+        return selector.select(candidate);
+    }
+
+    bool operator()(SelectorBig& selector, soArticle* candidate) const {
+        return selector.select(candidate);
+    }
+};
+
+template <unsigned Kind>
+struct Pool {
+    static inline Weapon* find(char*, Selector&, Search) {
+        return 0;
+    }
+};
+
+template <>
+struct Pool<0> {
+    static inline Weapon* find(char* p, SelectorBig& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0x11008)) == true
+            ? reinterpret_cast<Weapon*>(p + 0x10F80) : 0;
+    }
+};
+
+template <>
+struct Pool<1> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0xF020)) == true
+            ? reinterpret_cast<Weapon*>(p + 0xEF98) : 0;
+    }
+};
+
+template <>
+struct Pool<2> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0xD03C)) == true
+            ? reinterpret_cast<Weapon*>(p + 0xCFB4) : 0;
+    }
+};
+
+template <>
+struct Pool<3> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0xAF34)) == true
+            ? reinterpret_cast<Weapon*>(p + 0xAEAC) : 0;
+    }
+};
+
+template <>
+struct Pool<4> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0x8EB0)) == true
+            ? reinterpret_cast<Weapon*>(p + 0x8E28) : 0;
+    }
+};
+
+template <>
+struct Pool<5> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0x72C4)) == true
+            ? reinterpret_cast<Weapon*>(p + 0x723C) : 0;
+    }
+};
+
+template <>
+struct Pool<6> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0x5BF0)) == true
+            ? reinterpret_cast<Weapon*>(p + 0x5B68) : 0;
+    }
+};
+
+template <>
+struct Pool<7> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0x451C)) == true
+            ? reinterpret_cast<Weapon*>(p + 0x4494) : 0;
+    }
+};
+
+template <>
+struct Pool<8> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0x2E48)) == true
+            ? reinterpret_cast<Weapon*>(p + 0x2DC0) : 0;
+    }
+};
+
+template <>
+struct Pool<9> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0x1774)) == true
+            ? reinterpret_cast<Weapon*>(p + 0x16EC) : 0;
+    }
+};
+
+template <>
+struct Pool<10> {
+    static inline Weapon* find(char* p, Selector& s, Search f) {
+        return f(s, reinterpret_cast<soArticle*>(p + 0xA0)) == true
+            ? reinterpret_cast<Weapon*>(p + 0x18) : 0;
+    }
+};
+
+template <unsigned Kind>
+inline soArticle* allocate(char* p, KirbyInput* input, Status& status,
+                           const Activation<Kind>& activation,
+                           const Deactivation& deactivation) {
+    if (Kind == 11) {
+        if (input->unkD8->obj84->getEtcArchiveId__24soResourceIdAccesserImplFv(11) >= 2)
+            return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage);
+        if (createItem__23soArticleMediatorHelperFiii(0x59, 0xB, input->unk8->getId()) == 0)
+            return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage);
+        return reinterpret_cast<soArticle*>(castArticle__23soArticleMediatorHelperFP8BaseItem());
+    }
+    if (Kind >= 12) return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage);
+    typename SelectorType<Kind>::Type selector;
+    Weapon* owner = Pool<Kind>::find(p, selector, Search());
+
+    if (!owner) {
+        owner = reinterpret_cast<Weapon*>(selector.article);
+        if (owner) {
+            owner = reinterpret_cast<Weapon*>(
+                reinterpret_cast<char*>(owner) - 0x88);
+        }
+        if (!owner) {
+            selector.release(-1);
+            return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage);
+        }
+        deactivation(owner);
+    }
+
+    if (activation(owner, input) == 1) {
+        selector.release(-1);
+        return reinterpret_cast<soArticle*>(
+            reinterpret_cast<char*>(owner) + 0x88);
+    }
+
+    selector.release(-1);
+    return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage);
+}
+}
+
+extern "C" soArticle* fn_96_F970(char* p, unsigned kind, KirbyInput* input) {
+    switch (kind) {
+    case 0: {
+        Status status;
+        return allocate<0>(p, input, status, Activation<0>(), Deactivation());
+    }
+    case 1: {
+        Status status;
+        return allocate<1>(p, input, status, Activation<1>(), Deactivation());
+    }
+    case 2: {
+        Status status;
+        return allocate<2>(p, input, status, Activation<2>(), Deactivation());
+    }
+    case 3: {
+        Status status;
+        return allocate<3>(p, input, status, Activation<3>(), Deactivation());
+    }
+    case 4: {
+        Status status;
+        return allocate<4>(p, input, status, Activation<4>(), Deactivation());
+    }
+    case 5: {
+        Status status;
+        return allocate<5>(p, input, status, Activation<5>(), Deactivation());
+    }
+    case 6: {
+        Status status;
+        return allocate<6>(p, input, status, Activation<6>(), Deactivation());
+    }
+    case 7: {
+        Status status;
+        return allocate<7>(p, input, status, Activation<7>(), Deactivation());
+    }
+    case 8: {
+        Status status;
+        return allocate<8>(p, input, status, Activation<8>(), Deactivation());
+    }
+    case 9: {
+        Status status;
+        return allocate<9>(p, input, status, Activation<9>(), Deactivation());
+    }
+    case 10: {
+        Status status;
+        return allocate<10>(p, input, status, Activation<10>(), Deactivation());
+    }
+    case 11: {
+        Status status;
+        return allocate<11>(p, input, status, Activation<11>(), Deactivation());
+    }
+    case 12: {
+        Status status;
+        return allocate<12>(p, input, status, Activation<12>(), Deactivation());
+    }
+    case 13: {
+        Status status;
+        return allocate<13>(p, input, status, Activation<13>(), Deactivation());
+    }
+    case 14: {
+        Status status;
+        return allocate<14>(p, input, status, Activation<14>(), Deactivation());
+    }
+    case 15: {
+        Status status;
+        return allocate<15>(p, input, status, Activation<15>(), Deactivation());
+    }
+    case 16: {
+        Status status;
+        return allocate<16>(p, input, status, Activation<16>(), Deactivation());
+    }
+    default:
+        return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_11750 {
+extern "C" void* getInstanceAt__21ftPurinArticleSubPoolFl(void* object, int index) {
+    if (index == 0) {
+        return static_cast<char*>(object) + 0x0c;
+    }
+    return 0;
+}
+}
+

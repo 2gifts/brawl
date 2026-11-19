@@ -1014,3 +1014,170 @@ extern "C" int fn_80061944(Record* self, float rate) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_80062B78 {
+
+namespace nw4r { namespace g3d { class ScnMdlSimple; } }
+struct Node {
+    char pad[0x1c];
+    nw4r::g3d::ScnMdlSimple* model;
+    char pad20[2];
+    unsigned short index;
+    Vec3f position;
+    void set(nw4r::g3d::ScnMdlSimple* m, unsigned short i) { model = m; index = i; }
+};
+struct Entry {
+    char pad[4];
+    void* value;
+    char rest[8];
+};
+struct Table {
+    char pad[0xc];
+    Entry* entries;
+};
+struct Object {
+    Vec3f position;
+    Vec3f rotation;
+    Vec3f scale;
+    char pad24[8];
+    int entryIndex;
+    Table* table;
+    Node** nodes;
+    int nodeIndex;
+    char pad3c[8];
+    void* target;
+    char pad48[8];
+    nw4r::g3d::ScnMdlSimple* model;
+    unsigned short index;
+    unsigned short flags;
+};
+extern "C" void fn_800613B8(Matrix*, nw4r::g3d::ScnMdlSimple*, unsigned short, const Vec3f*, const Vec3f*, const Vec3f*);
+extern "C" void ScnMdl_SetNodeMtx__FPQ34nw4r3g3d6ScnMdlUlPC6Matrix(void*, int, Matrix*);
+inline void setPosition(Vec3f& p, float z, float y, float x) { p.m_y = y; p.m_x = x; p.m_z = z; }
+extern "C" void init_attach__12ecEffectWorkFv(Object* self) {
+    Entry* entry = self->table->entries + self->entryIndex;
+    if (!(self->flags & 1)) {
+        if (self->target) {
+            Matrix m(true);
+            fn_800613B8(&m, self->model, self->index, &self->scale, &self->rotation, &self->position);
+            ScnMdl_SetNodeMtx__FPQ34nw4r3g3d6ScnMdlUlPC6Matrix(self->target, 0, &m);
+        }
+        if (entry[1].value && self->nodes) {
+            Node* node = *(Node**)((char*)(self->nodes + self->nodeIndex) - 4);
+            if (node) {
+                node->set(self->model, self->index);
+            }
+        }
+    } else {
+        Matrix m(true);
+        fn_800613B8(&m, self->model, self->index, &self->scale, &self->rotation, &self->position);
+        Vec3f pos;
+        float z = m.m[2][3];
+        float y = m.m[1][3];
+        float x = m.m[0][3];
+        setPosition(pos, z, y, x);
+        if (self->target) {
+            m.setSRT(self->scale, self->rotation, pos);
+            ScnMdl_SetNodeMtx__FPQ34nw4r3g3d6ScnMdlUlPC6Matrix(self->target, 0, &m);
+        }
+        if (entry[1].value && self->nodes) {
+            Node* node = *(Node**)((char*)(self->nodes + self->nodeIndex) - 4);
+            if (node) {
+                node->position = pos;
+            }
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80064284 {
+
+extern "C" {
+
+void __dla__FPv(void*);
+void __dl__FPv(void*);
+void __dt__9gfArchiveFv(void*, int);
+void fn_8001AE1C(void*, char*);
+int sprintf(char*, const char*, ...);
+extern void* lbl_8059FFC8;
+extern char lbl_8059DAE8;
+
+struct ArchiveData {
+    void* f00;
+    void* f04;
+    void* f08;
+    int f0C;
+    int f10;
+    unsigned char f14;
+};
+
+void release__10ecResourceFb(ArchiveData* self, int flag) {
+    void* archive = self->f00;
+    if (archive != 0) {
+        void* heap = lbl_8059FFC8;
+        if (heap != 0) {
+            void* result = ((gfArchive*)archive)->getData(Data_Type_Misc, 1, 0xFFFE);
+            ((gfArchive*)self->f00)->getData(Data_Type_Misc, 2, 0xFFFE);
+            if (result != 0) {
+                char buf[16];
+                sprintf(buf, &lbl_8059DAE8, self->f10);
+                fn_8001AE1C(heap, buf);
+            }
+        }
+        if (flag != 0) {
+            self->f14 = 0xFF;
+        }
+    }
+
+    void* ptr4 = self->f04;
+    if (ptr4 != 0) {
+        if (ptr4 != 0) {
+            if (ptr4 != 0) {
+                __dla__FPv((char*)ptr4 - 0x10);
+            }
+            self->f04 = 0;
+        }
+    }
+
+    void* ptr8 = self->f08;
+    if (ptr8 != 0) {
+        __dl__FPv(ptr8);
+        self->f08 = 0;
+    }
+
+    void* ptr0 = self->f00;
+    if (ptr0 != 0) {
+        __dt__9gfArchiveFv(ptr0, 1);
+        self->f00 = 0;
+    }
+}
+
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8006526C {
+extern "C" void ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+extern "C" void ScnObj_DisableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+extern "C" void ScnObj_EnableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+extern "C" void ScnObj_DisableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+
+extern "C" void SetCallbackCondition__16ecScnObjCallbackFb(void* arg0, int arg1) {
+    void* temp_r5 = *(void**)((char*)arg0 + 0x4);
+    if (temp_r5 != 0) {
+        if (arg1 != 0) {
+            *(void**)((char*)temp_r5 + 0xD4) = arg0;
+            ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(*(void**)((char*)arg0 + 0x4), 1);
+            ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(*(void**)((char*)arg0 + 0x4), 4);
+            ScnObj_EnableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(*(void**)((char*)arg0 + 0x4), 4);
+            return;
+        }
+        *(void**)((char*)temp_r5 + 0xD4) = 0;
+        ScnObj_DisableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(*(void**)((char*)arg0 + 0x4), 1);
+        ScnObj_DisableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(*(void**)((char*)arg0 + 0x4), 4);
+        ScnObj_DisableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(*(void**)((char*)arg0 + 0x4), 4);
+    }
+}
+}
+

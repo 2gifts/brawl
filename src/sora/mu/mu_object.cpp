@@ -2046,3 +2046,339 @@ void fn_800B807C(Obj* self, s32 arg1, Iface* arg2) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_800B08A8 {
+
+extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+extern "C" void* __ct__6gfTaskFPCcQ26gfTask8Categoryiib(void*, const char*, int, int, int, bool);
+extern "C" s8 lbl_8059DF40;
+extern "C" char lbl_80455D8C[];
+
+struct TBase {
+    char pad0[0x2C];
+    u8 unk2C;
+    char pad2D[0xF];
+};
+
+struct TTask : public TBase {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+};
+
+extern "C" TTask* create__16muObjProcessTaskFQ25Heaps8HeapType(int arg0) {
+    TTask* task = (TTask*)__nw__FUlQ25Heaps8HeapType(0x48, arg0);
+    if (task) {
+        __ct__6gfTaskFPCcQ26gfTask8Categoryiib(task, (const char*)&lbl_8059DF40, 8, 0xF, 8, true);
+        *(char**)((char*)task + 0x3C) = lbl_80455D8C;
+        task->unk2C &= ~2;
+    }
+    task->v21();
+    return task;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800B20B0 {
+extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+extern "C" void ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+extern "C" void ScnObj_EnableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+extern "C" void ScnObj_DisableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+extern int lbl_80455D18[8];
+struct Owner;
+struct Node { virtual ~Node(); Node* next; Owner* owner; };
+struct Model {
+    virtual void v0(); virtual void v1(); virtual void v2();
+    virtual void v3(); virtual void v4(); virtual void v5();
+    virtual void set(int, int);
+    char pad[0xD0];
+    Node* head;
+};
+struct Owner { char pad[0x10]; Model* model; char pad2[0x40]; int heap; Node* node; };
+extern "C" void enableSkipMatrix__8MuObjectFb(Owner* self, int enabled) {
+    Model* current;
+    Model* model = self->model;
+    if (enabled != 0) {
+        if (self->node == 0) {
+            Node* node = (Node*)__nw__FUlQ25Heaps8HeapType(12, self->heap);
+            if (node != 0) {
+                Node* next = model->head;
+                *(void**)node = lbl_80455D18;
+                node->next = next;
+                node->owner = self;
+            }
+            model->head = node;
+            ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(model, 4);
+            if (self->node != node) {
+                delete self->node;
+                self->node = node;
+            }
+        }
+        ScnObj_EnableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(model, 4);
+    } else {
+        ScnObj_DisableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(model, 4);
+        current = self->model;
+        current->set(2, 0);
+        current->set(5, 0);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800B21C4 {
+extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+extern "C" void ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+extern "C" void ScnObj_EnableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+extern "C" void ScnObj_DisableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
+
+extern int lbl_80455D18[8];
+
+struct Owner;
+
+struct Node {
+    virtual ~Node();
+    Node* next;
+    Owner* owner;
+};
+
+struct Model {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void set(int, int);
+
+    char pad[0xD0];
+    Node* head;
+};
+
+struct Owner {
+    char pad[0x10];
+    Model* model;
+    char pad2[0x40];
+    int heap;
+    Node* node;
+};
+
+extern "C" void enableSkipMaterial__8MuObjectFb(Owner* self, int enabled) {
+    Model* model = self->model;
+    if (enabled != 0) {
+        if (self->node == 0) {
+            Node* node = (Node*)__nw__FUlQ25Heaps8HeapType(12, self->heap);
+            if (node != 0) {
+                Node* next = model->head;
+                *(void**)node = lbl_80455D18;
+                node->next = next;
+                node->owner = self;
+            }
+            model->head = node;
+            ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(model, 4);
+            if (self->node != node) {
+                delete self->node;
+                self->node = node;
+            }
+        }
+        ScnObj_EnableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(model, 2);
+    } else {
+        ScnObj_DisableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(model, 2);
+        Model* current = self->model;
+        current->set(3, 0);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800B2318 {
+extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+extern "C" void* __ct__8MuObjectFPCciiP8MuObjectPQ34nw4r3g3d7ResFileQ25Heaps8HeapType(void*, int, int, int, int, int, int);
+extern "C" void* copy__8MuObjectFiiQ25Heaps8HeapType(int a, int b, int c, int heap) {
+    void* p = __nw__FUlQ25Heaps8HeapType(0x60, heap);
+    if (p != 0)
+        p = __ct__8MuObjectFPCciiP8MuObjectPQ34nw4r3g3d7ResFileQ25Heaps8HeapType(p, 0, b, c, a, 0, heap);
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800B7AA4 {
+class Object_vptr_0 {
+public:
+    virtual void slot0();
+    virtual void slot1();
+    virtual void slot2();
+    virtual void slot3();
+    virtual void slot4();
+    virtual void slot5(float);
+    virtual float slot6();
+};
+class Controller {
+public:
+    virtual void slot0();
+    virtual void slot1();
+    virtual void slot2();
+    virtual void slot3();
+    virtual void slot4();
+    virtual void slot5();
+    virtual void slot6(int, int);
+};
+struct Mid {
+    char pad[8];
+    Object_vptr_0* b;
+    Object_vptr_0* a;
+    Object_vptr_0* c;
+    Object_vptr_0* d;
+    Object_vptr_0* e;
+};
+struct Self {
+    char pad[16];
+    Controller* controller;
+    Mid* mid;
+};
+extern "C" void setFrameFlg__8MuObjectFfUc(Self* self, unsigned int mask, float f) {
+    if (mask == 31) {
+        if (self->mid->a) {
+            if (f != self->mid->a->slot6()) {
+                Controller* c = self->controller;
+                c->slot6(2, 0);
+                c->slot6(5, 0);
+            }
+            self->mid->a->slot5(f);
+        }
+        if (self->mid->b) {
+            if (f != self->mid->b->slot6()) {
+                Controller* c = self->controller;
+                c->slot6(2, 0);
+                c->slot6(5, 0);
+            }
+            self->mid->b->slot5(f);
+        }
+        if (self->mid->c) {
+            if (f != self->mid->c->slot6()) {
+                self->controller->slot6(3, 0);
+            }
+            self->mid->c->slot5(f);
+        }
+        if (self->mid->d) {
+            if (f != self->mid->d->slot6()) {
+                self->controller->slot6(3, 0);
+            }
+            self->mid->d->slot5(f);
+        }
+        if (self->mid->e) {
+            if (f != self->mid->e->slot6()) {
+                self->controller->slot6(3, 0);
+            }
+            self->mid->e->slot5(f);
+        }
+    } else {
+        if (mask & 1) {
+            if (f != self->mid->a->slot6()) {
+                Controller* c = self->controller;
+                c->slot6(2, 0);
+                c->slot6(5, 0);
+            }
+            self->mid->a->slot5(f);
+        }
+        if (mask & 2) {
+            if (f != self->mid->b->slot6()) {
+                Controller* c = self->controller;
+                c->slot6(2, 0);
+                c->slot6(5, 0);
+            }
+            self->mid->b->slot5(f);
+        }
+        if (mask & 4) {
+            if (f != self->mid->c->slot6()) {
+                self->controller->slot6(3, 0);
+            }
+            self->mid->c->slot5(f);
+        }
+        if (mask & 8) {
+            if (f != self->mid->d->slot6()) {
+                self->controller->slot6(3, 0);
+            }
+            self->mid->d->slot5(f);
+        }
+        if (mask & 16) {
+            if (f != self->mid->e->slot6()) {
+                self->controller->slot6(3, 0);
+            }
+            self->mid->e->slot5(f);
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800B7F38 {
+typedef unsigned int u32;
+
+class AnimationObject {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void setUpdateRate(float rate);
+};
+
+struct gfModelAnimation {
+    char pad[8];
+    AnimationObject* visibility;
+    AnimationObject* character;
+    AnimationObject* texturePattern;
+    AnimationObject* textureSrt;
+    AnimationObject* materialColor;
+};
+
+struct ModelOwner {
+    char pad[0x14];
+    gfModelAnimation* animation;
+};
+
+extern "C" void setUpdateRate__16gfModelAnimationFf(gfModelAnimation*, float);
+
+extern "C" void setUpdateRateFlg__8MuObjectFfUc(ModelOwner* self, u32 flags, float rate) {
+    if (flags == 0x1F) {
+        setUpdateRate__16gfModelAnimationFf(self->animation, rate);
+        return;
+    }
+
+    if (flags & 1)
+        self->animation->character->setUpdateRate(rate);
+    if (flags & 2)
+        self->animation->visibility->setUpdateRate(rate);
+    if (flags & 4)
+        self->animation->texturePattern->setUpdateRate(rate);
+    if (flags & 8)
+        self->animation->textureSrt->setUpdateRate(rate);
+    if (flags & 0x10)
+        self->animation->materialColor->setUpdateRate(rate);
+}
+}
+

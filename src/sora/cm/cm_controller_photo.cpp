@@ -577,3 +577,261 @@ void fn_800A6E78(Output* out, Input* in) {
 }
 }
 
+#include <gf/gf_camera.h>
+#include <stdlib.h>
+// TODO: clean up, give variables real names
+namespace jj_800A6A78 {
+extern "C" char lbl_80454F5C[];
+
+struct Obj {
+    int unk0;
+    int unk4;
+    void* unk8;
+};
+
+extern "C" void __ct__15cmPhotoCallBackFv(Obj* p) {
+    p->unk0 = 0;
+    p->unk8 = lbl_80454F5C;
+    p->unk4 = 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800A6A94 {
+extern "C" {
+extern void __dl__FPv(void*);
+
+void* __dt__15cmPhotoCallBackFv(void* arg0, int arg1) {
+    if (arg0 != 0 && arg1 > 0) {
+        __dl__FPv(arg0);
+    }
+    return arg0;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800A6CF8 {
+extern "C" double tan(double);
+extern "C" const float lbl_805A2060;
+struct State {
+    gfCamera* camera;
+    char pad[0xB8];
+    float fov;
+    Vec3f pos;
+    float rx, ry, distance, rz;
+    Vec3f center, vertical, horizontal;
+    float depth;
+};
+extern "C" void fn_800A6CF8(State* s) {
+    gfCamera* c = s->camera;
+    s->fov = c->unkD0;
+    s->pos = c->m_targetPos;
+    s->rx = c->m_rot.m_x;
+    s->ry = c->m_rot.m_y;
+    float distance = c->unkCC;
+    s->distance = distance;
+    s->rz = c->m_rot.m_z;
+    Vec3f center = c->m_centerPos;
+    float aspect = *(float*)((char*)c + 0xE4);
+    float height = distance * (float)tan(s->fov * lbl_805A2060);
+    float width = height * aspect;
+    Vec2f extentCopy;
+    Vec2f extent;
+    __memcpy(&extent.m_x, &width, sizeof(float));
+    __memcpy(&extent.m_y, &height, sizeof(float));
+    __memcpy(&extentCopy, &extent, sizeof(Vec2f));
+
+    Vec3f vertical = s->pos;
+    Vec3f horizontal = s->pos;
+    Vec3f base = s->pos;
+    vertical.m_x += extentCopy.m_y;
+    horizontal.m_x += extentCopy.m_x;
+    s->center = center;
+    s->vertical = vertical;
+    s->horizontal = horizontal;
+    s->depth = c->unkCC;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800A92C4 {
+
+
+extern "C" const float lbl_805A205C;
+extern "C" const float lbl_805A20E4;
+
+struct Obj {
+    char pad[8];
+    int state;
+};
+
+struct Input {
+    char pad[4];
+    unsigned int buttons;
+    char pad2[0x28];
+    signed char x, y;
+    char pad3[10];
+    int type;
+};
+
+struct Vec {
+    float x, y;
+};
+
+extern "C" void getOrbitControl__17cmPhotoControllerFPC11gfPadStatusP5Vec2f(Obj* self, Input* input, Vec* out, int y) {
+    int x;
+
+    if (self->state == 2) {
+        out->y = lbl_805A205C;
+        out->x = lbl_805A205C;
+        return;
+    }
+
+    switch (input->type) {
+    case 0:
+        {
+            unsigned char a = input->y;
+            unsigned char b = input->x;
+            x = (signed char)b;
+            y = (signed char)a;
+        }
+        break;
+    case 1:
+        {
+            unsigned char a = input->y;
+            unsigned char b = input->x;
+            x = (signed char)b;
+            y = (signed char)a;
+        }
+        break;
+    case 2:
+        {
+            unsigned int buttons = input->buttons;
+            if (!(buttons & 0x300)) {
+                x = 0;
+                y = 0;
+                if (buttons & 2) x = 127;
+                if (buttons & 1) x = -127;
+                if (buttons & 4) y = -127;
+                if (buttons & 8) y = 127;
+            } else {
+                x = 0;
+                y = 0;
+            }
+        }
+        break;
+    case 3:
+        {
+            unsigned char a = input->y;
+            unsigned char b = input->x;
+            x = (signed char)b;
+            y = (signed char)a;
+        }
+        break;
+    default:
+        x = (int)input;
+        break;
+    }
+
+    int xx = (signed char)x;
+    int sign = xx >> 31;
+    int v = ((sign ^ xx) - sign) - 30;
+    float f;
+    if (v > 0) {
+        f = (float)v / lbl_805A20E4;
+        if ((signed char)x < 0) f = -f;
+    } else {
+        f = lbl_805A205C;
+    }
+    out->x = f;
+
+    xx = (signed char)y;
+    sign = xx >> 31;
+    v = ((sign ^ xx) - sign) - 30;
+    if (v > 0) {
+        f = (float)v / lbl_805A20E4;
+        if ((signed char)y < 0) f = -f;
+    } else {
+        f = lbl_805A205C;
+    }
+    out->y = f;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800A944C {
+extern "C" const float lbl_805A205C;
+extern "C" const float lbl_805A20E4;
+struct Obj { char pad[8]; int state; };
+struct Input { char pad[4]; unsigned int buttons; char pad2[0x2a]; signed char x, y; char pad3[8]; int type; };
+struct Vec { float x, y; };
+extern "C" void getOrbitControlWithMenu__17cmPhotoControllerFPC11gfPadStatusP5Vec2f(Obj* self, Input* input, Vec* out, int y) {
+    int x;
+    if (self->state == 2) {
+        out->y = lbl_805A205C;
+        out->x = lbl_805A205C;
+        return;
+    }
+    switch (input->type) {
+    case 0:
+        { unsigned char a = input->y;
+        unsigned char b = input->x;
+        x = (signed char)b;
+        y = (signed char)a; }
+        break;
+    case 1:
+        { unsigned char a = input->y;
+        unsigned char b = input->x;
+        x = (signed char)b;
+        y = (signed char)a; }
+        break;
+    case 2: {
+        unsigned int buttons = input->buttons;
+        if (buttons & 0x40) {
+            x = 0;
+            y = 0;
+            if (buttons & 2) x = 127;
+            if (buttons & 1) x = -127;
+            if (buttons & 4) y = -127;
+            if (buttons & 8) y = 127;
+        } else {
+            x = 0;
+            y = 0;
+        }
+        break;
+    }
+    case 3: {
+        unsigned int buttons = input->buttons;
+        x = 0;
+        y = 0;
+        if (buttons & 2) x = 127;
+        if (buttons & 1) x = -127;
+        if (buttons & 4) y = -127;
+        if (buttons & 8) y = 127;
+        break;
+    }
+    default:
+        x = (int)input;
+        break;
+    }
+    int xx = (signed char)x;
+    int sign = xx >> 31;
+    int v = ((sign ^ xx) - sign) - 30;
+    float f;
+    if (v > 0) {
+        f = (float)v / lbl_805A20E4;
+        if ((signed char)x < 0) f = -f;
+    } else f = lbl_805A205C;
+    out->x = f;
+    xx = (signed char)y;
+    sign = xx >> 31;
+    v = ((sign ^ xx) - sign) - 30;
+    if (v > 0) {
+        f = (float)v / lbl_805A20E4;
+        if ((signed char)y < 0) f = -f;
+    } else f = lbl_805A205C;
+    out->y = f;
+}
+}
+

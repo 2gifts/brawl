@@ -140,3 +140,55 @@ void wnSonicSuperSonic::notifyEventChangeStatus(int kind, int prevKind, soStatus
     default: break;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_145B8 {
+extern "C" u32 fn_123_145B8(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x4);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_14CE8 {
+extern "C" {
+void __dl__FPv(void*);
+void* __dt__22soControllerModuleImplFv(void*, short);
+}
+
+extern "C" {
+void* fn_123_14CE8(void* p1, short p2) {
+    if (p1 != 0) {
+        __dt__22soControllerModuleImplFv(p1, static_cast<short>(0));
+        if (p2 > 0) {
+            __dl__FPv(p1);
+        }
+    }
+    return p1;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1798C {
+extern "C" void* getInstanceAt__21ftPurinArticleSubPoolFl(void* object, int index) {
+    if (index == 0) {
+        return static_cast<char*>(object) + 0x0c;
+    }
+    return 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_17A34 {
+extern "C" s32 fn_123_17A34(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_17AE4 {
+extern "C" s32 fn_123_17AE4(void) {
+    return 0x0;
+}
+}
+

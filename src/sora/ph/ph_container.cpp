@@ -78,3 +78,9 @@ int phStreamReader::read(void* buf, int nbytes) {
     }
     return 0;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_80080A64 {
+extern "C" void calcStatistics__18hkReferencedObjectCFP21hkStatisticsCollector(void) {}
+}
+

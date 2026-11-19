@@ -2971,3 +2971,125 @@ itCustomizerInterface* itManager::getCustomizer(int kind) {
     if (kind < 0 || kind >= NUM_IT_KINDS) return &lbl_27_bss_6430;
     return lbl_27_bss_6768[kind];
 }
+
+// TODO: clean up, give variables real names
+namespace jj_2A0ED8 {
+extern "C" {
+extern s32 lbl_27_rodata_47C8[];
+extern u8 lbl_27_rodata_4A90[];
+extern s32 lbl_27_rodata_4B48[];
+void getItemKindArchiveRefBrresItKind__9itManagerFib(void*, s32, s32);
+u8 getItemKindArchiveGroup__9itManagerFiUc(void* self, s32 idx, s32 arg) {
+    if (idx < 0 || idx >= 0xB2) return 0;
+    s32 valid = 0;
+    if (idx > -1 && idx < 0xB2) valid = 1;
+    s32 value;
+    if (valid == 0) value = 0;
+    else {
+        s32 v = lbl_27_rodata_47C8[idx];
+        value = v < 0 ? -v : v;
+    }
+    if (value > 0 && (idx == 15 || idx == 7 || idx == 3 || idx == 10 || idx == 20 || idx == 143))
+        return lbl_27_rodata_4A90[idx] + arg;
+    if (idx != -3 && idx >= 0 && idx < 0xB2) {
+        s32 a = lbl_27_rodata_4B48[idx];
+        if (a != -1 && a != -3 && a >= 0 && a < 0xB2) {
+            s32 b = lbl_27_rodata_4B48[a];
+            if (b != -1 && b != -3 && b >= 0 && b < 0xB2) {
+                s32 c = lbl_27_rodata_4B48[b];
+                if (c != -1 && c != -3 && c >= 0 && c < 0xB2) {
+                    s32 d = lbl_27_rodata_4B48[c];
+                    if (d != -1) getItemKindArchiveRefBrresItKind__9itManagerFib(self, d, 0);
+                }
+            }
+        }
+    }
+    return lbl_27_rodata_4A90[idx];
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2A1D30 {
+extern "C" char lbl_27_data_26D04[];
+extern "C" void* getInstance__13soEventSystemFv();
+extern "C" void* getManager__13soEventSystemFl(void*, long);
+extern "C" void __dl__FPv(void*);
+extern "C" void __dt__6gfTaskFv(void*, int);
+extern "C" void __destroy_arr(void*, void (*)(void*, int), unsigned long, unsigned long);
+extern "C" void fn_27_2ADF54(void*, int);
+extern "C" void fn_27_2ADFB0(void*, int);
+extern "C" void fn_27_2AE00C(void*, int);
+extern "C" void fn_27_2AE068(void*, int);
+
+class soAnimCmdEventObserver;
+template <class T>
+struct soEventObserver {
+    static void __vt(int, int);
+};
+
+struct EvSys {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual u32 v6(s16);
+};
+
+struct EvMgr {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3(s16, s16);
+};
+
+struct Obj {
+    char pad0[0x40];
+    void* v40;
+    s16 m44;
+    s16 m46;
+    s16 m48;
+};
+
+extern "C" void* fn_27_2A1D30(void* arg, s32 flag) {
+    if (arg) {
+        Obj* p = (Obj*)arg;
+        if ((char*)p + 0x1170) {
+            __destroy_arr((char*)p + 0x1178, fn_27_2AE068, 0xC, 3);
+        }
+        if ((char*)p + 0x10C8) {
+            __destroy_arr((char*)p + 0x10D0, fn_27_2AE00C, 0xC, 0xC);
+        }
+        if ((char*)p + 0xCE8) {
+            __destroy_arr((char*)p + 0xCF0, fn_27_2ADFB0, 0xC, 0x40);
+        }
+        if ((char*)p + 0x9E0) {
+            __destroy_arr((char*)p + 0x9E8, fn_27_2ADFB0, 0xC, 0x40);
+        }
+        if ((char*)p + 0x6D8) {
+            __destroy_arr((char*)p + 0x6E0, fn_27_2ADFB0, 0xC, 0x40);
+        }
+        if ((char*)p + 0xC8) {
+            __destroy_arr((char*)p + 0xD4, fn_27_2ADF54, 0xC, 0x80);
+        }
+        if ((char*)p + 0x40 && (char*)p + 0x40) {
+            s16 id = p->m44;
+            p->v40 = (void*)lbl_27_data_26D04;
+            if (((EvSys*)getInstance__13soEventSystemFv())->v6(id) == 1) {
+                EvMgr* mgr = (EvMgr*)getManager__13soEventSystemFl(getInstance__13soEventSystemFv(), p->m44);
+                mgr->v3(p->m46, p->m48);
+            }
+            p->m48 = -1;
+            p->m44 = -1;
+        }
+        __dt__6gfTaskFv(p, 0);
+        if (flag > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return arg;
+}
+}
+

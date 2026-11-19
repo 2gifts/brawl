@@ -572,3 +572,25 @@ void soCollisionHitModuleImpl::setInvincibleFrameGlobal(int invincibleFrameGloba
         m_prevTotalStatus = totalStatus;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_42E0C {
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_27_42E0C(void* p, int n) {
+    if (p != 0 && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_46570 {
+extern "C" void notifyEventAnimCmd__24soCollisionHitModuleImplFP9acAnimCmdP16soModuleAccesseri(void*);
+
+extern "C" void fn_27_46570(void* self) {
+    notifyEventAnimCmd__24soCollisionHitModuleImplFP9acAnimCmdP16soModuleAccesseri(reinterpret_cast<u8*>(self) - 0x14);
+}
+}
+

@@ -368,3 +368,120 @@ void itKineticEnergy3f::resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*
     m_speed.m_x = x;
     m_speed.m_y = y;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_2BE510 {
+typedef struct {
+    float x;
+    float y;
+} Vec2;
+
+typedef struct {
+    int pad[2];
+    Vec2 v;
+} Obj;
+
+extern const float lbl_27_rodata_5FBC;
+
+extern "C" void fn_27_2BE510(Obj* obj, const Vec2* v)
+{
+    Vec2 tmp;
+    Vec2 f;
+    Vec2 c;
+    Vec2 a;
+
+    tmp.x = v->x;
+    tmp.y = v->y;
+
+    float d = tmp.x * obj->v.x + tmp.y * obj->v.y;
+
+    a.x = tmp.x * lbl_27_rodata_5FBC;
+    a.y = tmp.y * lbl_27_rodata_5FBC;
+    Vec2 b = a;
+
+    c.x = b.x * d;
+    c.y = b.y * d;
+    Vec2 e = c;
+
+    f.x = obj->v.x - e.x;
+    f.y = obj->v.y - e.y;
+    Vec2 g = f;
+
+    obj->v = g;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2BE5C8 {
+typedef struct {
+    float x;
+    float y;
+} Vec2;
+
+typedef struct {
+    char pad[0x10];
+    Vec2 v;
+} Obj;
+
+extern const float lbl_27_rodata_5FBC;
+
+extern "C" void fn_27_2BE5C8(Obj* obj, const Vec2* v)
+{
+    Vec2 tmp;
+    Vec2 f;
+    Vec2 c;
+    Vec2 a;
+
+    tmp.x = v->x;
+    tmp.y = v->y;
+
+    float d = tmp.x * obj->v.x + tmp.y * obj->v.y;
+
+    a.x = tmp.x * lbl_27_rodata_5FBC;
+    a.y = tmp.y * lbl_27_rodata_5FBC;
+    Vec2 b = a;
+
+    c.x = b.x * d;
+    c.y = b.y * d;
+    Vec2 e = c;
+
+    f.x = obj->v.x - e.x;
+    f.y = obj->v.y - e.y;
+    Vec2 g = f;
+
+    obj->v = g;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2BF030 {
+extern const float lbl_27_rodata_5FB4;
+extern const float lbl_27_rodata_5FBC;
+struct Vec2 { float x, y; };
+struct Obj { char pad[0xC]; float value; };
+extern "C" void fn_27_2BF030(Obj* out, const Vec2* v) {
+    Vec2 r;
+    Vec2 dir;
+    Vec2 g;
+    Vec2 e;
+    Vec2 a;
+    r.y = out->value;
+    r.x = lbl_27_rodata_5FB4;
+    dir.x = v->x;
+    dir.y = v->y;
+    float d = dir.x * r.x + dir.y * r.y;
+    a.x = dir.x * lbl_27_rodata_5FBC;
+    a.y = dir.y * lbl_27_rodata_5FBC;
+    Vec2 b = a;
+    e.x = b.x * d;
+    e.y = b.y * d;
+    Vec2 f = e;
+    g.x = r.x - f.x;
+    g.y = r.y - f.y;
+    Vec2 h = g;
+    r.x = h.x;
+    r.y = h.y;
+    out->value = r.y;
+}
+}
+

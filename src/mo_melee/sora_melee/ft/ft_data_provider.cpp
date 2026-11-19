@@ -492,3 +492,133 @@ bool ftDataProvider::isFinish(ftKind kind, int p2, int p3, int resourceType, u32
     }
     return false;
 }
+
+#include <ft/ft_slot_manager.h>
+// TODO: clean up, give variables real names
+namespace jj_141448 {
+
+struct ResBase { char pad[0x14]; };
+class ftDataTaskResource : public ResBase {
+public:
+    virtual void isNull();
+    virtual void at(s32 index);
+};
+
+extern "C" {
+extern unsigned char lbl_27_data_2BAC0[];
+extern unsigned char lbl_27_data_2BB78[];
+extern unsigned char lbl_27_data_2BAE8[];
+extern void* g_ftDataProvider;
+
+void __ct__13soArchiveItemFUl(void* self, int v);
+void* __ct__Q214ftDataProvider18ftDataTaskResourceFv(void* self);
+void* __dt__Q214ftDataProvider18ftDataTaskResourceFv(void* self, int shouldDelete);
+void __construct_array(void* base, void* ctor, void* dtor, unsigned long size, unsigned long count);
+}
+
+extern "C" void* __ct__14ftDataProviderFv(unsigned char* p) {
+    *(void**)(p + 0x0) = lbl_27_data_2BAC0;
+    *(void**)(p + 0x10) = lbl_27_data_2BB78;
+    p[0xc] = 0;
+    p[0x14] = 0;
+    *(void**)(p + 0x18) = lbl_27_data_2BAE8;
+    __ct__13soArchiveItemFUl(p + 0x20, 0);
+    *(int*)(p + 0x28) = 0xff;
+    *(int*)(p + 0x2c) = 0;
+    *(int*)(p + 0x30) = -1;
+    __construct_array(p + 0x38, (void*)__ct__Q214ftDataProvider18ftDataTaskResourceFv, (void*)__dt__Q214ftDataProvider18ftDataTaskResourceFv, 0x34, 0x50);
+    *(int*)(p + 0x1078) = -1;
+    p[0x10a0] = 1;
+    g_ftDataProvider = p;
+    *(int*)(p + 0x108c) = 0;
+    *(int*)(p + 0x1088) = 0;
+    *(int*)(p + 0x1090) = 0;
+    *(int*)(p + 0x1098) = 0;
+    *(int*)(p + 0x1094) = 0;
+    *(int*)(p + 0x109c) = 0;
+    *(int*)(p + 0x1080) = 0;
+    *(int*)(p + 0x107c) = 0;
+    *(int*)(p + 0x1084) = 0;
+    ((ftDataTaskResource*)(p + 4))->at(0);
+
+    s32 offset;
+    s32 i = 0;
+    offset = 0;
+    do {
+        ((ftDataTaskResource*)((unsigned long)(p + 0x38) + offset))->at(0);
+        ((utList*)(p + 0x107c))->addTail((utListNode*)((unsigned long)p + offset + 0x38));
+        i++;
+        offset += 0x34;
+    } while (i < 0x50);
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_14178C {
+extern "C" void reqLoad__13soArchiveItemFPCcQ25Heaps8HeapTypeUliiUlb(void*, s32, s32, s32, s32, s32, s32, s32);
+extern "C" void add__13soArchiveItemFPviQ25Heaps8HeapType(void*);
+extern s32 lbl_27_rodata_146C;
+
+struct Flags {
+    u8 a : 7;
+    u8 b : 1;
+};
+
+extern "C" void reqCommon__14ftDataProviderFUlUli(u8* self, s32 arg1, s32 unused, s32 arg3) {
+    if (self[0x0C] == 0) {
+        Flags* fl = (Flags*)(self + 0x37);
+        if (arg1 != 0) {
+            add__13soArchiveItemFPviQ25Heaps8HeapType(self + 0x20);
+        } else {
+            reqLoad__13soArchiveItemFPCcQ25Heaps8HeapTypeUliiUlb(self + 0x20, lbl_27_rodata_146C, arg3, 0, 0, 0, 0xFF, 1);
+        }
+        self[0x14] = 3;
+        *(s32*)(self + 0x28) = arg3;
+        self[0x35] = 0;
+        fl->a = 0xF;
+        *(s32*)(self + 0x1078) = -1;
+    }
+    self[0x0C]++;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_141840 {
+
+extern "C" sndSystem* fn_27_141840() {
+    return g_sndSystem;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_143B14 {
+
+extern gfModuleManager* g_gfModuleManager;
+
+gfModuleManager* gfModuleManager::getInstance()
+{
+    return g_gfModuleManager;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_143B34 {
+extern "C" {
+extern unsigned char g_ftInfo[0xC];
+
+void *getInstance__6ftInfoFv() {
+    return &g_ftInfo;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_144124 {
+
+extern "C" ftSlotManager* fn_27_144124()
+{
+    return g_ftSlotManager;
+}
+}
+

@@ -129,3 +129,54 @@ bool wnGameWatchSausage::notifyEventCollisionAttackCheck(u32 flags) {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_34F0D4 {
+extern "C" void* fn_27_34F0D4(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x7f8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_34FC3C {
+extern "C" void* fn_27_34FC3C(void* self) {
+    return reinterpret_cast<u8*>(self) + 0xd8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_35200C {
+extern "C" void fn_27_34ECF8(void*);
+
+extern "C" void fn_27_35200C(void* self) {
+    fn_27_34ECF8(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_352014 {
+extern "C" void fn_27_34ECF8(void*);
+
+extern "C" void fn_27_352014(void* self) {
+    fn_27_34ECF8(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_35201C {
+extern "C" void fn_27_34ECF8(void*);
+
+extern "C" void fn_27_35201C(void* self) {
+    fn_27_34ECF8(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_35203C {
+extern "C" void fn_27_351D94(void*);
+
+extern "C" void fn_27_35203C(void* self) {
+    fn_27_351D94(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

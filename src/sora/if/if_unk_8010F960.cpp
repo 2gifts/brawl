@@ -534,3 +534,63 @@ extern "C" void fn_8010F960(s32 kind, u8* mode, s32* id, s32 force) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_801104C4 {
+extern "C" {
+
+void buttonConfigInit__FP14ipButtonConfig(void*);
+void* getButtonConfig__10GameGlobalFi(void*, int);
+void reset__11ipPadConfigFv(void*);
+void* getInstance__11ipPadConfigFv();
+void setButtonConfig__11ipPadConfigFiUlPC14ipButtonConfig(void*, int, unsigned int, void*);
+void createPadNo2PlayerNoTable__11ipPadConfigFv(void*);
+extern void* g_GameGlobal;
+
+struct PadElem {
+    unsigned char pad0[7];
+    unsigned char flag;     // 0x07
+    unsigned char pad1[0x10];
+    unsigned char charId;   // 0x18
+    unsigned char pad2[0x24];
+    unsigned char count;    // 0x3D
+    unsigned char pad3[0x1E];
+};
+
+void stSetBottonConfig__FP17gmGlobalModeMelee(void* arg0) {
+    unsigned char sp8[0x2D];
+    PadElem* p;
+    int i;
+    int val;
+    void* src;
+
+    buttonConfigInit__FP14ipButtonConfig(sp8);
+    reset__11ipPadConfigFv(getInstance__11ipPadConfigFv());
+
+    p = (PadElem*)((unsigned char*)arg0 + 0x98);
+
+    for (i = 0; i < 4; i++) {
+        if (p->flag == 0) {
+            val = -1;
+        } else {
+            val = p->count - 1;
+            if (val < 0) {
+                val = i | 0x10;
+            }
+        }
+
+        if (p->charId != 0x78) {
+            src = getButtonConfig__10GameGlobalFi(g_GameGlobal, p->charId);
+        } else {
+            src = sp8;
+        }
+
+        setButtonConfig__11ipPadConfigFiUlPC14ipButtonConfig(getInstance__11ipPadConfigFv(), i, (unsigned int)val, src);
+        p++;
+    }
+
+    createPadNo2PlayerNoTable__11ipPadConfigFv(getInstance__11ipPadConfigFv());
+}
+
+}
+}
+

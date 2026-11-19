@@ -7,8 +7,8 @@ unsigned char lbl_804FB460[0x40] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_805A0CA0[0x4] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_805A0CA4[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A0CA8[0x8] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_805A0CB0[0x4] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_805A0CB4[0x4] __attribute__((aligned(4))) = { 0 };
+typedef struct { u32 x, y; } Pair;
+Pair lbl_805A0CB0 = { 0, 0 };
 unsigned char lbl_805A0CB8[0x4] __attribute__((aligned(4))) = { 0 };
 unsigned char lbl_805A0CBC[0x4] __attribute__((aligned(4))) = { 0 };
 
@@ -535,3 +535,83 @@ void clamp_stick_cross(float *out, int x, int y, int min, int max)
 #undef lbl_805A39E8
 #undef lbl_805A39F8
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
+typedef struct { u32 x, y, z; } Triple;
+extern f32 lbl_8059ED30;
+extern u16 lbl_8059ED38;
+extern f32 lbl_8059ED3C, lbl_8059ED44;
+extern const f32 lbl_805A39E8, lbl_805A39F4, lbl_805A39F8, lbl_805A39FC, lbl_805A3A00;
+#pragma opt_unroll_loops off
+void reset_kpad(void *arg0) {
+    u8 *p = arg0;
+    f32 temp_f1 = *(f32 *)(p + 0xA4);
+    f32 z = lbl_805A39E8;
+    f32 q = lbl_805A3A00;
+    f32 n = lbl_805A39FC;
+    f32 v = lbl_805A39F8;
+    f32 m = lbl_805A39F4;
+    f32 temp_f0;
+    f32 cb;
+    u8 *var_r29, *var_r5;
+    *(u8 *)(p + 0x51D) = 0;
+    *(f32 *)(p + 0x4F4) = m + lbl_8059ED3C;
+    *(f32 *)(p + 0x4FC) = v - lbl_8059ED3C;
+    *(f32 *)(p + 0x4F8) = n + lbl_8059ED3C;
+    *(f32 *)(p + 0x500) = q - lbl_8059ED3C;
+    *(f32 *)(p + 0x504) = v / lbl_8059ED44;
+    *(f32 *)(p + 0x508) = m / lbl_8059ED44;
+    *(f32 *)(p + 0x50C) = lbl_8059ED30 * lbl_8059ED30;
+    *(f32 *)(p + 0x514) = *(f32 *)lbl_805A0CBC;
+    cb = *(f32 *)lbl_805A0CB8;
+    temp_f0 = cb / temp_f1;
+    *(f32 *)(p + 0x510) = cb;
+    *(s32 *)(p + 8) = 0;
+    *(s32 *)(p + 4) = 0;
+    *(s32 *)(p + 0) = 0;
+    *(u16 *)(p + 0x4CC) = 0;
+    *(u16 *)(p + 0x4CE) = *(u16 *)(p + 0x4D0);
+    *(u8 *)(p + 0x5E) = 0;
+    *(u8 *)(p + 0x4CA) = 0;
+    *(Pair *)(p + 0x28) = lbl_805A0CB0;
+    *(f32 *)(p + 0x4B8) = v;
+    *(f32 *)(p + 0x4BC) = z;
+    *(Pair *)(p + 0x20) = *(Pair *)(p + 0x28);
+    *(f32 *)(p + 0x30) = z;
+    *(f32 *)(p + 0x4B0) = v;
+    *(f32 *)(p + 0x34) = v;
+    *(f32 *)(p + 0x4B4) = z;
+    *(f32 *)(p + 0x38) = z;
+    *(Pair *)(p + 0x3C) = lbl_805A0CB0;
+    *(f32 *)(p + 0x14) = z;
+    *(f32 *)(p + 0xC) = z;
+    *(f32 *)(p + 0x10) = m;
+    *(f32 *)(p + 0x44) = z;
+    *(f32 *)(p + 0x54) = v;
+    *(f32 *)(p + 0x58) = z;
+    *(f32 *)(p + 0x48) = temp_f1;
+    *(f32 *)(p + 0x50) = z;
+    *(f32 *)(p + 0x4C) = z;
+    *(f32 *)(p + 0x49C) = temp_f1;
+    *(f32 *)(p + 0x4A0) = temp_f0;
+    *(f32 *)(p + 0x490) = temp_f0;
+    *(s32 *)(p + 0x494) = *(s32 *)(p + 0xB0);
+    *(s32 *)(p + 0x498) = *(s32 *)(p + 0xB4);
+    *(f32 *)(p + 0x18) = v;
+    *(f32 *)(p + 0x1C) = z;
+    *(Triple *)(p + 0x4A4) = *(Triple *)(p + 0xC);
+    *(Pair *)(p + 0x4C0) = *(Pair *)(p + 0x4B8);
+    *(u16 *)(p + 0x4C8) = lbl_8059ED38;
+    *(u16 *)(p + 0x10C) = 0;
+    var_r29 = p + 0xE8;
+    do {
+        *(s8 *)(var_r29 + 8) = -1;
+        var_r29 -= 0xC;
+    } while (var_r29 >= p + 0xC4);
+    var_r5 = p + 0x100;
+    do {
+        *(s8 *)(var_r5 + 8) = -1;
+        var_r5 -= 0xC;
+    } while (var_r5 >= p + 0xF4);
+    *(u8 *)(p + 0x10F) = 0;
+    *(u8 *)(p + 0x51E) = 1;
+}
