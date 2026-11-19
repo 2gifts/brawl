@@ -16,16 +16,17 @@ protected:
     u8 m_reducedGravity;
     u8 unk175[3];
     snd3DGenerator m_soundGenerator;
-    u32 unk180;
+    s32 unk180;
     u8 unk184;
     u8 unk185[3];
 public:
+    grPiratesTornado(const char* taskName);
     virtual ~grPiratesTornado();
     virtual void update(float deltaFrame);
     virtual void updateMotion(float deltaFrame);
     virtual void updateSE(float deltaFrame);
     virtual void updateCallBack(float deltaFrame);
-    virtual void setMotion(u32 motion, u32 loop, bool force, float* endFrame);
+    virtual void setMotion(u32 motion, bool loop, bool force, float* endFrame);
     virtual void setMatrixWork(void* matrices) { unk164 = matrices; }
     virtual void setEventWork(u8* event) { m_stateWork = event; }
     static grPiratesTornado* create(int mdlIndex, const char* nodeName, const char* taskName);

@@ -25,7 +25,58 @@ extern "C" int DWC_CheckUserData(const DWCAccUserData* userdata);
 extern "C" void DWC_CreateUserData(DWCAccUserData* userdata);
 extern "C" int DWC_CheckDirtyFlag(const DWCAccUserData* userdata);
 // HYPOTHESIS: clears the dirty flag of the account data.
-extern "C" void fn_8035161C(DWCAccUserData* userdata);
+extern "C" void DWC_ClearDirtyFlag(DWCAccUserData* userdata);
+
+static inline bool getSaveHeaderInline(void** data) {
+    bool result;
+    if (data == 0) {
+        return false;
+    }
+    ntFriendInfo* info = ntFriendInfo::getInstance();
+    int modified;
+    if (info->unk0 == 0) {
+        modified = 0;
+    } else {
+        modified = info->unk8;
+        if (modified == 0 && DWC_CheckUserData(info->getUserData()) != 0 && DWC_CheckDirtyFlag(info->getUserData()) != 0) {
+            modified = 1;
+        }
+    }
+    if (modified == 0) {
+        result = false;
+    } else {
+        DWC_ClearDirtyFlag(info->getUserData());
+        info->unk8 = false;
+        info->unk0->unk0_0 = 0x2804;
+        u16 rev = srSystemGetRevisionNumber();
+        UnkFriendInfo* header = info->unk0;
+        header->unk4 = rev;
+        info->unk0->unk6 = 0;
+        info->unk0->unk2 = 0;
+        u16 crc = NETCalcCRC16((const char*)info->unk0, 0x2804);
+        result = true;
+        info->unk0->unk2 = crc;
+        *data = info->unk0;
+    }
+    return result;
+}
+
+static inline u8 isModifiedInline(ntFriendInfo* info) {
+    u8 modified;
+    if (info->unk0 == 0) {
+        modified = 0;
+    } else {
+        modified = info->unk8;
+        if (modified == 0 && DWC_CheckUserData(info->getUserData()) != 0 && DWC_CheckDirtyFlag(info->getUserData()) != 0) {
+            modified = 1;
+        }
+    }
+    return modified;
+}
+
+static inline u8 isReadyInline() {
+    return isModifiedInline(ntFriendInfo::getInstance());
+}
 
 ntFriendInfoSave::ntFriendInfoSave()
     : gfTask("ntFriendInfoSave", Category_None, 14, 6, true), unk40(0), unk44(false) {
@@ -37,6 +88,49 @@ ntFriendInfoSave::~ntFriendInfoSave() {
         gfSysRecorder2::dropInstance();
         unk40 = 0;
     }
+}
+
+// HYPOTHESIS: copies the Wi-Fi friend data to the buffer of a new gfSysRecorder2 and starts to save it.
+bool ntFriendInfoSave::startSave(Heaps::HeapType heap, bool exitWhenDone) {
+    if (unk40 != 0) {
+        return false;
+    }
+    ++s_savingCount;
+    unk44 = exitWhenDone;
+    int ok;
+    if (!gfSysRecorder2::isEnable(2)) {
+        ok = 0;
+    } else if (lbl_805A044C == 0) {
+        ok = 0;
+    } else if (!NtBase::isMatchStatusOnline()) {
+        ok = 0;
+    } else {
+        ok = isReadyInline() != 0;
+    }
+    if (ok) {
+        unk40 = gfSysRecorder2::createInstance(heap);
+        if (unk40 != 0) {
+            void* buffer = unk40->getBuffer(2);
+            if (buffer != 0) {
+                void* data = 0;
+                if (getSaveHeaderInline(&data)) {
+                    memcpy(buffer, data, 0x2804);
+                    if (unk40->saveWifi()) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    if (unk40 != 0) {
+        gfSysRecorder2::dropInstance();
+        unk40 = 0;
+    }
+    if (unk44) {
+        exit();
+    }
+    --s_savingCount;
+    return false;
 }
 
 void ntFriendInfoSave::processDefault() {
@@ -86,7 +180,7 @@ bool ntFriendInfo::isSaveNeeded() {
     if (!NtBase::isMatchStatusOnline()) {
         return false;
     }
-    if (!getInstance()->isModified()) {
+    if (!isReadyInline()) {
         return false;
     }
     return true;
@@ -125,25 +219,37 @@ ntFriendInfo* ntFriendInfo::getInstance() {
 }
 
 bool ntFriendInfo::getSaveHeader(void** data) {
+    bool result;
     if (data == 0) {
         return false;
     }
-    ntFriendInfo* info = getInstance();
-    if (!info->isModified()) {
-        return false;
+    ntFriendInfo* info = ntFriendInfo::getInstance();
+    int modified;
+    if (info->unk0 == 0) {
+        modified = 0;
+    } else {
+        modified = info->unk8;
+        if (modified == 0 && DWC_CheckUserData(info->getUserData()) != 0 && DWC_CheckDirtyFlag(info->getUserData()) != 0) {
+            modified = 1;
+        }
     }
-    fn_8035161C(info->getUserData());
-    info->unk8 = false;
-    info->unk0->unk0_0 = 0x2804;
-    u16 rev = srSystemGetRevisionNumber();
-    UnkFriendInfo* header = info->unk0;
-    header->unk4 = rev;
-    info->unk0->unk6 = 0;
-    info->unk0->unk2 = 0;
-    u16 crc = NETCalcCRC16((const char*)info->unk0, 0x2804);
-    info->unk0->unk2 = crc;
-    *data = info->unk0;
-    return true;
+    if (modified == 0) {
+        result = false;
+    } else {
+        DWC_ClearDirtyFlag(info->getUserData());
+        info->unk8 = false;
+        info->unk0->unk0_0 = 0x2804;
+        u16 rev = srSystemGetRevisionNumber();
+        UnkFriendInfo* header = info->unk0;
+        header->unk4 = rev;
+        info->unk0->unk6 = 0;
+        info->unk0->unk2 = 0;
+        u16 crc = NETCalcCRC16((const char*)info->unk0, 0x2804);
+        result = true;
+        info->unk0->unk2 = crc;
+        *data = info->unk0;
+    }
+    return result;
 }
 
 // HYPOTHESIS: true when the data was changed since it was saved.
@@ -164,7 +270,7 @@ bool ntFriendInfo::getSaveData(void** data, int* size) {
     if (!isModified()) {
         return false;
     }
-    fn_8035161C(getUserData());
+    DWC_ClearDirtyFlag(getUserData());
     unk8 = false;
     unk0->unk0_0 = 0x2804;
     u16 rev = srSystemGetRevisionNumber();
@@ -203,71 +309,3 @@ bool ntFriendInfo::resetData() {
     unlock();
     return true;
 }
-
-// TODO: clean up, give variables real names
-namespace jj_8014C75C {
-struct Hdr { u16 magic; u16 crc; u16 rev; u8 pad6; u8 pad7; };
-struct Obj { Hdr* hdr; int size; u8 flag; u8 f9; };
-extern "C" {
-s16 NETCalcCRC16(void*, s32);
-s32 fn_80351304(void*);
-u32 fn_80351610(void*);
-void fn_8035161C(void*);
-s16 srSystemGetRevisionNumber__Fv(void);
-void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int, unsigned long);
-void* memset(void*, int, unsigned long);
-}
-extern Obj* lbl_805A044C;
-
-static inline void adjust(unsigned int* field, unsigned int remainder) {
-    if (remainder) *(long*)field += 32 - remainder;
-}
-
-extern "C" s32 fn_8014C75C(Hdr** out) {
-    s32 r30;
-    s32 r5;
-    if (out == 0) return 0;
-    if (lbl_805A044C == 0) {
-        Obj* o = (Obj*)__nw__FUlQ25Heaps8HeapType(12, 0x2d);
-        if (o) {
-            unsigned int* sizeField = (unsigned int*)((char*)o + 4);
-            *sizeField = 0x2804;
-            adjust(sizeField, *sizeField & 31);
-            o->hdr = (Hdr*)alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(0x2d, o->size);
-            memset(o->hdr, 0, o->size);
-            o->flag = 0;
-            o->f9 = 0;
-        }
-        lbl_805A044C = o;
-    }
-    Obj* self = lbl_805A044C;
-    if (self->hdr == 0) {
-        r30 = 0;
-    } else {
-        r30 = self->flag;
-        if (r30 == 0 && fn_80351304((u8*)self->hdr + 0x10) != 0 &&
-            fn_80351610((u8*)self->hdr + 0x10) != 0) {
-            r30 = 1;
-        }
-    }
-    if (r30 == 0) {
-        r5 = 0;
-    } else {
-        fn_8035161C((u8*)self->hdr + 0x10);
-        self->flag = 0;
-        self->hdr->magic = 0x2804;
-        s16 rev = srSystemGetRevisionNumber__Fv();
-        Hdr* t = self->hdr;
-        t->rev = rev;
-        self->hdr->pad6 = 0;
-        self->hdr->crc = 0;
-        s16 c = NETCalcCRC16(self->hdr, 0x2804);
-        r5 = 1;
-        self->hdr->crc = c;
-        *out = self->hdr;
-    }
-    return r5;
-}
-}
-

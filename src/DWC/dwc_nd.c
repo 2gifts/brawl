@@ -466,3 +466,14 @@ done:
  return result;
 }
 
+// TODO: clean up, give variables real names
+/* jj_803560A4 */
+extern int DWCi_NdSetAttr(const char *arg0, const char *arg1, const char *arg2);
+
+int DWC_NdSetAttr(const char *arg0, const char *arg1, const char *arg2) {
+    if (DWCi_IsError() != 0) {
+        return 0;
+    }
+    return DWCi_NdSetAttr(arg0, arg1, arg2);
+}
+

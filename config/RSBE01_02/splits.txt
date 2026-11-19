@@ -108,7 +108,7 @@ sora/gf/gf_decomp.cpp:
 	.text       start:0x8001A48C end:0x8001A5C0
 
 sora/gf/gf_draw.cpp:
-	.text       start:0x8001A5C0 end:0x8001ABE4
+	.text       start:0x8001A5C0 end:0x8001AF08
 	.sdata2     start:0x805A1460 end:0x805A1480
 
 sora/gf/gf_error_manager.cpp:
@@ -285,7 +285,7 @@ sora/gf/gf_mii_texture.cpp:
 	.sdata2     start:0x805A15F0 end:0x805A1670
 
 sora/gf/gf_homemenu.cpp:
-	.text       start:0x8003623C end:0x80037DC8
+	.text       start:0x8003623C end:0x80037DD0
 	.ctors      start:0x80406504 end:0x80406508
 	.rodata     start:0x80406910 end:0x80406920
 	.data       start:0x804231E0 end:0x80423398
@@ -314,7 +314,7 @@ sora/gf/gf_capture_util.cpp:
 	.sdata      start:0x8059C6B0 end:0x8059C6B8
 
 sora/gf/gf_collection_io.cpp:
-	.text       start:0x80038890 end:0x8003CFC0
+	.text       start:0x80038890 end:0x8003CFD0
 	.ctors      start:0x8040650C end:0x80406510
 	.rodata     start:0x80406920 end:0x80406938
 	.data       start:0x80423550 end:0x80423918
@@ -402,7 +402,7 @@ sora/ut/ut_list.cpp:
 	.text       start:0x800448F8 end:0x80044AD0
 
 sora/ut/ut_archive_manager.cpp:
-	.text       start:0x80044AD0 end:0x800469E4
+	.text       start:0x80044AD0 end:0x80046A28
 	.ctors      start:0x80406518 end:0x8040651C
 	.data       start:0x8042B5FC end:0x8042B6B8
 	.bss        start:0x804977C0 end:0x804977D0
@@ -476,7 +476,7 @@ sora/ef/ef_effect.cpp:
 	.sdata2     start:0x805A18D0 end:0x805A18E8
 
 sora/ef/ef_manager.cpp:
-	.text       start:0x8005AD04 end:0x8005C5B0
+	.text       start:0x8005AD04 end:0x8005C634
 	.ctors      start:0x80406520 end:0x80406524
 	.data       start:0x8042E9B0 end:0x8042EC18
 	.bss        start:0x80497800 end:0x80497810

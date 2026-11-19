@@ -193,3 +193,9 @@ s32 VFi_nanddrv_init_drv_tbl(PDM_DISK_TBL* p_disk_tbl, u32 ui_ext) {
     p_disk_tbl->p_func = &lbl_8041AC68;
     return 0;
 }
+
+// TODO: clean up, give variables real names
+/* jj_803CB000 */
+void VFi_InitSDWrok(void) {
+}
+

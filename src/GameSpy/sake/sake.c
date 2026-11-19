@@ -243,6 +243,87 @@ int sakeiDeleteRecordFillSoapRequest(SAKERequest request) {
     return 0;
 }
 
+SAKERequest fn_8038D77C(SAKE sake, int type, void* input, void* callback, void* userData) {
+    SAKERequest request;
+
+    sake->mStartRequestResult = 0;
+    if (input == NULL) {
+        sake->mStartRequestResult = 3;
+        return NULL;
+    }
+    if (sake->mIsGameAuthenticated == 0 || sake->mIsProfileAuthenticated == 0) {
+        sake->mStartRequestResult = 1;
+        return NULL;
+    }
+    request = gsimalloc(sizeof(SAKERequestInternal));
+    if (request == NULL) {
+        sake->mStartRequestResult = 2;
+        return NULL;
+    }
+    memset(request, 0, sizeof(SAKERequestInternal));
+    request->mSake = sake;
+    request->mType = type;
+    request->mInput = input;
+    request->mCallback = callback;
+    request->mCallbackData = userData;
+    return request;
+}
+
+extern char lbl_8059FC04[7];  // "values"
+extern char lbl_8059FC0C[5];  // "name"
+extern char lbl_8059FC14[6];  // "value"
+
+int sakeiFillSoapRequestFieldValues(SAKERequest request, SAKEField* fields, int numFields) {
+    int i;
+
+    fn_80364034(request->mSoapRequest, lbl_8059FC00, lbl_8059FC04);
+    for (i = 0; i < numFields; fields++, i++) {
+        fn_80364034(request->mSoapRequest, lbl_8059FC00, "RecordField");
+        fn_803646CC(request->mSoapRequest, lbl_8059FC00, lbl_8059FC0C, fields->mName);
+        fn_80364034(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14);
+        if (fields->mType == 0) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "byteValue");
+            fn_80365548(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mByte);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "byteValue");
+        } else if (fields->mType == 1) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "shortValue");
+            fn_80365548(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mShort);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "shortValue");
+        } else if (fields->mType == 2) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "intValue");
+            fn_80365548(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mInt);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "intValue");
+        } else if (fields->mType == 3) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "floatValue");
+            fn_80365C7C(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mFloat);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "floatValue");
+        } else if (fields->mType == 4) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "asciiStringValue");
+            fn_803646CC(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mAsciiString);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "asciiStringValue");
+        } else if (fields->mType == 5) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "unicodeStringValue");
+            fn_80364DAC(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mUnicodeString);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "unicodeStringValue");
+        } else if (fields->mType == 6) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "booleanValue");
+            fn_80365548(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mBoolean != 0);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "booleanValue");
+        } else if (fields->mType == 7) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "dateAndTimeValue");
+            fn_80366B18(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mDateAndTime);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "dateAndTimeValue");
+        } else if (fields->mType == 8) {
+            fn_80364034(request->mSoapRequest, lbl_8059FC00, "binaryDataValue");
+            fn_803663AC(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14, fields->mValue.mBinaryData.mValue, fields->mValue.mBinaryData.mLength);
+            fn_80364340(request->mSoapRequest, lbl_8059FC00, "binaryDataValue");
+        }
+        fn_80364340(request->mSoapRequest, lbl_8059FC00, lbl_8059FC14);
+        fn_80364340(request->mSoapRequest, lbl_8059FC00, "RecordField");
+    }
+    return fn_80364340(request->mSoapRequest, lbl_8059FC00, lbl_8059FC04);
+}
+
 // TODO: clean up, give variables real names
 extern void fn_8035E00C(void* arg);
 
@@ -256,7 +337,21 @@ void fn_8038D84C(SAKERequest request) {
 
 // TODO: clean up, give variables real names
 typedef struct Entry { signed char *name; int type; void *data; int count; } Entry;
-extern int fn_8038DDDC(Entry *p, int n);
+int sakeiValidateRequestFields(void *fields, int n) {
+    Entry *p = (Entry *)fields;
+    int i;
+    for (i = 0; i < n; i++, p++) {
+        if (!p->name || !*p->name) return 7;
+        if (p->type < 0 || p->type >= 9) return 8;
+        if (p->type == 4 && !p->data) return 9;
+        if (p->type == 5 && !p->data) return 9;
+        if (p->type == 8) {
+            if (p->count < 0) return 9;
+            if (!p->data && p->count > 0) return 9;
+        }
+    }
+    return 0;
+}
 struct Inner {
     int first;
     Entry *third;
@@ -266,19 +361,16 @@ struct S {
     char pad[8];
     struct Inner *p;
 };
-static int getSecond(struct Inner *p) {
-    return p->second;
-}
 int fn_8038E1C0(struct S *arg) {
     struct Inner *p = arg->p;
     int second;
     Entry *third;
     if (p->first == 0) return 4;
-    second = getSecond(p);
+    second = p->second;
     if (second < 0) return 6;
     third = p->third;
     if (third == 0 && second > 0) return 5;
-    return fn_8038DDDC(third, second);
+    return sakeiValidateRequestFields(third, second);
 }
 
 // TODO: clean up, give variables real names
@@ -348,3 +440,56 @@ int fn_8038D850(const char *arg0) {
     return result;
 }
 
+// sakeiSoapCallback: translates the HTTP result and the result tag of the SOAP response, lets the request callback
+// look at the output and frees the request.
+void fn_8038DA60(int httpResult, GSXmlStreamWriter requestData, GSXmlStreamReader response, void* userData) {
+    SAKERequest request = (SAKERequest)userData;
+    void* output = NULL;
+    int result;
+    char resultStr[0x20];
+
+    if (request == NULL || request->mSake == NULL || request->mInfo == NULL) {
+        return;
+    }
+    switch (httpResult) {
+    case 0:
+        result = 0;
+        break;
+    case 1:
+        result = 6;
+        break;
+    default:
+        result = 4;
+        break;
+    }
+    if (result == 0) {
+        if (!gsXmlMoveToStart(response) || !gsXmlMoveToNext(response, request->mInfo->mResponseTag)
+            || !fn_803679BC(response, request->mInfo->mResultTag, resultStr, 0x20)) {
+            result = 5;
+        } else {
+            result = fn_8038D850(resultStr);
+            if (result == 0 && request->mInfo->mSakeOutputSize != 0) {
+                request->mOutput = gsimalloc(request->mInfo->mSakeOutputSize);
+                if (request->mOutput != NULL) {
+                    request->mSoapResponse = response;
+                    result = request->mInfo->mProcessSoapResponseFunc(request);
+                    if (result == 0) {
+                        output = request->mOutput;
+                    }
+                } else {
+                    result = 6;
+                }
+            }
+        }
+    }
+    if (request->mCallback != NULL) {
+        ((void (*)(SAKE, SAKERequest, int, void*, void*, void*))request->mCallback)(
+            request->mSake, request, result, request->mInput, output, request->mCallbackData);
+    }
+    if (request->mInfo->mFreeDataFunc != NULL) {
+        request->mInfo->mFreeDataFunc(request);
+    }
+    gsifree(request->mOutput);
+    request->mOutput = NULL;
+    gsifree(request);
+}

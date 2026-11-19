@@ -1,3 +1,4 @@
+#include <mt/mt_vector.h>
 #include <gr/collision/gr_collision.h>
 #include <gr/collision/gr_collision_manager.h>
 #include <gr/collision/gr_collision_status.h>
@@ -404,3 +405,417 @@ void grCollStatus::setShapeKeepPrev(clRhombus2D* rhombus) {
     m_prevDownPos = m_prevCollShape->getDownPos();
     m_unk1C = m_currentCollShape->getDownPos();
 }
+
+// TODO: clean up, give variables real names
+namespace jj_80135B94 {
+extern "C" {
+extern void fn_80135950(int a, int b, int c);
+
+void fn_80135B94(int arg0, int arg1) {
+    fn_80135950(arg0, arg0 + 0x1C, arg1);
+}
+}
+}
+
+namespace jj_80135BA0 {
+extern "C" {
+extern void fn_80135950(void*, void*, int);
+
+void fn_80135BA0(void* arg0, int arg1) {
+    fn_80135950(arg0, (char*)arg0 + 0x14, arg1);
+}
+}
+}
+
+namespace jj_80137FF0 {
+extern "C" {
+    void fn_8015C238(void* a1, int a2);
+    void __dl__FPv(void* a1);
+}
+
+extern "C" void* fn_80137FF0(void* arg1, int arg2) {
+    if (arg1) {
+        if (arg1) {
+            fn_8015C238(arg1, 0);
+        }
+        if (arg2 > 0) {
+            __dl__FPv(arg1);
+        }
+    }
+    return arg1;
+}
+}
+
+namespace jj_80137074 {
+struct Entry {
+    u32 a;
+    u32 b;
+    u32 c;
+    u8 d;
+    u8 e;
+
+    int equals(const Entry& other) const {
+        int result = 0;
+        if (a == other.a)
+            result = 1;
+        return result;
+    }
+};
+
+struct Owner {
+    u8 pad[0x7d];
+    u8 count;
+    u8 pad2[0x174 - 0x7e];
+    Entry entries[8];
+};
+
+extern "C" int fn_80137074(Owner* self, const Entry* src) {
+    u8 count = self->count;
+    int result = 0;
+
+    if (count < 8U) {
+        for (u32 i = 0; i < count; ++i) {
+            if (self->entries[i].equals(*src)) {
+                result = 1;
+                break;
+            }
+        }
+
+        if (result == 0) {
+            self->entries[count] = *src;
+            ++self->count;
+            result = 1;
+        }
+    }
+
+    return result;
+}
+}
+
+namespace jj_801371D8 {
+struct Entry {
+    u32 a, b, c;
+    u8 d, e;
+    int equals(const Entry& other) const {
+        int result = 0;
+        if (a == other.a) result = 1;
+        return result;
+    }
+};
+struct Owner {
+    u8 pad[0x7d];
+    u8 count;
+    u8 pad2[0x174 - 0x7e];
+    Entry entries[8];
+};
+extern "C" void fn_801371D8(Owner* self, const Entry* src) {
+    u8 count = self->count;
+    for (u32 i = 0; i < count; ++i) {
+        if (self->entries[i].equals(*src)) {
+            for (; i < self->count - 1; ++i) {
+                self->entries[i] = self->entries[i + 1];
+            }
+            Entry& last = self->entries[self->count - 1];
+            last.a = 0;
+            last.b = 0;
+            last.c = 0;
+            last.d = 0;
+            --self->count;
+            return;
+        }
+    }
+}
+}
+
+namespace jj_80137114 {
+struct Entry {
+    u8 pad[0xE];
+    u16 flags;
+};
+
+extern "C" int fn_80114A60(void** a, Entry** b);
+
+extern "C" int fn_80137114(u8* self, Entry** arg) {
+    Entry** p = (Entry**)(self + 0x174);
+    int ret = 0;
+    u32 i = 0;
+    while (i < self[0x7D]) {
+        int f;
+        Entry* b = *arg;
+        int eq = 0;
+        Entry* cur = *p;
+        if (cur == b) {
+            eq = 1;
+        }
+        if (eq) {
+            ret = 1;
+            break;
+        }
+        f = 0;
+        if (cur->flags & b->flags & 0xF) {
+            f = 1;
+        }
+        if (f) {
+            if (fn_80114A60((void**)p, arg)) {
+                ret = 1;
+                break;
+            }
+        }
+        p += 4;
+        i++;
+    }
+    return ret;
+}
+}
+
+namespace jj_80137298 {
+extern "C" int fn_80114A60(void*, void*);
+
+struct Entry {
+    u32 a, b, c;
+    u8 d, e;
+    u8 pad[2];
+};
+
+inline bool valid(Entry* p) {
+    return p->a != 0 && p->b != 0 && p->c != 0;
+}
+
+extern "C" void fn_80137298(void* arg0, u32* arg1) {
+    u8* base = (u8*)arg0;
+    Entry* p = (Entry*)(base + 0x174);
+    u32 i = 0;
+
+    while (i < base[0x7D]) {
+        if (valid(p)) {
+            int equal = 0;
+            if (p->a == *arg1)
+                equal = 1;
+
+            if (equal != 0 || fn_80114A60(p, arg1) != 0) {
+                u8* q = base + i * 0x10;
+
+                for (; i < base[0x7D] - 1; i++, q += 0x10) {
+                    *(u32*)(q + 0x174) = *(u32*)(q + 0x184);
+                    *(u32*)(q + 0x178) = *(u32*)(q + 0x188);
+                    *(u32*)(q + 0x17C) = *(u32*)(q + 0x18C);
+                    q[0x180] = q[0x190];
+                    q[0x181] = q[0x191];
+                }
+
+                u8* last = base + (base[0x7D] - 1) * 0x10;
+                *(u32*)(last + 0x174) = 0;
+                *(u32*)(last + 0x178) = 0;
+                *(u32*)(last + 0x17C) = 0;
+                last[0x180] = 0;
+                base[0x7D] = base[0x7D] - 1;
+                return;
+            }
+        }
+
+        p++;
+        i++;
+    }
+}
+}
+
+namespace jj_80135950 {
+
+
+extern const f32 lbl_805A2A40;
+
+struct Self {
+    u8 pad0[8];
+    u32 flags;
+    u8 pad1[0x3C - 0x0C];
+    Vec2f a;
+    Vec2f b;
+    Vec2f c;
+    u8 pad2[4];
+    s32 mode;
+};
+
+extern "C" void fn_80135950(const Self* self, Vec2f* base, f32* out) {
+    Vec2f a, b, c;
+    __memcpy(&a, &self->a, sizeof(Vec2f));
+    s32 flags = self->flags;
+    __memcpy(&b, &self->b, sizeof(Vec2f));
+    __memcpy(&c, &self->c, sizeof(Vec2f));
+
+    if (((s32)((flags << 0x18) | ((flags >> 8) & 0x800000)) >> 0x18) == 0) {
+        a.m_x = -a.m_x;
+        b.m_x = -b.m_x;
+    } else {
+        c.m_x = -c.m_x;
+    }
+
+    Vec2f p;
+    __memcpy(&p, &(*base + a), sizeof(Vec2f));
+
+    Vec2f q1, q0;
+    switch (self->mode) {
+    case 0:
+    default:
+        q1 = p;
+        q0 = p + b;
+        break;
+    case 1:
+        q1 = p + c;
+        q0 = p;
+        break;
+    case 2:
+        f32 m = b.m_y > c.m_y ? b.m_y : c.m_y;
+        q1 = p + Vec2f(b.m_x, m);
+        q0 = p + Vec2f(c.m_x, lbl_805A2A40);
+        break;
+    }
+
+    register f32 f0, f1, f2, f3, f4, f5, f6, f7;
+    f6 = q0.m_x;
+    f7 = q1.m_x;
+    f3 = q0.m_y;
+    f4 = q1.m_y;
+    asm { ps_sub f5, f7, f6 }
+    asm { ps_sub f1, f7, f6 }
+    asm { ps_sub f2, f4, f3 }
+    asm { ps_sub f0, f4, f3 }
+    asm { ps_sel f5, f5, f6, f7 }
+    asm { ps_sel f2, f2, f3, f4 }
+    asm { ps_sel f1, f1, f7, f6 }
+    asm { ps_sel f0, f0, f4, f3 }
+    out[0] = f5;
+    out[1] = f2;
+    out[2] = f1;
+    out[3] = f0;
+}
+}
+
+namespace jj_801361F0 {
+class Object;
+
+class NtBuffer {
+public:
+    virtual void slot0(Object*, int);
+};
+
+struct Entry {
+    void* a;
+    void* b;
+    void* c;
+    unsigned char d;
+    unsigned char e;
+
+    bool valid() const { return a && b && c; }
+    void clear() { a = 0; b = 0; c = 0; d = 0; }
+};
+
+struct Object {
+    char pad0[8];
+    signed int state : 8;
+    unsigned int stateRest : 24;
+    char padC[0x58];
+    NtBuffer* callback;
+    char pad68[4];
+    union {
+        unsigned int word;
+        struct {
+            unsigned char first;
+            unsigned char flags : 8;
+            unsigned char x, y;
+        } bytes;
+    } u;
+    char pad70[5];
+    unsigned char f80 : 1, f40 : 1, f20 : 1, f10 : 1;
+    unsigned char f08 : 1, f04 : 1, f02 : 1, f01 : 1;
+    char pad76[7];
+    unsigned char count;
+    char pad7E[0x56];
+    Entry entries[8];
+    Entry special;
+    Entry other;
+    Entry list[8];
+    Entry last;
+
+    int getState() const { return state; }
+};
+
+static inline void clearSpecial(Object* self, Entry* entry) {
+    entry->clear();
+    self->state = 2;
+    if (!(self->u.bytes.flags & 8))
+        self->f80 = 0;
+}
+
+extern "C" void fn_801361F0(Object* self, void* target) {
+    bool changed = false;
+    Object* cursor = self;
+
+    for (unsigned int i = 0; i < 8;
+         cursor = (Object*)((char*)cursor + 16), i++) {
+        Entry& e = cursor->entries[0];
+        if (e.valid() && e.c == target) {
+            e.clear();
+            if (i == 3) {
+                self->state = 2;
+                if (!(self->u.bytes.flags & 8))
+                    self->f80 = 0;
+                self->f80 = 0;
+            } else if (i == 1) {
+                self->f20 = 0;
+            } else if (i == 2) {
+                self->f10 = 0;
+            } else if (i == 0) {
+                self->f40 = 0;
+            } else if (i == 4) {
+                self->f04 = 0;
+            } else if (i == 5) {
+                self->f08 = 0;
+            } else if (i == 6) {
+                self->f01 = 0;
+            } else if (i == 7) {
+                self->f02 = 0;
+            }
+            if (i <= 3)
+                self->u.bytes.flags &= ~(1 << i);
+            changed = true;
+        }
+    }
+
+    if (!self->u.bytes.flags)
+        self->u.word &= 0xffffff;
+
+    Entry* p = self->list;
+    unsigned int n = self->count;
+    unsigned int i = 0;
+    while (i < n) {
+        if (p->valid() && p->c == target) {
+            p->clear();
+            --self->count;
+            for (unsigned int j = i; j < self->count; j++)
+                self->list[j] = self->list[j + 1];
+            self->list[self->count].clear();
+        } else {
+            p++;
+            i++;
+        }
+    }
+
+    for (unsigned int j = self->count; j < 8; j++)
+        self->list[j].clear();
+
+    if (self->other.valid() && self->other.c == target)
+        self->other.clear();
+
+    if (self->last.valid() && self->last.c == target)
+        self->last.clear();
+
+    if (self->getState() == 3 && self->special.c == target) {
+        clearSpecial(self, &self->special);
+        changed = true;
+    }
+
+    if (changed && self->callback)
+        self->callback->slot0(self, 0);
+}
+}
+

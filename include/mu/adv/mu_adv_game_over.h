@@ -22,8 +22,31 @@ struct muAdvGameOverTaskParam {
 };
 static_assert(sizeof(muAdvGameOverTaskParam) == 0x20, "Size is the wrong size!");
 
+class scResourceLoader;
+class tyFigListDataManager;
+class tySealListDataManager;
+
+// The part of the object that the task of the cursor keeps that getSelection reads (HYPOTHESIS: the name of the object).
+struct muAdvGameOverObj {
+    u8 unk000[0x1AC];
+    s32 unk1AC;                         // 0x1AC
+    u8 unk1B0[4];
+    s32 unk1B4;                         // 0x1B4
+};
+
 struct muAdvGameOverTask : public utility::StandardMenu {
     s32 unk1AC;
+    u8 unk1B0;                          // 0x1B0
+    u8 unk1B1[0x22C - 0x1B1];
+    s32 unk22C;                         // 0x22C the entry the cursor is on
+    s32 unk230;
+    s32 unk234[18];                     // 0x234 what each entry does (1: continue, ...)
+    tyFigListDataManager* unk27C;       // 0x27C
+    tySealListDataManager* unk280;      // 0x280
+    u8 unk284[0x2BC - 0x284];
+    muAdvGameOverObj* unk2BC;           // 0x2BC
+    u8 unk2C0[0x3F4 - 0x2C0];
+    scResourceLoader* unk3F4;           // 0x3F4 reads the pack of the menu
 
     virtual ~muAdvGameOverTask();
     virtual bool preLoad();
@@ -36,4 +59,4 @@ struct muAdvGameOverTask : public utility::StandardMenu {
 
     static muAdvGameOverTask* create(const muAdvGameOverTaskParam* param);
 };
-// TODO size
+static_assert(sizeof(muAdvGameOverTask) == 0x3F8, "Class is wrong size!");

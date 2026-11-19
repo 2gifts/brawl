@@ -1,0 +1,12 @@
+#pragma force_active off
+#include <so/so_array.h>
+class itFigureArchive;
+#include <new>
+
+typedef soArrayList<itFigureArchive*, 64> VelaList;
+
+// MATCH-ONLY: constructing/deleting the list forces its unit constructor and base-class destructors into this unit.
+#pragma dont_inline on
+void vela_a(void* p) { new (p) VelaList(); }
+void vela_del(VelaList* p) { delete p; }
+#pragma dont_inline reset

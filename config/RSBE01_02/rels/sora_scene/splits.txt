@@ -78,9 +78,71 @@ mo_scene/sora_scene/sc_edit.cpp:
 	.text       start:0x00008514 end:0x00008BC8
 	.ctors      start:0x0000000C end:0x00000010
 
+mo_scene/sora_scene/sc_replay.cpp:
+	.text       start:0x00008BC8 end:0x00008E20
+	.data       start:0x00001FA0 end:0x000020C0
+
+mo_scene/sora_scene/sc_sel_event.cpp:
+	.text       start:0x00008E20 end:0x000091AC
+	.data       start:0x000020C0 end:0x00002160
+
+mo_scene/sora_scene/sc_tour_rule.cpp:
+	.text       start:0x000091AC end:0x0000948C
+	.data       start:0x00002160 end:0x00002228
+
+mo_scene/sora_scene/sc_tour_entry.cpp:
+	.text       start:0x0000948C end:0x0000A8C4
+	.rodata     start:0x00000030 end:0x000006D0
+	.data       start:0x00002228 end:0x000039B0
+
+mo_scene/sora_scene/sc_soft_list.cpp:
+	.text       start:0x0000A8C4 end:0x0000AA7C
+	.data       start:0x000039B0 end:0x00003A98
+
+mo_scene/sora_scene/sc_qm_setting.cpp:
+	.text       start:0x0000AA7C end:0x0000AE80
+	.data       start:0x00003A98 end:0x00003B78
+
+mo_scene/sora_scene/sc_qm_entry.cpp:
+	.text       start:0x0000AE80 end:0x0000B444
+	.data       start:0x00003B78 end:0x00003C58
+
+mo_scene/sora_scene/sc_net_friend_list.cpp:
+	.text       start:0x0000B444 end:0x0000BC2C
+	.rodata     start:0x000006D0 end:0x000006E8
+	.data       start:0x00003C58 end:0x00003EA8
+
+mo_scene/sora_scene/sc_net_watch_bet.cpp:
+	.text       start:0x0000BC2C end:0x0000C824
+	.rodata     start:0x000006E8 end:0x000006F0
+	.data       start:0x00003EA8 end:0x000040D0
+
 mo_scene/sora_scene/sc_net_time_result.cpp:
 	.text       start:0x0000C824 end:0x0000C9C4
 	.data       start:0x000040D0 end:0x00004140
+
+mo_scene/sora_scene/sc_coin_shooter.cpp:
+	.text       start:0x0000C9C4 end:0x0000CBA0
+	.data       start:0x00004140 end:0x000041A8
+
+mo_scene/sora_scene/sc_vc_trial.cpp:
+	.text       start:0x0000CBA0 end:0x0000CECC
+	.rodata     start:0x000006F0 end:0x00000708
+	.data       start:0x000041A8 end:0x000042B8
+
+mo_scene/sora_scene/sc_sel_char.cpp:
+	.text       start:0x0000CECC end:0x0000D6C0
+	.data       start:0x000042B8 end:0x00004408
+
+mo_scene/sora_scene/sc_sel_stage.cpp:
+	.text       start:0x0000D6C0 end:0x0000DEAC
+	.rodata     start:0x00000708 end:0x00000710
+	.data       start:0x00004408 end:0x00004540
+
+mo_scene/sora_scene/sc_prize_info.cpp:
+	.text       start:0x0000DEAC end:0x0000E530
+	.ctors      start:0x00000010 end:0x00000014
+	.data       start:0x00004540 end:0x00004688
 
 mo_scene/sora_scene/sc_challenger.cpp:
 	.text       start:0x0000E530 end:0x0000E9D8

@@ -1581,3 +1581,459 @@ void MuObject::calcMatrix() {
     scnMdl->SetScnObjOption(2, 0);
     scnMdl->SetScnObjOption(5, 0);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_800B85AC {
+extern "C" void fn_800B85AC(void) {}
+}
+
+namespace jj_800B092C {
+struct Obj {
+    u8 pad[0x2c];
+    u8 flags;
+    u8 pad2[0x40 - 0x2d];
+    u32 unk40;
+    u32 unk44;
+};
+
+extern "C" {
+void fn_800B092C(Obj* p) {
+    p->unk40 = 0;
+    p->flags &= ~2;
+    p->unk44 = 0;
+}
+}
+}
+
+namespace jj_800B803C {
+extern "C" {
+
+struct Obj {
+    virtual s32 v0();
+    virtual s32 v1();
+    virtual s32 v2();
+    virtual s32 v3();
+    virtual s32 v4();
+    virtual s32 v5();
+};
+
+struct Holder {
+    s32 pad0;
+    Obj* target;
+};
+
+s32 fn_800B803C(Holder* h) {
+    Obj* t = h->target;
+    if (t)
+        return t->v5();
+    return (s32)t;
+}
+
+}
+}
+
+namespace jj_800B805C {
+class A {
+public:
+    virtual void m0();
+    virtual void m1();
+    virtual void m2();
+    virtual void m3();
+    virtual void m4();
+};
+
+extern "C" void fn_800B805C(int* self) {
+    A* obj = *(A**)(self + 1);
+    if (!obj)
+        return;
+    obj->m4();
+}
+}
+
+namespace jj_800B858C {
+class Child {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+};
+
+class Parent {
+public:
+    char pad[4];
+    Child* m_child;
+};
+
+extern "C" {
+void fn_800B858C(Parent* p) {
+    if (p->m_child) {
+        p->m_child->v1();
+    }
+}
+}
+}
+
+namespace jj_800B8608 {
+// Release a heap allocation when requested, preserving its original pointer.
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_800B8608(void* arg0, int arg1) {
+    if (arg0 != 0 && arg1 > 0) {
+        __dl__FPv(arg0);
+    }
+    return arg0;
+}
+}
+
+namespace jj_800B85B0 {
+extern "C" {
+void __dt__6gfTaskFv(void*, int);
+void __dl__FPv(void*);
+}
+
+extern "C" void* fn_800B85B0(void* p, int n) {
+    if (p) {
+        __dt__6gfTaskFv(p, 0);
+        if (n > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+
+namespace jj_800B881C {
+extern "C" int fn_8006CA64();
+extern "C" int fn_8006C90C();
+extern "C" int fn_8006C9EC();
+extern "C" int fn_8006C790();
+extern "C" void fn_800B881C(unsigned char* p, int index) {
+    int flags = 0;
+    if ((unsigned int)((p[16] >> 7) & 1) != 1) {
+        unsigned char old = p[index];
+        p[index] = 0;
+        for (int i = 0; i < 16; i++) flags |= p[i];
+        if ((old & 2) && !(flags & 2U)) fn_8006CA64();
+        if ((old & 1) && !(flags & 1)) fn_8006C90C();
+        if ((old & 4) && !(flags & 4)) fn_8006C9EC();
+        if ((old & 8) && !(flags & 8)) fn_8006C790();
+    }
+}
+}
+
+namespace jj_800B8648 {
+extern "C" s32 fn_8006C7D4(s32);
+extern "C" s32 fn_8006C870(s32);
+extern "C" s32 fn_8006C950(s32);
+extern "C" u8 fn_800B8648(u8* arg0, s32 arg1, s32 arg2, s32 arg3) {
+    if ((u32)((*(u8*)(arg0 + 0x10) >> 7) & 1) == 1U) return 0;
+    u32 orval;
+    s32 flag;
+    flag = arg1;
+    if (arg1 & 4) flag = arg1 & ~1;
+    orval = 0;
+    for (s32 i = 0; i < 16; i++) orval |= arg0[i];
+    if ((flag & 1) && !(orval & 1)) {
+        s32 val = arg2;
+        if (arg2 == 0xFF) val = 0x2F;
+        if (arg3 == 0) fn_8006C7D4(val);
+        else fn_8006C870(val);
+    }
+    if ((flag & 4) && !(orval & 4)) {
+        s32 val2 = arg2;
+        if (arg2 == 0xFF) val2 = 0x31;
+        fn_8006C950(val2);
+    }
+    s32 idx;
+    for (idx = 0; idx < 16; idx++) {
+        if (arg0[idx] == 0) break;
+    }
+    *(u8*)(arg0 + idx) = (u8)arg1;
+    return (u8)idx;
+}
+}
+
+namespace jj_800B8350 {
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef int s32;
+typedef float f32;
+
+extern f32 lbl_805A2200;
+
+struct G {
+    u8 p0[0x1C];
+    u16 h1c;
+    u8 p1[2];
+    s32 w20;
+};
+
+class VT {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual f32 v6();
+    virtual void v7();
+    virtual void v8();
+    virtual f32 v9();
+    u8 pad[0x28];
+    G* g;
+};
+
+class Iface {
+public:
+    virtual void i0();
+    virtual void i1();
+    virtual void i2();
+    virtual void i3();
+    virtual void i4();
+    virtual void i5();
+    virtual void i6(s32, s32);
+};
+
+struct C {
+    u8 p0[8];
+    VT* y;
+    VT* x;
+};
+
+struct B {
+    u8 p0[0x14];
+    C* c;
+};
+
+struct Obj {
+    u32 p0;
+    VT* a;
+    B* b;
+};
+
+extern "C" {
+void fn_800B8350(Obj* self, s32 arg1, Iface* arg2) {
+    C* c;
+    VT* z;
+    G* g;
+    s32 r0;
+
+    if (self->a != 0) {
+        self->a->v3();
+    }
+    if (arg1 == 4) {
+        c = self->b->c;
+        if (c == 0) {
+            r0 = 1;
+        } else {
+            z = c->x;
+            if (z == 0) {
+                r0 = 1;
+            } else {
+                g = z->g;
+                u16 h1;
+                if (g->w20 != 1 && ((h1 = g->h1c), 1) && z->v6() >= (f32)(h1 - 1)) {
+                    r0 = 1;
+                } else {
+                    r0 = 0;
+                }
+            }
+        }
+        s32 f1 = 1;
+        if (r0 == 0) {
+            if (lbl_805A2200 != self->b->c->x->v9()) {
+                f1 = 0;
+            }
+        }
+        c = self->b->c;
+        if (c == 0) {
+            r0 = 1;
+        } else {
+            z = c->y;
+            if (z == 0) {
+                r0 = 1;
+            } else {
+                g = z->g;
+                u16 h2;
+                if (g->w20 != 1 && ((h2 = g->h1c), 1) && z->v6() >= (f32)(h2 - 1)) {
+                    r0 = 1;
+                } else {
+                    r0 = 0;
+                }
+            }
+        }
+        s32 f2 = 1;
+        if (r0 == 0) {
+            if (lbl_805A2200 != self->b->c->y->v9()) {
+                f2 = 0;
+            }
+        }
+        arg2->i6(2, f1 && f2);
+        arg2->i6(5, f1);
+    }
+}
+}
+}
+
+namespace jj_800B807C {
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef int s32;
+typedef float f32;
+
+struct G {
+    u8 p0[0x1C];
+    u16 h1c;
+    u8 p1[2];
+    s32 w20;
+    s32 w24;
+    u8 p2[4];
+    u16 h2c;
+    u8 p3[6];
+    s32 w34;
+};
+
+class VT {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual f32 v6();
+    virtual void v7();
+    virtual void v8();
+    virtual f32 v9();
+    u8 pad[0x28];
+    G* g;
+};
+
+class Iface {
+public:
+    virtual void i0();
+    virtual void i1();
+    virtual void i2();
+    virtual void i3();
+    virtual void i4();
+    virtual void i5();
+    virtual void i6(s32, s32);
+};
+
+struct C {
+    u8 p0[0x10];
+    VT* z;
+    VT* d;
+    VT* f;
+};
+
+struct B {
+    u8 p0[0x14];
+    C* c;
+};
+
+struct Obj {
+    u32 p0;
+    VT* a;
+    B* b;
+};
+
+extern "C" {
+extern f32 lbl_805A2200;
+
+void fn_800B807C(Obj* self, s32 arg1, Iface* arg2) {
+    s32 r0;
+    s32 flag;
+    u16 h;
+    C* c;
+    VT* z;
+    VT* d;
+    VT* f;
+    G* g;
+
+    if (self->a != 0) {
+        self->a->v2();
+    }
+    if (arg1 == 4) {
+        c = self->b->c;
+        if (c == 0) {
+            r0 = 1;
+        } else {
+            z = c->z;
+            if (z == 0) {
+                r0 = 1;
+            } else {
+                g = z->g;
+                if (g->w34 != 1 && ((h = g->h2c), 1) && z->v6() >= (f32)(h - 1)) {
+                    r0 = 1;
+                } else {
+                    r0 = 0;
+                }
+            }
+        }
+        flag = 1;
+        if (r0 == 0) {
+            if (lbl_805A2200 != self->b->c->z->v9()) {
+                flag = 0;
+            }
+        }
+        if (flag != 0) {
+            c = self->b->c;
+            if (c == 0) {
+                r0 = 1;
+            } else {
+                d = c->d;
+                if (d == 0) {
+                    r0 = 1;
+                } else {
+                    g = d->g;
+                    if (g->w24 != 1 && ((h = g->h1c), 1) && d->v6() >= (f32)(h - 1)) {
+                        r0 = 1;
+                    } else {
+                        r0 = 0;
+                    }
+                }
+            }
+            flag = 1;
+            if (r0 == 0) {
+                if (lbl_805A2200 != self->b->c->d->v9()) {
+                    flag = 0;
+                }
+            }
+        }
+        if (flag != 0) {
+            c = self->b->c;
+            if (c == 0) {
+                r0 = 1;
+            } else {
+                f = c->f;
+                if (f == 0) {
+                    r0 = 1;
+                } else {
+                    g = f->g;
+                    if (g->w20 != 1 && ((h = g->h1c), 1) && f->v6() >= (f32)(h - 1)) {
+                        r0 = 1;
+                    } else {
+                        r0 = 0;
+                    }
+                }
+            }
+            flag = 1;
+            if (r0 == 0) {
+                if (lbl_805A2200 != self->b->c->f->v9()) {
+                    flag = 0;
+                }
+            }
+        }
+        arg2->i6(3, flag);
+    }
+}
+}
+}
+

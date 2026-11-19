@@ -31,6 +31,7 @@ class grPiratesSling : public grPirates {
     s32 m_dangerZoneId;                // 0x18C
 
 public:
+    virtual void receiveCollMsg_Landing(grCollStatus* collStatus, grCollisionJoint* collisionJoint, bool isFirstContact);
     // Derived virtual entries begin at slot 0x1D0.
     virtual void updateYakumono(float deltaFrame);
     virtual void updateJoint(float deltaFrame);

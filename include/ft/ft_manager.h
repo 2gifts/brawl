@@ -300,7 +300,7 @@ public:
     int getFighterCount(int entryId) const;
     const char* getFighterName(int entryId) const;
     Vec3f getFighterCursorPos(int entryId, int instanceIndex) const;
-    Vec2f* getFighterRhombusCenterPos(int entryId, int instanceIndex) const;
+    Vec2f getFighterRhombusCenterPos(int entryId, int instanceIndex) const;
     ftOwner* getSubOwner(int entryId) const;
     void* getInput(int entryId) const;
     void* getSubInput(int entryId) const;

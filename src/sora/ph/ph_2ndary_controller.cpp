@@ -1,3 +1,5 @@
+#include <nw4r/g3d/g3d_resmdl.h>
+#include <gf/gf_application.h>
 #include <nw4r/math/math_types.h>
 #include <nw4r/ut/ut_algorithm.h>
 #include <mt/mt_common.h>
@@ -592,6 +594,598 @@ extern "C" void fn_80091F28(Object* self) {
             self->nodes[i]->value = lbl_805A1CA8;
             ++i;
         }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8008EB3C {
+
+struct Entry {
+    f32 f[12];
+};
+
+struct Vec3 {
+    f32 x;
+    f32 y;
+    f32 z;
+};
+
+struct Obj {
+    char _0[0x34];
+    Vec3 v34;
+    Vec3 v40;
+    char _4C[0xC];
+    Vec3 v58;
+    char _64[0x1C];
+    f32 f80;
+    char _84[0x58];
+    Entry ent;
+    char _10C[0x94];
+    u32 m1A0;
+};
+
+struct Self {
+    Obj** objs;
+    u32 count;
+    char _08[0x5];
+    u8 flagD;
+    char _0E[0x1];
+    u8 flagF;
+    char _10[0x14];
+    void* f24;
+    char _28[0x18];
+    u8 b40;
+    char _41[0x18];
+    u8 b59;
+    char _5A[0x1];
+    u8 b5B;
+};
+
+struct Mgr {
+    char _0[0x58];
+    void* m58;
+};
+
+struct GlobalMgrRef {
+    Mgr* ptr;
+    char _4[0x1C];
+};
+
+struct ResNodeData {
+    char _0[0x10];
+    s32 n10;
+};
+
+extern GlobalMgrRef lbl_8049DEC8;
+extern char lbl_8059DBFA;
+extern char lbl_8059DBFC;
+extern const f32 lbl_805A1C98;
+
+extern "C" {
+void* fn_8008653C(void* mgr, Self* self, char* name);
+void fn_8008F084(Self* self, Entry* arr, u32* p);
+void fn_80086694(void* mgr, Vec3* v, char* name, Obj* o, f32 a, f32 b);
+s32 fn_800867E8(void* mgr, Obj* o, u8 b, f32* out, f32 a, f32 c);
+s32 fn_80086AC0(void* mgr, Obj* o, u8 b);
+ResNodeData* GetResNode__Q34nw4r3g3d6ResMdlCFUl(const nw4r::g3d::ResMdl* mdl, u32 idx);
+}
+
+static inline void* getMgr() {
+    void* m = lbl_8049DEC8.ptr->m58;
+    return m ? m : 0;
+}
+
+static inline bool isNaNf(f32& x) {
+    u32 b = *(u32*)&x;
+    return ((b >> 23) & 0xFF) == 0xFF && (b & 0x7FFFFF) != 0;
+}
+
+extern "C" void fn_8008EB3C(Self* self, Entry* arr, nw4r::g3d::ResMdl* mdl) {
+    self->b59 = 0;
+    if (self->flagF == 0) {
+        self->f24 = fn_8008653C(getMgr(), self, &lbl_8059DBFA);
+        self->flagF = 1;
+    }
+    if (self->flagD == 0) {
+        u32 mtmp = *(u32*)mdl;
+        fn_8008F084(self, arr, &mtmp);
+        self->flagD = 1;
+    }
+    s32 i = (s32)self->count - 1;
+    void* mgr = getMgr();
+    ResNodeData* node = GetResNode__Q34nw4r3g3d6ResMdlCFUl(mdl, self->objs[i]->m1A0);
+    s32 n = node ? node->n10 : 0;
+    Entry* e = arr + n;
+    self->objs[i]->ent = *e;
+    Entry tmp = *e;
+
+    f32 t11, t10, t9, t8, t7, t6, t5, t4, t3, t2, t1, t0;
+    bool bad = false;
+    if (!bad) bad = isNaNf(t0 = tmp.f[0]);
+    if (!bad) bad = isNaNf(t1 = tmp.f[1]);
+    if (!bad) bad = isNaNf(t2 = tmp.f[2]);
+    if (!bad) bad = isNaNf(t3 = tmp.f[3]);
+    if (!bad) bad = isNaNf(t4 = tmp.f[4]);
+    if (!bad) bad = isNaNf(t5 = tmp.f[5]);
+    if (!bad) bad = isNaNf(t6 = tmp.f[6]);
+    if (!bad) bad = isNaNf(t7 = tmp.f[7]);
+    if (!bad) bad = isNaNf(t8 = tmp.f[8]);
+    if (!bad) bad = isNaNf(t9 = tmp.f[9]);
+    if (!bad) bad = isNaNf(t10 = tmp.f[10]);
+    if (!bad) bad = isNaNf(t11 = tmp.f[11]);
+
+    if (!bad) {
+        Vec3 p;
+        f32 sp40[2];
+        p.x = tmp.f[3];
+        p.y = tmp.f[7];
+        p.z = tmp.f[11];
+        self->objs[i]->v34 = p;
+        self->objs[i]->v40 = p;
+        Obj* o2 = self->objs[i];
+        o2->v58 = p;
+        fn_80086694(mgr, &p, &lbl_8059DBFC, o2, tmp.f[7], tmp.f[3]);
+        f32 s1 = self->objs[i]->f80;
+        self->objs[i]->v34.x = self->objs[i]->v34.x + s1 * lbl_805A1C98;
+        f32 s2 = self->objs[i]->f80;
+        self->objs[i]->v40.x = self->objs[i]->v40.x - s2 * lbl_805A1C98;
+        f32 s3 = self->objs[i]->f80;
+        f32 q = s3 * lbl_805A1C98;
+        self->objs[i]->v58.x = self->objs[i]->v58.x - q;
+        Obj* o = self->objs[i];
+        s32 r29 = fn_800867E8(mgr, o, self->b5B, sp40, q, lbl_805A1C98);
+        s32 r3 = fn_80086AC0(mgr, o, self->b40);
+        if (r29 != 0) r3 = 1;
+        if (r29 != 0) {
+            self->b59 = 2;
+        } else if (r3 != 0) {
+            self->b59 = 1;
+        }
+    }
+}
+}
+
+namespace jj_8008D8B0 {
+
+struct Matrix { u32 v[12]; };
+struct Position { float x, y, z; };
+struct Vec2 { float x, y; };
+
+struct Node {
+    char p0[0x34];
+    Position pos;
+    char p40[0x30];
+    Position result;
+    char p7c[0x34];
+    float b0;
+    char pb4[0x1c];
+    float d0, d4;
+    char pd8[4];
+    Matrix dc;
+    char p10c[0x30];
+    Matrix m13c, m16c;
+    char p19c[4];
+    u32 index;
+    char p1a4[0x5c];
+    int end;
+};
+
+struct Self {
+    Node** nodes;
+    int count;
+    char p8[5];
+    u8 initModel, reset, init;
+    char p10[0x10];
+    u8 mode;
+    char p21[3];
+    int handle;
+    char p28[4];
+    int selected;
+    char p30[8];
+    int state;
+    char p3c[0x28];
+    u8 flag;
+    char p65[0x84];
+    u8 value;
+};
+
+struct Context {
+    char pad[0x4c];
+    int count;
+    u8 flag;
+};
+
+struct Global {
+    char pad[0x58];
+    Context* ctx;
+};
+
+extern "C" Global* lbl_8049DEC8[9];
+extern "C" char lbl_8059DBF9;
+extern "C" const float lbl_805A1C98, lbl_805A1CA8;
+
+extern "C" int fn_8008653C(Context*, Self*, char*);
+extern "C" void fn_8008F084(Self*, Matrix*, nw4r::g3d::ResMdl*);
+extern "C" void fn_80081DC4(Node*);
+extern "C" void fn_80081EE0(Node*, Matrix*);
+extern "C" void fn_80082130(Node*);
+extern "C" void fn_8008674C(Context*, Vec2*, Vec2*);
+extern "C" void fn_8003E388(Matrix*, Matrix*);
+extern "C" void fn_8003E6DC(Matrix*, Position*);
+extern "C" void fn_80083390(
+    Context*, Node*, Node*, void*, int, bool, int, int,
+    int, int, int, int, int, int, int, int);
+
+extern "C" void fn_8008D8B0(
+    Self* self, Matrix* matrices, nw4r::g3d::ResMdl* model,
+    int start, int count)
+{
+    if (!self->init) {
+        Context* ctx = lbl_8049DEC8[0]->ctx;
+        self->handle = fn_8008653C(ctx ? ctx : 0, self, &lbl_8059DBF9);
+        self->init = 1;
+    }
+
+    Context* ctx = lbl_8049DEC8[0]->ctx;
+    (ctx ? ctx : 0)->flag = self->value;
+
+    ctx = lbl_8049DEC8[0]->ctx;
+    ctx = ctx ? ctx : 0;
+    if (count > 1)
+        ctx->count = count;
+    else
+        ctx->count = 1;
+
+    if (!self->initModel) {
+        nw4r::g3d::ResMdl local = *model;
+        fn_8008F084(self, matrices, &local);
+        self->initModel = 1;
+    }
+
+    if (((u8*)g_gfApplication)[0xed] & 1) {
+        int i;
+        int offset = start * 4;
+        int end = self->count - 1;
+        for (int j = start; j < self->count; ++j) {
+            if (self->nodes[j]->end == 0) {
+                end = j;
+                break;
+            }
+        }
+
+        if (self->reset) {
+            i = start;
+            if (start <= end) {
+                for (; i <= end; ++i) {
+                    nw4r::g3d::ResNodeData* data =
+                        model->GetResNode(self->nodes[i]->index).ptr();
+                    u32 id = data ? *(u32*)((char*)data + 0x10) : 0;
+                    self->nodes[i]->dc = matrices[id];
+                    fn_80081DC4(self->nodes[i]);
+                }
+            }
+        }
+
+        count = start;
+        if (start <= end) {
+            for (; count <= end; ++count) {
+                nw4r::g3d::ResNodeData* data =
+                    model->GetResNode(self->nodes[count]->index).ptr();
+                u32 id = data ? *(u32*)((char*)data + 0x10) : 0;
+                Matrix* m = &matrices[id];
+
+                self->nodes[count]->m13c = *m;
+                fn_80081EE0(self->nodes[count], m);
+                self->nodes[count]->m16c = *m;
+                fn_80082130(self->nodes[count]);
+
+                float a = lbl_805A1CA8;
+                float b = a;
+                if (self->mode == 2) {
+                    a = self->nodes[count]->d0;
+                    b = self->nodes[count]->d4;
+                }
+
+                if ((self->state == 0 &&
+                     lbl_805A1CA8 == self->nodes[count]->b0) ||
+                    (self->mode == 2 && a >= b * lbl_805A1C98) ||
+                    (self->state == 1 &&
+                     lbl_805A1CA8 == self->nodes[count]->b0 &&
+                     self->nodes[count]->end == 0)) {
+                    self->nodes[count]->dc = *m;
+                    fn_80081DC4(self->nodes[count]);
+                }
+            }
+        }
+
+        Context* context = lbl_8049DEC8[0]->ctx;
+        context = context ? context : 0;
+
+        float minx, maxx, maxy, miny;
+        miny = lbl_805A1CA8;
+        maxy = miny;
+        maxx = miny;
+        minx = miny;
+        int first = 0;
+
+        for (int j = end; j >= start; --j) {
+            Position pos = {
+                self->nodes[j]->pos.x,
+                self->nodes[j]->pos.y,
+                self->nodes[j]->pos.z
+            };
+            if (!first) {
+                maxx = pos.x;
+                first = 1;
+                minx = pos.x;
+                miny = pos.y;
+                maxy = pos.y;
+            } else {
+                if (pos.x < minx)
+                    minx = pos.x;
+                else if (maxx < pos.x)
+                    maxx = pos.x;
+
+                if (pos.y < miny)
+                    miny = pos.y;
+                else if (maxy < pos.y)
+                    maxy = pos.y;
+            }
+        }
+
+        Vec2 lo, hi;
+        hi.x = maxx;
+        hi.y = miny;
+        lo.x = minx;
+        lo.y = maxy;
+        fn_8008674C(context, &lo, &hi);
+
+        Node* selected;
+        if (self->selected == -1) {
+            selected = 0;
+        } else {
+            selected = self->nodes[self->selected];
+            Matrix tmp;
+            Position copy;
+            Position out;
+            fn_8003E388(&selected->dc, &tmp);
+            fn_8003E6DC(&tmp, &out);
+            copy.x = out.x;
+            copy.y = out.y;
+            copy.z = out.z;
+            selected->result = copy;
+        }
+
+        fn_80083390(
+            context, *(Node**)((char*)self->nodes + offset),
+            selected, (char*)self + 0x3c,
+            0, self->state == 0, 0, 0, 0, self->mode,
+            0, 0, 0, 0, self->flag, 0);
+    }
+}
+}
+
+namespace jj_8008F3E0 {
+
+struct Node {
+    char pad0[0xb0];
+    float value;
+    char padb4[0x110];
+    u8 marked;
+    char pad1c5[3];
+    nw4r::math::VEC3 first;
+    char pad1d4[4];
+    nw4r::math::VEC3 second;
+};
+struct Object {
+    Node** nodes;
+    int count;
+    char pad08[4];
+    u8 flag0c;
+    char pad0d;
+    u8 flag0e;
+    char pad0f[0x11];
+    u8 mode;
+    char pad21[0x21];
+    u8 active;
+    u8 saved;
+    char pad44[0x13];
+    u8 state;
+    char pad58[4];
+    u8 flag5c;
+    u8 flag5d;
+    u8 flag5e;
+    char pad5f;
+    float value;
+    char pad64[4];
+    char matrix1[0x30];
+    char matrix2[0x30];
+    char padc8[0x20];
+    u8 flage8;
+};
+struct Context {
+    Object* a;
+    Object* b;
+    u8 flag8, flag9, flaga;
+};
+extern "C" {
+void fn_8008AD64(Context*);
+void fn_80091F28(Object*);
+void fn_80091AFC(Object*);
+int fn_8008F230(Object*);
+void fn_80095990(Object*, int*);
+void fn_801EC158(void*);
+void fn_801EC868(void*, void*, float, float, float);
+extern u8 lbl_8059DC01, lbl_8059DC02, lbl_8059DC03, lbl_8059DC04, lbl_8059DC05, lbl_8059DC06, lbl_8059DC07;
+extern const float lbl_805A1CA8;
+}
+static inline void clearObject(Object* o) {
+    for (int i = 0; i < o->count; i++) o->nodes[i]->marked = 0;
+    o->flag5c = 0;
+}
+static inline void clearMarks(Context* self) {
+    if (self->a->flag5c || self->b->flag5c) {
+        clearObject(self->a);
+        if (self->b) clearObject(self->b);
+        Object* a = self->a;
+        a->flag5c = 0;
+        a->flag5d = 0;
+        Object* b = self->b;
+        b->flag5c = 0;
+        b->flag5d = 0;
+    }
+}
+static inline void resetSecond(Object* o) {
+    for (int i = 0; i < o->count; i++)
+        o->nodes[i]->second = nw4r::math::VEC3(lbl_805A1CA8, lbl_805A1CA8, lbl_805A1CA8);
+}
+static inline void resetFirst(Object* o) {
+    for (int i = 0; i < o->count; i++)
+        o->nodes[i]->first = nw4r::math::VEC3(lbl_805A1CA8, lbl_805A1CA8, lbl_805A1CA8);
+}
+static inline void setMatrices(Object* target, nw4r::math::VEC3 v1, nw4r::math::VEC3 v2) {
+    char m[0x30];
+    fn_801EC158(m);
+    fn_801EC868(m, target->matrix1, v1.x, v1.y, v1.z);
+    fn_801EC868(m, target->matrix2, v2.x, v2.y, v2.z);
+}
+static inline void restore(Object* o) {
+    for (int i = 1; i < o->count; i++) {
+        if (lbl_805A1CA8 == o->nodes[i]->value)
+            o->nodes[i]->value = o->value;
+    }
+    o->flag0c = 0;
+    o->flage8 = 0;
+}
+
+extern "C" void fn_8008F3E0(Context* self, int mode) {
+    Object* o = self->a;
+    if (!o) return;
+    if (mode == 2) {
+        Object* other = self->b;
+        int state = o->state;
+        int kind;
+        if (other && !o->mode && !other->mode) {
+            if (state == 8) kind = 3;
+            else kind = 6;
+        } else if (state == 0) {
+            if (o->flag5c) kind = 4;
+            else kind = 0;
+        } else if (state == 4) {
+            if (o->flag5c) kind = 5;
+            else kind = 1;
+        } else if (state == 5) {
+            kind = 2;
+        } else if (state == 6) {
+            if (o->flag5c) kind = 5;
+            else kind = 1;
+        } else if (state == 7) {
+            kind = 6;
+        } else if (state == 9) {
+            kind = 7;
+        } else {
+            kind = 3;
+            if (state == 10) kind = 8;
+        }
+        if (kind == 6 || state == 8) {
+            o->saved = o->active;
+            self->flag9 = 1;
+            self->flag8 = 0;
+            self->flaga = 1;
+            self->a->flag0e = 1;
+            __memcpy(&self->a->mode, &lbl_8059DC01, sizeof(u8));
+        } else if (other) {
+            fn_8008AD64(self);
+            fn_80091F28(self->b);
+        }
+        clearMarks(self);
+    } else if (mode == 1) {
+        resetSecond(o);
+        resetFirst(self->a);
+        if (self->b) {
+            if ((int)self->a->state == 5) {
+                fn_8008AD64(self);
+            } else {
+                fn_80091F28(self->a);
+                self->a->state = 4;
+                if (self->b) self->b->state = 5;
+            }
+        }
+        clearMarks(self);
+    } else if (mode == 0) {
+        restore(o);
+        restore(self->b);
+        self->flag8 = 0;
+        resetSecond(self->a);
+        resetFirst(self->a);
+        if ((int)self->a->state == 8) self->a->flag0e = 1;
+        self->a->state = 0;
+        if (self->b) self->b->state = 0;
+        clearMarks(self);
+    } else if (mode == 8) {
+        resetSecond(o);
+        resetFirst(self->a);
+        if (self->b) {
+            if ((int)self->a->state == 5) {
+                fn_8008AD64(self);
+            } else {
+                fn_80091AFC(self->a);
+                fn_80091F28(self->a);
+                self->a->state = 10;
+                if (self->b) self->b->state = 5;
+            }
+        }
+        clearMarks(self);
+    } else if (mode == 7) {
+        restore(o);
+        restore(self->b);
+        self->flag8 = 0;
+        resetSecond(self->a);
+        resetFirst(self->a);
+        setMatrices(self->a,
+            nw4r::math::VEC3(lbl_805A1CA8, lbl_805A1CA8, lbl_805A1CA8),
+            nw4r::math::VEC3(lbl_805A1CA8, lbl_805A1CA8, lbl_805A1CA8));
+        if ((int)self->a->state == 8) self->a->flag0e = 1;
+        self->a->state = 9;
+        if (self->b) self->b->state = 0;
+        clearMarks(self);
+        __memcpy(&self->a->mode, &lbl_8059DC02, sizeof(u8));
+        if (self->b) self->b->mode = lbl_8059DC03;
+    } else if (mode == 3) {
+        if ((int)o->state == 5) {
+            if (self->b) fn_8008AD64(self);
+            clearMarks(self);
+        }
+        self->a->state = 8;
+        __memcpy(&self->a->mode, &lbl_8059DC04, sizeof(u8));
+        if (self->b) self->b->mode = lbl_8059DC05;
+    } else if (mode == 6) {
+        o->mode = lbl_8059DC06;
+        if (self->b) self->b->mode = lbl_8059DC07;
+    } else if (mode == 4) {
+        if (!o->flag5c) {
+            o->flag5e = o->count - o->saved;
+            int n = o->flag5e;
+            fn_80095990(o, &n);
+            o->flag5c = 1;
+            if (self->b) {
+                u8 count = fn_8008F230(self->b);
+                Object* b = self->b;
+                b->flag5e = count;
+                int n2 = count;
+                fn_80095990(b, &n2);
+                b->flag5c = 1;
+            }
+        }
+    } else if (mode == 5) {
+        if (o->flag5c || self->b->flag5c) {
+            clearObject(o);
+            if (self->b) clearObject(self->b);
+        }
+        Object* b = self->b;
+        b->flag5c = 1;
+        b->flag5d = 0;
     }
 }
 }

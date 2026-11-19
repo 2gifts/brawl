@@ -848,3 +848,20 @@ vf_inc:
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_8003CFC0 {
+extern "C" void fn_80038AC8(void*);
+
+extern "C" void fn_8003CFC0(void* self) {
+    fn_80038AC8(reinterpret_cast<u8*>(self) - 0x4);
+}
+}
+
+namespace jj_8003CFC8 {
+extern "C" void fn_80038F6C(void*);
+
+extern "C" void fn_8003CFC8(void* self) {
+    fn_80038F6C(reinterpret_cast<u8*>(self) - 0x4);
+}
+}
+

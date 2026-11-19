@@ -69,3 +69,29 @@ s32 fn_8035423C(void* arg0, void* arg1, s32 arg2, s32 arg3, u32 arg4, s32 arg5, 
     return 1;
 }
 
+// TODO: clean up, give variables real names
+/* jj_803553C8 */
+extern void DWC_Free(int a, int b, int c);
+extern void DWCi_GsFree(void *p);
+extern void DWC_ShutdownGHTTP(void);
+extern char lbl_8048DC08[];
+
+void DWCi_EncSessionShutdown(void) {
+    int a;
+    int c;
+    a = *(int *)(lbl_8048DC08 + 0x54);
+    if (a) {
+        DWC_Free(8, a, 0);
+        *(int *)(lbl_8048DC08 + 0x54) = 0;
+    }
+    c = *(int *)(lbl_8048DC08 + 0x60);
+    if (c) {
+        DWCi_GsFree((void *)c);
+        *(int *)(lbl_8048DC08 + 0x64) = 0;
+        *(int *)(lbl_8048DC08 + 0x60) = 0;
+    }
+    DWC_ShutdownGHTTP();
+    *(int *)(lbl_8048DC08 + 0) = 2;
+    *(int *)(lbl_8048DC08 + 0x4) = 0;
+}
+

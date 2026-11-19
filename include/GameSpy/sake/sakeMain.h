@@ -104,7 +104,30 @@ int sakeiUpdateRecordValidateInput(SAKERequest request);
 int sakeiUpdateRecordFillSoapRequest(SAKERequest request);
 int sakeiDeleteRecordFillSoapRequest(SAKERequest request);
 int sakeiValidateRequestFields(void* fields, int numFields);
-int sakeiFillSoapRequestFieldValues(SAKERequest request, void* fields, int numFields);
+typedef struct SAKEBinaryData {
+    u8* mValue;
+    int mLength;
+} SAKEBinaryData;
+
+typedef union SAKEValue {
+    u8 mByte;
+    s16 mShort;
+    s32 mInt;
+    float mFloat;
+    char* mAsciiString;
+    u16* mUnicodeString;
+    int mBoolean;
+    long long mDateAndTime;
+    SAKEBinaryData mBinaryData;
+} SAKEValue;
+
+typedef struct SAKEField {
+    char* mName;
+    int mType;
+    SAKEValue mValue;
+} SAKEField;
+
+int sakeiFillSoapRequestFieldValues(SAKERequest request, SAKEField* fields, int numFields);
 
 #ifdef __cplusplus
 }

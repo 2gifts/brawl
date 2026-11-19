@@ -384,3 +384,130 @@ s32 PFFAT_ResetCluster(PF_VOLUME* p_vol, u32 cluster) {
     PFCACHE_FreeDataPage(p_vol, p_page);
     return 0;
 }
+
+// TODO: clean up, give variables real names
+/* jj_803E2468 */
+struct Ctx {
+    unsigned short unk0;
+    unsigned char pad002[0x0A];
+    unsigned int unkC;
+    unsigned char pad010[0x08];
+    unsigned short unk18;
+    unsigned char pad01A[0x06];
+    unsigned char unk20;
+    unsigned char pad021;
+    unsigned char unk22;
+    unsigned char pad023[0x05];
+    unsigned int unk28;
+    unsigned char pad02C[0x1F84 - 0x2C];
+    int unk1F84;
+    unsigned char pad1F88[0x1FC0 - 0x1F88];
+    int (*unk1FC0)(int);
+};
+
+inline int inline_fn(struct Ctx *arg0) {
+    return arg0->unk0 - 1;
+}
+
+extern int fn_803E8DC0(void *, unsigned short *, unsigned int, unsigned int, unsigned short);
+
+int fn_803E2468(struct Ctx *arg0, int arg1, int *arg2) {
+    unsigned short temp_r28;
+    unsigned short var_r27;
+    int var_r26;
+    unsigned int var_r25;
+    unsigned char buf[4];
+    unsigned short temp_r9;
+    unsigned short temp_r0;
+    int temp_r3;
+    int temp_r3_2;
+    int (*temp_r12)(int);
+    unsigned int temp_r0_3;
+    unsigned short sp8;
+
+    temp_r0 = (unsigned short)(arg1 + (arg1 >> 1));
+    temp_r9 = arg0->unk18;
+    var_r25 = 1;
+    var_r27 = (unsigned short)(arg0->unk28 + ((int)temp_r0 >> arg0->unk20));
+    temp_r28 = (unsigned short)(temp_r0 & inline_fn(arg0));
+    if (temp_r9 & 0x80) {
+        var_r25 = temp_r9 & 7;
+    }
+
+    do {
+        if ((int)temp_r28 < (int)inline_fn(arg0)) {
+            var_r26 = fn_803E8DC0(arg0, (unsigned short *)buf, (unsigned short)var_r27, temp_r28, 2);
+        } else {
+            temp_r3 = fn_803E8DC0(arg0, (unsigned short *)buf, (unsigned short)var_r27, temp_r28, 1);
+            var_r26 = temp_r3;
+            if (temp_r3 == 0) {
+                var_r26 = fn_803E8DC0(arg0, (unsigned short *)(buf + 1),
+                                      (unsigned short)var_r27 + 1, 0, 1);
+            }
+        }
+        if (var_r26 == 0x1000) {
+            temp_r12 = arg0->unk1FC0;
+            if (temp_r12 != 0) {
+                temp_r3_2 = temp_r12(arg0->unk1F84);
+                if (temp_r3_2 == 0) {
+                    continue;
+                }
+                if (temp_r3_2 == 1) {
+                    if (arg0->unk22 >= 2 && var_r25 < arg0->unk22) {
+                        var_r25 += 1;
+                        var_r27 += (unsigned short)arg0->unkC;
+                        continue;
+                    }
+                }
+            }
+        }
+        if (var_r26 != 0) {
+            *arg2 = -1;
+            return var_r26;
+        }
+    } while (var_r26 != 0);
+
+    sp8 = *(unsigned short *)buf;
+    temp_r0_3 = ((sp8 >> 8) & 0xFF) | (((unsigned int)sp8 << 8) & 0xFF00);
+    if (arg1 & 1) {
+        *arg2 = (temp_r0_3 >> 4) & 0xFFF;
+    } else {
+        *arg2 = temp_r0_3 & 0xFFF;
+    }
+    return 0;
+}
+
+// TODO: clean up, give variables real names
+/* jj_803E119C */
+typedef struct Info { char pad0[0x10]; u32 value; char pad14[8]; u32 count; char pad20[0x14]; u32 limit; } Info;
+typedef struct Record { int key; u32 value; int owner; } Record;
+typedef struct Context { int owner; char pad4[4]; int *state; char padc[0x10]; int flag; char pad20[0x10]; Record *record; Info *info; } Context;
+extern int fn_803E0A88(Context *, int, int, int, u32 *, u32 *);
+int fn_803E119C(Context *ctx, int key, int arg2, u32 *out) {
+    u32 value, other;
+    Info *info = ctx->info;
+    u32 count = info->count;
+    Record *record = ctx->record;
+    int result;
+    if ((u32)*ctx->state == 1) {
+        if (count <= 1) { *out = -1; return 0; }
+        *ctx->state = info->value;
+    }
+    *out = -1;
+    result = fn_803E0A88(ctx, key, 2, arg2, &other, &value);
+    switch (result) {
+    case 0:
+        if (other >= 2 && other < ctx->info->limit + 2) *out = other;
+        result = 0;
+        break;
+    default:
+        break;
+    }
+    if (result != 0) return result;
+    if (*out == 0xFFFFFFFF) return 0;
+    record->owner = ctx->owner;
+    record->key = key;
+    record->value = *out;
+    return 0;
+}
+
