@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 // nw4r ef_animcurve.cpp (main.dol 0x80166EFC-0x8016B680). Only createChild is drafted so far.
 #include <nw4r/ef.h>
 

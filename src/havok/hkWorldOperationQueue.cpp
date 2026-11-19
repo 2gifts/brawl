@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 // Havok translation unit hkWorldOperationQueue.o (main.dol 0x802F5D5C-0x802F7E24).
 // Not yet decompiled. Functions in address order:
 //   0x802F5D5C    44  __ct

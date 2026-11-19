@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses into fighter/module structs; add named fields to the fighter class (or a local struct) instead of *(T*)(p + 0x..)
 #define FT_KINETIC_IMPL_DTOR_OUT_OF_LINE
 #define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
 #define FT_LUCAS_ARTICLES_FULL

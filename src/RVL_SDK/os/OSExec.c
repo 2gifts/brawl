@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 // OSExec: the part of the os that boots other code. packs launch arguments, talks to the es module to
 // start titles (menu included), and boots a dol from the disc or from nand.
 // HYPOTHESIS: the retail source had several more entry points (the OSLaunch* family) that nothing in brawl

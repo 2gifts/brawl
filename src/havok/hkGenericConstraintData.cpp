@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 // Havok translation unit hkGenericConstraintData.o (main.dol 0x802DBC80-0x802DD570).
 // Not yet decompiled. Functions in address order:
 //   0x802DBC80    52  finishLoadedObjecthkGenericConstraintData

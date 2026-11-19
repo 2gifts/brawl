@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 // OSFont: the built in system font. reads the compressed font out of the rtc rom (yay0 packed), unpacks
 // it, and then answers glyph/width queries for ansi, shift-jis and utf strings.
 #include "revolution/os.h"
