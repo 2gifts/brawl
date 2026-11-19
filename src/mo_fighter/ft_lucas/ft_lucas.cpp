@@ -971,3 +971,22 @@ extern "C" void fn_114_AEE8(void* object) {
 }
 }
 
+void operator delete(void* object);
+// TODO: clean up, give variables real names
+namespace jj_4380 {
+extern "C" void* __dt__22soControllerModuleImplFv(void* object, short deleting);
+
+extern "C" void* fn_114_4380(void* object, short deleting) {
+    if (object != 0) {
+        void* sub = static_cast<char*>(object) + 4;
+        if (sub != 0) {
+            __dt__22soControllerModuleImplFv(sub, 0);
+        }
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

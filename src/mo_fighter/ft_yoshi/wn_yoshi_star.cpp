@@ -95,3 +95,22 @@ extern "C" void fn_95_1796C(void* self) {
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_16D78 {
+extern "C" void* __dt__15soParamAccesserFv(void*, short);
+
+extern "C" void* fn_95_16D78(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            short baseDeleting = 0;
+            __dt__15soParamAccesserFv(object, baseDeleting);
+        }
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

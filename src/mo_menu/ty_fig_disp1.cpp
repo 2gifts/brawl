@@ -381,3 +381,29 @@ extern "C" void* fn_2_6DBC(char* self) {
 }
 }
 
+void operator delete(void* p);
+// TODO: clean up, give variables real names
+namespace jj_647C {
+class gfFileIOHandle {
+public:
+    ~gfFileIOHandle();
+};
+
+
+extern "C" void __dt__14gfFileIOHandleFv(void* p, int flag);
+
+extern "C" {
+gfFileIOHandle* __dt__14muFileIOHandleFv(gfFileIOHandle* self, int n);
+}
+
+gfFileIOHandle* __dt__14muFileIOHandleFv(gfFileIOHandle* self, int n) {
+    if (self) {
+        __dt__14gfFileIOHandleFv(self, 0);
+        if (n > 0) {
+            operator delete(self);
+        }
+    }
+    return self;
+}
+}
+

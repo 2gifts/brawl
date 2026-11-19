@@ -552,3 +552,17 @@ void fn_120_183D4() {
 }
 }
 
+#include <stddef.h>
+void operator delete(void* p);
+// TODO: clean up, give variables real names
+namespace jj_127E0 {
+
+
+extern "C" void* __dt__30soSound3dGeneratorAccesserImplFv(void* self, short size) {
+    if (self != NULL && size > 0) {
+        operator delete(self);
+    }
+    return self;
+}
+}
+

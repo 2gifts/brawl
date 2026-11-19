@@ -48,3 +48,18 @@ int ftKirbyCopyAbilityIdConverter::convCorrectToOrigId(int unk, int statusKind, 
     }
     return statusKind;
 }
+
+void operator delete(void* p);
+// TODO: clean up, give variables real names
+namespace jj_30F9EC {
+
+extern "C" void* fn_27_30F9EC(void* p, s32 n) {
+    if (p != nullptr) {
+        if (n > 0) {
+            operator delete(p);
+        }
+    }
+    return p;
+}
+}
+

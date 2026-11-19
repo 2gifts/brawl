@@ -890,3 +890,25 @@ extern int g_soValueVariation;
 #pragma dont_inline on
 int soValueAccesser::getValueVariation() { return g_soValueVariation; }
 #pragma dont_inline off
+
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_442C {
+extern "C" {
+void* __dt__22soControllerModuleImplFv(void*, short);
+}
+
+extern "C" void* fn_101_442C(void* object, short deleting) {
+    if (object != 0) {
+        unsigned char* member = static_cast<unsigned char*>(object) + 0x4;
+        if (member != 0) {
+            __dt__22soControllerModuleImplFv(member, static_cast<short>(0));
+        }
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

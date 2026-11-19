@@ -1053,3 +1053,21 @@ extern "C" void fn_27_33EA8(soNullable* self, u32 arg1, Obj2* arg2, s32 arg3, u3
 }
 }
 
+void operator delete(void* p);
+// TODO: clean up, give variables real names
+namespace jj_31270 {
+struct fn_27_Obj {
+    int unk0;
+};
+
+
+extern "C" {
+fn_27_Obj* __dt__18soGroundTracerImplFv(fn_27_Obj* p, int n) {
+    if (p != 0 && n > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+}
+}
+

@@ -281,3 +281,66 @@ extern "C" void fn_116_23B9C(void* self) {
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_22D18 {
+
+extern "C" {
+void* fn_116_37E8(void*, short);
+void* __dt__21wnKineticEnergyNormalFv(void*, short);
+void* fn_116_22DA0(void*, short);
+void* __dt__6WeaponFv(void*, short);
+}
+
+extern "C" void* fn_116_22D18(void* object, short deleting) {
+    if (object != 0) {
+        unsigned char* members = static_cast<unsigned char*>(object);
+        short memberDeleting = -1;
+        fn_116_37E8(members + 0x1670, memberDeleting);
+        __dt__21wnKineticEnergyNormalFv(members + 0x1638, memberDeleting);
+        fn_116_22DA0(members + 0xCC, memberDeleting);
+        __dt__6WeaponFv(object, static_cast<short>(0));
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_22DA0 {
+extern "C" void* fn_116_22E10(void*, short);
+extern "C" void* fn_116_22F2C(void*, short);
+
+extern "C" void* fn_116_22DA0(void* object, short deleting) {
+    if (object != 0) {
+        fn_116_22E10(static_cast<unsigned char*>(object) + 0x1228, -1);
+        fn_116_22F2C(object, 0);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_231EC {
+
+extern "C" void* __dt__Q215soKineticEnergy13AttributeFlagFv(void*, short);
+
+extern "C" void* fn_116_231EC(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            short baseDeleting = 0;
+            __dt__Q215soKineticEnergy13AttributeFlagFv(object, baseDeleting);
+        }
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

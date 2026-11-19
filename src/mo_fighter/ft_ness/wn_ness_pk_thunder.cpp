@@ -226,3 +226,23 @@ bool wnNessPKThunder::reflect() {
     setNotifyArticleEventEject(-1, m_moduleAccesser);
     return false;
 }
+
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_18DC8 {
+extern "C" void* __dt__15soParamAccesserFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* __dt__29wnNessPKThunderParamAccesserFv(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            __dt__15soParamAccesserFv(object, static_cast<short>(0));
+        }
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
