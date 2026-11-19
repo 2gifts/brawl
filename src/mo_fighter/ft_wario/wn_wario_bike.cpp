@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses into fighter/module structs; add named fields to the fighter class (or a local struct) instead of *(T*)(p + 0x..)
 #define SO_BUILDER_HELPERS_WEAK
 #define IP_INPUT_BUTTON_RAW
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h

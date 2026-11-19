@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses into fighter/module structs; add named fields to the fighter class (or a local struct) instead of *(T*)(p + 0x..)
 #define SO_KINETIC_ROTATION_FIELDWISE_ZERO
 #define FT_ARTICLE_MEDIATOR_DTOR_INLINE
 #define FT_POOL_ROOT_NONPOLYMORPHIC

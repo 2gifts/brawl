@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 // Havok translation unit hkWorldOperationUtil.o (main.dol 0x802F7E24-0x802FB244).
 // Work in progress. Functions in address order:
 //   0x802F7E24  updateEntityBP, addEntityBP, addPhantomBP, addEntitySI, removeEntityBP, removePhantomBP,

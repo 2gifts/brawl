@@ -1,3 +1,4 @@
+// TODO: clean up - raw offset accesses kept to get a match; define the struct with named fields and replace the *(T*)(p + 0x..) casts with readable member accesses
 #include <revolution/GX.h>
 #include <revolution/OS.h>
 #include <revolution/VI.h>
