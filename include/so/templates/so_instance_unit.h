@@ -62,6 +62,10 @@ public:
     int m_id;
     soInstanceUnit() : m_id(-1) { }
     soInstanceUnit(T*& elm, s32 id) : m_element(elm), m_id(id) { }
+#ifdef SO_INSTANCE_UNIT_PTR_DTOR
+    // BYTES: sora_melee destroys arrays of these records through an out-of-line destructor.
+    ~soInstanceUnit() { }
+#endif
 };
 
 template <typename T>
