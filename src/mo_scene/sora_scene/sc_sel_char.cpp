@@ -9,8 +9,10 @@
 #include <gf/gf_task.h>
 #include <memory.h>
 #include <mu/menu.h>
+#include <mu/mu_menuroot.h>
 #include <mu/mu_resource_loader.h>
 #include <sr/sr_common.h>
+#include <nw4r/g3d/g3d_scngroup.h>
 #include <string.h>
 #include <types.h>
 
@@ -22,13 +24,58 @@ extern "C" bool fn_1_3E50(scResourceLoader* loader);
 // Hands the archives that the packs are read into to the loaders (scene module).
 extern "C" void fn_1_3F04(scResourceLoader* loader, gfArchive* archive, gfArchive* main, int unk);
 extern "C" void fn_1_3F84(scResourceLoader* loader, gfArchive* archive, int unk);
+// Gets the data of the file with that number from the archive (main module).
+extern "C" void* fn_800B03F0(gfArchive* archive, int index);
 // Makes the scene root of a pack of the main module.
-extern "C" gfTask* fn_800AFBFC(const char* name, int heap, gfArchive* archive, int index);
+extern "C" MenuRoot* fn_800AFBFC(const char* name, int heap, gfArchive* archive, int index);
 
 // The character selection task of sora_menu_sel_char.rel. Only what the scene reads is declared.
 class muSelCharTask : public gfTask {
 public:
     int m_result;                       // 0x40 how the screen was left (2: on, 4: back, 5: ...)
+
+    static muSelCharTask* create(void* param);
+};
+
+// What the scene gives to the character selection task: the data of the pack and what the scene keeps.
+// HYPOTHESIS: the names follow how the scene fills the members.
+struct scSelCharParam {
+    void* m_data0;
+    void* m_data1;
+    void* m_data2;
+    void* m_archive2;                   // 0x0C
+    void* m_data3;
+    void* m_data4;
+    void* m_data5;
+    void* m_data6;
+    void* m_data7;
+    void* m_data8;
+    nw4r::g3d::ScnGroup* m_group;
+    void* m_data9;
+    void* m_data10;
+    int m_unk3C;
+    int m_unk40;
+    int m_unk44;
+    u8 m_unk48;
+
+    scSelCharParam() {
+        m_data0 = NULL;
+        m_data1 = NULL;
+        m_data2 = NULL;
+        m_data3 = NULL;
+        m_data4 = NULL;
+        m_data5 = NULL;
+        m_data6 = NULL;
+        m_data7 = NULL;
+        m_data8 = NULL;
+        m_group = NULL;
+        m_data9 = NULL;
+        m_data10 = NULL;
+        m_unk3C = 0;
+        m_unk40 = 0;
+        m_unk44 = 0;
+        m_unk48 = 0;
+    }
 };
 
 // A file of the menu that is read when the scene starts (the handle is the only thing it holds).
@@ -41,7 +88,7 @@ struct scNetFileHandle : gfFileIOHandle {
 class scSelChar : public muMenu {
 public:
     u8 m_unk350[0x35C - 0x350];
-    gfTask* m_unk35C;
+    MenuRoot* m_unk35C;                 // 0x35C
     CameraController* m_camera;         // 0x360
     scNetFileHandle m_files[10];        // 0x364
     int m_unk38C;
@@ -251,4 +298,37 @@ s32 scSelChar::process() {
         }
     }
     return 0;
+}
+
+// Hands the data of the pack to the character selection and makes it.
+muSelCharTask* scSelChar::createTask() {
+    scSelCharParam param;
+    m_unk38C = reinterpret_cast<int>(fn_800B03F0(m_archive, 0x1E));
+    m_unk390 = reinterpret_cast<int>(fn_800B03F0(m_archive, 0x46));
+    m_unk394 = reinterpret_cast<int>(fn_800B03F0(m_archive, 0x50));
+    m_unk398 = reinterpret_cast<int>(fn_800B03F0(m_archive, 0x28));
+    m_unk39C = reinterpret_cast<int>(fn_800B03F0(m_archive, 0x5A));
+    m_unk3A0 = reinterpret_cast<int>(fn_800B03F0(m_archive, 0x32));
+    m_unk3A4 = reinterpret_cast<int>(fn_800B03F0(m_archive, 0x3C));
+    m_unk3A8 = reinterpret_cast<int>(fn_800B03F0(m_archive, 0x82));
+    m_unk3B4 = reinterpret_cast<int>(m_archive->getData(0, static_cast<ARCNodeType>(1), 0x6E, 0xFFFE));
+    m_unk3B8 = reinterpret_cast<int>(m_archive->getData(0, static_cast<ARCNodeType>(1), 0x78, 0xFFFE));
+    param.m_data0 = &m_unk38C;
+    param.m_data1 = &m_unk390;
+    param.m_data2 = &m_unk394;
+    param.m_archive2 = m_unk3B0;
+    param.m_data4 = &m_unk398;
+    param.m_data5 = &m_unk39C;
+    param.m_data6 = &m_unk3A0;
+    param.m_data7 = &m_unk3A4;
+    param.m_data8 = &m_unk3A8;
+    param.m_data3 = m_unk3AC;
+    param.m_group = m_unk35C->scene;
+    param.m_data9 = reinterpret_cast<void*>(m_unk3B4);
+    param.m_data10 = reinterpret_cast<void*>(m_unk3B8);
+    param.m_unk44 = 0xA8C;
+    param.m_unk3C = 0x27;
+    param.m_unk40 = 0x27;
+    param.m_unk48 = m_unk408;
+    return muSelCharTask::create(&param);
 }
