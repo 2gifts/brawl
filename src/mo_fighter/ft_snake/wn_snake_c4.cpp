@@ -349,3 +349,31 @@ bool wnSnakeC4::notifyEventCollisionSearchCheck() {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_190B4 {
+extern "C" void notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser(void*);
+
+extern "C" void fn_122_190B4(void* self) {
+    notifyEventChangeStatus__6WeaponFiiP12soStatusDataP16soModuleAccesser(reinterpret_cast<u8*>(self) - 0x64);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_19124 {
+extern "C" void setAttackPowerMulPattern__6WeaponFf(void*);
+
+extern "C" void fn_122_19124(void* self) {
+    setAttackPowerMulPattern__6WeaponFf(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1919C {
+extern "C" void isConstraint__6WeaponFb(void*);
+
+extern "C" void fn_122_1919C(void* self) {
+    isConstraint__6WeaponFb(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

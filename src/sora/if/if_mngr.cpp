@@ -946,3 +946,145 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
 }
 }
 
+#include <gf/gf_archive.h>
+// TODO: clean up, give variables real names
+namespace jj_800DBB10 {
+extern "C" {
+void* fn_800B03F0(void*, int);
+void* getData__9gfArchiveFi11ARCNodeTypeiUs(void*, int, int, int, unsigned short);
+void* getData__9gfArchiveFi11ARCNodeTypeiPiUs(void*, int, int, int, int*, unsigned short);
+}
+
+struct Obj {
+    char pad0[4];
+    int state;
+    char pad8[0x14];
+    void* f1c;
+    void* f20;
+    void* f24;
+    void* f28;
+    void* f2c;
+    void* f30;
+    void* f34;
+    void* f38;
+    void* f3c;
+    void* f40;
+    char pad44[4];
+    void* f48;
+    char pad4c[0x30];
+    void* f7c;
+    void* f80;
+    void* f84;
+    char pad88[8];
+    void* f90;
+    char pad94[4];
+    void* f98;
+    char pad9c[0x24];
+    void* resource;
+};
+
+extern "C" void fn_800DBB10(Obj* self) {
+    self->f1c = fn_800B03F0(self->resource, 0x1e);
+    if (self->state == 0 || self->state == 5 || self->state == 1 ||
+        self->state == 4 || self->state == 7 || self->state == 9) {
+        self->f20 = fn_800B03F0(self->resource, 0x28);
+    } else {
+        self->f20 = fn_800B03F0(self->resource, 0x32);
+    }
+    self->f48 = getData__9gfArchiveFi11ARCNodeTypeiUs(self->resource, 0, 1, 0x8c, 0xfffe);
+    self->f28 = fn_800B03F0(self->resource, 0xa);
+    self->f2c = fn_800B03F0(self->resource, 0xb);
+    if (self->state == 2 || self->state == 6 || self->state == 9) {
+        self->f24 = fn_800B03F0(self->resource, 0x6e);
+    }
+    if (self->state == 1) {
+        self->f34 = fn_800B03F0(self->resource, 0x46);
+    }
+    if (self->state == 5) {
+        self->f38 = fn_800B03F0(self->resource, 0x50);
+        self->f7c = getData__9gfArchiveFi11ARCNodeTypeiUs(self->resource, 0, 1, 0x96, 0xfffe);
+        self->f80 = getData__9gfArchiveFi11ARCNodeTypeiUs(self->resource, 0, 1, 0x82, 0xfffe);
+        self->f84 = getData__9gfArchiveFi11ARCNodeTypeiPiUs(self->resource, 0, 1, 0x14, (int*)((char*)self + 0x88), 0xfffe);
+    }
+    if (self->state == 7) {
+        self->f40 = fn_800B03F0(self->resource, 0x3c);
+        self->f98 = getData__9gfArchiveFi11ARCNodeTypeiUs(self->resource, 0, 1, 0x78, 0xfffe);
+    }
+    self->f90 = getData__9gfArchiveFi11ARCNodeTypeiUs(self->resource, 0, 1, 0xa0, 0xfffe);
+    self->f3c = fn_800B03F0(self->resource, 0x64);
+    self->f30 = fn_800B03F0(self->resource, 0x5a);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800DBD3C {
+
+struct Obj800DBD3C {
+    bool b0 : 1;
+    bool b1 : 1;
+    char pad1[0x1C - 0x1];
+    void* m1C;
+    void* m20;
+    void* m24;
+    void* m28;
+    void* m2C;
+    void* m30;
+    void* m34;
+    void* m38;
+    void* m3C;
+    void* m40;
+    char pad44[0x48 - 0x44];
+    void* m48;
+    char pad4C[0x7C - 0x4C];
+    void* m7C;
+    void* m80;
+    void* m84;
+    char pad88[0x90 - 0x88];
+    void* m90;
+    char pad94[0x98 - 0x94];
+    void* m98;
+    char pad9C[0xC0 - 0x9C];
+    gfArchive* mC0;
+    gfResourceLoader* mC4;
+};
+
+extern "C" void fn_800DBD3C(Obj800DBD3C* p) {
+    if (p->m1C) p->m1C = 0;
+    if (p->m20) p->m20 = 0;
+    if (p->m48) p->m48 = 0;
+    if (p->m24) p->m24 = 0;
+    if (p->m28) p->m28 = 0;
+    if (p->m2C) p->m2C = 0;
+    if (p->m30) p->m30 = 0;
+    if (p->m34) p->m34 = 0;
+    if (p->m38) p->m38 = 0;
+    if (p->m7C) p->m7C = 0;
+    if (p->m80) p->m80 = 0;
+    if (p->m84) p->m84 = 0;
+    if (p->m40) p->m40 = 0;
+    if (p->m98) p->m98 = 0;
+    if (p->m3C) p->m3C = 0;
+    if (p->m90) p->m90 = 0;
+    if (p->mC0) {
+        delete p->mC0;
+        p->mC0 = 0;
+    }
+    if (p->mC4) {
+        delete p->mC4;
+        p->mC4 = 0;
+    }
+    p->b1 = false;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800DCDDC {
+typedef struct { unsigned char pad[0x24]; unsigned char unk24[0x20]; void* unk44; } S;
+
+extern "C" void fn_800DF298(void* a, int b, int c, void* d);
+
+extern "C" void dispCorps__6IfMngrFPCvi(S* arg0, int b, int c) {
+    fn_800DF298(arg0->unk44, b, c, arg0->unk24);
+}
+}
+

@@ -46,3 +46,26 @@ void wnDiddyGun::notifyEventLink(soLinkEventArgs* event, soModuleAccesser* modul
     }
     Weapon::notifyEventLink(event, moduleAccesser, sender, selector);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_365664 {
+extern "C" void* fn_27_365664(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x804;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3661CC {
+extern "C" unsigned char lbl_27_bss_330[0x14];
+
+extern "C" unsigned char* fn_27_3661CC()
+{
+    return lbl_27_bss_330;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3661D8 {
+extern "C" void fn_27_3661D8(void) {}
+}
+

@@ -765,3 +765,359 @@ extern "C" {
 void* fn_107_6800(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_107_6840(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+
+#include <mt/mt_vector.h>
+#include <nw4r/ut/ut_algorithm.h>
+#include <math.h>
+// TODO: clean up, give variables real names
+namespace jj_A8D4 {
+
+extern "C" {
+int getSpycloak__7ftOwnerCFv(void* owner);
+unsigned char getFighterColor__7ftOwnerFv(void* owner);
+void create__9soAnimObjFRCQ34nw4r3g3d7ResFileRCQ34nw4r3g3d6ResMdlQ25Heaps8HeapTypePCc(void* self, int* a, int* b, int c, int d);
+void set__9soAnimObjFPQ34nw4r3g3d6ScnMdl(void* self, void* target);
+void setFrame__9soAnimObjFf(void* self, float value);
+extern const float lbl_107_rodata_C;
+}
+
+#define DUMMY(n) virtual void d##n() = 0;
+#define DUMMY10(p) DUMMY(p##0) DUMMY(p##1) DUMMY(p##2) DUMMY(p##3) DUMMY(p##4) DUMMY(p##5) DUMMY(p##6) DUMMY(p##7) DUMMY(p##8) DUMMY(p##9)
+
+struct Prefix8 {
+    unsigned int fields[2];
+};
+
+class Inner0 {
+public:
+    DUMMY10(0)
+    virtual int g12() = 0;
+};
+
+class Obj0 : public Prefix8 {
+public:
+    DUMMY(0) DUMMY(1) DUMMY(2) DUMMY(3)
+    virtual Inner0* f6() = 0;
+    DUMMY(5) DUMMY(6) DUMMY(7) DUMMY(8) DUMMY(9) DUMMY(10)
+    virtual int f13(int a, unsigned int b, unsigned int c) = 0;
+};
+
+struct Inner2 {
+    char pad0[0xE8];
+    int unkE8;
+};
+
+class Obj4 : public Prefix8 {
+public:
+    DUMMY10(0) DUMMY(10) DUMMY(11) DUMMY(12)
+    virtual Inner2* f15() = 0;
+    DUMMY(14) DUMMY(15) DUMMY(16) DUMMY(17) DUMMY(18) DUMMY(19)
+    DUMMY10(2) DUMMY10(3) DUMMY10(4)
+    DUMMY(50) DUMMY(51) DUMMY(52) DUMMY(53) DUMMY(54) DUMMY(55)
+    virtual void f58() = 0;
+};
+
+class Obj_C0 {
+public:
+    DUMMY(0) DUMMY(1) DUMMY(2) DUMMY(3) DUMMY(4)
+    virtual int f7() = 0;
+};
+
+class Obj8 {
+public:
+    DUMMY10(0) DUMMY10(1) DUMMY10(2) DUMMY10(3) DUMMY10(4) DUMMY10(5) DUMMY10(6) DUMMY10(7) DUMMY10(8) DUMMY10(9)
+    DUMMY(100) DUMMY(101)
+    virtual void f104(int v) = 0;
+};
+
+class WorkModule {
+public:
+    DUMMY(0) DUMMY(1) DUMMY(2) DUMMY(3) DUMMY(4)
+    virtual void setInt(int value, unsigned int index) = 0;
+    DUMMY(6) DUMMY(7) DUMMY(8) DUMMY(9) DUMMY(10) DUMMY(11) DUMMY(12)
+    virtual void setFloat(float value, unsigned int index) = 0;
+};
+
+struct Modules {
+    Obj0* o0;
+    Obj4* o4;
+    Obj8* o8;
+    char pad0C[0x64 - 0x0C];
+    WorkModule* work;
+    char pad68[0xC0 - 0x68];
+    Obj_C0* oC0;
+};
+
+struct Accesser {
+    char pad0[0xD8];
+    Modules* modules;
+};
+
+struct FighterPrefix {
+    char pad[0x3c];
+};
+
+class Fighter : public FighterPrefix {
+public:
+    DUMMY10(0) DUMMY10(1) DUMMY10(2) DUMMY10(3) DUMMY10(4) DUMMY10(5) DUMMY10(6) DUMMY10(7) DUMMY10(8) DUMMY10(9)
+    DUMMY10(10) DUMMY10(11) DUMMY10(12) DUMMY10(13) DUMMY10(14) DUMMY10(15) DUMMY10(16) DUMMY10(17)
+    DUMMY(180) DUMMY(181) DUMMY(182) DUMMY(183) DUMMY(184)
+    virtual void* getOwner() = 0;
+    char pad40[0x60 - 0x40];
+    Accesser* accesser;
+};
+
+extern "C" void fn_107_A8D4(Fighter* self, int param) {
+    Obj4* o4 = self->accesser->modules->o4;
+    Accesser* accesser = self->accesser;
+    soValueAccesser::getConstantFloat(reinterpret_cast<soModuleAccesser*>(accesser), 0xFB7, 0);
+    o4->f58();
+    if (getSpycloak__7ftOwnerCFv(self->getOwner()) == 0) {
+        unsigned char k = getFighterColor__7ftOwnerFv(self->getOwner());
+        if (k != 0xD && k != 0xC) {
+            int arr[4];
+            Obj0* o0 = accesser->modules->o0;
+            arr[3] = o0->f13(o0->f6()->g12(), 4, 0);
+            Obj_C0* c0 = accesser->modules->oC0;
+            int e8 = accesser->modules->o4->f15()->unkE8;
+            arr[0] = e8;
+            arr[1] = e8;
+            arr[2] = arr[3];
+            int c = c0->f7();
+            create__9soAnimObjFRCQ34nw4r3g3d7ResFileRCQ34nw4r3g3d6ResMdlQ25Heaps8HeapTypePCc(reinterpret_cast<char*>(self) + 0x1FDBC, &arr[2], &arr[1], c, 0);
+            set__9soAnimObjFPQ34nw4r3g3d6ScnMdl(reinterpret_cast<char*>((int)self + 0x1FDBC), accesser->modules->o4->f15());
+            setFrame__9soAnimObjFf(reinterpret_cast<char*>((unsigned int)self + 0x1FDBC), (float)k);
+        }
+    }
+    accesser->modules->o8->f104(1);
+    WorkModule* work = accesser->modules->work;
+    work->setFloat(lbl_107_rodata_C, 0x11000013);
+    work->setFloat(lbl_107_rodata_C, 0x21000006);
+    work->setInt(0, 0x10000046);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B198 {
+
+
+struct Work {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual float getFloat(unsigned long);
+    virtual void v13();
+    virtual void v14();
+    virtual void setFloat(float, unsigned long);
+    virtual void v15();
+    virtual bool isFlag(unsigned long);
+    virtual void onFlag(unsigned long);
+};
+
+struct Status {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void change(int, void*);
+};
+
+struct Base {
+    int a, b;
+};
+
+struct Model : Base {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual Vec3f position(int, Vec3f*, bool, bool);
+};
+
+struct Effect {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void create(int, Vec3f*, Vec3f*, float, int, int);
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void set(int, float);
+};
+
+struct Modules {
+    char p0[4];
+    Model* model;
+    char p1[0x5c];
+    Work* work;
+    char p2[8];
+    Status* status;
+    char p3[0x14];
+    Effect* effect;
+};
+
+struct Access {
+    char p[0xd8];
+    Modules* modules;
+};
+
+extern "C" {
+extern const float lbl_107_rodata_0[];
+Vec3f* __ct__5Vec3fFfff(Vec3f*, float, float, float);
+Vec3f* fn_107_B454(Vec3f*, const void*);
+}
+
+extern "C" void fn_107_B198(char* self, float amount, int unused,
+                            char* input, int flag, Access* access) {
+    const float* c = lbl_107_rodata_0;
+    if (flag == 0) {
+        Work* work = access->modules->work;
+        Status* status = access->modules->status;
+        if (work->getFloat(0x11000013) < c[8]) {
+            float* param = *(float**)(*(char**)(self + 0x1fdb8) + 0x88);
+            float value = amount * param[5];
+            if (value > param[7])
+                value = param[7];
+
+            work->setFloat(value, 0x11000014);
+            work->setFloat(c[1], 0x11000013);
+            status->change(0x11a, access);
+
+            Vec3f offset;
+            __ct__5Vec3fFfff(&offset, c[3], c[9], c[10]);
+            Vec3f pos = access->modules->model->position(0x1d, &offset, 0, 0);
+            Vec3f diff;
+            Vec3f rot;
+            Vec3f tmp;
+            Vec3fSub(&diff, &pos, fn_107_B454(&tmp, input + 0x10));
+
+            double x = diff.m_x;
+            double y = diff.m_y;
+            float angle = atan2(y, x);
+            rot.m_x = c[3];
+            rot.m_y = c[3];
+            rot.m_z = angle;
+
+            float sq = diff.m_z * diff.m_z +
+                       (diff.m_x * diff.m_x + diff.m_y * diff.m_y);
+            float len;
+            if ((float)(double)nw4r::ut::Abs(sq) <= c[11])
+                len = c[3];
+            else
+                len = sq * rsqrtf(sq);
+
+            float scale = len / c[0];
+            Effect* effect = access->modules->effect;
+            Vec3f tmp2;
+            effect->create(0x7a, fn_107_B454(&tmp2, input + 0x10),
+                           &rot, scale, 0, -1);
+
+            if (work->getFloat(0x11000013) >= c[8] &&
+                !work->isFlag(0x1200003d)) {
+                work->onFlag(0x1200003d);
+                access->modules->effect->set(0x1a, c[3]);
+            }
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B454 {
+extern "C" void fn_107_B454(float* dst, const float* src) {
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_FE3C {
+extern "C" void fn_107_FE3C(void *p, void *a, void *b)
+{
+    ((void **)p)[0] = a;
+    ((void **)p)[1] = b;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_10054 {
+extern "C" void fn_107_B198(void*);
+
+extern "C" void fn_107_10054(void* self) {
+    fn_107_B198(reinterpret_cast<u8*>(self) - 0xac);
+}
+}
+

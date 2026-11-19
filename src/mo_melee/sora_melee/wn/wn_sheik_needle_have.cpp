@@ -35,3 +35,39 @@ void wnSheikNeedleHave::activate(int founderTaskId, int resourceId, int team) {
     desc.unk4DHigh = 0;
     Weapon::activate(&desc);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_342ED4 {
+extern "C" {
+extern void __dl__FPv(void*);
+
+void* __dt__30wnSheikNeedleHaveParamAccesserFv(void* p, int n) {
+    if (p && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_342F14 {
+extern "C" void* fn_27_342F14(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x4f8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_343CC0 {
+extern "C" void* fn_27_343CC0(void* self) {
+    return reinterpret_cast<u8*>(self) + 0xdc;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_343CC8 {
+extern "C" void* fn_27_343CC8(void* self) {
+    return reinterpret_cast<u8*>(self) + 0xb8;
+}
+}
+

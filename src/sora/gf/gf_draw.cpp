@@ -243,3 +243,62 @@ void fn_8001ACC4(Manager *mgr, const char *name, int a2, int a3, int a4) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_8001AE1C {
+extern "C" {
+unsigned char* GetInstance__Q34nw4r2ef8ResourceFv(void);
+int RemoveEffectProject__Q34nw4r2ef8ResourceFPQ34nw4r2ef13EffectProject(void* a, void* b);
+int RemoveTextureProject__Q34nw4r2ef8ResourceFPQ34nw4r2ef14TextureProject(void* a, void* b);
+void gfMemFill__FPvUcUl(void* p, unsigned char c, unsigned long n);
+int strncmp(const char* a, const char* b, unsigned long n);
+}
+
+struct Entry {
+    char name[0x20];
+    void* p20;
+    void* p24;
+    void* p28;
+    void* p2c;
+};
+
+struct Header {
+    unsigned short count;
+    unsigned short active;
+    Entry* base;
+    Entry* last;
+};
+
+extern "C" void fn_8001AE1C(Header* h, const char* name) {
+    unsigned short n;
+    Header* hp = h;
+    Entry* e = hp->base;
+    n = hp->count;
+    int i = 0;
+    while (i < (int)n) {
+        if (e->p20 != 0 && strncmp(name, e->name, 0x1f) == 0) {
+            break;
+        }
+        i++;
+        e++;
+    }
+    if (i < (int)n) {
+        unsigned char* base = GetInstance__Q34nw4r2ef8ResourceFv();
+        if (e->p28 != 0) {
+            RemoveEffectProject__Q34nw4r2ef8ResourceFPQ34nw4r2ef13EffectProject(base, e->p28);
+        }
+        if (e->p2c != 0) {
+            RemoveTextureProject__Q34nw4r2ef8ResourceFPQ34nw4r2ef14TextureProject(base, e->p2c);
+        }
+        gfMemFill__FPvUcUl(e, 0, 0x20);
+        e->p20 = 0;
+        e->p24 = 0;
+        e->p28 = 0;
+        e->p2c = 0;
+        if (hp->last == e) {
+            hp->last = 0;
+        }
+        hp->active = hp->active - 1;
+    }
+}
+}
+

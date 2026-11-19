@@ -159,3 +159,18 @@ bool wnYoshiTamago::notifyEventCollisionAttackCheck(u32 flags) {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_3086B4 {
+extern "C" void* fn_27_3086B4(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x7f8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_309224 {
+extern "C" void* fn_27_309224(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x114;
+}
+}
+

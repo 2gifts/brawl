@@ -507,3 +507,83 @@ bool clCapsule::chkCapsuleSameScale(float radius, clCapsule* other) {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_98 {
+extern "C" {
+extern void __dl__FPv(void*);
+
+void* __dt__26soArrayVectorCalcInterfaceFv(void* p, int n) {
+    if (p != 0 && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_E54 {
+extern "C" void fn_27_E54(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_E58 {
+struct Vec3f {
+    float x;
+    float y;
+    float z;
+};
+
+extern "C" float lengthSq__5Vec3fCFv(Vec3f* v) {
+    return v->x * v->x + v->y * v->y + v->z * v->z;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_E7C {
+struct Vec3 {
+    float x, y, z;
+};
+
+extern "C" void __as__5Vec3fFRC5Vec3f(Vec3* destination, const Vec3* source)
+{
+    *destination = *source;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_E98 {
+extern "C" {
+float fn_27_E98(const float* a, const float* b)
+{
+    return a[2] * b[2] + (a[0] * b[0] + a[1] * b[1]);
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_EC8 {
+extern float lbl_27_rodata_14;
+extern float lbl_27_rodata_18;
+
+extern "C" float fn_27_EC8(float x)
+{
+    if (x > lbl_27_rodata_18) {
+        return lbl_27_rodata_18;
+    }
+    if (x < lbl_27_rodata_14) {
+        return lbl_27_rodata_14;
+    }
+    return x;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1050 {
+extern "C" float fn_27_1050(float f)
+{
+    return f * f;
+}
+}
+

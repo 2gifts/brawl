@@ -438,3 +438,180 @@ finish:
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_80157E8C {
+extern "C" {
+int getSections_Direct__7nteFileFPCUc(int arg0);
+void fn_80153488(void* arg0);
+void* getSectionData_Direct__7nteFileFPUcUl(int arg0, u8 arg1);
+void fn_80153498(void* arg0, int arg1);
+int fn_80153504(void* arg0, int arg1);
+void* fn_80153818(void* arg0, int arg1);
+void fn_80152FA4(void);
+u64 getTime__9nteGlobalFPb(int arg0);
+void OSTicksToCalendarTime(u64 arg0, void* arg1);
+void setTimeStampFileSetting__9nteGlobalFUsUcUc(u16 a, u8 b, u8 c);
+void setLastDownload__9nteGlobalFUsUcUc(u16 a, u8 b, u8 c);
+}
+
+struct ObjBase {
+    int type;
+    int pad4;
+};
+class Obj : public ObjBase {
+public:
+    virtual void __dt__18nteFileDataSettingFv(int arg1);
+    virtual void fn_1();
+    virtual void fn_2();
+};
+
+extern "C" int _reflectSetting__12nteCheckDataFPvUl(void* self, int arg1) {
+    int entry[2];
+    int timeData[8];
+
+    if ((u8)getSections_Direct__7nteFileFPCUc(arg1) != 1) {
+        return 0;
+    }
+
+    fn_80153488(entry);
+    if (fn_80153504(entry, (int)getSectionData_Direct__7nteFileFPUcUl(arg1, 0)) == 0) {
+        fn_80153498(entry, -1);
+        return 0;
+    }
+
+    Obj* obj = (Obj*)fn_80153818(entry, *(int*)((char*)self + 0x350));
+    if (obj == 0) {
+        fn_80153498(entry, -1);
+        return 0;
+    }
+
+    if (obj->type == 0) {
+        fn_80152FA4();
+        OSTicksToCalendarTime(getTime__9nteGlobalFPb(0), timeData);
+        setTimeStampFileSetting__9nteGlobalFUsUcUc((u16)timeData[5], (u8)(timeData[4] + 1), (u8)timeData[3]);
+        setLastDownload__9nteGlobalFUsUcUc((u16)timeData[5], (u8)(timeData[4] + 1), (u8)timeData[3]);
+    }
+
+    if (obj != 0) {
+        obj->__dt__18nteFileDataSettingFv(1);
+    }
+
+    fn_80153498(entry, -1);
+    return 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80157FD4 {
+
+
+extern "C" {
+int requestSaveVF__14gfCollectionIOFiPCcPvib(void*, int, int, int, void*, int);
+int getDeliveryFileName__14gfCollectionIOFi(int);
+void setLastDownload__9nteGlobalFUsUcUc(u16, u8, u8);
+void setTimeStampFileDeliv__9nteGlobalFx(void);
+void setEnableGotDeliveryData__9nteGlobalFUc(int);
+u64 getTime__9nteGlobalFPb(int);
+void fn_80153488(int*);
+void fn_80153498(int*, int);
+int fn_80153504(int*, int);
+int fn_80153810(int*);
+int getDataType__10nteSectionFv(int*);
+char* getSize__10nteSectionFv(int*);
+u8 getSections_Direct__7nteFileFPCUc(int);
+void* getSectionData_Direct__7nteFileFPUcUl(int, u8);
+void OSTicksToCalendarTime(u64, void*);
+}
+
+struct Fn80157Target {
+    u8 pad5c[0x5c];
+    u8 busy;
+    u8 pad5d[3];
+    int result;
+};
+
+struct Fn80157Object {
+    u8 pad[0x370];
+    Fn80157Target* target;
+};
+
+extern "C" int _storeDelivData__12nteCheckDataFPvUl(Fn80157Object* self, int arg1, int arg2) {
+    int entry[2];
+    int timeData[8];
+    u32 success;
+    u8 count;
+    int index;
+    char* value;
+    u8 i;
+    int type;
+
+    if (self->target == 0) {
+        return 0;
+    }
+
+    success = 0;
+    count = getSections_Direct__7nteFileFPCUc(arg1);
+    i = 0;
+
+    while ((u8)i < count) {
+        fn_80153488(entry);
+        if (fn_80153504(entry, (int)getSectionData_Direct__7nteFileFPUcUl(arg1, (u8)i)) == 0) {
+            fn_80153498(entry, -1);
+        } else if (getSize__10nteSectionFv(entry) == 0) {
+            fn_80153498(entry, -1);
+        } else {
+            type = 0;
+            switch (getDataType__10nteSectionFv(entry)) {
+            case 1:
+                type = 1;
+                break;
+            case 2:
+                type = 2;
+                break;
+            case 3:
+                type = 3;
+                break;
+            }
+
+            if (type != 0) {
+                value = getSize__10nteSectionFv(entry);
+                index = fn_80153810(entry);
+
+                if (requestSaveVF__14gfCollectionIOFiPCcPvib(self->target, type, getDeliveryFileName__14gfCollectionIOFi(type),
+                                index, value, 1) != 0) {
+                    while (self->target->busy == 0) {
+                        OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
+                    }
+                    if (self->target->result == 0) {
+                        success = 1;
+                    }
+                }
+            }
+
+            if (type == 1) {
+                setEnableGotDeliveryData__9nteGlobalFUc(2);
+            }
+            if (type == 2) {
+                setEnableGotDeliveryData__9nteGlobalFUc(1);
+            }
+            if (type == 3) {
+                setEnableGotDeliveryData__9nteGlobalFUc(4);
+            }
+            fn_80153498(entry, -1);
+        }
+
+        i++;
+    }
+
+    if (success == 1) {
+        OSGetTime();
+        setTimeStampFileDeliv__9nteGlobalFx();
+        OSTicksToCalendarTime(getTime__9nteGlobalFPb(0), timeData);
+        setLastDownload__9nteGlobalFUsUcUc((u16)timeData[5], (u8)(timeData[4] + 1),
+                    (u8)timeData[3]);
+    }
+
+    return success;
+}
+}
+

@@ -110,3 +110,11 @@ void FxDelay::UpdateBuffer(int channels, void** ppBuffer, u32 size,
 
 } // namespace snd
 } // namespace nw4r
+
+// TODO: clean up, give variables real names
+namespace jj_801C0390 {
+extern "C" void* GetParam__Q34nw4r3snd7FxDelayCFv(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x18;
+}
+}
+

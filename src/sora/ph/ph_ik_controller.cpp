@@ -372,3 +372,113 @@ extern "C" void fn_800969E0(Ctx* self, void* dst) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_80096774 {
+extern "C" void deallocateChunk__14hkThreadMemoryFPvii(void*, void*, unsigned int, int);
+extern "C" void __dl__FPv(void*);
+extern "C" void relAll__11phContainerFv(void*);
+extern "C" void __dt__11phContainerFv(void*, int);
+extern void* s_instance__14hkThreadMemory;
+extern void* lbl_8049DEC8[3];
+
+struct Array {
+    void* data;
+    int size;
+    unsigned int raw;
+    unsigned int rawValue() const { return raw; }
+};
+struct Child { char pad[0x114]; Array a; };
+struct Object { void* unk; void* p; Array a; Array b; };
+struct List { Object** data; int size; unsigned int raw; unsigned int rawValue() const { return raw; } int sizeValue() const { return size; } };
+extern "C" List* getArrayIKController__11phInterfaceFv(void*);
+extern "C" Object* __dt__14phIkControllerFv(Object* self, int flag) {
+    if (self) {
+        Child* child;
+        int offset;
+        int i = 0;
+        offset = 0;
+        for (; i < self->a.size; offset += 4, i++) {
+            child = *(Child**)((char*)self->a.data + offset);
+            if (child) {
+                if ((unsigned int)child + 0x114 != 0 && !(child->a.raw & 0x80000000)) {
+                    deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, child->a.data, (child->a.rawValue() & 0x3fffffff) * 0x30, 0x15);
+                }
+                __dl__FPv(child);
+            }
+        }
+        if (!(self->a.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->a.data, self->a.rawValue() << 2, 0x15);
+        }
+        self->a.data = 0;
+        self->a.size = 0;
+        self->a.raw = (self->a.raw & 0x40000000) | 0x80000000;
+        if (!(self->b.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->b.data, self->b.rawValue() << 3, 0x15);
+        }
+        self->b.data = 0;
+        self->b.size = 0;
+        self->b.raw = (self->b.raw & 0x40000000) | 0x80000000;
+        List* list = getArrayIKController__11phInterfaceFv(lbl_8049DEC8[0]);
+        int index;
+        int byteOffset;
+        index = 0;
+        byteOffset = 0;
+        for (int j = 0; j < list->size; byteOffset += 4, index++, j++) {
+            if (*(Object**)((char*)list->data + byteOffset) == self) {
+                if (list->sizeValue() == 1) {
+                    if (!(list->raw & 0x80000000)) {
+                        deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, list->data, list->rawValue() << 2, 0x15);
+                    }
+                    list->data = 0;
+                    list->size = 0;
+                    list->raw = (list->raw & 0x40000000) | 0x80000000;
+                } else {
+                    list->size--;
+                    list->data[index] = list->data[list->size];
+                }
+                break;
+            }
+        }
+        relAll__11phContainerFv(self->p);
+        __dt__11phContainerFv(self->p, 1);
+        if ((unsigned int)self + 0x14 != 0 && !(self->b.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->b.data, self->b.rawValue() << 3, 0x15);
+        }
+        if ((unsigned int)self + 8 != 0 && !(self->a.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->a.data, self->a.rawValue() << 2, 0x15);
+        }
+        if (flag > 0) __dl__FPv(self);
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80098388 {
+extern float lbl_805A1D38;
+struct S {
+    int a;
+    short b, c, d, e;
+    float f0 __attribute__((aligned(16)));
+    float f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19;
+    S() {}
+    S(const S& o) { *this = o; }
+    S& operator=(const S& o) {
+        a = o.a; b = o.b; c = o.c; d = o.d; e = o.e;
+        f0 = o.f0; f1 = o.f1; f2 = o.f2; f3 = o.f3; f4 = o.f4; f5 = o.f5;
+        f6 = o.f6; f7 = o.f7; f8 = o.f8; f9 = o.f9; f10 = o.f10; f11 = o.f11;
+        f12 = o.f12; f13 = o.f13; f14 = o.f14; f15 = o.f15; f16 = o.f16;
+        f17 = o.f17; f18 = o.f18; f19 = o.f19;
+        return *this;
+    }
+};
+struct Obj { char pad[0x10]; S s; };
+struct Mgr { char pad[8]; Obj** objs; };
+extern "C" void setToeAngle__14phIkControllerFif(Mgr* m, int i, float v) {
+    Obj* o = m->objs[i];
+    S tmp = o->s;
+    tmp.f16 = tmp.f17 = lbl_805A1D38 * v;
+    o->s = tmp;
+}
+}
+

@@ -140,3 +140,11 @@ void wnIkeSwordInstantiateBuilder(const wnArticleBuildInfo& info, const wnModule
     wnWeaponBuilder<wnIkeSwordModuleAccesserBuildConfig> builder("wnIkeSword", 0, info, bd);
     wnIkeSwordParamAccesser paramAccesser(0);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_1356C {
+extern "C" s32 fn_119_1356C(void) {
+    return -0x1;
+}
+}
+

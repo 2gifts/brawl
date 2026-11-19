@@ -474,3 +474,435 @@ void soGenerateArticleManageModuleImpl::remove(int articleId, int selector) {
         }
     }
 }
+
+#include <so/so_instance_manager.h>
+// TODO: clean up, give variables real names
+namespace jj_932A0 {
+class Mgr {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3(s16 a, s16 b);
+};
+
+class soEventSystem {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual u32 v6(s16 id);
+};
+
+extern "C" soEventSystem* getInstance__13soEventSystemFv();
+extern "C" Mgr* getManager__13soEventSystemFl(soEventSystem*, s32);
+
+struct Ev {
+    s16 m0;
+    s16 m2;
+    s16 m4;
+    s16 m6;
+    s16 m8;
+};
+
+class Elem {
+public:
+    virtual void e0();
+    virtual void e1();
+    virtual void e2();
+    virtual void e3();
+    virtual void e4();
+    virtual void e5();
+    virtual void e6();
+    virtual s16 e7();
+    virtual void e8();
+    virtual void e9();
+    virtual void e10();
+    virtual void e11();
+    virtual void e12();
+    virtual void e13();
+    virtual void e14();
+    virtual void e15();
+    virtual void e16();
+    virtual void e17();
+    virtual void e18();
+    virtual void e19();
+    virtual void e20();
+    virtual void e21();
+    virtual s32 e22();
+    virtual void e23();
+    virtual void e24();
+    virtual void e25();
+    virtual void e26(s32 a);
+};
+
+class ElemList {
+public:
+    virtual void l0();
+    virtual Elem** at(s32 i);
+    virtual void l2();
+    virtual s32 size();
+    virtual void l4();
+    virtual void l5();
+    virtual void l6();
+    virtual void l7();
+    virtual void l8();
+    virtual void l9();
+    virtual void l10();
+    virtual void l11();
+    virtual void remove(s32 i);
+};
+
+class EvList {
+public:
+    virtual void l0();
+    virtual Ev* at(s32 i);
+    virtual void l2();
+    virtual s32 size();
+};
+
+class Obj {
+public:
+    virtual void o0();
+    virtual void o1();
+    virtual void o2();
+    virtual void o3();
+    virtual void o4();
+    virtual void o5();
+    virtual void o6();
+};
+
+struct Owner {
+    void* vt;
+    char pad[0x28];
+    ElemList* m2c;
+    Obj* m30;
+    EvList* m34;
+    Obj* m38;
+
+    inline void run(u32 mode) {
+        if (mode == 1U) {
+            s32 j;
+            Elem* b;
+            s16 y;
+            s32 i;
+            Elem* a;
+            for (i = m2c->size() - 1; i >= 0; i--) {
+                a = *m2c->at(i);
+                b = *m2c->at(i);
+                s32 n = m34->size();
+                for (j = 0; j < n; j++) {
+                    s16 x = b->e7();
+                    Ev* ev = m34->at(j);
+                    if (x != -1) {
+                        y = ev->m4;
+                        if (x == y) {
+                            if (getInstance__13soEventSystemFv()->v6(y) == 1U) {
+                                getManager__13soEventSystemFl(getInstance__13soEventSystemFv(), ev->m4)->v3(ev->m6, ev->m8);
+                            }
+                            ev->m8 = -1;
+                            ev->m4 = -1;
+                        }
+                    }
+                }
+                m2c->remove(i);
+                b->e26(1);
+                a->e5();
+            }
+            m2c->l8();
+            m30->o6();
+            if (m38 != 0) {
+                m38->o6();
+            }
+        } else {
+            for (s32 i = m2c->size() - 1; i >= 0; i--) {
+                if (*m2c->at(i) != 0) {
+                    switch ((*m2c->at(i))->e22()) {
+                    case 0: {
+                        Elem* a;
+                        s32 j;
+                        Elem* b;
+                        s16 y;
+                        a = *m2c->at(i);
+                        b = *m2c->at(i);
+                        s32 n = m34->size();
+                        for (j = 0; j < n; j++) {
+                            s16 x = b->e7();
+                            Ev* ev = m34->at(j);
+                            if (x != -1) {
+                                y = ev->m4;
+                                if (x == y) {
+                                    if (getInstance__13soEventSystemFv()->v6(y) == 1U) {
+                                        getManager__13soEventSystemFl(getInstance__13soEventSystemFv(), ev->m4)->v3(ev->m6, ev->m8);
+                                    }
+                                    ev->m8 = -1;
+                                    ev->m4 = -1;
+                                }
+                            }
+                        }
+                        m2c->remove(i);
+                        b->e26(1);
+                        a->e5();
+                        break;
+                    }
+                    case 1: {
+                        s16 y;
+                        s32 j;
+                        Elem* b;
+                        b = *m2c->at(i);
+                        s32 n = m34->size();
+                        for (j = 0; j < n; j++) {
+                            s16 x = b->e7();
+                            Ev* ev = m34->at(j);
+                            if (x != -1) {
+                                y = ev->m4;
+                                if (x == y) {
+                                    if (getInstance__13soEventSystemFv()->v6(y) == 1U) {
+                                        getManager__13soEventSystemFl(getInstance__13soEventSystemFv(), ev->m4)->v3(ev->m6, ev->m8);
+                                    }
+                                    ev->m8 = -1;
+                                    ev->m4 = -1;
+                                }
+                            }
+                        }
+                        m2c->remove(i);
+                        b->e26(1);
+                        break;
+                    }
+                    case 2:
+                        break;
+                    }
+                }
+            }
+        }
+    }
+};
+
+extern "C" void fn_27_932A0(Owner* self, u32 mode) {
+    self->run(mode);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_94E00 {
+struct Item {
+ virtual u32 state();
+ virtual void v1();
+ virtual void v2();
+ virtual void v3();
+ virtual void v4();
+ virtual void v5();
+ virtual void v6();
+ virtual short id();
+ virtual u32 key();
+ virtual void v9();
+ virtual void v10();
+ virtual void v11();
+ virtual void v12();
+ virtual void v13();
+ virtual void v14();
+ virtual void v15();
+ virtual void v16();
+ virtual void v17();
+ virtual void v18();
+ virtual void v19();
+ virtual void v20();
+ virtual void v21();
+ virtual void v22();
+ virtual void v23();
+ virtual void v24();
+ virtual void setup(int, void*);
+};
+struct Entry {
+ virtual void set(short, int);
+ virtual void v1();
+ short value;
+};
+struct List {
+ virtual void v0();
+ virtual Item** at(int);
+ virtual void v2();
+ virtual int size();
+ virtual void v4();
+ virtual void v5();
+ virtual void v6();
+ virtual void v7();
+ virtual void v8();
+ virtual void v9();
+ virtual void add(Item**);
+};
+struct Entries {
+ virtual void v0();
+ virtual Entry* at(int);
+ virtual void v2();
+ virtual int size();
+};
+struct Checker {
+ virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+ virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
+ virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
+ virtual void v12(); virtual void v13(); virtual int test(u32);
+};
+struct Inner { char pad[0x28]; void* data; };
+struct Sub { char pad[0x54]; Checker* checker; };
+struct Context { char pad[8]; Inner* inner; char pad2[0xcc]; Sub* sub; };
+struct Self { char pad[0x28]; Context* context; List* list; char pad2[4]; Entries* entries; };
+inline bool contains(Self* self, u32 key) {
+ for (int i = 0; i < self->list->size(); i++) {
+  if (*self->list->at(i) && (*self->list->at(i))->key() == key) return true;
+ }
+ return false;
+}
+extern "C" void fn_27_94E00(Self* self, Item* item) {
+ self->list->size();
+ if (item->state() != 1) {
+  u32 key = item->key();
+  if (contains(self, key) != true) {
+   item->setup(1, self->context->inner->data);
+   Checker* checker = self->context->sub->checker;
+   if (checker->test(item->key())) {
+    self->list->add(&item);
+    int count = self->entries->size();
+    Entry* entry;
+    for (int i = 0; i < count; i++) {
+     entry = self->entries->at(i);
+     if (entry->value == -1) {
+      entry->set(item->id(), -1);
+      return;
+     }
+    }
+   }
+  }
+ }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_95028 {
+
+
+extern "C" {
+extern char lbl_27_data_C910[];
+extern char __RTTI__11soEventUnit[];
+void* __dynamic_cast(void*, long, const void*, const void*, short);
+}
+
+struct Self {
+    void* vt;
+    s16 a;
+    s16 b;
+    s16 c;
+};
+
+class Class_Article {
+public:
+    virtual void __dt__19soCaptureModuleImplFv();
+    virtual void activate__19soCaptureModuleImplFv();
+    virtual void deactivate__19soCaptureModuleImplFv();
+    virtual void setNodes__19soCaptureModuleImplFiif();
+    virtual void initInfo__19soCaptureModuleImplFv();
+    virtual void isCapture__19soCaptureModuleImplFv();
+    virtual s16 getCatchTaskId__19soCaptureModuleImplFv(Self*, s8);
+    virtual void fn_27_6636C();
+    virtual void getNodeOffset__19soCaptureModuleImplFb();
+};
+
+extern "C" void fn_27_95028(Self* self, s32 arg1, s8 arg2) {
+    soEventManager* mgr;
+    u32 f31 = 0;
+    s32 f30 = 0;
+    s32 f4 = 0;
+    s32 f5 = 0;
+    s16 ret;
+    s16 id;
+    s16 a = self->a;
+
+    if (a >= 0 && self->b >= 0) {
+        f5 = 1;
+    }
+    if (f5 != 0 && self->c > -1) {
+        f4 = 1;
+    }
+    if (f4 != 0) {
+        if (soEventSystem::getInstance()->getInstanceManager().isContain(a) == 1) {
+            f30 = 1;
+        }
+    }
+    if (f30 != 0) {
+        if (soEventSystem::getInstance()->getManager(self->a)->getObserverCapacity(self->b) == 1) {
+            f31 = 1;
+        }
+    }
+    if (f31 == 1) {
+        id = self->a;
+        if (soEventSystem::getInstance()->getInstanceManager().isContain(id) == 1) {
+            soEventSystem::getInstance()->getManager(self->a)->eraseObserver(self->b, self->c);
+        }
+        self->c = -1;
+        self->a = -1;
+    }
+    if (arg1 > -1 && self->b > -1) {
+        if (soEventSystem::getInstance()->getInstanceManager().isContain(arg1) != 0) {
+            if (soEventSystem::getInstance()->getManager(arg1)->isNullUnit(self->b) != 1) {
+                mgr = soEventSystem::getInstance()->getManager(arg1);
+                if (mgr->getObserverCapacity(self->b) == 0) {
+                    ret = -1;
+                } else {
+                    soEventUnit* unit = mgr->getEventUnit(self->b);
+                    Class_Article* cast = (Class_Article*)__dynamic_cast(
+                        unit, 0, lbl_27_data_C910, __RTTI__11soEventUnit, 0);
+                    if (cast == 0) {
+                        ret = -1;
+                    } else {
+                        ret = cast->getCatchTaskId__19soCaptureModuleImplFv(self, arg2);
+                    }
+                }
+                self->c = ret;
+                if (ret > -1 && ret > -1) {
+                    self->a = (s16)arg1;
+                }
+            }
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9745C {
+extern "C" void notifyEventChangeStatus__33soGenerateArticleManageModuleImplFiiP12soStatusDataP16soModuleAccesser(void*);
+
+extern "C" void fn_27_9745C(void* self) {
+    notifyEventChangeStatus__33soGenerateArticleManageModuleImplFiiP12soStatusDataP16soModuleAccesser(reinterpret_cast<u8*>(self) - 0x4);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_97464 {
+extern "C" void fn_27_9536C(void*);
+
+extern "C" void fn_27_97464(void* self) {
+    fn_27_9536C(reinterpret_cast<u8*>(self) - 0x10);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9746C {
+extern "C" void isObserv__33soGenerateArticleManageModuleImplFc(void*);
+
+extern "C" void fn_27_9746C(void* self) {
+    isObserv__33soGenerateArticleManageModuleImplFc(reinterpret_cast<u8*>(self) - 0x10);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_97474 {
+extern "C" void notifyEventLink__33soGenerateArticleManageModuleImplFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti(void*);
+
+extern "C" void fn_27_97474(void* self) {
+    notifyEventLink__33soGenerateArticleManageModuleImplFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti(reinterpret_cast<u8*>(self) - 0x1c);
+}
+}
+

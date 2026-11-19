@@ -642,3 +642,22 @@ void ftDiddy::processUpdate() {
     }
     Fighter::processUpdate();
 }
+
+// TODO: clean up, give variables real names
+namespace jj_D968 {
+extern "C" void fn_115_950C(void*);
+
+extern "C" void fn_115_D968(void* self) {
+    fn_115_950C(reinterpret_cast<u8*>(self) - 0x54);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_DA40 {
+extern "C" void fn_115_99EC(void*);
+
+extern "C" void fn_115_DA40(void* self) {
+    fn_115_99EC(reinterpret_cast<u8*>(self) - 0xdc);
+}
+}
+

@@ -85,3 +85,13 @@ int fn_95_172AC(u8* p) { return *(int*)(p + 0xC0); }
 int fn_95_172B4(u8* p) { return *(int*)(p + 0x28); }
 int fn_95_17414(u8* p) { return *(int*)(p + 0xb8); }
 } // extern "C"
+
+// TODO: clean up, give variables real names
+namespace jj_1796C {
+extern "C" void fn_95_35E4(void*);
+
+extern "C" void fn_95_1796C(void* self) {
+    fn_95_35E4(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

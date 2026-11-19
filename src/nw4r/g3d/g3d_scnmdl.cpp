@@ -1328,3 +1328,28 @@ extern "C" Object* fn_801B0A28(Object* self, void* a1, s32* a2, s32 a3, s32 a4, 
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_801AFF4C {
+struct Xyz {
+    void* m_ptr;
+    int m_index;
+    int m_value;
+};
+
+struct Yzz {
+    u8 pad[0x140];
+    s32* m_array;
+};
+
+extern "C" s32 CopiedMatAccess_GetResTexObj__FPQ44nw4r3g3d6ScnMdl15CopiedMatAccessb(Xyz* self, s32 arg) {
+    Yzz* ptr = (Yzz*)self->m_ptr;
+    if (ptr != NULL && self->m_value != 0) {
+        if (arg != 0) {
+            ptr->m_array[self->m_index] |= 1;
+        }
+        return self->m_value;
+    }
+    return 0;
+}
+}
+

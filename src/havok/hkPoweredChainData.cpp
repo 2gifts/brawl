@@ -658,3 +658,26 @@ extern "C" void fn_802DBC30(void) {
 
 __declspec(section ".ctors") extern void* const fn_802DBC30_ctor = (void*)fn_802DBC30;
 } // namespace jj_fn_802DBC30
+
+// TODO: clean up, give variables real names
+namespace jj_802DB598 {
+extern "C" void __ct__9hkVector4Fv(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_802DB620 {
+extern "C" void __ct__12hkQuaternionFv(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_802DB87C {
+extern "C" {
+void __ct__9hkVector4FRC9hkVector4(float* dst, const float* src) {
+    dst[0] = src[0];
+    dst[1] = src[1];
+    dst[2] = src[2];
+    dst[3] = src[3];
+}
+}
+}
+

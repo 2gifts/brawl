@@ -64,3 +64,9 @@ void grAdventureMotionGroundAttach::receiveCollMsg_Landing(grCollStatus* collSta
 }
 
 grAdventureMotionGroundAttach::~grAdventureMotionGroundAttach() { }
+
+// TODO: clean up, give variables real names
+namespace jj_3383C {
+extern "C" void fn_40_3383C(void) {}
+}
+

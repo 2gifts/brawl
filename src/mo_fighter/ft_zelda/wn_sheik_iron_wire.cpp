@@ -40,3 +40,55 @@ wnSheikIronWire::wnSheikIronWire(s32 articleId, const wnArticleBuildInfo& info, 
     m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 9);
     Weapon::deactivate(false);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_241F4 {
+
+struct ZeldaModuleOwner {
+    unsigned char prefix[0x60];
+    soModuleAccesser* accesser;
+};
+
+extern "C" void __as__5Vec3fFRC5Vec3f(Vec3f* dst, const Vec3f* src);
+extern "C" void updateNodeSRT__11StageObjectFv(void* object);
+
+extern "C" void fn_104_241F4(ZeldaModuleOwner* object) {
+    soModuleAccesser* accesser = object->accesser;
+    if (accesser->getLinkModule().isLink(3) &&
+        accesser->getWorkManageModule().isFlag(0x12000003)) {
+        float scale = accesser->getPostureModule().getScale();
+        Vec3f nodeScale;
+        nodeScale.m_x = nodeScale.m_y = nodeScale.m_z = scale;
+        Vec3f rotation;
+        Vec3f position;
+        u32 zero = 0;
+        Vec3f rawPosition = accesser->getLinkModule().getParentModelNodeGlobalPosition(3, zero, false);
+        __as__5Vec3fFRC5Vec3f(&position, &rawPosition);
+        Vec3f rawRotation = accesser->getLinkModule().getParentRot(3);
+        __as__5Vec3fFRC5Vec3f(&rotation, &rawRotation);
+        rotation.m_y += accesser->getPostureModule().getRotYLr();
+        accesser->getModelModule().setNodeSRT(0, &nodeScale, &rotation, &position);
+    } else {
+        updateNodeSRT__11StageObjectFv(object);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_24474 {
+extern "C" void getHeapSlotNo__25soModuleAccesserBuildDataCFv(void*);
+
+extern "C" void fn_104_24474(void* self) {
+    getHeapSlotNo__25soModuleAccesserBuildDataCFv(reinterpret_cast<u8*>(self) - 0x70);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2448C {
+extern "C" void __dt__15wnSheikIronWireFv(void*);
+
+extern "C" void fn_104_2448C(void* self) {
+    __dt__15wnSheikIronWireFv(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

@@ -204,3 +204,14 @@ void stScnObjCallBack::ExecCallback_CALC_WORLD(nw4r::g3d::ScnObj::Timing timing,
         }
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_238310 {
+extern "C" void __ct__18stDifLightParamSetFv(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_238314 {
+extern "C" void __ct__19stSpecLightParamSetFv(void) {}
+}
+

@@ -379,3 +379,12 @@ void hkConstraintData::getConstraintInfoUtil(const hkConstraintAtom* atoms, int 
         }
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_802DE25C {
+extern "C" void* getSolverResults__16hkConstraintDataCFP19hkConstraintRuntime(void* a, void* b)
+{
+    return b;
+}
+}
+

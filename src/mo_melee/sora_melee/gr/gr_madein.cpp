@@ -486,3 +486,170 @@ void grMadein::endEntity() {
         model->SetScnObjOption(9, 0);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_275FEC {
+typedef struct {
+    float x;
+    float y;
+    float z;
+} Vec3f;
+
+extern "C" void fn_27_275FEC(Vec3f* dst, const Vec3f* src) {
+    *dst = *src;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_278720 {
+extern "C" void* memset(void*, int, unsigned long);
+extern "C" const float lbl_27_rodata_4520;
+extern "C" const float lbl_27_rodata_4524;
+struct Vec { float x,y,z; Vec& operator=(const Vec& rhs) { x=rhs.x; y=rhs.y; z=rhs.z; return *this; } };
+struct Pair { int b,c; };
+struct Attack {
+ int a; Pair bc; int d; float e; int f,g,h,i; Vec v; int j,k;
+ union { unsigned raw; struct { unsigned high:19; unsigned mode:3; unsigned mid:5; unsigned low:5; } bits; } flags; int l;
+ Attack() { v.x=lbl_27_rodata_4524; v.y=lbl_27_rodata_4524; v.z=lbl_27_rodata_4524; flags.bits.low=0; }
+};
+struct Data { float power; Vec pos; char pad[0x18]; int kind; };
+struct Ground_base { char pad[0x3c]; };
+class Ground : public Ground_base {
+public:
+ virtual void processDefault();
+ virtual void processBegin();
+ virtual void slot2();
+ virtual void slot3();
+ virtual void processPreMapCorrection();
+ virtual void processMapCorrection();
+ virtual void processFixPosition();
+ virtual void processPreCollision();
+ virtual void processCollision();
+ virtual void processCatch();
+ virtual void processHit();
+ virtual void processCamera();
+ virtual void processFixCamera();
+ virtual void processEffect();
+ virtual void processGameProc();
+ virtual void processEnd();
+ virtual void renderPre();
+ virtual void renderOpa();
+ virtual void renderXlu();
+ virtual void processDebug();
+ virtual void slot20();
+ virtual void init();
+ virtual void slot22();
+ virtual void slot23();
+ virtual void loadGroundData();
+ virtual void slot25();
+ virtual void setupMelee();
+ virtual void slot27();
+ virtual void setVisibilityByClipping();
+ virtual void slot29();
+ virtual void receiveCollMsg();
+ virtual void slot31();
+ virtual void receiveCollMsg_Heading();
+ virtual void receiveCollMsg_Wall();
+ virtual void receiveCollMsg_Attack();
+ virtual void unloadData();
+ virtual void getModelCount();
+ virtual void slot37();
+ virtual void slot38();
+ virtual void setStageData();
+ virtual void getStageData();
+ virtual void initStageData();
+ virtual void setMdlIndex();
+ virtual void getMdlIndex();
+ virtual void isEnableCalcCollision();
+ virtual void enableCalcCollision();
+ virtual void disableCalcCollision();
+ virtual void getNodeIndex();
+ virtual void getNodePosition();
+ virtual void getNodePosition_2();
+ virtual void getNodeMatrix();
+ virtual void getNodeMatrix_2();
+ virtual void setNodeVisibility();
+ virtual void setNodeVisibility_2();
+ virtual void setNodeVisibilityAll();
+ virtual void isNodeVisible();
+ virtual void setNodeCollision();
+ virtual void setNodeCollision_2();
+ virtual void getNodeScale();
+ virtual void getNodeScale_2();
+ virtual void slot60();
+ virtual void slot61();
+ virtual void slot62();
+ virtual void setInitializeInfo();
+ virtual void getInitializeInfo();
+ virtual void slot65();
+ virtual void setMotionFrame();
+ virtual void getMotionFrame();
+ virtual void setMotionLoop();
+ virtual void setMatAlphaMul();
+ virtual void setMatAlpha();
+ virtual void updateG3dProcCalcWorld();
+ virtual void slot72();
+ virtual void adventureEventGetItem();
+ virtual void slot74();
+ virtual void slot75();
+ virtual void updateCallback();
+ virtual void fixedPosition();
+ virtual void slot78();
+ virtual void slot79();
+ virtual void setGimmickData();
+ virtual void getGimmickData();
+ virtual void slot82();
+ virtual void createFadeVisibleProduction();
+ virtual void createSoundEffectVisibleProductionForExcel();
+ virtual void createEffectVisibleProductionForExcel();
+ virtual void slot86();
+ virtual void slot87();
+ virtual void slot88();
+ virtual void getTransparencyFlag();
+ virtual void slot90();
+ virtual void slot91();
+ virtual void slot92();
+ virtual void slot93();
+ virtual void enableYakumono();
+ virtual void disableYakumono();
+ virtual void enableHit();
+ virtual void disableHit();
+ virtual void disableAttack();
+ virtual void enableArea();
+ virtual void slot100();
+ virtual void slot101();
+ virtual void setTeamYakumonoOwnerId();
+ virtual void setTeamYakumono();
+ virtual void getTeamYakumono();
+ virtual void setOffsetAttack();
+ virtual void setAreaGimmick();
+ virtual void setAttackGimmick();
+ virtual void setSoCollisionAttackData();
+ virtual void setAttackGimmickDetails(Attack*, int, Vec*, float, int, int, int, int, float, float, float, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int);
+ char pad40[0x10c]; void* module; char pad150[0xc]; Data* data; char pad160[4]; Attack* overwrite; char pad168[4]; unsigned char flags; char pad16d[7]; int id;
+};
+extern "C" void setAttack__8YakumonoFiiP21soCollisionAttackData(void*, int, int, Attack*);
+#define CALL() self->setAttackGimmickDetails(&a,self->id,&data->pos,data->power,361,100,0,70,lbl_27_rodata_4524,lbl_27_rodata_4524,lbl_27_rodata_4524,0,1023,7,0,15,0,0,0,0,0,0,1,0,0,0,60,0,0,0,0,0,0,0,0,0,0,1)
+extern "C" void fn_27_278720(Ground* self) {
+ Attack a;
+ if ((self->flags >> 6) & 1) {
+  memset(&a,0,0x40);
+  a.v.x=lbl_27_rodata_4524; a.v.y=lbl_27_rodata_4524; a.v.z=lbl_27_rodata_4524;
+  unsigned int flags = (a.flags.raw >> 5) << 5;
+  a.e=lbl_27_rodata_4520;
+  flags &= 0xfffffdff;
+  a.flags.raw = flags | 0x8000;
+  Data* data=self->data;
+  switch(data->kind) {
+   case 0:
+   default: CALL(); a.g=50; a.h=0; a.i=70; break;
+   case 1: CALL(); a.f=90; a.g=50; a.h=0; a.i=80; a.flags.bits.mode=2; break;
+   case 2: CALL(); a.g=80; a.h=100; a.i=50; a.flags.bits.mode=3; break;
+   case 3: CALL(); a.g=80; a.h=100; a.i=50; a.flags.bits.mode=3; break;
+   case 4: a=*self->overwrite; break;
+  }
+  setAttack__8YakumonoFiiP21soCollisionAttackData(self->module,0,0,&a);
+ }
+}
+}
+

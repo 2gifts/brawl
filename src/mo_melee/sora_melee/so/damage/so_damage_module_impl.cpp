@@ -839,3 +839,13 @@ bool soDamageModuleImpl::preProcessCheckDamage() {
 
 void soDamageModuleImpl::reqDamageShake() {
 }
+
+// TODO: clean up, give variables real names
+namespace jj_6059C {
+extern "C" void fn_27_5F8A4(void*);
+
+extern "C" void fn_27_6059C(void* self) {
+    fn_27_5F8A4(reinterpret_cast<u8*>(self) - 0x30);
+}
+}
+

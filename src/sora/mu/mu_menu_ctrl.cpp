@@ -256,3 +256,12 @@ extern "C" int fn_800B96B0(void) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_800BA2E0 {
+extern "C" int getButtonPushedControllerID__16muMenuControllerFUl(int);
+
+extern "C" int getAButtonPushedControllerID__16muMenuControllerFv(void) {
+    return getButtonPushedControllerID__16muMenuControllerFUl(0x1100);
+}
+}
+

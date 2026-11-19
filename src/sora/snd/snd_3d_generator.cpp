@@ -52,3 +52,29 @@ snd3DGenerator::snd3DGenerator() {
 void snd3DGenerator::stopGroupId(int tag, SndID sndID, int fade) {
     g_sndSystem->stopGroupId(tag, sndID, fade);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_80079780 {
+extern "C" {
+
+class sndSystem;
+extern sndSystem* g_sndSystem;
+void isPreparedSE__9sndSystemFl(sndSystem*);
+
+void isPreparedSE__14snd3DGeneratorFl(void) {
+    isPreparedSE__9sndSystemFl(g_sndSystem);
+}
+
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_800797A4 {
+
+extern "C" void isPlay__9sndSystemFl(sndSystem* p);
+
+extern "C" void isPlay__14snd3DGeneratorFl(void) {
+    isPlay__9sndSystemFl(g_sndSystem);
+}
+}
+

@@ -93,3 +93,21 @@ bool soAreaEnviromentElementCheckerImpl::isEnable() {
 void soAreaEnviromentElementCheckerImpl::enable() {
     soEnable::enable();
 }
+
+// TODO: clean up, give variables real names
+namespace jj_A7B98 {
+extern "C" {
+extern void* lbl_8059FF90;
+void* testPosInclude__13gfAreaManagerFUcRC5Vec3f(void* p, int id, int idx);
+
+bool fn_27_A7B98(void*, int a, float* out) {
+    void* p = testPosInclude__13gfAreaManagerFUcRC5Vec3f(lbl_8059FF90, 0x1c, a);
+    if (p) {
+        *out = *(float*)((char*)p + 0x38);
+        return true;
+    }
+    return false;
+}
+}
+}
+

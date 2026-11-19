@@ -77,3 +77,105 @@ bool wnSnakeTrenchMortarBullet::notifyEventCollisionAttackCheck(u32 flags) {
     }
     return Weapon::notifyEventCollisionAttackCheck(flags);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_3AF5F0 {
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* __dt__45wnSnakeTrenchMortarBulletStatusUniqProcessFlyFv(void* ptr, int size) {
+    if (ptr != 0 && size > 0)
+        __dl__FPv(ptr);
+    return ptr;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3AF630 {
+extern "C" void* fn_27_3AF630(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x7f8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B0198 {
+extern "C" void* fn_27_3B0198(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x9c;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B01A0 {
+extern "C" void* fn_27_3B01A0(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x4;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B01A8 {
+extern "C" void fn_27_3B01A8(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B0318 {
+extern "C" void __ct__19soReflectModuleImplFP16soModuleAccesseri(void*, void*, int);
+
+extern "C" void* fn_27_3B0318(void* a, void* b) {
+    __ct__19soReflectModuleImplFP16soModuleAccesseri(a, b, 1);
+    return a;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B0D74 {
+extern "C" void fn_27_3AF338(void*);
+
+extern "C" void fn_27_3B0D74(void* self) {
+    fn_27_3AF338(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B0D7C {
+extern "C" void fn_27_3AF338(void*);
+
+extern "C" void fn_27_3B0D7C(void* self) {
+    fn_27_3AF338(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B0D84 {
+extern "C" void fn_27_3AF338(void*);
+
+extern "C" void fn_27_3B0D84(void* self) {
+    fn_27_3AF338(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B0DA4 {
+extern "C" void fn_27_3B0CC8(void*);
+
+extern "C" void fn_27_3B0DA4(void* self) {
+    fn_27_3B0CC8(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B0DB4 {
+extern "C" void notifyEventCollisionSearchCheck__25wnSnakeTrenchMortarBulletFv(void*);
+
+extern "C" void fn_27_3B0DB4(void* self) {
+    notifyEventCollisionSearchCheck__25wnSnakeTrenchMortarBulletFv(reinterpret_cast<u8*>(self) - 0x21f0);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3B0DBC {
+extern "C" void notifyEventCollisionSearch__25wnSnakeTrenchMortarBulletFP14soCollisionLogP16soModuleAccesser(void*);
+
+extern "C" void fn_27_3B0DBC(void* self) {
+    notifyEventCollisionSearch__25wnSnakeTrenchMortarBulletFP14soCollisionLogP16soModuleAccesser(reinterpret_cast<u8*>(self) - 0x21f0);
+}
+}
+

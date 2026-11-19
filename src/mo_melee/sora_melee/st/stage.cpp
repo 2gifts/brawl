@@ -1117,3 +1117,251 @@ StSeUtil::SeSeq::~SeSeq() {
         }
     }
 }
+
+#include <nw4r/math/math_types.h>
+// TODO: clean up, give variables real names
+namespace jj_221A24 {
+class soBase {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+};
+
+extern "C" soBase* getClassInfo__11stClassInfoFQ26Stages11srStageKind(int);
+
+extern "C" void fn_27_221A24(int arg) {
+    soBase* p = getClassInfo__11stClassInfoFQ26Stages11srStageKind(arg);
+    if (p == 0) {
+        p = getClassInfo__11stClassInfoFQ26Stages11srStageKind(0x40);
+    }
+    p->v1();
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_221D48 {
+
+using namespace nw4r::math;
+
+struct M {
+    float m[12];
+};
+
+struct StageVTable {
+    void* unused[0x98 / 4];
+    void (*closeStageEntry)(void*);
+};
+
+struct Stage_base {
+    char pad0[0x3c];
+};
+
+class Stage : public Stage_base {
+public:
+    virtual void processDefault();
+    virtual void processBegin();
+    virtual void processAnim();
+    virtual void processUpdate();
+    virtual void processPreMapCorrection();
+    virtual void processMapCorrection();
+    virtual void processFixPosition();
+    virtual void processPreCollision();
+    virtual void processCollision();
+    virtual void processCatch();
+    virtual void processHit();
+    virtual void processCamera();
+    virtual void processFixCamera();
+    virtual void processEffect();
+    virtual void processGameProc();
+    virtual void processEnd();
+    virtual void renderPre();
+    virtual void renderOpa();
+    virtual void renderXlu();
+    virtual void processDebug();
+    virtual void renderDebug();
+    virtual void init();
+    virtual ~Stage();
+    virtual void createObj();
+    virtual void createObjPokeTrainer();
+    virtual void getPokeTrainerPointNum();
+    virtual void getPokeTrainerPointData();
+    virtual float getPokeTrainerPositionZ();
+    virtual int getPokeTrainerDrawLayer();
+    virtual bool isAdventureStage();
+    virtual void getItemPac();
+    virtual void getItemGenPac();
+    virtual void getItemPacEnemyFigure();
+    virtual void getEnemyPac();
+    virtual void getAdvRadarData();
+    virtual void initializeStage();
+    virtual void closeStage();
+    virtual void renderDebugPositions();
+    virtual void loading();
+    virtual void process();
+    virtual void updateStagePositions();
+
+    s32 m40;
+    char pad44[0x5c];
+    void* ma0;
+    char padA4[0x54];
+    char mf8[0xc];
+    char m104[0x10];
+};
+
+struct RoData33D0 {
+    float f0, f4, f8, fc, f10, f14, f18, f1c;
+};
+
+struct SndSystemView {
+    char p0[0x294];
+    M mtx;
+    float fa, fb, fc;
+    char p1[0xb90 - 0x2d0];
+    u8 b90;
+};
+
+extern "C" {
+void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+void* __ct__13stAreaManagerFv(void*);
+void clearAll__13stAreaManagerFv(void*);
+void Clear__Q44nw4r2ut6detail12LinkListImplFv(void*);
+void allStopSE__9sndSystemFib(void*, int, int);
+float CosFIdx__Q24nw4r4mathFf(float);
+float SinFIdx__Q24nw4r4mathFf(float);
+void C_MTXLookAt(M*, VEC3*, VEC3*, VEC3*);
+void* GetInstance__Q44nw4r3snd6detail9AxManagerFv(void);
+void ClearEffect__Q44nw4r3snd6detail9AxManagerFQ34nw4r3snd6AuxBusi(void*, int, int);
+void __dt__20stCollisionAttrParamFv(void*, int);
+void exit__6gfTaskFv(void*);
+void __dt__9gfArchiveFv(void*, int);
+void __dt__6gfTaskFv(void*, int);
+void __dl__FPv(void*);
+extern StageVTable lbl_27_data_4A1E8;
+extern const RoData33D0 lbl_27_rodata_33D0;
+extern void* lbl_27_bss_5780;
+extern void* g_Stage;
+extern char g_grCollisionList;
+extern void* g_sndSystem;
+}
+
+extern "C" Stage* __dt__5StageFv(Stage* self, int destroyFlag) {
+    const RoData33D0* rd = &lbl_27_rodata_33D0;
+    if (self != 0) {
+        *(StageVTable**)((char*)self + 0x3c) = &lbl_27_data_4A1E8;
+        self->closeStage();
+        if (self->ma0 != 0) {
+            exit__6gfTaskFv(self->ma0);
+            self->ma0 = 0;
+        }
+        if (lbl_27_bss_5780 == 0) {
+            void* m = __nw__FUlQ25Heaps8HeapType(0x54, 2);
+            if (m != 0) {
+                m = __ct__13stAreaManagerFv(m);
+            }
+            lbl_27_bss_5780 = m;
+        }
+        clearAll__13stAreaManagerFv(lbl_27_bss_5780);
+        g_Stage = 0;
+        Clear__Q44nw4r2ut6detail12LinkListImplFv(&g_grCollisionList);
+        self->m40 = 0;
+        allStopSE__9sndSystemFib(g_sndSystem, 0, 0);
+        VEC3 pos(rd->f8, rd->f8, rd->f8);
+        VEC3 up(rd->f8, rd->f0, rd->f8);
+        float s = -CosFIdx__Q24nw4r4mathFf(rd->f8);
+        float x = SinFIdx__Q24nw4r4mathFf(rd->f8);
+        VEC3 d(x, rd->f8, s);
+        VEC3 t = pos + d;
+        M mtx;
+        C_MTXLookAt(&mtx, &pos, &up, &t);
+        ((SndSystemView*)g_sndSystem)->mtx = mtx;
+        ((SndSystemView*)g_sndSystem)->fa = rd->f14;
+        ((SndSystemView*)g_sndSystem)->fb = rd->f18;
+        ((SndSystemView*)g_sndSystem)->fc = rd->f1c;
+        SndSystemView* snd = (SndSystemView*)g_sndSystem;
+        ClearEffect__Q44nw4r3snd6detail9AxManagerFQ34nw4r3snd6AuxBusi(GetInstance__Q44nw4r3snd6detail9AxManagerFv(), 0, 0);
+        snd->b90 = 0;
+        __dt__9gfArchiveFv(self->m104, -1);
+        __dt__20stCollisionAttrParamFv(self->mf8, -1);
+        __dt__6gfTaskFv(self, 0);
+        if (destroyFlag > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_222B98 {
+struct CameraParam {
+    float value[16];
+};
+
+struct Stage {
+    unsigned char pad[0x78];
+    CameraParam* current;
+    unsigned char initialized;
+    unsigned char pad7d[3];
+    CameraParam* allocated;
+};
+
+struct Controller {
+    unsigned char pad[0x94];
+    unsigned char unused : 2;
+    unsigned char mode : 1;
+    unsigned char rest : 5;
+};
+
+struct Mode {
+    unsigned char pad[0xD];
+    unsigned char flags;
+};
+
+struct Global {
+    unsigned char pad[8];
+    Mode* mode;
+};
+
+extern Global* g_GameGlobal;
+extern Controller* g_cmAIController;
+
+extern "C" void fn_27_222C9C(Stage*, float*);
+extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
+
+extern "C" void initCameraParam__5StageFv(Stage* self) {
+    float params[32];
+    fn_27_222C9C(self, params);
+
+    CameraParam* camera =
+        (CameraParam*)__nw__FUlQ25Heaps8HeapType(0x40, 15);
+
+    if (camera) {
+        camera->value[0] = params[16];
+        camera->value[1] = params[17];
+        camera->value[2] = params[18];
+        camera->value[3] = params[19];
+        camera->value[4] = params[22];
+        camera->value[5] = params[23];
+        camera->value[6] = params[20];
+        camera->value[7] = params[21];
+        camera->value[8] = params[24];
+        camera->value[9] = params[25];
+        camera->value[10] = params[26];
+        camera->value[14] = params[27];
+        camera->value[15] = params[28];
+        camera->value[13] = params[29];
+        camera->value[11] = params[30];
+        camera->value[12] = params[31];
+
+        self->initialized = 1;
+        self->allocated = camera;
+        self->current = camera;
+
+        g_cmAIController->mode =
+            ((g_GameGlobal->mode->flags >> 3) & 3) == 2;
+    }
+}
+}
+

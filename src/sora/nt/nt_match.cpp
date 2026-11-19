@@ -1586,3 +1586,288 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_801475A4 {
+typedef unsigned long long u64;
+typedef unsigned int u32;
+typedef int s32;
+
+struct NetworkState {
+    char pad[0x3440];
+    u64 id;
+};
+
+struct FriendData {
+    u32 data[3];
+};
+
+extern "C" {
+void* getInstance__12ntFriendInfoFv();
+int getUserData__12ntFriendInfoFv(int*);
+int DWC_CheckFriendKey(void*, u64);
+void DWC_CreateFriendKeyToken(FriendData*, u64);
+char* getFriendInfo__12ntFriendInfoFv(void*);
+s32 getAvailableFriendListIndex__10NtMatchingFUx(u64);
+void netReport__FPCce(const char*, ...);
+void setDirtyFlag__12ntFriendInfoFb(void*, int);
+void DWC_UpdateServersAsync(int, void*, int, void*, int, void*, int);
+void* memset(void*, int, unsigned long);
+void updateServerCallback__10NtMatchingFiiPv();
+void changetFriendStatusCallback__10NtMatchingFiUcPCcPv();
+void deleteFriendListCallback__10NtMatchingFiiPv();
+}
+
+extern char lbl_8045F7A8[];
+
+extern "C" s32 fn_801475A4(NetworkState* self, s32 index, u64 id, s32 flag) {
+    const char* base = lbl_8045F7A8;
+    s32 idx = flag;
+    netReport__FPCce(base + 0x70);
+
+    if (id == self->id) {
+        netReport__FPCce(base + 0x88);
+        return -3;
+    }
+
+    int found = DWC_CheckFriendKey(
+        (void*)getUserData__12ntFriendInfoFv((int*)getInstance__12ntFriendInfoFv()), id);
+    if (found == 0) {
+        netReport__FPCce(base + 0xa8);
+        return -2;
+    }
+
+    flag = index;
+    if (index < 0)
+        flag = getAvailableFriendListIndex__10NtMatchingFUx(id);
+
+    if (flag < 0) {
+        netReport__FPCce(base + 0xc8);
+        return -1;
+    }
+
+    if (idx)
+        return 0;
+
+    DWC_CreateFriendKeyToken(
+        (FriendData*)(getFriendInfo__12ntFriendInfoFv(
+            getInstance__12ntFriendInfoFv()) + flag * 0xc + 0x50),
+        id);
+    DWC_UpdateServersAsync(0, (void*)updateServerCallback__10NtMatchingFiiPv, 0, (void*)changetFriendStatusCallback__10NtMatchingFiUcPCcPv,
+                0, (void*)deleteFriendListCallback__10NtMatchingFiiPv, 0);
+
+    if (index < 0) {
+        char* b = (char*)*(int*)getInstance__12ntFriendInfoFv() + flag * 4;
+        b[0x350] = 0;
+        b[0x351] = 0;
+        b[0x352] = 0;
+        b[0x353] = 0;
+
+        char* entry = (char*)*(int*)getInstance__12ntFriendInfoFv()
+                      + flag * 0x89;
+        char* p = entry + 0x581;
+        memset(p, 0, 0xa);
+        memset(p + 0xa, 0, 0xa);
+        memset(p + 0x3b, 0, 0x4c);
+        memset(p + 0x32, 0, 8);
+        p[0x3a] = 0;
+        p[0x87] = 0;
+        p[0x88] = 0;
+    }
+
+    setDirtyFlag__12ntFriendInfoFb(getInstance__12ntFriendInfoFv(), 1);
+    return flag;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80147C9C {
+
+extern "C" void lock__12ntFriendInfoFv(ntFriendInfo*);
+extern "C" void unlock__12ntFriendInfoFv(ntFriendInfo*);
+extern "C" void setDirtyFlag__12ntFriendInfoFb(ntFriendInfo*, int);
+extern "C" int DWC_GetNumFriend(char*, int);
+extern char lbl_8045F7A8[];
+extern void* lbl_805A0434;
+
+extern "C" unsigned int fn_80147C9C(unsigned char* self, int arg) {
+    char* base = lbl_8045F7A8;
+    lock__12ntFriendInfoFv(ntFriendInfo::getInstance());
+    char* info = (char*)ntFriendInfo::getInstance()->getFriendInfo();
+    unsigned char* order = (unsigned char*)info + 0x27c1;
+    int count = DWC_GetNumFriend(info + 0x50, 0x40);
+    *(int*)((char*)lbl_805A0434 + 0x3408) = count;
+    unsigned int result = 0;
+    int i;
+    for (i = 0; i < 64; i++) {
+        if (order[i] == 0) {
+            result = 1;
+            order[i] = arg + 1;
+            break;
+        }
+    }
+    if (result == 1)
+        setDirtyFlag__12ntFriendInfoFb(ntFriendInfo::getInstance(), 1);
+    else
+        netReport(base + 0x100);
+    unlock__12ntFriendInfoFv(ntFriendInfo::getInstance());
+    netReport(base + 0x130, i, count);
+    for (int k = 0; k < 64; k++)
+        netReport0(base + 0x168, k, order[k] - 1);
+    unsigned char* slots;
+    int j;
+    for (j = 0; j < 64; j++) {
+        if ((self + j)[0x12] == 0)
+            break;
+    }
+    if (j == 64) {
+        netReport(base + 0x180);
+        return 0;
+    }
+    slots = self + 0x52;
+    (self + j)[0x12] = 3;
+    for (i = 0; i < 64; i++) {
+        if (slots[i] == 0) {
+            slots[i] = j + 1;
+            break;
+        }
+    }
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_80147F10 {
+
+extern "C" void lock__12ntFriendInfoFv(ntFriendInfo*);
+extern "C" void unlock__12ntFriendInfoFv(ntFriendInfo*);
+extern "C" void setDirtyFlag__12ntFriendInfoFb(ntFriendInfo*, int);
+extern "C" int DWC_GetNumFriend(char*, int);
+extern char lbl_8045F7A8[];
+extern void* lbl_805A0434;
+
+extern "C" unsigned int deleteDisplayOrder__10NtMatchingFib(unsigned char* self, int arg, int flag) {
+    char* base = lbl_8045F7A8;
+    char* info = (char*)ntFriendInfo::getInstance()->getFriendInfo();
+    unsigned char* order = (unsigned char*)info + 0x27c1;
+    int count = DWC_GetNumFriend(info + 0x50, 0x40);
+    *(int*)((char*)lbl_805A0434 + 0x3408) = count;
+    unsigned int result = 0;
+    lock__12ntFriendInfoFv(ntFriendInfo::getInstance());
+    int i;
+    for (i = 0; i < 64; i++) {
+        if (arg == order[i] - 1) {
+            netReport(base + 0x1a4, arg, i);
+            for (; i < 63; i++)
+                order[i] = order[i + 1];
+            result = 1;
+            order[63] = 0;
+            break;
+        }
+    }
+    if (result == 1)
+        setDirtyFlag__12ntFriendInfoFb(ntFriendInfo::getInstance(), 1);
+    else if (flag)
+        netReport(base + 0x1cc, arg);
+    unlock__12ntFriendInfoFv(ntFriendInfo::getInstance());
+    netReport(base + 0x210, count);
+    for (int k = 0; k < 64; k++)
+        netReport0(base + 0x168, k, order[k] - 1);
+    if (flag) {
+        unsigned char* slots = self + 0x52;
+        (self + arg)[0x12] = 0;
+        for (int j = 0; j < 64; j++) {
+            if (arg == slots[j] - 1) {
+                for (; j < 63; j++)
+                    slots[j] = slots[j + 1];
+                slots[63] = 0;
+                break;
+            }
+        }
+    }
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8014B130 {
+extern "C" {
+void fn_8013F658(int);
+void netReport__FPCce(const char*, ...);
+void netMinReport__FPCce(const char*, ...);
+void setMatchingStatus__6NtBaseFi(int);
+int getErrorStr__6NtBaseFl(int, int);
+void clearGlobalAIDStatusLive__19muWifiInterfaceTaskFv(int);
+void fn_8014403C(int);
+extern char lbl_8045F7A8[];
+extern int g_muWifiInterfaceTask;
+extern int lbl_805A0390;
+extern int lbl_805A0434;
+extern int lbl_805A03A8;
+extern int lbl_805A03E0;
+extern int lbl_805A03E8;
+extern int lbl_805A03F4;
+extern int g_NtMatchingStatus;
+
+void setErrorStatus__10NtMatchingFl(int arg0) {
+    char* base = lbl_8045F7A8;
+    int taskPtr = g_muWifiInterfaceTask;
+    int sel;
+    fn_8013F658(lbl_805A0390);
+    char* self = (char*)lbl_805A0434;
+    if (*(int*)(self + 0x34a4) != 0) {
+        *(int*)(self + 0x34a4) = 0;
+        netReport__FPCce(base + 0x7ac);
+    }
+    *(int*)(self + 0x3430) = 0;
+    ((unsigned char*)lbl_805A0434)[0x34ac] = (unsigned char)(((unsigned char*)lbl_805A0434)[0x34ac] & 0xFFFFFF00);
+    switch (lbl_805A03E8) {
+    case 7: {
+        int v;
+        switch (lbl_805A03F4) {
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            v = 1;
+            break;
+        default:
+            v = 0;
+            break;
+        }
+        if (v == 0) goto L;
+        sel = 1;
+        break;
+    }
+    case 2:
+    case 3:
+    case 6:
+    case 14:
+        sel = 1;
+        break;
+    default:
+    L:
+        sel = 0;
+        break;
+    }
+    if (sel != 0) {
+        int r = getErrorStr__6NtBaseFl((int)lbl_805A0434, arg0);
+        netReport__FPCce(base + 0x10c8, r);
+        netMinReport__FPCce(base + 0x10e8, getErrorStr__6NtBaseFl((int)lbl_805A0434, arg0));
+    } else {
+        int r = getErrorStr__6NtBaseFl((int)lbl_805A0434, arg0);
+        netReport__FPCce(base + 0x10fc, r);
+        netMinReport__FPCce(base + 0x1110, getErrorStr__6NtBaseFl((int)lbl_805A0434, arg0));
+        if (g_NtMatchingStatus != 0xc) {
+            lbl_805A03E0 = g_NtMatchingStatus;
+        }
+        lbl_805A03E8 = arg0;
+        setMatchingStatus__6NtBaseFi(0xc);
+    }
+    clearGlobalAIDStatusLive__19muWifiInterfaceTaskFv(taskPtr);
+    fn_8014403C(lbl_805A03A8);
+}
+}
+}
+

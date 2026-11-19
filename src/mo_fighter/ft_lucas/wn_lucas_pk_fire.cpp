@@ -102,3 +102,14 @@ void wnLucasPKFire::notifyEventCollisionHit(float power, soCollisionAttackData* 
         moduleAccesser->getWorkManageModule().setInt(life, Weapon::Instance::Work::Int_Life);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_15AB4 {
+extern "C" void fn_114_15AB4(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_15AB8 {
+extern "C" void fn_114_15AB8(void) {}
+}
+

@@ -746,3 +746,11 @@ void stFzero::updateCar(float deltaFrame) {
         break;
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_2318 {
+extern "C" void setMdlIndex__6GroundFi(void* self, u16 value) {
+    *reinterpret_cast<u16*>(reinterpret_cast<u8*>(self) + 0x5c) = value;
+}
+}
+

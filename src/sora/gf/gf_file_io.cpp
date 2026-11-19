@@ -2404,3 +2404,62 @@ extern "C" int fn_8001C5D4(gfFileIORequest* arg) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_8001CE40 {
+extern "C" {
+unsigned int strlen(const char*);
+char* strncpy(char*, const char*, int);
+int checkFSType__8gfFileIOFPCc(const char*);
+}
+struct S {
+    const char* p;
+    int a, b, c, d;
+    unsigned r : 8;
+    unsigned x : 8;
+    unsigned y : 16;
+};
+struct B { unsigned char pad[0x15]; unsigned char x : 8; };
+extern "C" int fn_8001D134(S*);
+extern "C" int writeSDFile__8gfFileIOFP15gfFileIORequest(S*);
+extern "C" int writeVFFile__8gfFileIOFP15gfFileIORequest(S*);
+
+extern "C" void writeFile__8gfFileIOFP15gfFileIORequest(S* self) {
+    char buf[128];
+    int t = checkFSType__8gfFileIOFPCc(self->p);
+    const char* s = self->p;
+    unsigned int n = strlen(s);
+    const char* q = s;
+    unsigned int i;
+    for (i = 0; i < n; i++) {
+        if (*q == ':') {
+            strncpy(buf, q + 1, 128);
+            goto done;
+        }
+        q++;
+    }
+    strncpy(buf, s, 128);
+done:
+    S l;
+    ((int*)&l)[0] = ((int*)self)[0];
+    ((int*)&l)[1] = ((int*)self)[1];
+    ((int*)&l)[2] = ((int*)self)[2];
+    ((int*)&l)[3] = ((int*)self)[3];
+    ((int*)&l)[4] = ((int*)self)[4];
+    ((int*)&l)[5] = ((int*)self)[5];
+    l.p = buf;
+    int r = 3;
+    switch (t) {
+    case 0: r = 1; break;
+    case 1: r = 3; break;
+    case 2: r = fn_8001D134(&l); break;
+    case 3: r = writeSDFile__8gfFileIOFP15gfFileIORequest(&l); break;
+    case 4:
+        ((B*)&l)->x = ((const unsigned char*)self->p)[2] - '0';
+        r = writeVFFile__8gfFileIOFP15gfFileIORequest(&l);
+        break;
+    }
+    self->r = r;
+    if (r == 0) self->b = l.b;
+}
+}
+

@@ -50,3 +50,24 @@ void ftDiddyStatusUniqProcessSpecialPopGun::exitStatus(soModuleAccesser* moduleA
 }
 
 ftDiddyStatusUniqProcessSpecialPopGun g_ftDiddyStatusUniqProcessSpecialPopGun;
+
+#include <cmath>
+// TODO: clean up, give variables real names
+namespace jj_E59C {
+
+extern "C" float fn_115_E59C(float value) {
+    return __fabsf(value);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_E708 {
+typedef unsigned int u32;
+
+extern "C" void __ct__14itGenSheetKindFQ26Stages11srStageKindi(u32 *p, u32 a, u32 b)
+{
+    p[0] = a;
+    p[1] = b;
+}
+}
+

@@ -17,3 +17,17 @@ bool stEventRuleYoshiEgg::chechEventRule() {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_25DDC8 {
+struct FnObj27 {
+    char pad[0x10];
+    int value;
+};
+
+extern "C" void notifyEventYoshiEgg__19stEventRuleYoshiEggFv(FnObj27 *obj, int delta)
+{
+    obj->value += delta;
+}
+}
+

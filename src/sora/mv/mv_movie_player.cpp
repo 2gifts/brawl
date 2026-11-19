@@ -226,3 +226,220 @@ void mvMoviePlayer::prepare(int unk) {
         fn_8007C61C(0, unk, remainder);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_8007E99C {
+extern "C" {
+
+void MIXInit(void);
+int AXRegisterCallback(int);
+void AXRegisterAuxACallback(int, int);
+int GetSizeTHPReadWork__Fv(void);
+void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int, unsigned long);
+void SetTHPReadWork__FP11THPReadWork(void*);
+int fn_8007E3A4(void);
+void SetTHPVideoDecWork__FP15THPVideoDecWork(void*);
+int GetSizeTHPAudioDecWork__Fv(void);
+void SetTHPAudioDecWork__FP15THPAudioDecWork(void*);
+int GetSizeTHPPlayerWork__Fv(void);
+void SetTHPPlayerWork__FPv(void*);
+void Disable__Q34nw4r2ut2LCFv(void);
+void THPPlayerInit__Fv(void);
+void CallbackTHPAudioFrame__Fv(void);
+
+extern int lbl_805A0210;
+extern int lbl_805A025C;
+extern int lbl_805A0230;
+extern void* lbl_805A021C;
+extern void* lbl_805A0220;
+extern void* lbl_805A0224;
+extern void* lbl_805A0228;
+extern unsigned char lbl_805A024C[2];
+extern unsigned char lbl_805A024E;
+extern unsigned char lbl_805A024A;
+
+int __ct__13mvMoviePlayerFv(int arg0) {
+    int tmp = lbl_805A0210;
+    lbl_805A025C = arg0;
+    lbl_805A0210 = tmp + 1;
+    MIXInit();
+    lbl_805A0230 = AXRegisterCallback((int)CallbackTHPAudioFrame__Fv);
+    AXRegisterAuxACallback(0, 0);
+    lbl_805A021C = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(0x2a, GetSizeTHPReadWork__Fv());
+    SetTHPReadWork__FP11THPReadWork(lbl_805A021C);
+    lbl_805A0220 = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(0x2a, fn_8007E3A4());
+    SetTHPVideoDecWork__FP15THPVideoDecWork(lbl_805A0220);
+    lbl_805A0224 = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(0x2a, GetSizeTHPAudioDecWork__Fv());
+    SetTHPAudioDecWork__FP15THPAudioDecWork(lbl_805A0224);
+    lbl_805A0228 = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(0x2a, GetSizeTHPPlayerWork__Fv());
+    SetTHPPlayerWork__FPv(lbl_805A0228);
+    Disable__Q34nw4r2ut2LCFv();
+    THPPlayerInit__Fv();
+    lbl_805A024C[1] = 0;
+    lbl_805A024C[0] = 0;
+    lbl_805A024E = 0;
+    lbl_805A024A = 0;
+    return arg0;
+}
+
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8007EA78 {
+struct S { char d[0x3c]; };
+extern "C" {
+void exit__6gfTaskFv(void*);
+void fn_8007C9DC();
+void THPPlayerClose__Fv();
+void FreeTHPReadWork__Fv();
+void fn_8007E3C8();
+void FreeTHPAudioDecWork__Fv();
+void FreeTHPPlayerWork__Fv();
+void free__13gfHeapManagerFPv(void*);
+void freeMovieBuffer__9movieOpenFv();
+void DVDClose(void*);
+void Enable__Q34nw4r2ut2LCFv();
+void AXRegisterCallback(int);
+void __dl__FPv(void*);
+extern S lbl_8049DDF0[2];
+extern int lbl_805A0210;
+extern int lbl_805A0214;
+extern void* lbl_805A0218;
+extern void* lbl_805A021C;
+extern void* lbl_805A0220;
+extern void* lbl_805A0224;
+extern void* lbl_805A0228;
+extern void* lbl_805A022C;
+extern int lbl_805A0230;
+extern unsigned char lbl_805A024C[2];
+extern int lbl_805A0250;
+extern int lbl_805A025C;
+extern void* lbl_805A0260;
+
+void* __dt__13mvMoviePlayerFv(void* p, int n) {
+    if (p != 0) {
+        if (lbl_805A0260 != 0) {
+            exit__6gfTaskFv(lbl_805A0260);
+            lbl_805A0260 = 0;
+        }
+        if (lbl_805A0214 != 0) {
+            fn_8007C9DC();
+            THPPlayerClose__Fv();
+            lbl_805A0214 = 0;
+        }
+        FreeTHPReadWork__Fv();
+        fn_8007E3C8();
+        FreeTHPAudioDecWork__Fv();
+        FreeTHPPlayerWork__Fv();
+        if (lbl_805A0218 != 0) { free__13gfHeapManagerFPv(lbl_805A0218); lbl_805A0218 = 0; }
+        if (lbl_805A021C != 0) { free__13gfHeapManagerFPv(lbl_805A021C); lbl_805A021C = 0; }
+        if (lbl_805A0220 != 0) { free__13gfHeapManagerFPv(lbl_805A0220); lbl_805A0220 = 0; }
+        if (lbl_805A0224 != 0) { free__13gfHeapManagerFPv(lbl_805A0224); lbl_805A0224 = 0; }
+        if (lbl_805A0228 != 0) { free__13gfHeapManagerFPv(lbl_805A0228); lbl_805A0228 = 0; }
+        if (lbl_805A022C != 0) { free__13gfHeapManagerFPv(lbl_805A022C); lbl_805A022C = 0; }
+        freeMovieBuffer__9movieOpenFv();
+        for (int i = 0; i < 2; i++) {
+            if (lbl_805A024C[i] != 0) {
+                DVDClose(&lbl_8049DDF0[i]);
+                lbl_805A024C[i] = 0;
+            }
+        }
+        Enable__Q34nw4r2ut2LCFv();
+        lbl_805A0210--;
+        AXRegisterCallback(lbl_805A0230);
+        lbl_805A0230 = 0;
+        lbl_805A0250 = 0;
+        lbl_805A025C = 0;
+        if (n > 0) __dl__FPv(p);
+    }
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8007EF70 {
+extern "C" int THPPlayerGetState__Fv(void);
+extern "C" void fn_8007C9DC(void);
+extern "C" int THPPlayerClose__Fv(void);
+extern "C" void THPPlayerPlay__Fv(void);
+extern "C" int THPPlayerPause__Fv(void);
+extern "C" int THPPlayerDrawCurrentFrame__Fiiiiii(int, int, int, int, int, int);
+extern "C" void THPPlayerDrawDone__Fv(void);
+extern "C" void fn_8007FE00(int, int, int, int, int, int, int);
+extern "C" char g_thpObject[];
+extern int lbl_8049DDB0[4];
+extern int lbl_8059DBA0;
+extern int lbl_8059DBA4;
+extern int lbl_805A0214;
+extern int lbl_805A0238;
+extern int lbl_805A023C;
+extern unsigned int lbl_805A0240;
+extern unsigned char lbl_805A024E;
+extern int lbl_805A0250;
+extern int lbl_805A0254;
+
+extern "C" int drawFrame__13mvMoviePlayerFiiii(int a1, int a2, int a3, int a4, int a5) {
+    int ret = -1;
+    int st;
+    int t;
+    unsigned int sum;
+    unsigned int* e8;
+
+    if (lbl_805A0214 != 0) {
+        st = THPPlayerGetState__Fv();
+        if (st == 5) {
+            fn_8007C9DC();
+            THPPlayerClose__Fv();
+            lbl_805A0214 = 0;
+            return lbl_805A0238 - 1;
+        }
+        if (st == 3) {
+            return lbl_805A0238 - 1;
+        }
+        if (lbl_805A024E != 0) {
+            if (st == 2) {
+                THPPlayerPause__Fv();
+            }
+        } else if (st == 4) {
+            THPPlayerPlay__Fv();
+        }
+        if (a4 < 0) {
+            a4 = lbl_8049DDB0[0];
+        }
+        if (a5 < 0) {
+            a5 = lbl_8049DDB0[1];
+        }
+        if (lbl_805A0250 == 0) {
+            ret = THPPlayerDrawCurrentFrame__Fiiiiii(lbl_8059DBA0, lbl_8059DBA4, a2, a3, a4, a5);
+            THPPlayerDrawDone__Fv();
+        } else if (*(int*)(g_thpObject + 0xA0) != 0 &&
+                   *(unsigned char*)(g_thpObject + 0xA4) != 0 &&
+                   *(void**)(g_thpObject + 0xE8) != 0) {
+            e8 = *(unsigned int**)(g_thpObject + 0xE8);
+            fn_8007FE00(lbl_805A0250, lbl_805A0254, e8[0], e8[1], e8[2], a4, a5);
+            e8 = *(unsigned int**)(g_thpObject + 0xE8);
+            sum = e8[3] + *(unsigned int*)(g_thpObject + 0xC0);
+            ret = sum % *(unsigned int*)(g_thpObject + 0x50);
+            THPPlayerDrawDone__Fv();
+            if (lbl_805A023C != ret) {
+                lbl_805A023C = ret;
+                lbl_805A0240 = 0;
+            } else if (lbl_805A024E == 0) {
+                t = lbl_805A0238 - 30;
+                lbl_805A0240++;
+                if (t < 0) {
+                    t = 0;
+                }
+                if (lbl_805A023C >= t &&
+                    (unsigned int)((lbl_805A0238 - lbl_805A023C) * 6) < lbl_805A0240) {
+                    ret = lbl_805A0238 - 1;
+                }
+            }
+        }
+    }
+    return ret;
+}
+}
+

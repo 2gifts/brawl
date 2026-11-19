@@ -121,3 +121,87 @@ bool soShakeModuleImpl::notifyEventAnimCmd(acAnimCmd* acmd, soModuleAccesser* mo
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_689B0 {
+class soAnimCmdEventObserver;
+
+template <class T>
+struct soEventObserver {
+    static void __vt(int, int);
+};
+
+extern "C" {
+void* getInstance__13soEventSystemFv();
+void* getManager__13soEventSystemFl(void*, long);
+void __dt__19soShakeModuleSimpleFv(void*, short);
+void __dl__FPv(void*);
+}
+
+struct IEvSys {
+    virtual void f0();
+    virtual void f1();
+    virtual void f2();
+    virtual void f3();
+    virtual void f4();
+    virtual void f5();
+    virtual u32 f6(s32 id);
+};
+
+struct IEvMgr {
+    virtual void f0();
+    virtual void f1();
+    virtual void f2();
+    virtual void f3(s16 a, s16 b);
+};
+
+struct fn27Obj {
+    char pad[8];
+    void* vtbl;
+    s16 m_c;
+    s16 m_e;
+    s16 m_10;
+};
+
+extern "C" fn27Obj* __dt__17soShakeModuleImplFv(fn27Obj* p, s32 flag) {
+    if (p != nullptr) {
+        if (((char*)p + 8 != nullptr) && ((char*)p + 8 != nullptr)) {
+            s16 id = p->m_c;
+            p->vtbl = (void*)&soEventObserver<soAnimCmdEventObserver>::__vt;
+            IEvSys* inst = (IEvSys*)getInstance__13soEventSystemFv();
+            u32 r = inst->f6(id);
+            if (r == 1U) {
+                IEvMgr* mgr = (IEvMgr*)getManager__13soEventSystemFl(
+                    getInstance__13soEventSystemFv(), p->m_c);
+                mgr->f3(p->m_e, p->m_10);
+            }
+            p->m_10 = -1;
+            p->m_c = -1;
+        }
+        __dt__19soShakeModuleSimpleFv(p, 0);
+        if (flag > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_693E4 {
+extern "C" void notifyEventAnimCmd__17soShakeModuleImplFP9acAnimCmdP16soModuleAccesserl(void*);
+
+extern "C" void fn_27_693E4(void* self) {
+    notifyEventAnimCmd__17soShakeModuleImplFP9acAnimCmdP16soModuleAccesserl(reinterpret_cast<u8*>(self) - 0x8);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_693EC {
+extern "C" void isObserv__17soShakeModuleImplFc(void*);
+
+extern "C" void fn_27_693EC(void* self) {
+    isObserv__17soShakeModuleImplFc(reinterpret_cast<u8*>(self) - 0x8);
+}
+}
+

@@ -110,3 +110,11 @@ void grAdventureDoor::setInitializeFlag() {
         setValid(0);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_24D80 {
+extern "C" void setJumpData__15grAdventureDoorFUl(void* self, u32 value) {
+    *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x164) = value;
+}
+}
+

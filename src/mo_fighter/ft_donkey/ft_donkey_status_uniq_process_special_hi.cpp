@@ -17,3 +17,17 @@ void ftDonkeyStatusUniqProcessSpecialHi::execFixPos(soModuleAccesser* moduleAcce
 void ftDonkeyStatusUniqProcessSpecialHi::exitStatus(soModuleAccesser* moduleAccesser, int) {}
 
 ftDonkeyStatusUniqProcessSpecialHi g_ftDonkeyStatusUniqProcessSpecialHi;
+
+// TODO: clean up, give variables real names
+namespace jj_D29C {
+struct FtVec3 {
+    float x, y, z;
+};
+
+extern "C" void __ct__5Vec3fFfff(FtVec3* v, float x, float y, float z) {
+    v->x = x;
+    v->y = y;
+    v->z = z;
+}
+}
+

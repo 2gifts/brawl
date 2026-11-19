@@ -1263,3 +1263,443 @@ extern "C" void fn_800613B8(Matrix* arg0, nw4r::g3d::ScnMdlSimple* arg1, u32 arg
 }
 }
 
+#include <nw4r/g3d/g3d_obj.h>
+#include <gf/gf_application.h>
+// TODO: clean up, give variables real names
+namespace jj_8005E6C8 {
+extern "C" {
+extern char lbl_8059DAB0[6];
+extern char lbl_80453DB8[];
+extern s32 lbl_805A014C;
+extern s32 lbl_805A0150;
+extern s32 lbl_805A0154;
+extern s32 lbl_805A0158;
+extern s32 lbl_805A015C;
+extern s32 lbl_805A0160;
+extern s32 lbl_805A0164;
+extern void* g_gfSceneRoot;
+
+void* __ct__6gfTaskFPCcQ26gfTask8Categoryiib(void* self, const char* name, int category, int a, int b, bool c);
+void* __ct__10ecTraceMgrFv(void* self);
+void fn_8001ABE4(unsigned long count);
+void* __nwa__FUlQ25Heaps8HeapType(unsigned long size, int heap);
+void* __construct_new_array(void* block, void (*ctor)(), void (*dtor)(), unsigned long size, int count);
+void* getMEMAllocator__13gfHeapManagerFQ25Heaps8HeapType(int heap);
+void* fn_801AB6CC(void* allocator, unsigned long a, unsigned long b);
+void add__11gfSceneRootFQ211gfSceneRoot9LayerTypePQ34nw4r3g3d6ScnMdl(void* self, int layer, void* mdl);
+void gfMemFill__FPvUcUl(void* p, unsigned char c, unsigned long n);
+void __ct__10ecResourceFv();
+void __dt__10ecResourceFv();
+void __ct__12ecEffectWorkFv();
+}
+
+struct gfTaskFlags2C {
+    u8 b0 : 1;
+    u8 b1 : 1;
+    u8 b2 : 1;
+    u8 b3 : 1;
+    u8 b4 : 1;
+    u8 flag2 : 1;
+    u8 b6 : 1;
+    u8 b7 : 1;
+};
+
+struct gfTask {
+    char pad0[0x2C];
+    gfTaskFlags2C unk2C;
+    char pad2D[0xF];
+    void* unk3C;
+    s8 unk40;
+    s8 unk41;
+    s8 unk42;
+    s8 unk43;
+    s32 unk44;
+    s32 unk48;
+    void* unk4C;
+    void* unk50;
+    void* unk54;
+    void* unk58;
+    s32 unk5C;
+    void* unk60;
+    u32 unk64;
+    u32 unk68;
+    s32 unk6C;
+    s32 unk70;
+    s32 unk74;
+    s32 unk78;
+    s32 unk7C;
+    s8 unk80;
+    s8 unk81;
+    char pad82[2];
+    s32 unk84;
+    char pad88[8];
+    s32 unk90;
+    s32 unk94;
+    void* unk98;
+};
+
+extern "C" gfTask* __ct__5ecMgrFUlUlUl(gfTask* arg0, u32 arg1, u32 arg2, u32 arg3) {
+    __ct__6gfTaskFPCcQ26gfTask8Categoryiib(arg0, lbl_8059DAB0, 0xE, 0xB, 7, true);
+    arg0->unk3C = lbl_80453DB8;
+    __ct__10ecTraceMgrFv(&arg0->unk98);
+    fn_8001ABE4(arg2);
+    arg0->unk60 = __construct_new_array(__nwa__FUlQ25Heaps8HeapType(arg1 * 0x84 + 0x10, 3), (void (*)())__ct__12ecEffectWorkFv, 0, 0x84, arg1);
+    arg0->unk58 = __construct_new_array(__nwa__FUlQ25Heaps8HeapType(arg2 * 0x18 + 0x10, 3), (void (*)())__ct__10ecResourceFv, (void (*)())__dt__10ecResourceFv, 0x18, arg2);
+    arg0->unk4C = fn_801AB6CC(getMEMAllocator__13gfHeapManagerFQ25Heaps8HeapType(2), 0, arg1);
+    add__11gfSceneRootFQ211gfSceneRoot9LayerTypePQ34nw4r3g3d6ScnMdl(g_gfSceneRoot, 4, arg0->unk4C);
+    arg0->unk50 = fn_801AB6CC(getMEMAllocator__13gfHeapManagerFQ25Heaps8HeapType(2), 0, arg1);
+    add__11gfSceneRootFQ211gfSceneRoot9LayerTypePQ34nw4r3g3d6ScnMdl(g_gfSceneRoot, 7, arg0->unk50);
+    arg0->unk54 = arg0->unk4C;
+    gfMemFill__FPvUcUl(arg0->unk60, 0, (u32)arg1 * 0x84);
+    arg0->unk64 = arg1;
+    if (arg3 < arg1) {
+        arg1 = arg3;
+    }
+    arg0->unk68 = arg1;
+    arg0->unk5C = arg2;
+    arg0->unk7C = 0;
+    arg0->unk78 = 0;
+    arg0->unk74 = 0;
+    arg0->unk70 = 0;
+    arg0->unk6C = 0;
+    arg0->unk81 = 0;
+    arg0->unk84 = 0;
+    arg0->unk90 = 0;
+    arg0->unk94 = 0;
+    arg0->unk80 = 0;
+    arg0->unk44 = 3;
+    arg0->unk48 = 3;
+    arg0->unk40 = 0;
+    arg0->unk41 = 0;
+    arg0->unk42 = 0;
+    arg0->unk43 = 0;
+    lbl_805A0160 = 0;
+    lbl_805A015C = 0;
+    lbl_805A0158 = 0;
+    lbl_805A0154 = 0;
+    lbl_805A0150 = 0;
+    lbl_805A014C = 0;
+    arg0->unk2C.flag2 = 0;
+    lbl_805A0164 = 0;
+    return arg0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8005E920 {
+
+extern "C" {
+extern char lbl_80453DB8[];
+void Destroy__Q34nw4r3g3d6G3dObjFv(nw4r::g3d::G3dObj* obj);
+void __dla__FPv(void* p);
+void __dl__FPv(void* p);
+void __dt__10ecTraceMgrFv(ecTraceMgr* self, int flag);
+void __dt__6gfTaskFv(void* self, int flag);
+void fn_8001AC98();
+void release__12ecEffectWorkFb(void* arg0, unsigned int arg1);
+void __destroy_new_array(void* block, void (*destroy)(void*, int));
+extern void __dt__10ecResourceFv(void*, int);
+extern void* g_ecMgr;
+}
+
+struct gfTask {
+    char pad0[0x3C];
+    void* unk3C;
+    char pad40[0xC];
+    nw4r::g3d::G3dObj* unk4C;
+    nw4r::g3d::G3dObj* unk50;
+    char pad54[4];
+    void* unk58;
+    char pad5C[4];
+    void* unk60;
+    u32 unk64;
+    char pad68[4];
+    s32 unk6C;
+    char pad70[0x28];
+};
+
+extern "C" gfTask* fn_8005E920(gfTask* arg0, s32 arg1) {
+    if (arg0 != 0) {
+        arg0->unk3C = lbl_80453DB8;
+        if (arg0->unk6C != 0) {
+            u32 i = 0;
+            char* cur = (char*)arg0->unk60;
+            while (i <= arg0->unk64) {
+                if (*(void**)(cur + 0x7C) != 0) {
+                    release__12ecEffectWorkFb(cur, 1);
+                    *(void**)(cur + 0x7C) = 0;
+                }
+                i++;
+                cur += 0x84;
+            }
+        }
+        arg0->unk6C = 0;
+        Destroy__Q34nw4r3g3d6G3dObjFv(arg0->unk4C);
+        arg0->unk4C = 0;
+        Destroy__Q34nw4r3g3d6G3dObjFv(arg0->unk50);
+        arg0->unk50 = 0;
+        if (arg0->unk60 != 0) {
+            if (arg0->unk60 != 0) {
+                __dla__FPv((char*)arg0->unk60 - 0x10);
+            }
+            arg0->unk60 = 0;
+        }
+        if (arg0->unk58 != 0) {
+            __destroy_new_array(arg0->unk58, __dt__10ecResourceFv);
+            arg0->unk58 = 0;
+        }
+        fn_8001AC98();
+        g_ecMgr = 0;
+        __dt__10ecTraceMgrFv((ecTraceMgr*)((char*)arg0 + 0x98), -1);
+        __dt__6gfTaskFv(arg0, 0);
+        if (arg1 > 0) {
+            __dl__FPv(arg0);
+        }
+    }
+    return arg0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8005EA4C {
+struct Entry {
+    void* archive;
+    char pad[12];
+    u32 id;
+    char pad2[4];
+};
+struct Manager {
+    char pad[0x44];
+    int heap;
+    char pad2[0x10];
+    Entry* entries;
+    u32 count;
+};
+extern "C" {
+extern unsigned char lbl_80407060[];
+void set_file_img__10ecResourceFPviUl(Entry*, void*, int, u32);
+}
+inline Entry* findEntry(Manager* self, u32 id) {
+    for (u32 i = 0; i < self->count; i++) {
+        if (self->entries[i].archive && self->entries[i].id == id)
+            return &self->entries[i];
+    }
+    return 0;
+}
+extern "C" void fn_8005EA4C(Manager* self, u32 id, void* file, int size, int unused, int heap) {
+    if (!findEntry(self, id) && lbl_80407060[id]) {
+        u32 i;
+        for (i = 0; i < self->count; i++) {
+            if (!self->entries[i].archive)
+                break;
+        }
+        if (i < self->count) {
+            int oldHeap = self->heap;
+            if (heap != 0xff)
+                self->heap = heap;
+            if (file)
+                set_file_img__10ecResourceFPviUl(&self->entries[i], file, size, id);
+            self->heap = oldHeap;
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8005F814 {
+
+struct Data {
+    char pad[4];
+    u16 count;
+};
+
+struct Entry {
+    int active;
+    char pad[8];
+    Data* data;
+    u32 id;
+    u32 pad14;
+};
+
+struct Record {
+    char pad0[0x28];
+    int priority;
+    char pad2c[0x2a];
+    u16 flags;
+    u8 flags58;
+    char pad59[0x23];
+    int active;
+    int pad80;
+};
+
+struct Owner {
+    char pad0[0x43];
+    u8 mode;
+    char pad44[0xc];
+    int value50;
+    int value54;
+    Entry* entries;
+    u32 entryCount;
+    Record* records;
+    u32 capacity;
+    u32 limit;
+    u32 used;
+    u32 first;
+    u32 last;
+    u32 next;
+    u32 serial;
+    u8 enabled;
+    u8 index;
+    char pad82[2];
+    u32 masks[3];
+    u32 expected;
+    u32 mask;
+};
+
+extern s32 lbl_805A014C;
+extern s32 lbl_805A0150;
+extern s32 lbl_805A0154;
+extern s32 lbl_805A0158;
+extern s32 lbl_805A015C;
+extern s32 lbl_805A0160;
+
+extern "C" void end__12ecEffectWorkFbb(Record*, int, int);
+extern "C" void set_mdl_texpat__12ecEffectWorkFUl(Record*, int);
+extern "C" void fn_80064398(Entry*, int*, int*, int*, int*, int, int, int,
+                            int, int, int, int, int);
+extern "C" void fn_80061514(Record*, u32, u32, Entry*, u16, int, int, int,
+                            int, int, int, int, int, bool, bool, int);
+
+static inline u32 dataCount(Data* data)
+{
+    return data == 0 ? 0U : (u32)data->count;
+}
+
+static inline u8* dataAt(Data* data, u32 index)
+{
+    return (u8*)data + index * 16;
+}
+
+static inline Entry* findEntry(Owner* self, u32 id)
+{
+    for (u32 i = 0; i < self->entryCount; ++i) {
+        if (self->entries[i].active && self->entries[i].id == id)
+            return &self->entries[i];
+    }
+    return 0;
+}
+
+extern "C" u32 setEffect__5ecMgrF4EfIDUlPC5Vec3fPC5Vec3fPC5Vec3f(Owner* self, int id, u32 key, int a, int b, int c)
+{
+    if (!id)
+        return 0;
+
+    Entry* entry;
+    u32 index = (u16)id;
+    entry = findEntry(self, key);
+    if (!entry)
+        return 0;
+
+    if (!index || index >= dataCount(entry->data))
+        return 0;
+
+    Data* data = entry->data;
+    if (self->used >= self->capacity)
+        return 0;
+
+    if ((((u8*)g_gfApplication)[0xee] & 1) &&
+        (dataAt(data, index)[0x1c] & 0x80))
+        return 0;
+
+    if (self->used >= self->limit) {
+        u8* dataFlags = (u8*)data + (u32)index * 16;
+        u32 last = self->last;
+        u32 i = self->first;
+        Record* p = &self->records[i];
+        int priority = 0;
+        Record* best = 0;
+
+        for (; i <= last; ++i, ++p) {
+            if (p->active && (p->flags & 0x4000) &&
+                !(p->flags58 & 0x10) && p->priority > priority) {
+                best = p;
+                priority = p->priority;
+            }
+        }
+
+        if (!best) {
+            if (dataFlags[0x1c] & 0x80)
+                return 0;
+        } else {
+            end__12ecEffectWorkFbb(best, 1, 1);
+        }
+    }
+
+    {
+        u32 selectedMask = self->masks[self->index];
+        u32 mask = self->mask;
+        u32 expected = self->expected;
+        if (expected != (selectedMask & mask))
+            return 0;
+    }
+
+    u32 used = self->used;
+    u32 next = self->next;
+    u32 capacity = self->capacity;
+    Record* record = &self->records[next];
+
+    if (used == capacity - 1 || self->last < used) {
+        self->last = used;
+        self->next = self->used + 1;
+    } else {
+        u32 i = next + 1;
+        Record* p = record + 1;
+        for (; i < capacity; ++i, ++p) {
+            if (!p->active)
+                break;
+        }
+        if (i >= capacity)
+            return 0;
+        if (self->first > next)
+            self->first = next;
+        if (self->last < self->next)
+            self->last = self->next;
+        self->next = i;
+    }
+
+    self->used++;
+    if (++self->serial == 0)
+        self->serial++;
+
+    int x4 = 0;
+    int x3 = 0;
+    int x2 = 0;
+    int x1 = 0;
+
+    fn_80064398(entry, &x3, &x2, self->mode ? &x1 : 0, &x4, index,
+                self->value54, lbl_805A014C, lbl_805A0150, lbl_805A0154,
+                lbl_805A0158, lbl_805A015C, lbl_805A0160);
+
+    lbl_805A0160 = 0;
+    lbl_805A015C = 0;
+    lbl_805A0158 = 0;
+    lbl_805A0154 = 0;
+    lbl_805A0150 = 0;
+    lbl_805A014C = 0;
+
+    if (id == 0x14)
+        x4 = -1;
+    if (id > 0x1340000 && id < 0x1360002)
+        x4 = -1;
+
+    fn_80061514(record, self->serial, self->masks[self->index], entry, index,
+                a, b, c, self->value54, x3, x2, x1, x4,
+                self->value54 == self->value50, self->enabled != 0, self->mode);
+
+    if (id > 0x1340000 && id < 0x1360002)
+        set_mdl_texpat__12ecEffectWorkFUl(record, 0);
+
+    return self->serial;
+}
+}
+

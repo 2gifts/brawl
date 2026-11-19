@@ -329,3 +329,18 @@ soDamage::soDamage() {
     unk68 = 1.0f;
     unk74 = unk74 & ~0x1F;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_21F08 {
+struct grBase {
+    virtual void unk0();
+    virtual void unk1();
+    virtual void unk2();
+    virtual int unk3();
+};
+
+extern "C" bool fn_40_21F08(grBase* obj) {
+    return !obj->unk3();
+}
+}
+

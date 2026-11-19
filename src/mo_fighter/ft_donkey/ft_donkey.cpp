@@ -573,3 +573,187 @@ void fn_92_CBBC(u8* p, float a0, float a1, soModuleAccesser* a2) { return ((Figh
 extern "C" {
 bool fn_92_CAA4(u8* self, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, s32 unk3) { return ((Fighter*)(self - 0x48))->Fighter::notifyEventAnimCmd(acmd, moduleAccesser, unk3); }
 } // extern "C"
+
+// TODO: clean up, give variables real names
+namespace jj_3AA4 {
+extern "C" void* __dt__19soReflectModuleImplFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_92_3AA4(void* object, short flag) {
+    if (object != 0) {
+        __dt__19soReflectModuleImplFv(object, -1);
+        if (flag > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8E5C {
+struct Blob {
+    void* vptr;
+};
+
+struct Dispatch {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3(void*);
+};
+
+extern "C" {
+extern signed char lbl_92_bss_1AC;
+extern Blob lbl_92_bss_1B0;
+extern char lbl_92_bss_198[];
+void processUpdate__7FighterFv(void*);
+void __ct__18ftDonkeyTransactorFv(void*);
+void* __dt__18ftDonkeyTransactorFv(void*, int);
+void* __register_global_object(void* object, void* destructor, void* chain);
+}
+
+extern "C" void fn_92_8E5C(void* obj) {
+    processUpdate__7FighterFv(obj);
+    if (lbl_92_bss_1AC == 0) {
+        __ct__18ftDonkeyTransactorFv(&lbl_92_bss_1B0);
+        __register_global_object(&lbl_92_bss_1B0, (void*)__dt__18ftDonkeyTransactorFv, &lbl_92_bss_198);
+        lbl_92_bss_1AC = 1;
+    }
+    reinterpret_cast<Dispatch*>(&lbl_92_bss_1B0)
+        ->v3(*reinterpret_cast<void**>(reinterpret_cast<char*>(obj) + 0x60));
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_8EE4 {
+struct DonkeyAccesser;
+
+struct DonkeyEventHandler {
+    unsigned char padding[0x60];
+    DonkeyAccesser* accesser;
+};
+
+class DonkeyStatusModule {
+public:
+    virtual void slot08();
+    virtual void slot0C();
+    virtual void slot10();
+    virtual bool changeStatusRequest(int, DonkeyAccesser*);
+    virtual void slot18();
+    virtual void slot1C();
+    virtual void slot20();
+    virtual void slot24();
+    virtual void slot28();
+    virtual void slot2C();
+    virtual void slot30();
+    virtual void slot34();
+    virtual void slot38();
+    virtual void slot3C();
+    virtual void slot40();
+    virtual void slot44();
+    virtual int getStatusKind();
+};
+
+class DonkeyModule {
+public:
+    virtual void slot08();
+    virtual void slot0C();
+    virtual void slot10();
+    virtual void slot14();
+    virtual void slot18();
+    virtual void slot1C();
+    virtual void slot20();
+    virtual void slot24();
+    virtual void slot28();
+    virtual void slot2C();
+    virtual void slot30();
+    virtual void slot34();
+    virtual void slot38();
+    virtual void slot3C();
+    virtual void set(int);
+};
+
+struct DonkeyModules {
+    unsigned char padding00[0x3C];
+    DonkeyModule* module;
+    unsigned char padding40[0x30];
+    DonkeyStatusModule* status;
+};
+
+struct DonkeyAccesser {
+    unsigned char padding[0xD8];
+    DonkeyModules* modules;
+};
+
+extern "C" void notifyEventLink__7FighterFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti(
+    DonkeyEventHandler*, int*, DonkeyAccesser*, void*, int);
+
+extern "C" void fn_92_8EE4(
+    DonkeyEventHandler* self,
+    int* event,
+    DonkeyAccesser* accesser,
+    void* object,
+    int eventType)
+{
+    DonkeyStatusModule* status = accesser->modules->status;
+    int kind = status->getStatusKind();
+
+    switch (*event) {
+    case 0x453:
+        if (kind >= 0x120 && kind <= 0x129) {
+            status->changeStatusRequest(0x3B, self->accesser);
+            return;
+        }
+        break;
+
+    case 9:
+        if (kind >= 0x120 && kind <= 0x129) {
+            accesser->modules->module->set(0);
+            status->changeStatusRequest(0x3B, self->accesser);
+            return;
+        }
+        break;
+    }
+
+    notifyEventLink__7FighterFP15soLinkEventArgsP16soModuleAccesserP11StageObjecti(self, event, accesser, object, eventType);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9E50 {
+extern "C" s32 g_soValueVariation;
+
+extern "C" s32 getValueVariation__15soValueAccesserFv() {
+    return g_soValueVariation;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_AFF0 {
+extern "C" void* __dt__15soKineticEnergyFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* __dt__25ftKineticEnergyControllerFv(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            short baseDeleting = 0;
+            __dt__15soKineticEnergyFv(object, baseDeleting);
+        }
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_CAB4 {
+extern "C" void fn_92_8EE4(void*);
+
+extern "C" void fn_92_CAB4(void* self) {
+    fn_92_8EE4(reinterpret_cast<u8*>(self) - 0x54);
+}
+}
+

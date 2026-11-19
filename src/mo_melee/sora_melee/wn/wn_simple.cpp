@@ -88,3 +88,8 @@ wnSimple::wnSimple(s32 articleId, const wnSimpleConstructionInfo& info, wnSimple
 }
 #pragma auto_inline on
 
+// TODO: clean up, give variables real names
+namespace jj_1E1E84 {
+extern "C" void fn_27_1E1E84(void) {}
+}
+

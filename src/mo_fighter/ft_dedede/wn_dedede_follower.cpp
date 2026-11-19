@@ -574,3 +574,202 @@ wnDededeFollower::wnDededeFollower(s32 articleId, const wnArticleBuildInfo& info
     wnDededeFollowerSetPack(&m_moduleAccesser->getAnimCmdModule(), 3, &m_animCmdPack2);
     Weapon::deactivate(false);
 }
+
+#include <so/so_array.h>
+#include <so/so_enable.h>
+// TODO: clean up, give variables real names
+namespace jj_1CD04 {
+extern "C" u32 fn_117_1CD04(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x4);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1CD24 {
+extern "C" void* getStatusModule__16soModuleAccesserCFv(void* self) {
+    unsigned char* p = (unsigned char*)self;
+    unsigned char* q = *(unsigned char**)(p + 0xd8);
+    return *(void**)(q + 0x70);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1CD30 {
+extern "C" u32 getModuleAccesser__11StageObjectCFv(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x60);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1CD38 {
+struct Inner {
+    unsigned char pad[0x20];
+    void* field20;
+};
+
+struct Outer {
+    unsigned char pad[0xd8];
+    Inner* fieldD8;
+};
+
+extern "C" void* getCollisionHitModule__16soModuleAccesserCFv(Outer* self) {
+    return self->fieldD8->field20;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1CD44 {
+extern "C" void* fn_117_1CD44(void* self) {
+    return *(void**)((char*)*(void**)((char*)self + 0xd8) + 0x6c);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2053C {
+struct Vec2 {
+    float x;
+    float y;
+};
+
+extern "C" Vec2 __ml__FRC5Vec2ff(const Vec2* value, float scale) {
+    Vec2 result;
+    result.x = value->x * scale;
+    result.y = value->y * scale;
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20568 {
+
+namespace {
+struct DededeDamageReceiver {
+    unsigned char prefix[0x60];
+    soModuleAccesser* accesser;
+};
+}
+
+extern "C" void notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser(void*, float, int, int);
+
+extern "C" void notifyEventCollisionAttack__17wnSonicSuperSonicFfPC14soCollisionLogP16soModuleAccesser(DededeDamageReceiver* receiver, float damage,
+                              int kind, int flags) {
+    if (receiver->accesser->getWorkManageModule().getFloat(0x11000001) < damage) {
+        receiver->accesser->getWorkManageModule().setFloat(damage, 0x11000001);
+    }
+    notifyEventCollisionAttack__6WeaponFfPC14soCollisionLogP16soModuleAccesser(receiver, damage, kind, flags);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20E14 {
+struct DededeSingletonStorage {
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+};
+
+extern "C" DededeSingletonStorage* fn_117_1EB30(void* self);
+
+extern "C" void fn_117_20E14(unsigned char* self) {
+    DededeSingletonStorage* storage = fn_117_1EB30(self + 0x1d10);
+    storage->v6();
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_21A40 {
+
+namespace {
+// Shared prefix of the dynamic traversal's concrete elements.
+class DededeDynamicTraversalElement {
+public:
+    virtual void reserved08();
+    virtual void update(void* argument);
+    unsigned char reserved;
+    soEnable enabled;
+    bool suspended;
+
+    void updateIfActive(void* argument) {
+        if (enabled.isEnable() == true && suspended == false) {
+            update(argument);
+        }
+    }
+};
+
+inline void visitElement(DededeDynamicTraversalElement* element, void* argument) {
+    if (element->enabled.isEnable() == true && element->suspended == false) {
+        element->updateIfActive(argument);
+    }
+}
+}
+
+extern "C" void fn_117_21A40(void*, soArrayFixed<DededeDynamicTraversalElement**>* elements,
+                              void* argument) {
+    for (int i = 0; i < elements->size(); ++i) {
+        DededeDynamicTraversalElement* element = *elements->at(i);
+        if (!element->enabled.isEnable() || element->suspended == true) {
+            continue;
+        }
+        visitElement(element, argument);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_21B14 {
+extern "C" void fn_117_15724(void*, void*, void*);
+
+extern "C" void fn_117_21B14(void* a, void* b, void* c) {
+    fn_117_15724(b, static_cast<char*>(a) + 4, c);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_22014 {
+extern "C" void fn_117_20080(void*);
+
+extern "C" void fn_117_22014(void* self) {
+    fn_117_20080(reinterpret_cast<u8*>(self) - 0x48);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2201C {
+extern "C" void fn_117_1FCD0(void*);
+
+extern "C" void fn_117_2201C(void* self) {
+    fn_117_1FCD0(reinterpret_cast<u8*>(self) - 0x54);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2202C {
+extern "C" void fn_117_20610(void*);
+
+extern "C" void fn_117_2202C(void* self) {
+    fn_117_20610(reinterpret_cast<u8*>(self) - 0x70);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_22034 {
+extern "C" void notifyEventCollisionAttack__17wnSonicSuperSonicFfPC14soCollisionLogP16soModuleAccesser(void*);
+
+extern "C" void fn_117_22034(void* self) {
+    notifyEventCollisionAttack__17wnSonicSuperSonicFfPC14soCollisionLogP16soModuleAccesser(reinterpret_cast<u8*>(self) - 0x70);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_23DC8 {
+extern "C" s32 fn_117_23DC8(void) {
+    return 0x0;
+}
+}
+

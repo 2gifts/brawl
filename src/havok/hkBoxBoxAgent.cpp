@@ -145,3 +145,9 @@ void hkBoxBoxAgent::getClosestPoints(const hkCdBody& unk0, const hkCdBody& unk1,
 void hkBoxBoxAgent::getPenetrations(const hkCdBody& unk0, const hkCdBody& unk1, hkCollisionInput& unk2, void* unk3) {
     staticGetPenetrations(unk0, unk1, unk2, unk3);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_802A1D78 {
+extern "C" void updateShapeCollectionFilter__16hkCollisionAgentFRC8hkCdBodyRC8hkCdBodyR16hkCollisionInput(void) {}
+}
+

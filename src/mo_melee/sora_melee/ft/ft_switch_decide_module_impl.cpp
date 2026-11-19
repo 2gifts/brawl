@@ -44,3 +44,14 @@ int ftSwitchDecideModuleImpl::decideSwitch(int kind, soArrayContractibleTable<co
     return fn_27_7B610(this, kind, args, acc);
 }
 
+// TODO: clean up, give variables real names
+namespace jj_15400C {
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_27_15400C(void* p, int n) {
+    if (p && n > 0)
+        __dl__FPv(p);
+    return p;
+}
+}
+

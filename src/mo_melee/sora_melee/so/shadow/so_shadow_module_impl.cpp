@@ -152,3 +152,37 @@ void soShadowModuleImpl::update() {
             (u32)ground.getGrCollision(), yOffset, groundPokemon);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_B6940 {
+typedef unsigned int u32;
+typedef int s32;
+
+extern "C" {
+extern char* g_Stage;
+
+int fn_27_B6940() {
+    char* p = *(char**)(g_Stage + 0xc4);
+    u32 w = *(u32*)(p + 0x40);
+    s32 r = (s32)(((w << 24) | (w >> 8)) & 0xFF800000) >> 24;
+    switch (r) {
+    case 0:
+        return 0;
+    case 1:
+        return 1;
+    default:
+        return 0;
+    }
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B6DA4 {
+extern "C" void fn_27_B6998(void*);
+
+extern "C" void fn_27_B6DA4(void* self) {
+    fn_27_B6998(reinterpret_cast<u8*>(self) - 0x10);
+}
+}
+

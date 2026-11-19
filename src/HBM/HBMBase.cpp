@@ -3173,3 +3173,178 @@ void HomeButton::fadeout_sound(f32 gain) {
 }
 
 } // namespace homebutton
+
+#include <revolution/OS/OSMutex.h>
+// TODO: clean up, give variables real names
+namespace jj_8026FAE4 {
+extern "C" {
+void OSCancelAlarm(void*);
+void* __dt__Q34nw4r2ut4RectFv(void*, int);
+void MEMFreeToAllocator(void*, void*);
+void* __dt__Q210homebutton10ControllerFv(void*, int);
+void __dl__FPv(void*);
+extern void* lbl_8059EE5C;
+}
+
+class VObj {
+public:
+    virtual void m1(int);
+    virtual void m2(int);
+    virtual void m3(int);
+    virtual void m4(int);
+    virtual void m5(int);
+    virtual void m6(int);
+};
+
+struct VBase { char pad[0x1f0]; };
+class VObj1f0 : public VBase {
+public:
+    virtual void m1(int);
+};
+
+extern "C" void* __dt__Q210homebutton10HomeButtonFv(void* self, int arg1) {
+    char* s = (char*)self;
+    if (self != 0) {
+        ((VObj*)*(void**)(s + 0x1fc))->m1(-1);
+        MEMFreeToAllocator(lbl_8059EE5C, *(void**)(s + 0x1fc));
+        ((VObj*)*(void**)(s + 0x1e8))->m1(-1);
+        MEMFreeToAllocator(lbl_8059EE5C, *(void**)(s + 0x1e8));
+        if (*(int*)(*(char**)(s + 4) + 0x20) == 0) {
+            int i;
+            char* p;
+            p = s;
+            i = 0;
+            do {
+                ((VObj*)*(void**)(p + 0x1ec))->m1(-1);
+                MEMFreeToAllocator(lbl_8059EE5C, *(void**)(p + 0x1ec));
+                i++;
+                p += 4;
+            } while (i < 4);
+        }
+        {
+            char* p2 = s;
+            int j;
+            for (j = 0; j < *(int*)(s + 0xc); j++) {
+                ((VObj*)*(void**)(p2 + 0x270))->m1(-1);
+                MEMFreeToAllocator(lbl_8059EE5C, *(void**)(p2 + 0x270));
+                p2 += 4;
+            }
+        }
+        {
+            char* p2 = s;
+            int j;
+            for (j = 0; j < 0xf; j++) {
+                ((VObj*)*(void**)(p2 + 0x3c8))->m1(-1);
+                MEMFreeToAllocator(lbl_8059EE5C, *(void**)(p2 + 0x3c8));
+                p2 += 4;
+            }
+        }
+        {
+            char* p2 = s;
+            int j;
+            for (j = 0; j < 0x4a; j++) {
+                ((VObj*)*(void**)(p2 + 0x2a0))->m1(-1);
+                MEMFreeToAllocator(lbl_8059EE5C, *(void**)(p2 + 0x2a0));
+                p2 += 4;
+            }
+        }
+        MEMFreeToAllocator(lbl_8059EE5C, *(void**)(s + 0x204));
+        ((VObj*)*(void**)(s + 0x200))->m6(-1);
+        MEMFreeToAllocator(lbl_8059EE5C, *(void**)(s + 0x200));
+        {
+            char* p2 = s;
+            int j;
+            for (j = 0; j < 4; j++) {
+                __dt__Q210homebutton10ControllerFv(*(void**)(p2 + 0x25c), -1);
+                MEMFreeToAllocator(lbl_8059EE5C, *(void**)(p2 + 0x25c));
+                p2 += 4;
+            }
+        }
+        ((VObj1f0*)*(void**)(s + 0x26c))->m1(-1);
+        MEMFreeToAllocator(lbl_8059EE5C, *(void**)(s + 0x26c));
+        *(void**)(s + 0x26c) = 0;
+        MEMFreeToAllocator(lbl_8059EE5C, *(void**)(s + 0xa8));
+        MEMFreeToAllocator(lbl_8059EE5C, *(void**)(s + 0xac));
+        {
+            char* b;
+            char* a;
+            int k;
+            a = s + 0x418;
+            b = s + 0x4d8;
+            for (k = 0; k < 4; k++) {
+                OSCancelAlarm(a);
+                OSCancelAlarm(b);
+                a += 0x30;
+                b += 0x30;
+            }
+        }
+        OSCancelAlarm(s + 0x598);
+        __dt__Q34nw4r2ut4RectFv(s + 0x208, -1);
+        if (arg1 > 0) {
+            __dl__FPv(s);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_802789B4 {
+class Object_vptr_0 {
+public:
+    virtual void slot0(int);
+};
+struct Object_vptr_8_base { char pad[8]; };
+class Object_vptr_8 : public Object_vptr_8_base {
+public:
+    virtual void slot0(int);
+};
+struct Owner {
+    char pad[0x5d0];
+    Object_vptr_8* a;
+    Object_vptr_0* b;
+    Object_vptr_0* c;
+    Object_vptr_0* d;
+    Object_vptr_0* e;
+    void* f;
+};
+extern OSMutex lbl_80532170;
+extern "C" {
+void Close__Q34nw4r3snd15DvdSoundArchiveFv(void*);
+void Shutdown__Q34nw4r3snd18MemorySoundArchiveFv(void*);
+void __ct__Q34nw4r3snd16NandSoundArchiveFv(void*);
+void Destroy__Q34nw4r3snd9SoundHeapFv(void*);
+void Shutdown__Q34nw4r3snd18SoundArchivePlayerFv(void*);
+void DetachSound__Q34nw4r3snd11SoundHandleFv(void*);
+}
+inline void cleanup(void* p) {
+    if (p) DetachSound__Q34nw4r3snd11SoundHandleFv(p);
+}
+extern "C" void delete_sound__Q210homebutton10HomeButtonFv(Owner* self) {
+    OSMutex* mutex = &lbl_80532170;
+    OSLockMutex(mutex);
+    if (self->b) {
+        Close__Q34nw4r3snd15DvdSoundArchiveFv(self->b);
+        self->b->slot0(-1);
+    }
+    if (self->c) {
+        Shutdown__Q34nw4r3snd18MemorySoundArchiveFv(self->c);
+        self->c->slot0(-1);
+    }
+    if (self->d) {
+        __ct__Q34nw4r3snd16NandSoundArchiveFv(self->d);
+        self->d->slot0(-1);
+    }
+    if (self->e) {
+        Destroy__Q34nw4r3snd9SoundHeapFv(self->e);
+        self->e->slot0(-1);
+    }
+    if (self->a) {
+        Shutdown__Q34nw4r3snd18SoundArchivePlayerFv(self->a);
+        self->a->slot0(-1);
+    }
+    if (self->f) cleanup(self->f);
+    OSUnlockMutex(mutex);
+}
+}
+

@@ -82,3 +82,36 @@ void soArchiveDb::Processer::processBegin() {
         ++manager;
     } while (index < 3);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_70004 {
+extern "C" void* lbl_27_bss_120[];
+extern "C" int getLoadResult__16utArchiveManagerFUlPl(void*, unsigned int, int);
+
+struct Data {
+    unsigned int index;
+    unsigned int id;
+};
+
+extern "C" bool fn_27_70004(Data self) {
+    unsigned int index = self.index;
+    return getLoadResult__16utArchiveManagerFUlPl(lbl_27_bss_120[index], self.id, 0) == 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_70070 {
+enum ARCNodeType { ARCNodeType_0 };
+class utArchiveManager {
+public:
+    void* getResFileFromId(long id, ARCNodeType t, unsigned long a, unsigned long b, unsigned long c);
+};
+extern void* lbl_27_bss_120[];
+
+struct Ref { unsigned int idx; long id; };
+
+extern "C" void* fn_27_70070(Ref r, ARCNodeType t, unsigned long a, unsigned long b, unsigned long c) {
+    return ((utArchiveManager*)lbl_27_bss_120[r.idx])->getResFileFromId(r.id, t, a, b, c);
+}
+}
+

@@ -1203,3 +1203,104 @@ extern "C" void fn_8008F3E0(Context* self, int mode) {
 }
 }
 
+// TODO: clean up, give variables real names
+namespace jj_8008B00C {
+extern "C" void __dl__FPv(void*);
+extern "C" void removeConstraintArray__13ph2ndaryWorldFPv(void*, void*);
+extern "C" void* __dt__12ph2ndaryLineFv(void*, int);
+extern "C" void* getArray2ndaryController__11phInterfaceFv(void*);
+extern "C" void delete2ndaryWorld__11phInterfaceFv(void*);
+extern "C" void delete2ndaryController__11phInterfaceFv(void*);
+extern "C" void deallocateChunk__14hkThreadMemoryFPvii(void*, void*, unsigned int, int);
+extern void* lbl_8049DEC8[3];
+extern void* s_instance__14hkThreadMemory;
+struct Mgr { char pad[0x58]; void* f58; };
+struct Obj { char pad[0x1fc]; void** data; int size; };
+struct Array {
+    void** data; int size; unsigned int raw;
+    unsigned int rawValue() const { return raw; }
+};
+struct Self { Array a; char pad1[0xcc - sizeof(Array)]; Array b; Array c; };
+struct Reg {
+    void** data; int size; unsigned int raw;
+    int sizeValue() const { return size; }
+    unsigned int rawValue() const { return raw; }
+};
+extern "C" Self* __dt__18ph2ndaryControllerFv(Self* self, int flag) {
+    if (self) {
+        Obj* obj; int j; int off; int joff; int i;
+        off = 0;
+        void* x = ((Mgr*)lbl_8049DEC8[0])->f58;
+        void* t = x ? x : 0;
+        if (t) { removeConstraintArray__13ph2ndaryWorldFPv(t, self); }
+        i = 0;
+        off = 0;
+        while (i < self->a.size) {
+            obj = *(Obj**)((char*)self->a.data + off);
+            if (obj) {
+                j = 0; joff = 0;
+                while (j < obj->size) {
+                    void* p = *(void**)((char*)obj->data + joff);
+                    if (p) {
+                        if (p) { __dl__FPv(p); }
+                        *(void**)((char*)obj->data + joff) = 0;
+                    }
+                    joff += 4; j++;
+                }
+            }
+            __dt__12ph2ndaryLineFv(*(void**)((char*)self->a.data + off), 1);
+            i++;
+            *(void**)((char*)self->a.data + off) = 0;
+            off += 4;
+        }
+        if (!(self->b.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->b.data, self->b.rawValue() << 2, 0x15);
+        }
+        self->b.data = 0; self->b.size = 0;
+        self->b.raw = (self->b.raw & 0x40000000) | 0x80000000;
+        if (!(self->c.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->c.data, self->c.rawValue() & 0x3fffffff, 0x15);
+        }
+        self->c.data = 0; self->c.size = 0;
+        self->c.raw = (self->c.raw & 0x40000000) | 0x80000000;
+        if (!(self->a.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->a.data, self->a.rawValue() << 2, 0x15);
+        }
+        self->a.data = 0; self->a.size = 0;
+        self->a.raw = (self->a.raw & 0x40000000) | 0x80000000;
+        Reg* reg = (Reg*)getArray2ndaryController__11phInterfaceFv(lbl_8049DEC8[0]);
+        int index = 0;
+        int byteOffset = 0;
+        for (int j = 0; j < reg->size; j++, index++) {
+            if (*(void**)((char*)reg->data + byteOffset) == (void*)self) {
+                if (reg->sizeValue() == 1) {
+                    if (!(reg->raw & 0x80000000)) {
+                        deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, reg->data, reg->rawValue() << 2, 0x15);
+                    }
+                    reg->data = 0; reg->size = 0;
+                    reg->raw = (reg->raw & 0x40000000) | 0x80000000;
+                } else {
+                    reg->size--;
+                    reg->data[index] = reg->data[reg->size];
+                }
+                break;
+            }
+            byteOffset += 4;
+        }
+        delete2ndaryWorld__11phInterfaceFv(lbl_8049DEC8[0]);
+        delete2ndaryController__11phInterfaceFv(lbl_8049DEC8[0]);
+        if ((unsigned int)self + 0xd8 != 0 && !(self->c.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->c.data, self->c.rawValue() & 0x3fffffff, 0x15);
+        }
+        if ((unsigned int)self + 0xcc != 0 && !(self->b.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->b.data, self->b.rawValue() << 2, 0x15);
+        }
+        if (self != 0 && !(self->a.raw & 0x80000000)) {
+            deallocateChunk__14hkThreadMemoryFPvii(s_instance__14hkThreadMemory, self->a.data, self->a.rawValue() << 2, 0x15);
+        }
+        if (flag > 0) { __dl__FPv(self); }
+    }
+    return self;
+}
+}
+

@@ -1261,3 +1261,13 @@ s8 soModelModuleImpl::getLoupeNo() {
 void soModelEventObserver::notifyEventConstructInstance(bool, soModuleAccesser*) {}
 void soModelEventObserver::notifyEventDestructInstance(soModuleAccesser*) {}
 template class soArrayContractibleTable<const acCmdArgConv>;
+
+// TODO: clean up, give variables real names
+namespace jj_E250 {
+extern "C" void notifyEventAnimCmd__17soModelModuleImplFP9acAnimCmdP16soModuleAccesseri(void*);
+
+extern "C" void notifyEventAnimCmd__22soAnimCmdEventObserverFP9acAnimCmdP16soModuleAccesserl(void* self) {
+    notifyEventAnimCmd__17soModelModuleImplFP9acAnimCmdP16soModuleAccesseri(reinterpret_cast<u8*>(self) - 0x14);
+}
+}
+

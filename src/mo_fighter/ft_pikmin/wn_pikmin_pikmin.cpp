@@ -2687,3 +2687,369 @@ void soSituationEventObserver::notifyEventChangeSituation(SituationKind, Situati
 bool soCollisionSearchEventObserver::notifyEventCollisionSearchCheck() {
     return false;
 }
+
+#include <so/so_enable.h>
+#include <so/kinetic/so_kinetic_module_impl.h>
+// TODO: clean up, give variables real names
+namespace jj_1BEA4 {
+extern "C" void fn_113_1BEA4(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1BEA8 {
+extern "C" void fn_113_1BEA8(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1CFE4 {
+extern "C" void* getInstanceAt__21ftPurinArticleSubPoolFl(void* object, int index) {
+    if (index == 0) {
+        return static_cast<char*>(object) + 0x0c;
+    }
+    return 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1E58C {
+typedef unsigned int u32;
+typedef unsigned long long u64;
+
+typedef struct
+{
+    float x;
+    float y;
+} Vec2;
+
+extern "C" u64 fn_113_1E58C(Vec2 *v)
+{
+    union
+    {
+        struct
+        {
+            float x;
+            float y;
+        } f;
+        struct
+        {
+            u32 a;
+            u32 b;
+        } w;
+        u64 q;
+    } out;
+
+    out.f.x = -v->x;
+    out.f.y = -v->y;
+    return out.q;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_20B38 {
+
+extern "C" void updateEnergy1__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+extern "C" void updateEnergy2__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+extern "C" void updateEnergy3__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+extern "C" void fn_113_21334(s8*, void*, void*);
+extern "C" void updateEnergy5__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+extern "C" void updateEnergy6__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+extern "C" void updateEnergy7__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+extern "C" void updateEnergy8__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+extern "C" void updateEnergy9__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+extern "C" void updateEnergy10__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(s8*, void*, void*);
+
+struct PikminProcessEntry {
+    virtual void slot0();
+    virtual void update(soModuleAccesser*);
+    unsigned char reserved;
+    soEnable enabled;
+    unsigned char suspended;
+};
+
+struct State {
+    s8 a;
+    s8 b;
+};
+
+extern "C" void fn_113_20B38(PikminProcessEntry* entry, soModuleAccesser* accesser) {
+    if (!entry->enabled.isEnable() || entry->suspended == 1) {
+        return;
+    }
+    switch (accesser->getKineticModule().getKineticType()) {
+            case 0x21: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy1__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            case 0x25: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy2__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            case 0x22: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy3__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            case 0x23: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                fn_113_21334(&state.b, entry, accesser);
+                break;
+            }
+            case 0x27:
+            case 0x28:
+            case 0x29: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy5__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            case 0x2A:
+            case 0x30: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy6__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            case 0x2D: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy7__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            case 0x32: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy8__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            case 0x35: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy9__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            case 0x2C: {
+                State state;
+                state.a = 0;
+                state.b = 0;
+                updateEnergy10__31wnPikminPikminKineticTransactorFP21soKineticEnergyNormalP16soModuleAccesser(&state.b, entry, accesser);
+                break;
+            }
+            default:
+                entry->update(accesser);
+                break;
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_21334 {
+struct Vec2 { float x, y; };
+struct Vec3 { float x, y, z; };
+union U { unsigned long long r; Vec2 v; };
+
+struct PosMod {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual Vec3 getPos();
+};
+struct WorkMod {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual unsigned int getInt(unsigned int);
+    virtual void v5(); virtual void v6(); virtual void v7(); virtual void v8();
+    virtual void v9(); virtual void v10(); virtual void v11();
+    virtual float getFloat(unsigned int);
+};
+struct Mods { char pad[0xc]; PosMod* pos; char pad2[0x64 - 0x10]; WorkMod* work; };
+struct Acc { char pad[0xd8]; Mods* mods; };
+struct Obj {
+    virtual void v0();
+    virtual void update(Acc*);
+    virtual unsigned long long get();
+    int pad0;
+    Vec2 a, b, c, pad, d;
+};
+
+extern "C" {
+extern const float lbl_113_rodata_88[];
+Vec2* __ct__5Vec2fFff(Vec2*, float, float);
+unsigned long long __mi__FRC5Vec2fRC5Vec2f(const Vec2*, const Vec2*);
+float lengthSq__5Vec2fFv(const Vec2*);
+void __as__5Vec2fFRC5Vec2f(Vec2*, const Vec2*);
+float getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(Acc*, unsigned long, unsigned long);
+void normalize__5Vec2fFv(Vec2*);
+void scale__FP5Vec2ff(Vec2*, float);
+}
+float mtSqrtf(float);
+
+extern "C" void fn_113_21334(void*, Obj* obj, Acc* acc) {
+    const float* c = lbl_113_rodata_88;
+    Vec2 pos;
+    U diff;
+    U n;
+    U n2;
+    U sv;
+    U nl;
+    PosMod* pm = acc->mods->pos;
+    __ct__5Vec2fFff(&pos, pm->getPos().x, pm->getPos().y);
+    WorkMod* w = acc->mods->work;
+    float ty = w->getFloat(0x11000005);
+    U r;
+    Vec2 tgt;
+    r.r = __mi__FRC5Vec2fRC5Vec2f(__ct__5Vec2fFff(&tgt, w->getFloat(0x11000004), ty), &pos);
+    diff = r;
+    float len = lengthSq__5Vec2fFv(&diff.v);
+    if (c[2] == len) {
+        Vec2 z; z.x = c[2]; z.y = c[2];
+        __as__5Vec2fFRC5Vec2f(&obj->a, &z);
+        return;
+    }
+    unsigned int flags = acc->mods->work->getInt(0x10000011);
+    unsigned int f4 = flags & 4;
+    if (f4 || (flags & 8)) {
+        __as__5Vec2fFRC5Vec2f(&obj->a, &diff.v);
+        Vec2 z; z.x = c[2]; z.y = c[2];
+        __as__5Vec2fFRC5Vec2f(&obj->b, &z);
+        if (f4) {
+            float f = getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(acc, 0xfc7, 0);
+            Vec2 v; v.x = f; v.y = f;
+            __as__5Vec2fFRC5Vec2f(&obj->c, &v);
+            f = getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(acc, 0xfc9, 0);
+            Vec2 v2; v2.x = f; v2.y = f;
+            __as__5Vec2fFRC5Vec2f(&obj->d, &v2);
+        } else {
+            Vec2 v; v.x = c[3]; v.y = c[3];
+            __as__5Vec2fFRC5Vec2f(&obj->c, &v);
+            Vec2 v2; v2.x = c[3]; v2.y = c[3];
+            __as__5Vec2fFRC5Vec2f(&obj->d, &v2);
+        }
+    } else if (c[2] != len) {
+        float f = getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(acc, 0xfc7, 0);
+        Vec2 v; v.x = f; v.y = f;
+        __as__5Vec2fFRC5Vec2f(&obj->c, &v);
+        f = getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(acc, 0xfc9, 0);
+        Vec2 v2; v2.x = f; v2.y = f;
+        __as__5Vec2fFRC5Vec2f(&obj->d, &v2);
+        U s;
+        s.r = obj->get();
+        float sl = lengthSq__5Vec2fFv(&s.v);
+        if (c[2] != sl) {
+            n = diff;
+            normalize__5Vec2fFv(&n.v);
+            scale__FP5Vec2ff(&n.v, mtSqrtf(sl));
+            __as__5Vec2fFRC5Vec2f(&obj->a, &n.v);
+        }
+        n2 = diff;
+        normalize__5Vec2fFv(&n2.v);
+        scale__FP5Vec2ff(&n2.v, getConstantFloat__15soValueAccesserFP16soModuleAccesserUlUl(acc, 0xfc6, 0));
+        __as__5Vec2fFRC5Vec2f(&obj->b, &n2.v);
+    } else {
+        Vec2 z; z.x = c[2]; z.y = c[2];
+        __as__5Vec2fFRC5Vec2f(&obj->a, &z);
+        Vec2 z2; z2.x = c[2]; z2.y = c[2];
+        __as__5Vec2fFRC5Vec2f(&obj->b, &z2);
+    }
+    obj->update(acc);
+    if (c[2] != len) {
+        U s;
+        s.r = obj->get();
+        sv = s;
+        if (lengthSq__5Vec2fFv(&sv.v) > len) {
+            U s2;
+            s2.r = obj->get();
+            nl = s2;
+            normalize__5Vec2fFv(&nl.v);
+            scale__FP5Vec2ff(&nl.v, mtSqrtf(len));
+            if (nl.v.y < c[2]) nl.v.y *= c[13];
+            __as__5Vec2fFRC5Vec2f(&obj->a, &nl.v);
+        }
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_227EC {
+extern "C" {
+extern unsigned char lbl_113_data_A834[];
+extern unsigned char lbl_113_data_A8E8[];
+
+void fn_113_227EC(void* arg0, void* arg1, void* arg2) {
+    unsigned char* self = static_cast<unsigned char*>(arg0);
+    unsigned char* fields = static_cast<unsigned char*>(arg1);
+
+    self[0x04] = 0;
+    *(int*)(self + 0x0C) = 0x43;
+    *(int*)(self + 0x10) = 0xF9F;
+    *(int*)(self + 0x14) = 0x5DBF;
+    *(int*)(self + 0x18) = 0;
+    *(unsigned char**)(self + 0x08) = lbl_113_data_A834;
+    *(unsigned char**)(self + 0x00) = lbl_113_data_A834 + 8;
+    *(int*)(self + 0x15C) = 0;
+    *(unsigned char**)(self + 0x158) = lbl_113_data_A8E8;
+    *(void**)(self + 0x160) = arg2;
+    *(int*)(self + 0x164) = 5;
+    if (arg2 == 0) {
+        *(int*)(self + 0x164) = 0;
+    }
+    *(unsigned char**)(self + 0x1C) = fields;
+    *(unsigned char**)(self + 0x20) = fields + 0x04;
+    *(unsigned char**)(self + 0x24) = fields + 0x08;
+    *(unsigned char**)(self + 0x28) = fields + 0x0C;
+    *(unsigned char**)(self + 0x2C) = fields + 0x10;
+    *(unsigned char**)(self + 0x30) = fields + 0x14;
+    *(unsigned char**)(self + 0x34) = fields + 0x20;
+    *(unsigned char**)(self + 0x38) = fields + 0x24;
+    *(unsigned char**)(self + 0x3C) = fields + 0x28;
+    *(unsigned char**)(self + 0x40) = fields + 0x2C;
+    *(unsigned char**)(self + 0x44) = fields + 0x30;
+    *(unsigned char**)(self + 0x48) = fields + 0x34;
+    *(unsigned char**)(self + 0x4C) = fields + 0x38;
+    *(unsigned char**)(self + 0x50) = fields + 0x40;
+    *(unsigned char**)(self + 0x54) = fields + 0x44;
+    *(unsigned char**)(self + 0x58) = fields + 0x48;
+    *(unsigned char**)(self + 0x5C) = fields + 0x4C;
+    *(unsigned char**)(self + 0x60) = fields + 0x50;
+    *(unsigned char**)(self + 0x64) = fields + 0x54;
+    *(unsigned char**)(self + 0x68) = fields + 0x58;
+    *(unsigned char**)(self + 0x6C) = fields + 0x5C;
+    *(unsigned char**)(self + 0x70) = fields + 0x60;
+    *(unsigned char**)(self + 0x74) = fields + 0x64;
+    *(unsigned char**)(self + 0x78) = fields + 0x68;
+    *(unsigned char**)(self + 0x7C) = fields + 0x6C;
+    *(unsigned char**)(self + 0x80) = fields + 0x7C;
+    *(unsigned char**)(self + 0x84) = fields + 0x80;
+    *(unsigned char**)(self + 0x88) = fields + 0x88;
+    *(unsigned char**)(self + 0x8C) = fields + 0x90;
+    *(unsigned char**)(self + 0x90) = fields + 0x94;
+    *(unsigned char**)(self + 0x94) = fields + 0x98;
+    *(unsigned char**)(self + 0x98) = fields + 0x9C;
+    *(unsigned char**)(self + 0x9C) = fields + 0xA0;
+    *(unsigned char**)(self + 0xA0) = fields + 0xA4;
+    *(unsigned char**)(self + 0xA4) = fields + 0xA8;
+    *(unsigned char**)(self + 0xA8) = fields + 0xAC;
+    *(unsigned char**)(self + 0xAC) = fields + 0xB0;
+    *(unsigned char**)(self + 0x124) = fields + 0x18;
+    *(unsigned char**)(self + 0x128) = fields + 0x1C;
+    *(unsigned char**)(self + 0x12C) = fields + 0x3C;
+    *(unsigned char**)(self + 0x130) = fields + 0x70;
+    *(unsigned char**)(self + 0x134) = fields + 0x74;
+    *(unsigned char**)(self + 0x138) = fields + 0x78;
+    *(unsigned char**)(self + 0x13C) = fields + 0x84;
+    *(unsigned char**)(self + 0x140) = fields + 0x8C;
+}
+}
+}
+

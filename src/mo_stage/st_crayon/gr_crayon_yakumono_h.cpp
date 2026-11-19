@@ -652,3 +652,25 @@ static s32 GetMoveVector(float* point) {
     }
     return (index - 1) * 45;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_5474 {
+extern "C" s32 fn_56_5474(void) {
+    return -0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_6664 {
+extern "C" s32 fn_56_6664(void) {
+    return 0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_AE5C {
+extern "C" s32 fn_56_AE5C(void) {
+    return 0x0;
+}
+}
+

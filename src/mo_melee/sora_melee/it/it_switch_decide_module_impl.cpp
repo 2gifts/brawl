@@ -19,3 +19,28 @@ int itSwitchDecideModuleImpl::decideSwitch(int kind, soArrayContractibleTable<co
         return fn_27_7B610(this, kind, args, acc);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_2BDF40 {
+extern "C" char lbl_27_bss_71A0[4];
+
+extern "C" char* fn_27_2BDF40(void)
+{
+    return lbl_27_bss_71A0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_2BDF4C {
+extern "C" {
+void __dl__FPv(void* p);
+
+void* fn_27_2BDF4C(void* p, s32 n) {
+    if (p != nullptr && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+}
+

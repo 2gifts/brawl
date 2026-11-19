@@ -891,3 +891,123 @@ void fn_116_DD28(u8* self) { ((Fighter*)(self - 0xF4))->Fighter::notifyEventBeat
 void fn_116_DD30(u8* self, float unk1) { ((Fighter*)(self - 0xF4))->Fighter::notifyEventSetDamage(unk1); }
 void fn_116_DD38(u8* self, float unk1, float unk2, soModuleAccesser* moduleAccesser) { ((Fighter*)(self - 0x100))->Fighter::notifyEventTurn(unk1, unk2, moduleAccesser); }
 } // extern "C"
+
+#include <wn/weapon.h>
+#include <ft/fighter.h>
+#include <so/resource/so_resource_module_impl.h>
+#include <so/resource/so_resource_id_accesser.h>
+#include <so/work/so_work_manage_module_impl.h>
+// TODO: clean up, give variables real names
+namespace jj_98D8 {
+struct Obj {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3(); virtual void v4();
+    virtual void v5(); virtual void v6(); virtual void v7(); virtual void v8(); virtual void v9();
+    virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14();
+    virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
+    virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24();
+    virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
+    virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(); virtual void v34();
+    virtual void v35(); virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39();
+    virtual void v40(); virtual void v41(); virtual void v42(); virtual void v43(); virtual void v44();
+    virtual void v45(); virtual void v46(); virtual void v47(); virtual void v48(); virtual void v49();
+    virtual void v50(); virtual void v51(); virtual void v52(); virtual void v53(); virtual void v54();
+    virtual void v55(int, int, int, int);
+};
+
+extern "C" void fn_116_98D8(void* self, int a, int b)
+{
+    char* p = (char*)self;
+    p = *(char**)(p + 0x60);
+    p = *(char**)(p + 0xd8);
+    Obj* o = *(Obj**)(p + 0x5c);
+    o->v55(a, 0, b, -1);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9F2C {
+extern "C" {
+extern const float lbl_116_rodata_8;
+void fn_27_3772A8(void*);
+void notifyEventCollisionAttackCheck__7FighterFUl(void*, unsigned int);
+
+void fn_116_9F2C(void* self, unsigned int flags) {
+    if (lbl_116_rodata_8 != *reinterpret_cast<float*>(
+            static_cast<unsigned char*>(self) + 0x114)) {
+        fn_27_3772A8(static_cast<unsigned char*>(self) + 0x17FBC);
+    }
+    notifyEventCollisionAttackCheck__7FighterFUl(self, flags);
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_9FF0 {
+
+
+struct Local {
+    float x, y, z;
+    Local(const Local&);
+};
+
+class Object_vptr_0 {
+public:
+    virtual void isNull__10soNullableCFv();
+    virtual void slot1();
+    virtual void slot2();
+    virtual void slot3();
+    virtual Local slot4();
+    virtual void slot5();
+    virtual void slot6();
+    virtual void slot7();
+    virtual void slot8();
+    virtual float slot9();
+    virtual void slot10();
+    virtual void slot11();
+    virtual void slot12();
+    virtual void slot13();
+    virtual void slot14();
+    virtual void slot15();
+};
+
+extern "C" {
+extern const char __RTTI__7Fighter[], __RTTI__11StageObject[];
+void* __dynamic_cast(void*, long, const void*, const void*, short);
+int getTeam__7ftOwnerFv(ftOwner*);
+void activate__18wnPokeLizardonRockFUlUliRC5Vec3fff(Weapon*, unsigned, unsigned, int, const Local*, float, float);
+}
+
+extern "C" int activeArticle__14ftPokeLizardonFP18wnPokeLizardonRockP16soModuleAccesser(Weapon* self, soModuleAccesser* accesser) {
+    Object_vptr_0* node;
+    soResourceModule* resource;
+    int taskId;
+    StageObject* obj;
+    const soModuleEnumeration* modules = accesser->m_enumerationStart;
+    node = reinterpret_cast<Object_vptr_0*>(modules->m_postureModule);
+    obj = accesser->m_stageObject;
+    resource = modules->m_resourceModule;
+    taskId = obj->m_taskId;
+    float vf;
+    float cf;
+    cf = soValueAccesser::getConstantFloat(accesser, 0xFB1, 0);
+    vf = node->slot9();
+    Local local = node->slot4();
+    Fighter* fighter = static_cast<Fighter*>(__dynamic_cast(obj, 0x3C, __RTTI__7Fighter, __RTTI__11StageObject, 1));
+    node = reinterpret_cast<Object_vptr_0*>(getTeam__7ftOwnerFv(fighter->getOwner()));
+    int iv = resource->getResourceIdAccesser()->getEtcResId();
+    activate__18wnPokeLizardonRockFUlUliRC5Vec3fff(self, taskId, iv, reinterpret_cast<int>(node), &local, vf, cf);
+    int value = self->getTaskId();
+    accesser->m_enumerationStart->m_workManageModule->setInt(value, 0x10000041);
+    return 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_DD08 {
+extern "C" void fn_116_98D8(void*);
+
+extern "C" void fn_116_DD08(void* self) {
+    fn_116_98D8(reinterpret_cast<u8*>(self) - 0xf4);
+}
+}
+

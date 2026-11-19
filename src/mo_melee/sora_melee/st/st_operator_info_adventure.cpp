@@ -110,3 +110,22 @@ void stOperatorInfoAdventure::renderDebug() {
 void stOperatorInfoAdventure::stopOperatorRequest() {
     m_isStopRequest = true;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_25A69C {
+extern "C" void* __dt__10stOperatorFv(void* p, int flag);
+extern "C" void __dl__FPv(void* p);
+
+extern "C" void* fn_27_25A69C(void* p, int flag) {
+    if (p) {
+        if (p) {
+            __dt__10stOperatorFv(p, 0);
+        }
+        if (flag > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+

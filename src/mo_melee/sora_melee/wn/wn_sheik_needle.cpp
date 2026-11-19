@@ -68,3 +68,120 @@ bool wnSheikNeedle::notifyEventCollisionAttackCheck(u32 flags) {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_33DEA8 {
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* __dt__26wnSheikNeedleParamAccesserFv(void* ptr, int size) {
+    if (ptr != 0 && size > 0)
+        __dl__FPv(ptr);
+    return ptr;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_33DEE8 {
+extern "C" void* fn_27_33DEE8(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x4b4;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_33EC7C {
+extern "C" void fn_27_33EC7C(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_33EC80 {
+extern "C" void* fn_27_33EC80(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x9c;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_33EC88 {
+extern "C" void* fn_27_33EC88(void* self) {
+    return reinterpret_cast<u8*>(self) + 0xdc;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_33EC90 {
+extern "C" void* fn_27_33EC90(void* self) {
+    return reinterpret_cast<u8*>(self) + 0xb8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3414F8 {
+extern "C" void fn_27_33D590(void*);
+
+extern "C" void fn_27_3414F8(void* self) {
+    fn_27_33D590(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_341500 {
+extern "C" void fn_27_33D590(void*);
+
+extern "C" void fn_27_341500(void* self) {
+    fn_27_33D590(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_341508 {
+extern "C" void fn_27_33D590(void*);
+
+extern "C" void fn_27_341508(void* self) {
+    fn_27_33D590(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_341510 {
+extern "C" void __dt__13wnSheikNeedleFv(void*);
+
+extern "C" void fn_27_341510(void* self) {
+    __dt__13wnSheikNeedleFv(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_341518 {
+extern "C" void notifyEventCollisionAttackCheck__13wnSheikNeedleFUl(void*);
+
+extern "C" void fn_27_341518(void* self) {
+    notifyEventCollisionAttackCheck__13wnSheikNeedleFUl(reinterpret_cast<u8*>(self) - 0x70);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_341520 {
+extern "C" void __dt__13wnSheikNeedleFv(void*);
+
+extern "C" void fn_27_341520(void* self) {
+    __dt__13wnSheikNeedleFv(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_341528 {
+extern "C" void fn_27_341280(void*);
+
+extern "C" void fn_27_341528(void* self) {
+    fn_27_341280(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_341530 {
+extern "C" void __dt__13wnSheikNeedleFv(void*);
+
+extern "C" void fn_27_341530(void* self) {
+    __dt__13wnSheikNeedleFv(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

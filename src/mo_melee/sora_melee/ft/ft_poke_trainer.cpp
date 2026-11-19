@@ -1226,3 +1226,190 @@ template soMotionModuleBuilder<ftPokeTrainerMBallMotionConfig>::~soMotionModuleB
 template soMotionModuleBuilder<ftPokeTrainerFinalMotionConfig>::~soMotionModuleBuilder();
 
 soCollisionAttackModuleBuilder<soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 7, 0, soCollisionAttackModuleImpl, 1, false, true> >::~soCollisionAttackModuleBuilder() { }
+
+#include <stddef.h>
+// TODO: clean up, give variables real names
+namespace jj_378E94 {
+extern "C" {
+void fn_27_378F90(void*, int);
+void fn_27_3790E4(void*, int);
+void __dt__7FighterFv(void*, short);
+void __dl__FPv(void*);
+void* fn_27_378E94(void* p, int del);
+}
+
+extern "C" {
+void* fn_27_378E94(void* p, int del) {
+    if (p) {
+        char* base = (char*)p;
+        if (base + 0x194 != 0) {
+            fn_27_378F90(base + 0x6928, -1);
+            fn_27_3790E4(base + 0x194, 0);
+        }
+        __dt__7FighterFv(p, 0);
+        if (del > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_378F90 {
+extern "C" {
+void __dt__16acCmdInterpreterFv(void* p, short flag);
+void __dl__FPv(void* p);
+
+void* fn_27_378F90(void* p, int flag) {
+    if (p != NULL) {
+        if ((char*)p + 0x1510) {
+            void* o1 = (void*)((char*)p + 0x15EC);
+            if (o1 != NULL) {
+                __dt__16acCmdInterpreterFv(o1, 0);
+            }
+        }
+        {
+            void* o2 = (void*)((char*)p + 0x13EC);
+            if (o2 != NULL && o2 != NULL) {
+                __dt__16acCmdInterpreterFv(o2, 0);
+            }
+        }
+        if ((char*)p + 0x12C0) {
+            void* o3 = (void*)((char*)p + 0x139C);
+            if (o3 != NULL) {
+                __dt__16acCmdInterpreterFv(o3, 0);
+            }
+        }
+        if ((char*)p + 0x1194) {
+            void* o4 = (void*)((char*)p + 0x1270);
+            if (o4 != NULL) {
+                __dt__16acCmdInterpreterFv(o4, 0);
+            }
+        }
+        if ((char*)p + 0x1068) {
+            void* o5 = (void*)((char*)p + 0x1144);
+            if (o5 != NULL) {
+                __dt__16acCmdInterpreterFv(o5, 0);
+            }
+        }
+        if ((char*)p + 0xF3C) {
+            void* o6 = (void*)((char*)p + 0x1018);
+            if (o6 != NULL) {
+                __dt__16acCmdInterpreterFv(o6, 0);
+            }
+        }
+        if ((char*)p + 0xE10) {
+            void* o7 = (void*)((char*)p + 0xEEC);
+            if (o7 != NULL) {
+                __dt__16acCmdInterpreterFv(o7, 0);
+            }
+        }
+        if ((char*)p + 0xCE4) {
+            void* o8 = (void*)((char*)p + 0xDC0);
+            if (o8 != NULL) {
+                __dt__16acCmdInterpreterFv(o8, 0);
+            }
+        }
+        if ((char*)p + 0xBB8) {
+            void* o9 = (void*)((char*)p + 0xC94);
+            if (o9 != NULL) {
+                __dt__16acCmdInterpreterFv(o9, 0);
+            }
+        }
+        if ((char*)p + 0xA8C) {
+            void* o10 = (void*)((char*)p + 0xB68);
+            if (o10 != NULL) {
+                __dt__16acCmdInterpreterFv(o10, 0);
+            }
+        }
+        if (p != NULL) {
+            void* o11 = (void*)((char*)p + 0xA3C);
+            if (o11 != NULL) {
+                __dt__16acCmdInterpreterFv(o11, 0);
+            }
+        }
+        if (flag > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_379358 {
+extern "C" void __dt__14soAreaInstanceFv(void* p, int n);
+extern "C" void __destroy_arr(void* p, void (*dtor)(void*, int), unsigned long elemSize, unsigned long count);
+extern "C" void* __dt__34soAreaEnviromentElementCheckerImplFv(void* p, short n);
+extern "C" void* __dt__16soAreaModuleImplFv(void* p, short n);
+extern "C" void __dl__FPv(void* p);
+
+extern "C" void* fn_27_379358(void* self, int flag) {
+    if (self) {
+        if ((char*)self + 0xD8) {
+            __destroy_arr((char*)self + 0xE4, __dt__14soAreaInstanceFv, 0x24, 1);
+        }
+        __dt__34soAreaEnviromentElementCheckerImplFv((char*)self + 0x50, -1);
+        __dt__16soAreaModuleImplFv((char*)self + 4, -1);
+        if (flag > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_379484 {
+extern "C" {
+void* __dt__33soGenerateArticleManageModuleImplFv(void*, short);
+void __dt__18wnPokeTrainerMBallFv(void*, int);
+void __dt__18wnPokeTrainerFinalFv(void*, int);
+void __dt__22soArticleEventObserverFv(void*, int);
+void __destroy_arr(void*, void (*)(void*, int), unsigned long, unsigned long);
+void __dl__FPv(void*);
+}
+
+extern "C" void* fn_27_379484(char* self, int flags) {
+    if (self) {
+        __dt__33soGenerateArticleManageModuleImplFv(self + 0x3A2C, -1);
+        if (self + 0x40 && self + 0x40) {
+            if (self + 0x48 && self + 0x48) {
+                if (self + 0x20C8 && self + 0x20D0) {
+                    __dt__18wnPokeTrainerMBallFv(self + 0x20D4, -1);
+                }
+                if (self + 0x48 && self + 0x48 && self + 0x4C && self + 0x54) {
+                    __dt__18wnPokeTrainerFinalFv(self + 0x58, -1);
+                }
+            }
+        }
+        if (self + 0x14) {
+            __destroy_arr(self + 0x20, __dt__22soArticleEventObserverFv, 0x10, 2);
+        }
+        if (flags > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_37B128 {
+extern "C" void* __dt__16soLinkModuleImplFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_27_37B128(void* p, int flag) {
+    if (p != 0) {
+        __dt__16soLinkModuleImplFv(static_cast<unsigned char*>(p) + 0x178, -1);
+        if (flag > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+

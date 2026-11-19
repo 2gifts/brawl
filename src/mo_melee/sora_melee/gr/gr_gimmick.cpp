@@ -708,3 +708,678 @@ void grGimmick::update(float deltaFrame) {
         updateProduction(deltaFrame);
     }
 }
+
+#include <revolution/OS.h>
+#include <nw4r/g3d/g3d_resmdl.h>
+#include <snd/snd_3d_generator.h>
+// TODO: clean up, give variables real names
+namespace jj_26A5A4 {
+extern "C" void __dl__FPv(void* p);
+
+extern "C" void* fn_27_26A5A4(void* p, s32 n) {
+    if (p != nullptr && n > 0) {
+        __dl__FPv(p);
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_26A664 {
+
+struct SimpleSoundData {
+    u32 id;
+    u16 repeatFrame;
+};
+
+extern "C" grVisibleProduction* fn_27_271170(grGimmick* owner, const SimpleSoundData* data);
+
+extern "C" void createSoundEffectVisibleProductionForExcel__9grGimmickFUlUlUl(
+    grGimmick* owner, const SimpleSoundData* data, const u32* index, grVisibleProduction** outputs) {
+    if (data->id != 0xFFFFFFFFUL) {
+        outputs[*index] = fn_27_271170(owner, data);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_26ACA8 {
+
+extern "C" {
+extern unsigned char g_stIsJustGameFrame;
+extern const float lbl_27_rodata_4388;
+extern char lbl_27_data_56744[];
+
+int isExistEffect__5ecMgrFUl(ecMgr*, int);
+void fn_27_26D35C(void*, unsigned int);
+}
+
+struct Pair {
+    float x, y;
+
+    Pair(float a, float b) : x(a), y(b) {}
+};
+
+struct GimmickEffect {
+    unsigned short state;
+    unsigned char pad02[2];
+    float timer;
+    int handle;
+    int effectID;
+    int duration;
+    int unk14;
+    unsigned char pad18[2];
+    unsigned short unk1A;
+    Pair offset;
+    unsigned char pad24[4];
+};
+
+struct Gimmick {
+    void* unk00;
+    unsigned char pad04[0xA8];
+    unsigned int effectCount;
+    GimmickEffect* effects;
+};
+
+extern "C" void updataGimmickEffect__9grGimmickFf(Gimmick* self, float dt) {
+    if (g_stIsJustGameFrame == 0)
+        return;
+
+    int offset;
+    unsigned int i = 0;
+    offset = 0;
+
+#define EFFECT ((GimmickEffect*)((char*)self->effects + offset))
+
+    while (i < self->effectCount) {
+        if (EFFECT->effectID != 0) {
+            if (EFFECT->state == 1 &&
+                (float)EFFECT->duration <= EFFECT->timer) {
+                EFFECT->handle = g_ecMgr->setEffect((EfID)EFFECT->effectID);
+
+                if (EFFECT->handle == 0)
+                    OSReport(lbl_27_data_56744, self->unk00, EFFECT->effectID);
+
+                EFFECT->state = 2;
+                EFFECT->timer = lbl_27_rodata_4388;
+            }
+
+            if (EFFECT->handle >= 0 && EFFECT->state == 2) {
+                fn_27_26D35C(self, i);
+
+                if (isExistEffect__5ecMgrFUl(g_ecMgr, EFFECT->handle) == 0 &&
+                    EFFECT->handle >= 0) {
+                    g_ecMgr->endEffect(EFFECT->handle);
+                    GimmickEffect& effect = *EFFECT;
+                    effect.state = 0;
+                    effect.timer = lbl_27_rodata_4388;
+                    effect.handle = -1;
+                    effect.unk1A = 0;
+                    effect.offset = Pair(lbl_27_rodata_4388, lbl_27_rodata_4388);
+                }
+
+                if (EFFECT->unk14 != 0 &&
+                    (float)EFFECT->unk14 <= EFFECT->timer &&
+                    EFFECT->handle >= 0) {
+                    g_ecMgr->endEffect(EFFECT->handle);
+                    GimmickEffect& effect = *EFFECT;
+                    effect.state = 0;
+                    effect.timer = lbl_27_rodata_4388;
+                    effect.handle = -1;
+                    effect.unk1A = 0;
+                    effect.offset = Pair(lbl_27_rodata_4388, lbl_27_rodata_4388);
+                }
+            }
+
+            EFFECT->timer += dt;
+        }
+
+        offset += 0x28;
+        ++i;
+    }
+
+#undef EFFECT
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_26AF10 {
+
+extern int lbl_27_data_5677C;
+extern int lbl_27_data_56780;
+
+class AttachedEffect {
+public:
+    virtual void v0();
+    virtual void v1(float frame);
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual int v11();
+    int field;
+};
+
+extern "C" void updateProduction__9grGimmickFf(grGimmick* self, float frame) {
+    char* p = reinterpret_cast<char*>(self);
+    int hasB = 0;
+    int allOk = 1;
+    for (int i = 0; i < 10; i++) {
+        if (*reinterpret_cast<AttachedEffect**>(p + 0xFC) != 0) {
+            (*reinterpret_cast<AttachedEffect**>(p + 0xFC))->v1(frame);
+            if ((*reinterpret_cast<AttachedEffect**>(p + 0xFC))->v11() != 0) {
+                (*reinterpret_cast<AttachedEffect**>(p + 0xFC))->field = lbl_27_data_5677C;
+            }
+        }
+        if (*reinterpret_cast<AttachedEffect**>(p + 0x124) != 0) {
+            hasB = 1;
+            (*reinterpret_cast<AttachedEffect**>(p + 0x124))->v1(frame);
+            if ((*reinterpret_cast<AttachedEffect**>(p + 0x124))->v11() != 0) {
+                (*reinterpret_cast<AttachedEffect**>(p + 0x124))->field = lbl_27_data_56780;
+            } else {
+                allOk = 0;
+            }
+        }
+        p += 4;
+    }
+    if (hasB != 0 && allOk != 0) {
+        self->Ground::setVisibilityAttachedEffect(0);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_26B02C {
+struct Object {
+    int unknown;
+    int index;
+};
+
+typedef void (Object::*Callback)();
+
+struct Table {
+    Callback entries[4];
+};
+
+extern const Table lbl_27_rodata_4358;
+
+extern "C" void fn_27_26B02C(Object* self) {
+    Table table = lbl_27_rodata_4358;
+    (self->*table.entries[self->index])();
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_26B25C {
+typedef unsigned char u8;
+struct GimmickBase { char pad[0x3c]; };
+class grGimmick : public GimmickBase {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void v12();
+    virtual void v13();
+    virtual void v14();
+    virtual void v15();
+    virtual void v16();
+    virtual void v17();
+    virtual void v18();
+    virtual void v19();
+    virtual void v20();
+    virtual void v21();
+    virtual void v22();
+    virtual void v23();
+    virtual void v24();
+    virtual void v25();
+    virtual void v26();
+    virtual void v27();
+    virtual void v28();
+    virtual void v29();
+    virtual void v30();
+    virtual void v31();
+    virtual void v32();
+    virtual void v33();
+    virtual void v34();
+    virtual void v35();
+    virtual void v36();
+    virtual void v37();
+    virtual void v38();
+    virtual void v39();
+    virtual void v40();
+    virtual void v41();
+    virtual void v42();
+    virtual void v43();
+    virtual void v44();
+    virtual void v45();
+    virtual void v46();
+    virtual void v47();
+    virtual void v48();
+    virtual void v49();
+    virtual void v50();
+    virtual void v51();
+    virtual void v52();
+    virtual void v53();
+    virtual void v54();
+    virtual void v55();
+    virtual void v56();
+    virtual void v57();
+    virtual void v58();
+    virtual void v59();
+    virtual void v60();
+    virtual void v61();
+    virtual void v62();
+    virtual void v63();
+    virtual void v64();
+    virtual void v65();
+    virtual void v66();
+    virtual void v67();
+    virtual void v68();
+    virtual void v69();
+    virtual void v70();
+    virtual void v71();
+    virtual void v72();
+    virtual void v73();
+    virtual void v74();
+    virtual void v75();
+    virtual void v76();
+    virtual void v77();
+    virtual void v78();
+    virtual const char* getTgtNode();
+    char pad40[4];
+    void** models;
+    char pad48[0x78];
+    int nodeIndex;
+    int targetNodeIndex;
+    u8 nodeSet;
+};
+extern "C" u8 setNode__9grGimmickFv(grGimmick* self) {
+    if (self->nodeSet == 1) return 1;
+    int valid = 0;
+    int nodeId = valid;
+    nw4r::g3d::ResMdl resource;
+    void* model = *self->models;
+    if (model == 0) return 0;
+    resource = nw4r::g3d::ResMdl(*(void**)((char*)model + 0xe8));
+    if (!resource.IsValid()) return 0;
+    self->nodeIndex = nodeId;
+    nw4r::g3d::ResNode node = resource.GetResNode(self->getTgtNode());
+    if (node.IsValid()) {
+        nodeId = node.IsValid() ? node.ptr()->m_nodeIndex : nodeId;
+        self->targetNodeIndex = nodeId;
+    }
+    if (self->nodeIndex != 0xffffffff && self->targetNodeIndex != 0xffffffff) valid = 1;
+    else valid = 0;
+    if (valid != 0) self->nodeSet = 1;
+    return self->nodeSet;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_26BB1C {
+extern "C" void __dla__FPv(void*);
+extern "C" void* __nwa__FUlQ25Heaps8HeapType(unsigned long, int);
+extern "C" void __ct__18grNodeCallbackDataFv();
+extern "C" void* __construct_new_array(
+    void*, void (*)(), void*, unsigned long, int);
+extern "C" void setIdentity__6MatrixFv(void*);
+
+extern const float lbl_27_rodata_4388;
+extern const float lbl_27_rodata_4398;
+
+struct Data {
+    float a, b, c, d, e, f, g, h, i;
+    float j, k, l, m, n, o, p, q, r;
+
+    Data()
+        : a(lbl_27_rodata_4388),
+          b(lbl_27_rodata_4388),
+          c(lbl_27_rodata_4388),
+          d(lbl_27_rodata_4388),
+          e(lbl_27_rodata_4388),
+          f(lbl_27_rodata_4388),
+          g(lbl_27_rodata_4398),
+          h(lbl_27_rodata_4398),
+          i(lbl_27_rodata_4398),
+          j(lbl_27_rodata_4388),
+          k(lbl_27_rodata_4388),
+          l(lbl_27_rodata_4388),
+          m(lbl_27_rodata_4388),
+          n(lbl_27_rodata_4388),
+          o(lbl_27_rodata_4388),
+          p(lbl_27_rodata_4398),
+          q(lbl_27_rodata_4398),
+          r(lbl_27_rodata_4398) {}
+};
+
+struct Callback {
+    int a, b;
+    Data data;
+    char matrix[48];
+};
+
+struct Gimmick {
+    char pad[0xD4];
+    Callback* callbacks;
+    unsigned long count;
+    int used;
+};
+
+extern "C" void makeCalcuCallback__9grGimmickFUlQ25Heaps8HeapType(
+    Gimmick* self, unsigned long count, int heap)
+{
+    if (self->callbacks) {
+        if (self->callbacks)
+            __dla__FPv((char*)self->callbacks - 16);
+    }
+
+    self->callbacks = 0;
+    self->count = count;
+    self->used = 0;
+    self->callbacks = (Callback*)__construct_new_array(
+        __nwa__FUlQ25Heaps8HeapType(count * 128 + 16, heap),
+        __ct__18grNodeCallbackDataFv, 0, 128, count);
+
+    for (int i = 0; i < (int)count; i++) {
+        Callback* cb = &self->callbacks[i];
+        cb->a = 0;
+        cb->b = 0;
+        cb->data = Data();
+        setIdentity__6MatrixFv(cb->matrix);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_26CE10 {
+struct Vec3f;
+
+struct Vec3f {
+    float x, y, z;
+};
+
+struct Vec2f {
+    float x, y;
+
+    Vec2f(float a, float b) : x(a), y(b) {}
+};
+
+struct SEInfo {
+    short state;
+    short pad2;
+    float frames;
+    int handle;
+    unsigned int sndId;
+    char pad10[8];
+    unsigned short unk18;
+    unsigned short generator;
+    Vec2f offset;
+    float scale;
+};
+
+struct GimmickPos {
+    int unk0;
+    unsigned int flags;
+    Vec3f pos;
+    char pad14[0x48];
+    float prevX;
+    char pad60[0xC];
+    float prevY;
+    char pad70[0xC];
+    float prevZ;
+    void updatePos() {
+        if (flags & 8) {
+            float z = prevZ;
+            float y = prevY;
+            float x = prevX;
+            setPos(z, y, x);
+        }
+    }
+    void setPos(float z, float y, float x) {
+        pos.x = x;
+        pos.y = y;
+        pos.z = z;
+    }
+};
+
+struct Ground_base {
+    int unk0;
+    char pad4[0x38];
+};
+
+class Ground : public Ground_base {
+public:
+    virtual void processDefault();
+    virtual void processBegin();
+    virtual void slot2();
+    virtual void slot3();
+    virtual void processPreMapCorrection();
+    virtual void processMapCorrection();
+    virtual void processFixPosition();
+    virtual void processPreCollision();
+    virtual void processCollision();
+    virtual void processCatch();
+    virtual void processHit();
+    virtual void processCamera();
+    virtual void processFixCamera();
+    virtual void processEffect();
+    virtual void processGameProc();
+    virtual void processEnd();
+    virtual void renderPre();
+    virtual void renderOpa();
+    virtual void renderXlu();
+    virtual void processDebug();
+    virtual void slot20();
+    virtual void init();
+    virtual void slot22();
+    virtual void slot23();
+    virtual void loadGroundData();
+    virtual void slot25();
+    virtual void setupMelee();
+    virtual void slot27();
+    virtual void setVisibilityByClipping();
+    virtual void slot29();
+    virtual void receiveCollMsg();
+    virtual void slot31();
+    virtual void receiveCollMsg_Heading();
+    virtual void receiveCollMsg_Wall();
+    virtual void receiveCollMsg_Attack();
+    virtual void unloadData();
+    virtual void getModelCount();
+    virtual void slot37();
+    virtual void slot38();
+    virtual void setStageData();
+    virtual void getStageData();
+    virtual void initStageData();
+    virtual void setMdlIndex();
+    virtual void getMdlIndex();
+    virtual void isEnableCalcCollision();
+    virtual void enableCalcCollision();
+    virtual void disableCalcCollision();
+    virtual void getNodeIndex();
+    virtual void getNodePosition();
+    virtual void getNodePosition_2();
+    virtual void getNodeMatrix(float (*mtx)[4], unsigned long unk, unsigned long node);
+};
+
+class grGimmick : public Ground {
+public:
+    char pad40[0x60];
+    snd3DGenerator* generators;
+    char padA4[4];
+    SEInfo* sounds;
+    char padAC[0x28];
+    GimmickPos* unkD4;
+};
+
+extern "C" {
+void stopSE__14snd3DGeneratorFll(snd3DGenerator*, int, int);
+int prepareSE__14snd3DGeneratorF5SndIDl(snd3DGenerator*, unsigned int, int);
+void setPos__14snd3DGeneratorFP5Vec3f(snd3DGenerator*, Vec3f*);
+int isPlay__14snd3DGeneratorFl(snd3DGenerator*, int);
+void OSReport(const char*, ...);
+}
+
+extern const float lbl_27_rodata_4388;
+extern char lbl_27_data_568B0[];
+
+inline void updateSoundPos(grGimmick* self, unsigned long index)
+{
+        if (self->sounds[(int)index].sndId != -1) {
+            unsigned short node = self->sounds[(int)index].unk18;
+            if (node == 0) {
+                Vec3f pos;
+                GimmickPos* p = self->unkD4;
+
+                if (p != 0) {
+                    p->updatePos();
+                    __memcpy(&pos, &self->unkD4->pos, sizeof(pos));
+                } else {
+                    pos.x = lbl_27_rodata_4388;
+                    pos.y = lbl_27_rodata_4388;
+                    pos.z = lbl_27_rodata_4388;
+                }
+
+                setPos__14snd3DGeneratorFP5Vec3f(
+                    self->generators + self->sounds[(int)index].generator,
+                    &pos);
+            } else {
+                float mtx[3][4];
+                self->getNodeMatrix(mtx, 0, node);
+
+                Vec3f pos;
+                float z = mtx[2][3];
+                float y = mtx[1][3];
+                float x = mtx[0][3];
+                pos.y = y;
+                pos.x = x;
+                pos.z = z;
+
+                setPos__14snd3DGeneratorFP5Vec3f(
+                    self->generators + self->sounds[(int)index].generator,
+                    &pos);
+            }
+        }
+}
+
+extern "C" void startGimmickSE__9grGimmickFUl(grGimmick* self, unsigned long index)
+{
+    if (self->sounds[index].sndId != -1) {
+        if (self->sounds[index].handle != -1 &&
+            isPlay__14snd3DGeneratorFl(
+                self->generators + self->sounds[index].generator,
+                self->sounds[index].handle) != 0) {
+            if (self->sounds[(int)index].handle >= 0) {
+                stopSE__14snd3DGeneratorFll(
+                    self->generators + self->sounds[(int)index].generator,
+                    self->sounds[(int)index].handle,
+                    0);
+
+                SEInfo& sound = self->sounds[(int)index];
+                sound.state = 0;
+                sound.frames = lbl_27_rodata_4388;
+                sound.handle = -1;
+                sound.generator = 0;
+                sound.offset = Vec2f(lbl_27_rodata_4388, lbl_27_rodata_4388);
+            }
+        }
+
+        self->sounds[index].state = 1;
+        self->sounds[index].frames = lbl_27_rodata_4388;
+        self->sounds[index].handle = prepareSE__14snd3DGeneratorF5SndIDl(
+            self->generators + self->sounds[index].generator,
+            self->sounds[index].sndId,
+            -1);
+
+        if (self->sounds[index].handle == -1) {
+            self->sounds[index].state = 0;
+            OSReport(lbl_27_data_568B0, self->sounds[index].sndId, self->unk0);
+            return;
+        }
+
+        updateSoundPos(self, index);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_26D798 {
+extern "C" int lbl_27_data_568E0;
+extern "C" int lbl_27_data_568E4;
+extern "C" void setVisibilityAttachedEffect__6GroundFUl(void*, unsigned long);
+
+class AttachedEffect {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11();
+    virtual void* v12();
+    int field;
+};
+
+struct grGimmick {
+    unsigned char pad[0xFC];
+    AttachedEffect* effects_a[10];
+    AttachedEffect* effects_b[10];
+};
+
+extern "C" void setVisibilityAttachedEffect__9grGimmickFUl(grGimmick* self, unsigned long visible) {
+    int found = 1;
+    if (visible != 0) {
+        for (int i = 0; i < 10; i++) {
+            if (self->effects_a[i] != 0) {
+                if (self->effects_a[i]->v12() != 0) {
+                    AttachedEffect* other = self->effects_b[i];
+                    if (other != 0) {
+                        other->field = lbl_27_data_568E0;
+                    }
+                    self->effects_a[i]->v4();
+                }
+            }
+        }
+        setVisibilityAttachedEffect__6GroundFUl(self, 1);
+        return;
+    }
+    if (visible == 0) {
+        for (int i = 0; i < 10; i++) {
+            if (self->effects_b[i] != 0) {
+                if (self->effects_b[i]->v12() != 0) {
+                    AttachedEffect* other = self->effects_a[i];
+                    if (other != 0) {
+                        other->field = lbl_27_data_568E4;
+                    }
+                    self->effects_b[i]->v4();
+                    found = 0;
+                }
+            }
+        }
+        if (found != 0) {
+            setVisibilityAttachedEffect__6GroundFUl(self, 0);
+        }
+    }
+}
+}
+

@@ -160,3 +160,365 @@ setData:
         part->initPos(m_48, modelModule, collision);
     }
 }
+
+#include <so/event/so_event_system.h>
+#include <so/so_array_vector_calculator.h>
+#include <so/collision/so_collision_group.h>
+// TODO: clean up, give variables real names
+namespace jj_4DCA4 {
+
+class soCollisionSearchEventObserver;
+
+extern "C" {
+extern char lbl_27_data_4A88[], lbl_27_data_4958[], lbl_27_data_4A40[], lbl_27_data_46F8[], lbl_27_data_4950[], __RTTI__11soEventUnit[];
+extern char __vt__21soStatusEventObserver[], __vt__22soAnimCmdEventObserver[];
+extern float lbl_27_rodata_530;
+void __construct_array(void*, void (*)(void*), void (*)(void*), unsigned long, int);
+void __ct__16soCollisionGroupFv(void*);
+void __dt__16soCollisionGroupFv(void*);
+void fn_27_35C3C(void*, int, int, int, int, void*, int);
+void* __dynamic_cast(void*, long, const void*, const void*, long);
+}
+
+struct Getter {
+    virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
+    virtual void v4(); virtual void v5(); virtual void v6(); virtual short get();
+};
+
+struct Item {
+    virtual void v0(); virtual void v1(); virtual int slot2();
+};
+
+struct Module {
+    char pad[0x18];
+    Item* item;
+    char pad2[0x64];
+    char* obj;
+};
+
+struct Owner {
+    char pad[0xd8];
+    Module* module;
+};
+
+struct Obs {
+    virtual void addObserver(short, signed char);
+    short id, type, link;
+};
+
+struct Obs3 {
+    void* vt;
+    short id, type;
+    void* unit;
+};
+
+struct Self {
+    void* vt;
+    Obs obs1, obs2;
+    Obs3 obs3;
+    Owner* owner;
+    unsigned int f2c;
+    float f30;
+    void* calc;
+    void* calc2;
+    unsigned int top : 4;
+    unsigned int mode : 2;
+    unsigned int enabled : 1;
+    unsigned int rest : 25;
+    char groups[0x78];
+    char pad[0x3c];
+    void* cache;
+    int fF8, fFC;
+    char pad3[4];
+    unsigned char f104;
+    unsigned char flag;
+};
+
+inline int getResult(Self* self) {
+    short t = self->obs3.type;
+    soEventManager* mgr = soEventSystem::getInstance()->getManager(self->obs3.id);
+    if (mgr->getObserverCapacity(t) == 0) return 0;
+    soEventUnitWrapper<soCollisionSearchEventObserver>* unit =
+        (soEventUnitWrapper<soCollisionSearchEventObserver>*)__dynamic_cast(
+            mgr->getEventUnit(t), 0, lbl_27_data_4950, __RTTI__11soEventUnit, 0);
+    if (unit == 0) return 0;
+    return (int)unit->getObserverListSub();
+}
+
+extern "C" Self* __ct__27soCollisionSearchModuleImplFP16soModuleAccesseriUcPvb(Self* self, Owner* owner, int a2, int a3, int a4, unsigned char a5) {
+    int result = -1;
+    self->vt = lbl_27_data_4A88;
+    char* obj = owner->module->obj;
+    short id = ((Getter*)(obj + 8))->get();
+    self->obs1.id = result;
+    self->obs1.type = 4;
+    self->obs1.link = result;
+    *(void**)&self->obs1 = __vt__21soStatusEventObserver;
+    self->obs1.addObserver(id, -1);
+
+    obj = owner->module->obj;
+    id = ((Getter*)(obj + 8))->get();
+    Obs* o2 = &self->obs2;
+    self->obs2.id = result;
+    self->obs2.type = 5;
+    self->obs2.link = result;
+    *(void**)o2 = __vt__22soAnimCmdEventObserver;
+    o2->addObserver(id, -1);
+
+    obj = owner->module->obj;
+    int cid = (short)((Getter*)(obj + 8))->get();
+    self->obs3.vt = lbl_27_data_4A40;
+    self->obs3.id = cid;
+    self->obs3.type = 17;
+    result = 0;
+    self->obs3.unit = (void*)result;
+
+    if (cid > 0 && cid > -1) {
+        if (soEventSystem::getInstance()->getInstanceManager().isContain(cid)) {
+            soEventManager* mgr = soEventSystem::getInstance()->getManager(self->obs3.id);
+            if (mgr->getObserverCapacity(self->obs3.type) == 0) {
+                self->obs3.unit = 0;
+            } else {
+                result = getResult(self);
+                self->obs3.unit = (void*)result;
+            }
+        }
+    }
+
+    float f = lbl_27_rodata_530;
+    self->vt = lbl_27_data_4958;
+    *(void**)&self->obs1 = lbl_27_data_4958 + 0x54;
+    *(void**)&self->obs2 = lbl_27_data_4958 + 0x64;
+    *(void**)&self->obs3 = lbl_27_data_4958 + 0x78;
+    self->owner = owner;
+    self->f2c = a4;
+    self->f30 = f;
+    self->calc = lbl_27_data_46F8;
+    self->calc2 = lbl_27_data_46F8 + 0x48;
+    self->top = 0;
+    self->mode = 1;
+    self->enabled = 0;
+    __construct_array(self->groups, __ct__16soCollisionGroupFv, __dt__16soCollisionGroupFv, 0x78, 1);
+    soArrayVectorCalculator::postInitialize(*(soArrayVectorCalcInterface*)&self->calc2, 1, 1);
+    fn_27_35C3C(self->pad, a2, a3, owner->module->item->slot2(), 5, &self->calc, 0);
+    self->cache = (void*)-1;
+    self->fF8 = 0;
+    self->fFC = 0;
+    self->f104 = 0;
+    self->flag = a5;
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4DFF8 {
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_27_4DFF8(void* ptr, int size) {
+    if (ptr != 0 && size > 0)
+        __dl__FPv(ptr);
+    return ptr;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4E63C {
+class Interface {
+public:
+    virtual void unused();
+    virtual char* get() const;
+};
+
+struct Object {
+    char padding[0x2c];
+    Interface* member;
+};
+
+extern "C" char* fn_27_4E63C(const Object* self) {
+    return self->member->get() + 4;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4E670 {
+struct Item {
+    int w0;
+    char pad4[0x54];
+    int f58;
+};
+
+struct Vt44 {
+    virtual void s0();
+    virtual void s1();
+    virtual void s2();
+    virtual void s3();
+    virtual void s4();
+    virtual void s5();
+    virtual void s6();
+    virtual void s7();
+    virtual void s8();
+    virtual int s9();
+};
+
+struct Mid {
+    int unk0;
+    int unk4;
+    char pad8[0x44 - 8];
+    Vt44* f44;
+};
+
+struct Owner {
+    char pad0[0xd8];
+    Mid* fd8;
+};
+
+struct Seq {
+    virtual void s0();
+    virtual Item* s1(int i);
+    virtual void s2();
+    virtual int s3();
+};
+
+struct SeqB {
+    virtual void s0();
+    virtual void* s1(int i, Mid* d);
+};
+
+struct Counter {
+    virtual void s0();
+    virtual void s1();
+    virtual void s2();
+    virtual int s3();
+};
+
+struct Self {
+    char pad0[0x28];
+    Owner* f28;
+    Seq* f2c;
+    float f30;
+    char pad34[0x84];
+    char b8[0xdc - 0xb8];
+    char dc[0xe8 - 0xdc];
+    char e8[0xf4 - 0xe8];
+    int fF4;
+    int padF8;
+    int fFC;
+    int f100;
+    unsigned char f104;
+};
+
+extern "C" {
+void fn_27_3627C(void*, int);
+void fn_27_37880(void*, int, float, float);
+void fn_27_36768(void*, int, int);
+int getCollision__11soCollisionFUlUl(void*, int, int);
+void addCheckList__11soCollisionFv(void*);
+unsigned int fn_27_4DA80(void*, int, int, void*, void*, float);
+}
+
+extern const float lbl_27_rodata_534;
+
+extern "C" void fn_27_4E670(Self* self, float a, float b) {
+    int i;
+    self->f30 = b;
+    int r27 = self->f28->fd8->f44->s9();
+    int r29 = ((Counter*)((char*)self + 0x34))->s3();
+    for (int i = 0; i < r29; i++) {
+        fn_27_3627C(self->b8, i);
+        fn_27_37880(self->b8, i, a, lbl_27_rodata_534);
+        fn_27_36768(self->b8, r27, i);
+    }
+    if (self->fFC > 0) {
+        if (self->f100 == 0) {
+            self->f100 = self->fFC;
+        } else {
+            self->f100 = self->f100 - 1;
+            return;
+        }
+    }
+    unsigned int r26 = 0U;
+    int r30 = self->f2c->s3();
+    for (int j = 0; j < r30; j++) {
+        if (self->f2c->s1(j)->w0 != 0) {
+            int v;
+            int dv;
+            void* obj;
+            int res;
+            if (j == self->fF4) {
+                obj = (void*)self->f2c->s1(j)->f58;
+                dv = self->f28->fd8->unk4;
+                v = (int)((SeqB*)self->f2c)->s1(j, self->f28->fd8);
+                res = getCollision__11soCollisionFUlUl(self->b8, j, (int)obj);
+                if (fn_27_4DA80((void*)v, dv, res, self->dc, self->e8, self->f30) == 1U) {
+                    r26 = 1U;
+                }
+            } else {
+                v = self->f2c->s1(j)->f58;
+                dv = self->f28->fd8->unk4;
+                obj = ((SeqB*)self->f2c)->s1(j, self->f28->fd8);
+                res = getCollision__11soCollisionFUlUl(self->b8, j, v);
+                if (fn_27_4DA80(obj, dv, res, 0, 0, self->f30) == 1U) {
+                    r26 = 1U;
+                }
+            }
+        }
+    }
+    if (r26 == 1U) {
+        addCheckList__11soCollisionFv(self->b8);
+    }
+    self->f104 = 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4EDB8 {
+extern "C" s32 notifyEventCollisionSearchCheck__30soCollisionSearchEventObserverFv(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4EDC0 {
+extern "C" void fn_27_36510(void*);
+
+extern "C" void fn_27_4EDC0(void* self) {
+    fn_27_36510(reinterpret_cast<u8*>(self) + 0xb8);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4FA94 {
+extern "C" void notifyEventChangeStatus__27soCollisionSearchModuleImplFiiP12soStatusDataP16soModuleAccesser(void*);
+
+extern "C" void fn_27_4FA94(void* self) {
+    notifyEventChangeStatus__27soCollisionSearchModuleImplFiiP12soStatusDataP16soModuleAccesser(reinterpret_cast<u8*>(self) - 0x4);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4FA9C {
+extern "C" void fn_27_4EF28(void*);
+
+extern "C" void fn_27_4FA9C(void* self) {
+    fn_27_4EF28(reinterpret_cast<u8*>(self) - 0x10);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4FAA4 {
+extern "C" void isObserv__27soCollisionSearchModuleImplFc(void*);
+
+extern "C" void fn_27_4FAA4(void* self) {
+    isObserv__27soCollisionSearchModuleImplFc(reinterpret_cast<u8*>(self) - 0x10);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_4FAAC {
+extern "C" void __dt__27soCollisionSearchModuleImplFv(void*);
+
+extern "C" void fn_27_4FAAC(void* self) {
+    __dt__27soCollisionSearchModuleImplFv(reinterpret_cast<u8*>(self) - 0x1c);
+}
+}
+

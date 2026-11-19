@@ -1201,3 +1201,744 @@ int muSelCharPlayerArea::getWifiStateByWifiCond() {
     }
     return 3;
 }
+
+#include <gf/gf_pad_status.h>
+// TODO: clean up, give variables real names
+namespace jj_114FC {
+
+extern "C" {
+void* create__5MuMsgFUlQ25Heaps8HeapTypeUl(u32, u32, u32);
+void allocMsgBuf__5MuMsgFUlUl(void*, u32, u32);
+void setMsgData__5MuMsgFPv(void*, void*);
+void attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(void*, u32, void*, u32, f32);
+void setFontType__5MuMsgFUlUl(void*, u32, u32);
+void setAlignMode__5MuMsgFUlQ25MuMsg9AlignMode(void*, u32, u32);
+void setFontWidthModeFixed__5MuMsgFUlf(void*, u32, f32);
+extern f32 lbl_10_rodata_56C;
+extern f32 lbl_10_rodata_570;
+}
+
+extern "C" void fn_10_114FC(void* self, void* data) {
+    void* msg;
+    char* s = (char*)self;
+    int i;
+    u32 idx;
+    char* p;
+
+    msg = create__5MuMsgFUlQ25Heaps8HeapTypeUl(3, 0x2a, 0x2b);
+    *(void**)(s + 0x40c) = msg;
+    allocMsgBuf__5MuMsgFUlUl(msg, 0x100, 0x1f);
+    setMsgData__5MuMsgFPv(msg, data);
+    attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(msg, 0, *(void**)((char*)*(void**)(s + 0xd0) + 0x10), 0, lbl_10_rodata_56C);
+    setFontType__5MuMsgFUlUl(msg, 0, 1);
+
+    p = s;
+    for (i = 0; i < 9; i++) {
+        idx = i + 1;
+        attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(msg, idx, *(void**)((char*)*(void**)(p + 0xf0) + 0x10), 0, lbl_10_rodata_56C);
+        setFontType__5MuMsgFUlUl(msg, idx, 1);
+        p += 4;
+    }
+
+    p = s;
+    for (i = 0; i < 9; i++) {
+        idx = i + 10;
+        attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(msg, idx, *(void**)((char*)*(void**)(p + 0xf0) + 0x10), 1, lbl_10_rodata_56C);
+        setFontType__5MuMsgFUlUl(msg, idx, 1);
+        p += 4;
+    }
+
+    p = s;
+    for (i = 0; i < 9; i++) {
+        idx = i + 0x13;
+        attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(msg, idx, *(void**)((char*)*(void**)(p + 0xf0) + 0x10), 2, lbl_10_rodata_56C);
+        setFontType__5MuMsgFUlUl(msg, idx, 1);
+        p += 4;
+    }
+
+    attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(msg, 0x1c, *(void**)((char*)*(void**)(s + 0x11c) + 0x10), 0, lbl_10_rodata_56C);
+    setFontType__5MuMsgFUlUl(msg, 0x1c, 1);
+    setAlignMode__5MuMsgFUlQ25MuMsg9AlignMode(msg, 0x1c, 1);
+    setFontWidthModeFixed__5MuMsgFUlf(msg, 0x1c, lbl_10_rodata_570);
+
+    s = *(char**)(s + 0x144);
+    if (s != NULL) {
+        attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(msg, 0x1d, *(void**)(s + 0x10), 0, lbl_10_rodata_56C);
+        setFontType__5MuMsgFUlUl(msg, 0x1d, 1);
+        attachScnMdlSimple__5MuMsgFUlPQ34nw4r3g3d12ScnMdlSimpleUlf(msg, 0x1e, *(void**)(s + 0x10), 1, lbl_10_rodata_56C);
+        setFontType__5MuMsgFUlUl(msg, 0x1e, 1);
+    }
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_11C50 {
+typedef int s32;
+typedef unsigned int u32;
+typedef unsigned char u8;
+typedef float f32;
+
+struct muSelCharPlayerArea {
+    char pad0[0xAC];
+    void* unkAC;
+    char padB0[0x24];
+    void* unkD4;
+    char padD8[0xD0];
+    s32 unk1A8;
+    s32 unk1AC;
+    char pad1B0[4];
+    s32 unk1B4;
+    s32 unk1B8;
+    char pad1BC[4];
+    s32 unk1C0;
+    char pad1C4[4];
+    s32 unk1C8;
+    char pad1CC[4];
+    s32 unk1D0;
+    s32 unk1D4;
+    s32 unk1D8;
+    s32 unk1DC;
+    char pad1E0[0x224];
+    s32 unk404;
+};
+
+struct GGSub {
+    char pad[4];
+    u8 unk4;
+};
+
+struct GG {
+    char pad[0x10];
+    GGSub* unk10;
+};
+
+class VIface {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11(s32, s32);
+};
+
+extern GG* g_GameGlobal;
+extern u8 lbl_10_rodata_574[];
+extern f32 lbl_10_rodata_578;
+
+extern "C" {
+void addObj__19muSelCharPlayerAreaFi(void* self, s32 idx);
+void dispMarkKind__19muSelCharPlayerAreaF11MuSelchkind(void* self, s32 v);
+void dispHandi__19muSelCharPlayerAreaFi(void* self, s32 v);
+void setHandiVisible__19muSelCharPlayerAreaFb(void* self, s32 v);
+void dispCpLevel__19muSelCharPlayerAreaFi(void* self, s32 v);
+void dispNumStar__19muSelCharPlayerAreaFii(void* self, s32 a, s32 b);
+s32 getControllerKind__19muSelCharPlayerAreaFv(void* self);
+s32 getHandiDispMode__19muSelCharPlayerAreaFv(void* self);
+void fn_10_16158(void* self);
+void dispBaseMdlColor__19muSelCharPlayerAreaFibi(void* self, s32 a, s32 b, s32 c);
+void dispBaseMdlAnim__19muSelCharPlayerAreaFi(void* self, s32 a);
+void dispPlayerNum__19muSelCharPlayerAreaFi(void* self, s32 a);
+void dispMarkColor__19muSelCharPlayerAreaFibi(void* self, s32 a, s32 b, s32 c);
+void dispNameEntryButtonVisible__19muSelCharPlayerAreaFii(void* self, s32 a, u8 b);
+void dispNameEntryButtonColor__19muSelCharPlayerAreaFbi(void* self, s32 a, s32 b);
+void fn_10_16CDC(void* self, s32 a, u8 b);
+void dispPlayerKindButtonColor__19muSelCharPlayerAreaFibi(void* self, s32 a, s32 b, s32 c);
+void dispControllerKind__19muSelCharPlayerAreaFiii(void* self, s32 a, s32 b, s32 c);
+void dispCpLevelVisible__19muSelCharPlayerAreaFi(void* self, s32 a);
+void addToBaseMdl__19muSelCharPlayerAreaFi(void* self, u32 idx);
+void dispName__19muSelCharPlayerAreaFiibi(void* self, s32 a, s32 b, s32 c, s32 d);
+void updatePlayerNo__13muSelCharHandFv(s32 a);
+void updateColorNo__13muSelCharHandFv(s32 a);
+void updateControllerNo__13muSelCharHandFv(s32 a);
+void updatePlayerKind__13muSelCharCoinFv(s32 a);
+s32 isTeamBattle__19muSelCharPlayerAreaFv(void* self);
+void setFrameVisible__8MuObjectFf(void* self, float f);
+}
+
+extern "C" void initDispSelect__19muSelCharPlayerAreaFv(muSelCharPlayerArea* arg0) {
+    s32 temp_r30;
+    s32 temp_r30_2;
+    s32 temp_r30_3;
+    s32 temp_r30_4;
+    s32 temp_r30_5;
+    s32 temp_r29;
+    s32 temp_r29_2;
+    u8* var_r29;
+    s32 var_r28;
+    void* temp_r3;
+
+    var_r29 = lbl_10_rodata_574;
+    var_r28 = 0;
+    temp_r30 = arg0->unk404;
+    do {
+        addToBaseMdl__19muSelCharPlayerAreaFi(arg0, *var_r29);
+        var_r28 += 1;
+        var_r29 += 1;
+    } while (var_r28 < 4);
+    setFrameVisible__8MuObjectFf(arg0->unkD4, lbl_10_rodata_578);
+    getHandiDispMode__19muSelCharPlayerAreaFv(arg0);
+    dispHandi__19muSelCharPlayerAreaFi(arg0, arg0->unk1D0);
+    if ((getHandiDispMode__19muSelCharPlayerAreaFv(arg0) == 1) || (getHandiDispMode__19muSelCharPlayerAreaFv(arg0) == 2)) {
+        setHandiVisible__19muSelCharPlayerAreaFb(arg0, 1);
+    }
+    temp_r3 = arg0->unkAC;
+    ((VIface*)temp_r3)->v11(*(s32*)((u8*)temp_r3 + 0xE4), temp_r30);
+    addObj__19muSelCharPlayerAreaFi(arg0, 8);
+    temp_r30_2 = arg0->unk1B4;
+    dispBaseMdlColor__19muSelCharPlayerAreaFibi(arg0, temp_r30_2, isTeamBattle__19muSelCharPlayerAreaFv(arg0), arg0->unk1C0);
+    dispBaseMdlAnim__19muSelCharPlayerAreaFi(arg0, arg0->unk1B4 != 0);
+    dispPlayerNum__19muSelCharPlayerAreaFi(arg0, arg0->unk1B4);
+    dispMarkKind__19muSelCharPlayerAreaF11MuSelchkind(arg0, arg0->unk1B8);
+    temp_r30_3 = arg0->unk1B4;
+    dispMarkColor__19muSelCharPlayerAreaFibi(arg0, temp_r30_3, isTeamBattle__19muSelCharPlayerAreaFv(arg0), arg0->unk1C0);
+    dispNameEntryButtonVisible__19muSelCharPlayerAreaFii(arg0, arg0->unk1B4, g_GameGlobal->unk10->unk4);
+    dispNameEntryButtonColor__19muSelCharPlayerAreaFbi(arg0, isTeamBattle__19muSelCharPlayerAreaFv(arg0), arg0->unk1C0);
+    fn_10_16CDC(arg0, arg0->unk1B4, g_GameGlobal->unk10->unk4);
+    temp_r30_4 = arg0->unk1B4;
+    dispPlayerKindButtonColor__19muSelCharPlayerAreaFibi(arg0, temp_r30_4, isTeamBattle__19muSelCharPlayerAreaFv(arg0), arg0->unk1C0);
+    temp_r30_5 = arg0->unk1B4;
+    temp_r29 = arg0->unk1C8;
+    dispName__19muSelCharPlayerAreaFiibi(arg0, temp_r29, temp_r30_5, isTeamBattle__19muSelCharPlayerAreaFv(arg0), arg0->unk1C0);
+    dispCpLevelVisible__19muSelCharPlayerAreaFi(arg0, arg0->unk1B4);
+    dispCpLevel__19muSelCharPlayerAreaFi(arg0, arg0->unk1D4);
+    fn_10_16158(arg0);
+    temp_r29_2 = arg0->unk1B4;
+    dispControllerKind__19muSelCharPlayerAreaFiii(arg0, temp_r29_2, getControllerKind__19muSelCharPlayerAreaFv(arg0), arg0->unk1DC);
+    dispNumStar__19muSelCharPlayerAreaFii(arg0, arg0->unk1D8, arg0->unk1B4);
+    updatePlayerKind__13muSelCharCoinFv(arg0->unk1AC);
+    updatePlayerNo__13muSelCharHandFv(arg0->unk1A8);
+    updateColorNo__13muSelCharHandFv(arg0->unk1A8);
+    updateControllerNo__13muSelCharHandFv(arg0->unk1A8);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_11F04 {
+extern "C" {
+extern void setPlayerKind__19muSelCharPlayerAreaFi(void* self, int a);
+extern void forceCloseList__19muSelCharPlayerAreaFv(void* self);
+extern void removeFromBaseMdl__19muSelCharPlayerAreaFi(void* self, unsigned char c);
+extern void setHandiVisible__19muSelCharPlayerAreaFb(void* self, int a);
+extern void removeObj__19muSelCharPlayerAreaFi(void* self, int a);
+extern void dispNameEntryButtonVisible__19muSelCharPlayerAreaFii(void* self, int a, unsigned char b);
+extern void dispCpLevelVisible__19muSelCharPlayerAreaFi(void* self, int a);
+extern void fn_10_16158(void* self);
+extern void updatePlayerKind__13muSelCharCoinFv(void* a);
+extern void updatePlayerNo__13muSelCharHandFv(void* a);
+extern void updateColorNo__13muSelCharHandFv(void* a);
+extern void updateControllerNo__13muSelCharHandFv(void* a);
+extern void* g_GameGlobal;
+}
+
+extern const unsigned char lbl_10_rodata_57C[12];
+
+struct VObj {
+    virtual void v0(void*);
+    virtual void v1(void*);
+    virtual void v2(void*);
+    virtual void v3(void*);
+    virtual void v4(void*);
+    virtual void v5(void*);
+    virtual void v6(void*);
+    virtual void v7(void*);
+    virtual void v8(void*);
+    virtual void v9(void*);
+    virtual void v10(void*);
+    virtual void v11(void*);
+    virtual void v12(void*);
+    virtual void v13(void*);
+    virtual void v14(void*);
+    virtual void v15(void*);
+};
+
+extern "C" void fn_10_11F04(void* self) {
+    u8* base = (u8*)self;
+    setPlayerKind__19muSelCharPlayerAreaFi(self, 0);
+    forceCloseList__19muSelCharPlayerAreaFv(self);
+    VObj* field = *(VObj**)(base + 0x404);
+    const unsigned char* p = lbl_10_rodata_57C;
+    for (int i = 0; i < 4; i++) {
+        removeFromBaseMdl__19muSelCharPlayerAreaFi(self, *p);
+        p++;
+    }
+    setHandiVisible__19muSelCharPlayerAreaFb(self, 0);
+    VObj* obj = *(VObj**)(base + 0xAC);
+    obj->v13(field);
+    removeObj__19muSelCharPlayerAreaFi(self, 8);
+    {
+        char* gg = *(char**)&g_GameGlobal;
+        unsigned char v = *(unsigned char*)(*(char**)(gg + 0x10) + 4);
+        dispNameEntryButtonVisible__19muSelCharPlayerAreaFii(self, 0, v);
+    }
+    dispCpLevelVisible__19muSelCharPlayerAreaFi(self, 0);
+    fn_10_16158(self);
+    updatePlayerKind__13muSelCharCoinFv(*(void**)(base + 0x1AC));
+    updatePlayerNo__13muSelCharHandFv(*(void**)(base + 0x1A8));
+    updateColorNo__13muSelCharHandFv(*(void**)(base + 0x1A8));
+    updateControllerNo__13muSelCharHandFv(*(void**)(base + 0x1A8));
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_13CAC {
+
+extern "C" {
+
+extern unsigned char lbl_10_rodata_568[];
+int isTeamBattle__19muSelCharPlayerAreaFv(void* self);
+int getCharColorNo__6muMenuFiii(int, int);
+int exchangeMuSelchkind2GmCharacterKind__6muMenuFiii(int);
+int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
+int getNumCharColor__6muMenuFiii(int);
+int getFighterColorFileNo__6muMenuFiii(int, int);
+void fn_800CA498(void*, int, int, int);
+
+struct SelArea {
+    int f0;
+    char pad4[0x1ac];
+    int f1b0;
+    char pad1b4[4];
+    int f1b8;
+    int f1bc;
+    int f1c0;
+    char pad1c4[0x24];
+    int f1e8;
+    int f1ec;
+    int f1f0;
+    char pad1f4[0x21c];
+    int f410;
+    int f414;
+    int f418;
+    char pad41c[0x28];
+    unsigned char f444;
+    unsigned char f445;
+};
+
+static inline int getMode(int state) {
+    int result;
+    if (state >= 0 && state < 4)
+        result = 1;
+    else
+        result = 0;
+    if (result != 0) {
+        result = 0;
+    } else {
+        if (state >= 4 && state < 0xc)
+            result = 1;
+        else
+            result = 0;
+        if (result != 0) {
+            result = 1;
+        } else {
+            int r0_4;
+            if (state >= 0xc && state < 0x10)
+                r0_4 = 1;
+            else
+                r0_4 = 0;
+            result = 3;
+            if (r0_4 != 0)
+                result = 2;
+        }
+    }
+    return result;
+}
+
+void sendSystemCharKind__19muSelCharPlayerAreaFv(SelArea* self) {
+    const unsigned char* const base = lbl_10_rodata_568;
+    const unsigned char* tbl;
+    int kind = self->f1b8;
+    switch (kind) {
+    case 14:
+        tbl = base;
+        tbl = (const unsigned char*)((unsigned int)tbl + 0x18);
+        kind = tbl[self->f1e8];
+        break;
+    case 3:
+        tbl = base;
+        tbl = (const unsigned char*)((unsigned int)tbl + 0x1c);
+        kind = tbl[self->f1ec];
+        break;
+    case 27:
+        tbl = base;
+        tbl = (const unsigned char*)((unsigned int)tbl + 0x20);
+        kind = tbl[self->f1f0];
+        break;
+    }
+    if (kind == 0x28)
+        return;
+    int color = self->f1bc;
+    if (kind == 0x29) {
+        kind = self->f410;
+        color = self->f414;
+    }
+    if (isTeamBattle__19muSelCharPlayerAreaFv(self)) {
+        tbl = base;
+        tbl = (const unsigned char*)((unsigned int)tbl + 0x48);
+        color = getCharColorNo__6muMenuFiii(kind, tbl[self->f1c0]);
+    }
+    if (kind == 0x1b) {
+        tbl = base;
+        tbl = (const unsigned char*)((unsigned int)tbl + 0x20);
+        kind = tbl[self->f418];
+    }
+    if (self->f0 != 0)
+        return;
+    int gm = exchangeMuSelchkind2GmCharacterKind__6muMenuFiii(kind);
+    int state = ((unsigned char*)g_GameGlobal->m_selCharData)[4];
+    int flag;
+    if (getMode(state) == 0 || getMode(state) == 1)
+        flag = 0;
+    else
+        flag = 1;
+    if (flag && gm != 0x3e) {
+        fn_800CA498(g_muWifiInterfaceTask, self->f1b0, gm, color);
+    }
+    if (gm == 0x3e)
+        return;
+    int fileNo = 0;
+    int m = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(gm);
+    int num = (m == 0x28) ? 1 : getNumCharColor__6muMenuFiii(m);
+    if (color < num) {
+        int m2 = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(gm);
+        fileNo = (m2 == 0x28) ? 0 : getFighterColorFileNo__6muMenuFiii(m2, color);
+    }
+    self->f444 = gm;
+    self->f445 = fileNo;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_141A0 {
+
+extern "C" {
+void createObjResFile__19muSelCharPlayerAreaFPCviPQ34nw4r3g3d7ResFilei(void* a, const void* b, int c, void* d, void* e);
+void* getMEMAllocator__13gfHeapManagerFQ25Heaps8HeapType(int);
+void* Construct__Q34nw4r3g3d6ScnMdlFPviiPv(void*, int, int, void*);
+extern const char lbl_10_rodata_5C0[];
+extern const char lbl_10_rodata_630[];
+extern char lbl_10_data_7C8[];
+}
+
+struct SelSub {
+    char pad[0x5cc];
+    int m_5cc;
+    unsigned char m_5d0;
+};
+
+struct SelSelf {
+    char pad0[0xb0];
+    char* m_b0;
+    char pad1[0xec - 0xb4];
+    char* m_ec;
+    char pad2[0x1f4 - 0xf0];
+    SelSub* m_1f4;
+    char pad3[0x404 - 0x1f8];
+    void* m_404;
+    void* m_408;
+};
+
+extern "C" void fn_10_141A0(SelSelf* self, void* a, void* b, void* c) {
+    char* base = lbl_10_data_7C8;
+    createObjResFile__19muSelCharPlayerAreaFPCviPQ34nw4r3g3d7ResFilei(self, lbl_10_rodata_5C0, 0xe, a, b);
+    createObjResFile__19muSelCharPlayerAreaFPCviPQ34nw4r3g3d7ResFilei(self, lbl_10_rodata_630, 3, a, c);
+
+    int state = ((unsigned char*)g_GameGlobal->m_selCharData)[4];
+    int result;
+    if (state >= 0 && state < 4) result = 1; else result = 0;
+    if (result != 0) {
+        result = 0;
+    } else {
+        if (state >= 4 && state < 0xc) result = 1; else result = 0;
+        if (result != 0) {
+            result = 1;
+        } else {
+            int r0_4;
+            if (state >= 0xc && state < 0x10) r0_4 = 1; else r0_4 = 0;
+            result = 3;
+            if (r0_4 != 0) result = 2;
+        }
+    }
+    int r2;
+    if (result == 1) {
+        r2 = 0;
+    } else {
+        SelSub* s = self->m_1f4;
+        if (s->m_5d0 != 0) {
+            r2 = 2;
+        } else {
+            r2 = s->m_5cc == 2;
+        }
+    }
+    char* p = base + 0x1ac;
+    if (r2 == 2) p = base + 0x198;
+    *(char**)(base + 0x190) = p;
+    createObjResFile__19muSelCharPlayerAreaFPCviPQ34nw4r3g3d7ResFilei(self, base + 0x190, 1, a, b);
+
+    void* heap = getMEMAllocator__13gfHeapManagerFQ25Heaps8HeapType(0x2a);
+    self->m_404 = Construct__Q34nw4r3g3d6ScnMdlFPviiPv(heap, 0, 0xf, *(void**)(self->m_b0 + 0x10));
+    self->m_408 = Construct__Q34nw4r3g3d6ScnMdlFPviiPv(heap, 0, 0xa, *(void**)(self->m_ec + 0x10));
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_18908 {
+extern "C" {
+struct ColorRGBA {
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+};
+
+struct FontTextBuf {
+    ColorRGBA color;
+    char text[28];
+};
+
+extern const unsigned char sTeamColorAnim[4];
+extern const ColorRGBA lbl_10_rodata_750[6];
+extern void* g_GameGlobal;
+
+void setFontColor__5MuMsgFUlUcUcUcUc(void* msg, unsigned long index, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+void printIndex__5MuMsgFUlUlPv(void* msg, unsigned long index, unsigned long value, void* extra);
+void printf__5MuMsgFUlPCce(void* msg, unsigned long index, const char* fmt, ...);
+int getName__10GameGlobalFiPc(void* global, int index, char* out);
+void getDefName__19muSelCharPlayerAreaFPc(void* self, char* buf);
+
+void dispName__19muSelCharPlayerAreaFiibi(void* self, int index, int mode, int flag, int tableIdx) {
+    int colorIdx;
+    FontTextBuf tb;
+    int printMode = -1;
+    int found = 0;
+
+    switch (mode) {
+    case 0:
+        colorIdx = 5;
+        break;
+    case 2:
+        colorIdx = 4;
+        break;
+    case 1:
+        if (flag) {
+            colorIdx = sTeamColorAnim[tableIdx];
+        } else {
+            colorIdx = *(int*)((char*)self + 0x1B0);
+        }
+        break;
+    }
+
+    void* msg = *(void**)((char*)self + 0x40C);
+    const ColorRGBA* col = &lbl_10_rodata_750[colorIdx];
+    tb.color = *col;
+    setFontColor__5MuMsgFUlUcUcUcUc(msg, 0, col->r, col->g, col->b, 0xff);
+
+    switch (mode) {
+    case 1:
+        if (index >= 0) {
+            if (getName__10GameGlobalFiPc(g_GameGlobal, index, tb.text)) {
+                found = 1;
+            }
+        }
+        if (!found) {
+            getDefName__19muSelCharPlayerAreaFPc(self, tb.text);
+        }
+        break;
+    case 2:
+        printMode = 2;
+        break;
+    case 0:
+        printMode = 3;
+        break;
+    }
+
+    if (printMode >= 0) {
+        printIndex__5MuMsgFUlUlPv(*(void**)((char*)self + 0x40C), 0, printMode, 0);
+    } else {
+        printf__5MuMsgFUlPCce(*(void**)((char*)self + 0x40C), 0, tb.text);
+    }
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_18AC0 {
+extern "C" {
+struct TargetData { char pad[0x5c8]; unsigned char f5c8; };
+struct SelCharSelf { char pad[0x1b0]; int f1b0; int f1b4; char p1b8[8]; int f1c0; char p1c4[4]; int f1c8; char p1cc[12]; int f1d8; char p1dc[0x18]; TargetData* f1f4; char p1f8[4]; char list[0x160]; };
+void dispName__19muSelCharPlayerAreaFiibi(void*, int, int, int, int);
+void getNameUTF16__10GameGlobalFiPw(void*, int, short*);
+void setLocalPlayersOnamae__19muWifiInterfaceTaskFiPCwUc(void*, int, short*, int);
+void dispNumStar__19muSelCharPlayerAreaFii(void*, int, int);
+int main__14MuSelctChrListFP11gfPadStatusPi(void*, gfPadStatus*, int*);
+void close__14MuSelctChrListFv(void*);
+extern void* g_muWifiInterfaceTask;
+}
+static inline void copyPad(gfPadStatus& d, const gfPadStatus& s) {
+ d.m_buttonsCurrentFrame = s.m_buttonsCurrentFrame;
+ d.m_buttonsCurrentFrame2 = s.m_buttonsCurrentFrame2;
+ d.m_buttonsHeld = s.m_buttonsHeld;
+ d.m_buttonsPressedThisFrame = s.m_buttonsPressedThisFrame;
+ d.m_buttonsReleasedThisFrame = s.m_buttonsReleasedThisFrame;
+ d.m_buttonsPressedThisFrame2 = s.m_buttonsPressedThisFrame2;
+ d._0x18 = s._0x18; d._0x1c = s._0x1c; d._0x20 = s._0x20;
+ d._0x24 = s._0x24; d._0x28 = s._0x28; d._0x2c = s._0x2c;
+ d.m_stickX = s.m_stickX; d.m_stickY = s.m_stickY;
+ d.m_subStickX = s.m_subStickX; d.m_subStickY = s.m_subStickY;
+ d.m_lTriggerAnalog = s.m_lTriggerAnalog; d.m_rTriggerAnalog = s.m_rTriggerAnalog;
+ d._0x36 = s._0x36; d._0x37 = s._0x37; d.m_error = s.m_error;
+ d.m_controllerType = s.m_controllerType;
+}
+extern "C" int fn_10_18AC0(void* arg0, const gfPadStatus* arg1, const gfPadStatus* arg2) {
+ SelCharSelf* self = (SelCharSelf*)arg0;
+ gfPadStatus status;
+ copyPad(status, *arg1);
+ status.m_buttonsCurrentFrame2 = arg2->m_buttonsHeld;
+ status.m_buttonsPressedThisFrame = arg2->m_buttonsPressedThisFrame;
+ status.m_buttonsPressedThisFrame2 = arg2->m_buttonsReleasedThisFrame;
+ int name;
+ int result;
+ int index;
+ switch (main__14MuSelctChrListFP11gfPadStatusPi(&self->list, &status, &name)) {
+ case 2:
+ {
+  if (name != self->f1c8) {
+   index = name;
+   dispName__19muSelCharPlayerAreaFiibi(self, index, self->f1b4, self->f1f4[0].f5c8, self->f1c0);
+   self->f1c8 = index;
+   void* task = g_muWifiInterfaceTask;
+   if (task != 0) {
+    short text[6];
+    int r;
+    int kind = 0;
+    if (index < 0) goto clear;
+    {
+     int state = ((unsigned char*)g_GameGlobal->m_selCharData)[4];
+     if (state >= 0 && state < 4) kind = 1; else kind = 0;
+     if (kind != 0) kind = 0;
+     else {
+      if (state >= 4 && state < 0xc) kind = 1; else kind = 0;
+      if (kind != 0) kind = 1;
+      else {
+       if (state >= 0xc && state < 0x10) r = 1; else r = 0;
+       kind = 3;
+       if (r != 0) kind = 2;
+      }
+     }
+    }
+    if (kind == 2) getNameUTF16__10GameGlobalFiPw(g_GameGlobal, index, text);
+    else goto clear;
+    goto done;
+clear:
+    text[0] = 0;
+done:
+    int slot = self->f1b0;
+    setLocalPlayersOnamae__19muWifiInterfaceTaskFiPCwUc(task, slot, text, index >= 0 ? index & 0xff : 0x78);
+   }
+   self->f1d8 = 0;
+   dispNumStar__19muSelCharPlayerAreaFii(arg0, 0, self->f1b4);
+  }
+  result = 1;
+  break;
+ }
+ case 3: result = 1; break;
+ case 4: result = 2; break;
+ case 5:
+  name = -1;
+  if (self->f1c8 != -1) {
+   dispName__19muSelCharPlayerAreaFiibi(arg0, -1, self->f1b4, self->f1f4->f5c8, self->f1c0);
+   self->f1c8 = -1;
+   void* task = g_muWifiInterfaceTask;
+   if (task != 0) {
+    short text[6];
+    text[0] = 0;
+    setLocalPlayersOnamae__19muWifiInterfaceTaskFiPCwUc(task, self->f1b0, text, 0x78);
+   }
+   self->f1d8 = 0;
+   dispNumStar__19muSelCharPlayerAreaFii(arg0, 0, self->f1b4);
+  }
+  result = 1; break;
+ case 1: result = 0; break;
+ }
+ if (result != 0) close__14MuSelctChrListFv(&self->list);
+ return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_19374 {
+extern "C" {
+extern int g_muWifiInterfaceTask;
+extern const float lbl_10_rodata_6A8;
+extern const unsigned char lbl_10_rodata_768[];
+extern char lbl_10_data_BA8[];
+
+void setWifiDispState__14IfWifiprPlayerFi(int, int);
+int fn_800C9F14(int, int);
+unsigned char getWifiAID__19muSelCharPlayerAreaFPUc(void*, void*);
+void fn_10_12C40(void*, int, unsigned char, int);
+int changeAnimN__8MuObjectFiUlbb(void*, int, int, int, int);
+void setFrameVisible__8MuObjectFf(void*, float);
+void printf__5MuMsgFUlPCce(void*, unsigned long, const char*, ...);
+
+class VObj {
+public:
+    virtual void v0();
+    virtual void v1();
+    virtual void v2();
+    virtual void v3();
+    virtual void v4();
+    virtual void v5();
+    virtual void v6();
+    virtual void v7();
+    virtual void v8();
+    virtual void v9();
+    virtual void v10();
+    virtual void v11(int, int);
+    virtual void v12();
+    virtual void v13(int);
+};
+
+extern "C" void dispWifiDispState__19muSelCharPlayerAreaFi(char* self, int arg1) {
+    char* p;
+    const unsigned char* rec = lbl_10_rodata_768 + arg1 * 3;
+    unsigned int flag = (rec[0] == 0);
+    if (flag != (unsigned char)self[0x424]) {
+        if (flag != 0) {
+            setWifiDispState__14IfWifiprPlayerFi(*(int*)(self + 0x41c), 0);
+        } else {
+            *(int*)(self + 0x420) = fn_800C9F14(g_muWifiInterfaceTask, *(int*)(self + 0x1b0));
+            unsigned char t = getWifiAID__19muSelCharPlayerAreaFPUc(self, self + 0x435);
+            self[0x434] = t;
+            fn_10_12C40(self, *(int*)(self + 0x420), t, 1);
+        }
+        self[0x424] = flag;
+        if (flag != 0) {
+            setFrameVisible__8MuObjectFf(*(void**)(self + 0x144), lbl_10_rodata_6A8);
+            printf__5MuMsgFUlPCce(*(void**)(self + 0x40c), 0x1d, lbl_10_data_BA8);
+            printf__5MuMsgFUlPCce(*(void**)(self + 0x40c), 0x1e, lbl_10_data_BA8);
+        }
+    }
+    int frame = rec[1];
+    setFrameVisible__8MuObjectFf(*(void**)(self + 0x148), (float)frame);
+    VObj* obj = *(VObj**)(self + 0xac);
+    p = *(char**)(self + 0x14c);
+    unsigned char flag2 = rec[2];
+    obj->v13(*(int*)(p + 0x10));
+    if (flag2 != 0) {
+        changeAnimN__8MuObjectFiUlbb(p, flag2 != 1, 0x12, 1, 0);
+        VObj* o2 = *(VObj**)(self + 0xac);
+        o2->v11(*(int*)((char*)o2 + 0xe4), *(int*)(p + 0x10));
+    }
+    *(int*)(self + 0x430) = arg1;
+}
+}
+}
+

@@ -200,3 +200,19 @@ void ftLucasStatusUniqProcessSpecialHiAttack::execFixPosCounter(soModuleAccesser
 extern "C" {
 float fn_114_1201C(float* v) { return v[0] * v[0] + v[1] * v[1]; }
 } // extern "C"
+
+// TODO: clean up, give variables real names
+namespace jj_12034 {
+extern "C" struct Vec2 {
+    float x;
+    float y;
+};
+
+extern "C" Vec2 __ml__FRC5Vec2ff(const Vec2* v, float s) {
+    Vec2 result;
+    result.x = v->x * s;
+    result.y = v->y * s;
+    return result;
+}
+}
+

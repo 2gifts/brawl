@@ -554,3 +554,559 @@ u32 aiIpBuf::getButton(int framesBack) {
     getData(framesBack, NULL, &button);
     return button;
 }
+
+#include <ai/ai_mgr.h>
+#include <nw4r/ut/ut_algorithm.h>
+// TODO: clean up, give variables real names
+namespace jj_21E24C {
+
+struct Environment {
+    float f00, f04, f08, f0C;
+    char pad10[8];
+    float f18, f1C, f20, f24, f28;
+};
+
+struct FighterState {
+    char pad00[0x50];
+    unsigned int flags;
+    char pad54[8];
+    Vec3f position;
+    float f68, f6C;
+    char pad70[0x10];
+    float f80, f84;
+    char pad88[0x18];
+    float fA0;
+    char padA4[4];
+    short sA8;
+    char padAA[2];
+    int action;
+    char padB0[0xC];
+    Environment* environment;
+    char padC0[0xFA];
+    unsigned char status;
+};
+
+struct Parameters {
+    char pad00[0x14];
+    float f14, f18;
+    char pad1C[4];
+    float f20, f24;
+};
+
+extern "C" {
+extern const float lbl_27_rodata_3290[];
+FighterState* get_aiStat__5aiMgrFP8aiChrIdx(s8*);
+int chk_over_ground__6aiStatFv(FighterState*);
+int chk_over_ground1__6aiStatFP8aiChrIdx(FighterState*, s8*);
+int chk_chr_stat__6aiStatFUli(FighterState*, unsigned int, int);
+float get_range__6aiStatFfP8aiChrIdx(FighterState*, s8*, float);
+float get_distance__6aiStatFfP8aiChrIdx(FighterState*, s8*, float);
+float get_range_floor__6aiStatFfP5Vec3f(FighterState*, Vec3f*, float);
+int chk_goto_blk__5aiMgrFP9AiClBlockP9AiClBlockifff(aiMgr*, Environment*, Environment*, int, float, float, float);
+int chkChildOptionMd__5aiMgrFi(aiMgr*, int);
+int fn_27_21E24C(Parameters*, unsigned int, s8*, s8*);
+}
+
+extern "C" int fn_27_21E24C(
+    Parameters* p, unsigned int kind, s8* selfId, s8* targetId) {
+    const float* c = lbl_27_rodata_3290;
+    FighterState* self = get_aiStat__5aiMgrFP8aiChrIdx(selfId);
+    int result = 0;
+    FighterState* target = get_aiStat__5aiMgrFP8aiChrIdx(targetId);
+    Vec3f position = target->position;
+    float x = get_range__6aiStatFfP8aiChrIdx(self, targetId, c[1]);
+    float y = get_distance__6aiStatFfP8aiChrIdx(self, targetId, c[1]);
+
+    switch (kind) {
+    case 0:
+        result = 1;
+        break;
+
+    case 1:
+        if (chk_over_ground__6aiStatFv(target) == 0 && target->status != 8) {
+            Environment* e = self->environment;
+            if (!(target->position.m_x > c[9] + e->f18) ||
+                !(target->position.m_x < e->f20 - c[9]) ||
+                !(target->position.m_y < e->f28 - c[9]))
+                result = 1;
+        }
+        break;
+
+    case 2: {
+        float dy = position.m_y - self->position.m_y;
+        if (dy > c[7]) {
+            if (dy > c[2] && dy < c[17])
+                result = 1;
+            else if (dy > c[18] && (target->flags & 1) && target->status == 5)
+                result = 1;
+            else if (target->environment != self->environment) {
+                if (!(target->flags & 1))
+                    result = 1;
+                else if (*(int*)((char*)g_aiMgr + 0x370) == 5 &&
+                         position.m_y > c[10])
+                    result = 1;
+            }
+        }
+        break;
+    }
+
+    case 3:
+        if (!(self->flags & 1) &&
+            target->environment != self->environment &&
+            position.m_y - self->position.m_y < c[19] &&
+            chk_over_ground__6aiStatFv(target) != 0 &&
+            (*(int*)((char*)g_aiMgr + 0x370) != 5 ||
+             !(self->position.m_y > c[10]))) {
+            if (position.m_y - self->position.m_y < c[20])
+                result = 1;
+            else if (!(target->flags & 1)) {
+                float height = p->f20 * (c[16] + c[21] * self->f6C);
+                float width = p->f24 * (c[16] + c[21] * self->f68);
+                if (chk_goto_blk__5aiMgrFP9AiClBlockP9AiClBlockifff(
+                        g_aiMgr, self->environment, target->environment, -1,
+                        self->position.m_x, width, height))
+                    result = 1;
+            }
+        }
+        break;
+
+    case 4:
+        if (x >= p->f14)
+            result = 1;
+        break;
+
+    case 5:
+        if (x < p->f14 && x >= p->f18)
+            result = 1;
+        break;
+
+    case 6:
+        if (x < p->f18 && x >= c[1])
+            result = 1;
+        break;
+
+    case 19: {
+        float range = p->f18;
+        if (x < c[0] * range && x >= c[1])
+            result = 1;
+        break;
+    }
+
+    case 20: {
+        float range = p->f18;
+        if (nw4r::ut::Abs(x) < c[0] * range)
+            result = 1;
+        break;
+    }
+
+    case 7:
+        if (x < c[1])
+            result = 1;
+        break;
+
+    case 8:
+        if (y >= p->f14)
+            result = 1;
+        break;
+
+    case 23: {
+        float range = p->f18;
+        if (y < c[0] * range)
+            result = 1;
+        break;
+    }
+
+    case 9:
+        if (self->environment == target->environment)
+            result = 1;
+        break;
+
+    case 10:
+        if (target->status == 4 || target->status == 6)
+            result = 1;
+        break;
+
+    case 26:
+        if (target->status == 5)
+            result = 1;
+        break;
+
+    case 27:
+        if (target->status == 14)
+            result = 1;
+        break;
+
+    case 11:
+        if (self->sA8 > 0 && self->status != 14)
+            result = 1;
+        break;
+
+    case 12:
+        if (self->action == 0 &&
+            chk_chr_stat__6aiStatFUli(self, 1, -1) == 0 &&
+            chk_over_ground__6aiStatFv(self) == 0 &&
+            self->status != 14)
+            result = 1;
+        break;
+
+    case 13:
+        if (self->flags & 4)
+            result = 1;
+        break;
+
+    case 14:
+        switch (self->action) {
+        case 29:
+        case 30:
+        case 31:
+            if (chk_chr_stat__6aiStatFUli(self, 1, -1))
+                result = 1;
+            break;
+        }
+        break;
+
+    case 15:
+        if (chk_chr_stat__6aiStatFUli(self, 1, 27) == 0)
+            result = 1;
+        break;
+
+    case 16:
+        switch (self->action) {
+        case 22:
+            if (chk_chr_stat__6aiStatFUli(self, 1, -1) == 0)
+                result = 1;
+            break;
+        case 23:
+            if (chk_chr_stat__6aiStatFUli(self, 1, -1) == 0)
+                result = 1;
+            break;
+        case 29:
+            if (chk_chr_stat__6aiStatFUli(self, 2, -1) == 0)
+                result = 1;
+            break;
+        }
+        break;
+
+    case 17:
+        if ((self->flags & 1) && self->f84 < c[1])
+            result = 1;
+        break;
+
+    case 18:
+        if (self->flags & 1)
+            result = 1;
+        break;
+
+    case 21:
+        if (chk_over_ground1__6aiStatFP8aiChrIdx(self, selfId) == 0) {
+            float value = get_range_floor__6aiStatFfP5Vec3f(self, &self->position, self->fA0);
+            if (value > c[22] && value < c[23]) {
+                Environment* e = self->environment;
+                if (self->position.m_y > e->f0C - c[9] &&
+                    ((self->position.m_x < e->f00 && self->f80 > c[24]) ||
+                     (self->position.m_x > e->f08 && self->f80 < c[0])))
+                    result = 1;
+            }
+        }
+        break;
+
+    case 22:
+        if (chk_chr_stat__6aiStatFUli(self, 1, 12))
+            result = 1;
+        break;
+
+    case 24:
+        if (fn_27_21E24C(p, 18, selfId, targetId) == 0 &&
+            fn_27_21E24C(p, 1, selfId, targetId) == 0 &&
+            fn_27_21E24C(p, 4, selfId, targetId) == 0 &&
+            fn_27_21E24C(p, 2, selfId, targetId) != 0 &&
+            fn_27_21E24C(p, 9, selfId, targetId) != 0)
+            result = 1;
+        break;
+
+    case 25:
+        if (chk_chr_stat__6aiStatFUli(self, 8, 46))
+            result = 1;
+        break;
+
+    case 28:
+        if (chkChildOptionMd__5aiMgrFi(g_aiMgr, *selfId))
+            result = 1;
+        break;
+
+    case 29:
+        if (chk_chr_stat__6aiStatFUli(self, 4, 27) == 0)
+            result = 1;
+        break;
+    }
+
+    return result;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_21E9BC {
+
+typedef struct FState {
+    u8 pad0[0x50];
+    u32 unk50;
+    u8 pad54[0x8];
+    f32 unk5C;
+    f32 unk60;
+    u8 pad64[0x44];
+    s16 unkA8;
+    u8 padAA[0x2];
+    s32 unkAC;
+    u8 padB0[0x4];
+    s32 unkB4;
+    u8 padB8[0x4];
+    void* unkBC;
+    u8 padC0[0x1C];
+    f32 unkDC;
+    u8 padE0[0xDA];
+    u8 unk1BA;
+} FState;
+
+extern "C" {
+FState* get_aiStat__5aiMgrFP8aiChrIdx(s8* fighterId);
+s32 IsPlayer__8aiChrIdxFPC8aiChrIdx(s8* fighterId);
+s32 chk_over_ground__6aiStatFv(FState* st);
+s32 chk_chr_stat__6aiStatFUli(FState* st, u32 a, s32 b);
+f32 get_range__6aiStatFfP8aiChrIdx(FState* st, s8* id, f32 f);
+f32 get_lr_tgt__6aiStatFP8aiChrIdx(FState* st, s8* id);
+f32 get_range_floor__6aiStatFfP5Vec3f(FState* st, void* vec, f32 f);
+u16 enum_act_list_id__7aiParamFii(void* a, s32 b, s32 c);
+}
+
+extern "C" const float lbl_27_rodata_3290[];
+
+extern "C" s32 fn_27_21E9BC(FState* p, void* arg1, s8* arg2, s32 script, u32 flags, void* arg5) {
+    const f32* c;
+    FState* s;
+    f32 f31;
+    f32 t;
+    f32* bc;
+    u32 f50;
+    u8 b8;
+
+    c = lbl_27_rodata_3290;
+    s = get_aiStat__5aiMgrFP8aiChrIdx(arg2);
+
+    if (!(flags & 1)) {
+        switch (script & 0x7FF0) {
+        case 0x1090:
+            return 1;
+        }
+    }
+    if (flags & 2) goto L_EA9C;
+    if ((u32)script == 0x603B) {
+        if (p->unkAC == 0x1D || p->unkAC == 0x1E || p->unkAC == 0x1F) goto L_EAE8;
+    }
+    if (((u32)script & 0xF000) == 0x1000 || ((u32)script & 0xF000) == 0x6000) return 1;
+    switch (script & 0x7FF0) {
+    case 0x2020:
+    case 0x2030:
+    case 0x3030:
+        return 1;
+    }
+    goto L_EAE8;
+
+L_EA9C:
+    if (flags & 4) goto L_EAC8;
+    switch (script & 0x7FF0) {
+    case 0x1070:
+    case 0x1080:
+        return 1;
+    }
+L_EAC8:
+    if (flags & 0x10) goto L_EAE8;
+    switch (script & 0x7FF0) {
+    case 0x1050:
+        return 1;
+    }
+
+L_EAE8:
+    if (flags & 8) goto L_EB08;
+    switch (script & 0x7FF0) {
+    case 0x1070:
+        return 1;
+    }
+
+L_EB08:
+    if (p->unkA8 > 0) goto L_EB44;
+    switch (script & 0x7FF0) {
+    case 0x50:
+    case 0x80:
+    case 0x1070:
+        return 1;
+    }
+
+L_EB44:
+    if (flags & 0x20) {
+        if (!(p->unkDC < c[25])) {
+            b8 = s->unk1BA;
+            if (b8 != 9 && (u8)(b8 + 0xFC) > 1) goto L_EB90;
+        }
+    }
+    switch (script & 0x7FF0) {
+    case 0x3020:
+        return 1;
+    }
+
+L_EB90:
+    if (flags & 0x200) goto L_EBB0;
+    switch (script & 0x7FF0) {
+    case 0x70:
+        return 1;
+    }
+
+L_EBB0:
+    f50 = p->unk50;
+    if ((f50 & 0x80) || (f50 & 0x100)) {
+        switch (script) {
+        case 0x21:
+        case 0x31:
+        case 0x55:
+        case 0x1040:
+        case 0x1050:
+        case 0x10D0:
+        case 0x3030:
+            return 1;
+        }
+    }
+
+    if (f50 & 1) {
+        switch (script & 0x7FF0) {
+        case 0x20:
+        case 0x30:
+        case 0x40:
+        case 0x70:
+        case 0x10A0:
+        case 0x3010:
+        case 0x3020:
+        case 0x3030:
+        case 0x3040:
+        case 0x3050:
+            return 1;
+        }
+    }
+
+L_ECAC:
+    if (chk_over_ground__6aiStatFv(p) == 0) {
+        switch (script) {
+        case 0x10A0:
+            return 1;
+        case 0x1140:
+            if (p->unkA8 < 1) return 1;
+            break;
+        case 0x2020:
+            bc = (f32*)p->unkBC;
+            if (p->unk5C < bc[0]) {
+                if (p->unk60 < c[9] + bc[1]) return 1;
+            } else {
+                if (p->unk60 < c[9] + bc[3]) return 1;
+            }
+            break;
+        }
+    }
+
+    if (chk_over_ground__6aiStatFv(s) == 0) {
+        switch (script) {
+        case 0x80:
+            return 1;
+        }
+    }
+    if (s->unkB4 == 0xBE) {
+        if (((u32)script & 0xF000) == 0x1000) return 1;
+        switch (script & 0x7FF0) {
+        case 0x50:
+            return 1;
+        }
+    }
+    if (chk_chr_stat__6aiStatFUli(p, 2, 0x12) != 0) {
+        switch (script) {
+        case 0x1140:
+        case 0x10A0:
+            return 1;
+        }
+    }
+    if (IsPlayer__8aiChrIdxFPC8aiChrIdx(arg2) == 0) {
+        switch (script) {
+        case 0x3080:
+        case 0x10F0:
+        case 0x1060:
+        case 0x30B0:
+        case 0x3090:
+            return 1;
+        }
+        if (*(s32*)((u8*)g_aiMgr + 0x370) == 0x1C) {
+            switch (script) {
+            case 0x3020:
+            case 0x1110:
+            case 0x10A0:
+            case 0x71:
+            case 0x72:
+            case 0x3010:
+            case 0x1160:
+            case 0x3050:
+            case 0x3040:
+            case 0x3030:
+            case 0x30A0:
+            case 0x3060:
+                return 1;
+            }
+        }
+    }
+
+    switch (script) {
+    case 0x21:
+    case 0x31:
+        goto L_EF80;
+    case 0x22:
+    case 0x32:
+        goto L_EF34;
+    case 0x10F0:
+        goto L_EFB0;
+    case 0x3030:
+        goto L_F010;
+    case 0x3060:
+        goto L_F024;
+    default:
+        goto L_F038;
+    }
+
+L_EF34:
+    f31 = *(f32*)((u8*)arg1 + 0x18);
+    t = get_range__6aiStatFfP8aiChrIdx(p, arg2, c[1]);
+    if (t > f31) goto L_F038;
+    f31 = *(f32*)((u8*)arg1 + 0x18);
+    t = get_range_floor__6aiStatFfP5Vec3f(p, (u8*)p + 0x5C, -get_lr_tgt__6aiStatFP8aiChrIdx(p, arg2));
+    if (t < f31) return 1;
+    goto L_F038;
+
+L_EF80:
+    f31 = *(f32*)((u8*)arg1 + 0x14);
+    t = get_range_floor__6aiStatFfP5Vec3f(p, (u8*)p + 0x5C, -get_lr_tgt__6aiStatFP8aiChrIdx(p, arg2));
+    if (t < f31) return 1;
+    goto L_F038;
+
+L_EFB0:
+    if (!(s->unk50 & 0x20000)) {
+        if (s->unk1BA != 6 || enum_act_list_id__7aiParamFii(arg1, 9, 0) == 0) return 1;
+    }
+    if (arg5 == 0) goto L_F038;
+    if ((u32)script == *(u16*)((u8*)arg5 + 0x78) || (u32)script == *(u16*)((u8*)arg5 + 0x7C)) return 1;
+    goto L_F038;
+
+L_F010:
+    if (p->unk50 & 4) return 1;
+    goto L_F038;
+
+L_F024:
+    if (p->unkB4 == 0x49) return 1;
+
+L_F038:
+    return 0;
+}
+}
+

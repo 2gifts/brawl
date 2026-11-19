@@ -423,3 +423,32 @@ void soGroundShapeImpl::setAttackPoint(bool a, bool b, bool c, bool d, bool flag
 }
 
 void soGroundShapeImpl::calcRhombusModify(soModuleAccesser* moduleAccesser, float* out1, float* out2, float* out3, float* out4) { }
+
+// TODO: clean up, give variables real names
+namespace jj_2E888 {
+extern "C" void __dt__12grCollStatusFv(void*, int);
+extern "C" void __dl__FPv(void*);
+extern "C" char lbl_27_data_2E68[];
+
+struct fn_27_2E888_obj {
+    unsigned int unk0;
+    void* unk4;
+    unsigned char pad8[0x38];
+    void* unk40;
+};
+
+extern "C" {
+fn_27_2E888_obj* __dt__17soGroundShapeImplFv(fn_27_2E888_obj* p, int flag) {
+    if (p) {
+        p->unk40 = lbl_27_data_2E68;
+        __dt__12grCollStatusFv(p->unk4, 1);
+        p->unk4 = 0;
+        if (flag > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+}
+

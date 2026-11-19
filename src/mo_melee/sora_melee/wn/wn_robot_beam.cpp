@@ -134,3 +134,121 @@ bool wnRobotBeam::notifyEventCollisionAttackCheck(u32 flags) {
     }
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_3A3BAC {
+extern "C" void* fn_27_3A3BAC(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x7f8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A55FC {
+extern "C" void setClassInfo__11wnClassInfoFlP11wnClassInfo(void* self, int id, void* data);
+extern "C" void __dl__FPv(void* p);
+
+extern char lbl_27_data_9D048[];
+extern char g_wnClassInfoNull[];
+
+struct stMeleeDerived {
+    void* m_vt0;
+    u32 m_pad4;
+    void* m_vt1;
+};
+
+extern "C" {
+stMeleeDerived* fn_27_3A55FC(stMeleeDerived* self, int flag) {
+    if (self) {
+        self->m_vt0 = lbl_27_data_9D048 + 8;
+        self->m_vt1 = lbl_27_data_9D048;
+        setClassInfo__11wnClassInfoFlP11wnClassInfo(self, 0x2e, g_wnClassInfoNull);
+        if (flag > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A574C {
+extern "C" void fn_27_3A4714(void*);
+
+extern "C" void fn_27_3A574C(void* self) {
+    fn_27_3A4714(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A5754 {
+extern "C" void fn_27_3A4714(void*);
+
+extern "C" void fn_27_3A5754(void* self) {
+    fn_27_3A4714(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A575C {
+extern "C" void fn_27_3A4714(void*);
+
+extern "C" void fn_27_3A575C(void* self) {
+    fn_27_3A4714(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A5764 {
+extern "C" void __dt__11wnRobotBeamFv(void*);
+
+extern "C" void fn_27_3A5764(void* self) {
+    __dt__11wnRobotBeamFv(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A576C {
+extern "C" void notifyEventAnimCmd__11wnRobotBeamFP9acAnimCmdP16soModuleAccesseri(void*);
+
+extern "C" void fn_27_3A576C(void* self) {
+    notifyEventAnimCmd__11wnRobotBeamFP9acAnimCmdP16soModuleAccesseri(reinterpret_cast<u8*>(self) - 0x48);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A5774 {
+extern "C" void notifyEventCollisionAttackCheck__11wnRobotBeamFUl(void*);
+
+extern "C" void fn_27_3A5774(void* self) {
+    notifyEventCollisionAttackCheck__11wnRobotBeamFUl(reinterpret_cast<u8*>(self) - 0x70);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A577C {
+extern "C" void __dt__11wnRobotBeamFv(void*);
+
+extern "C" void fn_27_3A577C(void* self) {
+    __dt__11wnRobotBeamFv(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A5784 {
+extern "C" void fn_27_3A54D4(void*);
+
+extern "C" void fn_27_3A5784(void* self) {
+    fn_27_3A54D4(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_3A578C {
+extern "C" void __dt__11wnRobotBeamFv(void*);
+
+extern "C" void fn_27_3A578C(void* self) {
+    __dt__11wnRobotBeamFv(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

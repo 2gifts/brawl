@@ -35,3 +35,18 @@ void ftStatusUniqProcessGimmickLadder::fixPosLadderEnd(soModuleAccesser* moduleA
         moduleAccesser->getStatusModule().changeStatusRequest(0xE, moduleAccesser);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_177E80 {
+extern "C" void adjustLadderMovement__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesserff(void*, void*, float, float);
+
+extern "C" void execLadderEnd__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesserP24soGimmickLadderEventArgs(void* a, void* b, float* c) {
+    adjustLadderMovement__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesserff(a, b, c[2], c[3]);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_178030 {
+extern "C" void exitLadderEnd__32ftStatusUniqProcessGimmickLadderFP16soModuleAccesser(void) {}
+}
+

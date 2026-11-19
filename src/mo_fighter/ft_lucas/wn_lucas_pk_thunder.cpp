@@ -236,3 +236,22 @@ bool wnLucasPKThunder::reflect() {
     setNotifyArticleEventEject(-1, m_moduleAccesser);
     return false;
 }
+
+// TODO: clean up, give variables real names
+namespace jj_18918 {
+extern "C" void* fn_114_3A60(void* object, short deleting);
+extern "C" void __dl__FPv(void* object);
+
+extern "C" void* __dt__30wnLucasPKThunderParamAccesserFv(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            fn_114_3A60(object, 0);
+        }
+        if (deleting > 0) {
+            __dl__FPv(object);
+        }
+    }
+    return object;
+}
+}
+

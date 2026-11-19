@@ -570,3 +570,185 @@ template class soInstancePoolSub<wnWarioBikeNormal2Info, soTypeListNullType>;
 template class soInstancePool<wnWarioBikeNormal2Info, soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info, soTypeList<wnWarioBikeGravityInfo, soTypeListNullType> >, soInstancePool, soInstancePoolRoot>, soTypeListNullType, 2>;
 template class soLineInvertHierarchy<soTypeList<wnWarioBikeNormal0Info, soTypeList<wnWarioBikeGravityInfo, soTypeList<wnWarioBikeNormal2Info, soTypeListNullType> > >, soInstancePool, soInstancePoolRoot>;
 #pragma dont_inline off
+
+// TODO: clean up, give variables real names
+namespace jj_F3F8 {
+extern "C" u32 fn_110_F3F8(void* self) {
+    return *reinterpret_cast<u32*>(reinterpret_cast<u8*>(self) + 0x4);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_FC44 {
+extern "C" {
+void* __dt__22soControllerModuleImplFv(void*, short);
+void __dl__FPv(void*);
+void* fn_110_FC44(void* self, short flags);
+}
+
+void* fn_110_FC44(void* self, short flags) {
+    if (self != 0) {
+        __dt__22soControllerModuleImplFv(self, static_cast<short>(0));
+        if (flags > 0) {
+            __dl__FPv(self);
+        }
+    }
+    return self;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_128F8 {
+extern "C" void fn_110_128F8(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_128FC {
+extern "C" void fn_110_128FC(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_12A74 {
+extern "C" void fn_110_12A74(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_12A78 {
+extern "C" void fn_110_12A78(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_12A7C {
+extern "C" void fn_110_12A7C(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_12A80 {
+extern "C" void fn_110_12A80(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_12C04 {
+extern "C" s32 fn_110_12C04(void) {
+    return -0x1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_13154 {
+extern "C" void* __dt__15soKineticEnergyFv(void*, short);
+extern "C" void __dl__FPv(void*);
+
+extern "C" void* fn_110_13154(void* p, short n) {
+    if (p != 0) {
+        __dt__15soKineticEnergyFv(p, 0);
+        if (n > 0) {
+            __dl__FPv(p);
+        }
+    }
+    return p;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_137D0 {
+extern "C" void fn_110_14BF8(void* a, void* b);
+
+struct Flags {
+    unsigned char pad[5];
+    unsigned char f : 1;
+    unsigned char g : 7;
+    unsigned char h;
+};
+
+extern "C" int fn_110_137D0(void* a, void* b, void* c) {
+    Flags* p = (Flags*)b;
+    bool flag = p->f;
+    if (flag == true && p->h == 0) {
+        fn_110_14BF8(b, c);
+    }
+    return 1;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_13820 {
+extern "C" void* getInstanceAt__21ftPurinArticleSubPoolFl(void* object, int index) {
+    if (index == 0) {
+        return static_cast<char*>(object) + 0x0c;
+    }
+    return 0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_138C8 {
+extern "C" s32 fn_110_138C8(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_13978 {
+extern "C" s32 fn_110_13978(void) {
+    return 0x0;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_13B08 {
+extern "C" void setAttackPowerMulPattern__6WeaponFf(void*);
+
+extern "C" void fn_110_13B08(void* self) {
+    setAttackPowerMulPattern__6WeaponFf(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_13B10 {
+extern "C" void getActiveGlobalFrame__6WeaponFv(void*);
+
+extern "C" void fn_110_13B10(void* self) {
+    getActiveGlobalFrame__6WeaponFv(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1526C {
+extern "C" {
+float rsqrtf__Ff(float);
+extern const float lbl_110_rodata_98;
+extern const float lbl_110_rodata_A8;
+
+struct Vec2f {
+    float x;
+    float y;
+};
+
+float length__5Vec2fFv(Vec2f* v) {
+    float sq = v->x * v->x + v->y * v->y;
+    double d = __fabs((double)sq);
+    float a = (float)d;
+    if (a <= lbl_110_rodata_A8) {
+        return lbl_110_rodata_98;
+    }
+    return sq * rsqrtf__Ff(sq);
+}
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_152E0 {
+struct Vec2 {
+    float x;
+    float y;
+};
+
+extern "C" Vec2 __ml__FRC5Vec2ff(const Vec2* vector, float scale) {
+    Vec2 result;
+    result.x = vector->x * scale;
+    result.y = vector->y * scale;
+    return result;
+}
+}
+

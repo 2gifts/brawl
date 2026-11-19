@@ -103,3 +103,47 @@ void wnLucasPKFlash::onDeactivate() {
 void wnLucasPKFlash::shoot() {
     m_moduleAccesser->getStatusModule().changeStatusForce(1, m_moduleAccesser);
 }
+
+// TODO: clean up, give variables real names
+namespace jj_3626C0 {
+extern "C" void* fn_27_3626C0(void* self) {
+    return reinterpret_cast<u8*>(self) + 0x7f8;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_363B30 {
+extern "C" void fn_27_3623B0(void*);
+
+extern "C" void fn_27_363B30(void* self) {
+    fn_27_3623B0(reinterpret_cast<u8*>(self) - 0x40);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_363B38 {
+extern "C" void fn_27_3623B0(void*);
+
+extern "C" void fn_27_363B38(void* self) {
+    fn_27_3623B0(reinterpret_cast<u8*>(self) - 0x90);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_363B40 {
+extern "C" void fn_27_3623B0(void*);
+
+extern "C" void fn_27_363B40(void* self) {
+    fn_27_3623B0(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_363B58 {
+extern "C" void fn_27_3638B8(void*);
+
+extern "C" void fn_27_363B58(void* self) {
+    fn_27_3638B8(reinterpret_cast<u8*>(self) - 0x88);
+}
+}
+

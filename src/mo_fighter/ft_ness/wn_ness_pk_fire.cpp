@@ -102,3 +102,14 @@ void wnNessPKFire::notifyEventCollisionHit(float power, soCollisionAttackData* a
         moduleAccesser->getWorkManageModule().setInt(life, Weapon::Instance::Work::Int_Life);
     }
 }
+
+// TODO: clean up, give variables real names
+namespace jj_15F64 {
+extern "C" void fn_101_15F64(void) {}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_15F68 {
+extern "C" void fn_101_15F68(void) {}
+}
+
