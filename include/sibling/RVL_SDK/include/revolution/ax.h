@@ -270,7 +270,7 @@ typedef enum {
 #define AX_VOICE_MAX 96
 
 typedef struct _AXVPB {
-    void* next;                // at 0x0
+    struct _AXVPB* next;                // at 0x0
     void* prev;                // at 0x4
     void* next1;               // at 0x8
     u32 priority;              // at 0xC

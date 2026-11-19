@@ -835,3 +835,24 @@ extern "C" void getOrbitControlWithMenu__17cmPhotoControllerFPC11gfPadStatusP5Ve
 }
 }
 
+
+void cmPhotoController::setFreezeMode(void* p1)
+{
+    int delta = -1;
+    if (p1) delta = 1;
+    unk60 += delta;
+}
+
+// TODO: clean up - the callback list lives at +0xAC (inside the unk64 blob); add a named `utList m_callBacks` member to cmPhotoController and use it here
+void cmPhotoController::addCallBack(utListNode* cb)
+{
+    ((utList*)((u8*)this + 0xAC))->addTail(cb);
+}
+
+// TODO: clean up - same as addCallBack: use a named utList member instead of the +0xAC cast
+void cmPhotoController::removeCallBack(utListNode* cb)
+{
+    if (cb) {
+        ((utList*)((u8*)this + 0xAC))->removeExist(cb);
+    }
+}
