@@ -259,6 +259,8 @@ struct hkVector4 {
     // Inline form of setTransformedInversePos (same body); defined in hkTransform.h. Inlined by the sphere agents.
     inline void _setTransformedInversePos(const hkTransform& t, const hkVector4& v);
     void setRotatedDir(const hkRotation& r, const hkVector4& v);
+    // this = q * v * conjugate(q) (weak copy in hkFootPlacementIkSolver.o).
+    void setRotatedDir(const hkQuaternion& q, const hkVector4& v);
     void setRotatedInverseDir(const hkRotation& r, const hkVector4& v);
     // Column-major product: this = m.col0 * v.x + m.col1 * v.y + m.col2 * v.z, w = 0. The inline behind
     // setRotatedDir (byte-identical); defined in hkRotation.h. hkSolver.cpp defines HK_VECTOR4_OUTLINE_SETMUL3

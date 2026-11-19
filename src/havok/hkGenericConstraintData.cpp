@@ -35,9 +35,8 @@
 #include <havok/hkGenericConstraintData.h>
 #include <havok/hkRegistry.h>
 #include <havok/hkMath.h>
+#include <havok/hkConstraintQueryIn.h>
 
-// Stand-in for a helper in another TU (not yet named).
-extern "C" void fn_80288B40(void* a, void* b, u32 c, u32 d);
 
 void hkGenericConstraintData::finishLoadedObjecthkGenericConstraintData(void* p) {
     hkFinishLoadedObjectFlag flag;
@@ -93,7 +92,8 @@ void hkGenericConstraintData::getRuntimeInfo(void* unusedA, hkConstraintRuntimeI
 }
 
 void hkGenericConstraintData::buildJacobian(void* a, void* b) {
-    fn_80288B40(a, b, *(u32*)((u8*)a + 0x44), 8);
+    const hkConstraintQueryIn& in = *(const hkConstraintQueryIn*)a;
+    hkBeginConstraints(in, *(hkConstraintQueryOut*)b, in.unk44, 8);
     hatchScheme(&m_scheme, a, b);
 }
 

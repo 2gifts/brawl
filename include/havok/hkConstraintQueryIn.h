@@ -5,6 +5,7 @@
 struct hkVelocityAccumulator;
 struct hkJacobianElement;
 struct hkJacobianSchema;
+struct hkTransform;
 
 // Solver step data handed to the constraint Jacobian builders (offsets from hkSimpleContactConstraintDataBuildJacobian).
 // HYPOTHESIS: all names; only the members that function reads are named after their use.
@@ -21,10 +22,15 @@ struct hkConstraintQueryIn {
     hkPadSpu<hkReal> m_frictionRhsScale; // 0x24 second argument of the friction rows' build*End
     hkPadSpu<const hkVelocityAccumulator*> m_bodyA; // 0x28
     hkPadSpu<const hkVelocityAccumulator*> m_bodyB; // 0x2C
-    u8 unk30[0x44 - 0x30];
+    hkPadSpu<const hkTransform*> m_transformA; // 0x30 world transform of body A (the local transform atoms read it)
+    hkPadSpu<const hkTransform*> m_transformB; // 0x34
+    hkPadSpu<hkReal> unk38;             // 0x38
+    hkPadSpu<hkReal> unk3C;             // 0x3C
+    hkPadSpu<void*> unk40;              // 0x40
     hkPadSpu<void*> unk44;             // 0x44 handed to the angular friction rows (HYPOTHESIS: their solver results)
     hkPadSpu<u32> m_accumulatorAOffset; // 0x48 first offset written into the Jacobian header
     hkPadSpu<u32> m_accumulatorBOffset; // 0x4C
+    hkPadSpu<void*> unk50;              // 0x50 (the copy constructor moves it as a word)
 };
 
 // Output cursors of the Jacobian builders.
@@ -33,3 +39,7 @@ struct hkConstraintQueryOut {
     hkPadSpu<hkJacobianElement*> m_jacobiansBase; // 0x04 HYPOTHESIS: the base the header's offset is taken from
     hkPadSpu<hkJacobianSchema*> m_jacobianSchemas; // 0x08 next free schema
 };
+
+// Writes the header schema in front of a constraint's rows (hkBuildJacobianFromAtoms.cpp).
+void hkBeginConstraints(const hkConstraintQueryIn& in, hkConstraintQueryOut& out, void* solverResults,
+                        int solverResultStride);

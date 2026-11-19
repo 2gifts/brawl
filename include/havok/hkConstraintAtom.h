@@ -87,6 +87,10 @@ struct hkBridgeConstraintAtom : hkConstraintAtom {
     hkConstraintData* m_constraintData;            // 0x08
 
     void init(hkConstraintData* data);
+    // Builds the bridged constraint through its data (out-of-line in hkBuildJacobianFromAtoms).
+    void callBridgeFromAtom(const struct hkConstraintQueryIn& in, hkTransform& baseA, hkTransform& baseB,
+                            struct hkConstraintQueryOut& out) const;
+    int numSolverResults() const;
 };
 
 // The atoms of a constraint that is solved through its constraint data (0x0C bytes).

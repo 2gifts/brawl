@@ -12,5 +12,12 @@ struct hkShapeCollection : hkShape, hkShapeContainer {
 
     hkBool m_disableWelding; // 0x10
 
+    // Overrides of hkShape defined in hkShapeCollection.cpp (they visit every child through the container).
+    virtual void getAabb(const hkTransform& localToWorld, hkReal tolerance, hkAabb& out) const;  // 0x14
+    virtual hkReal getMaximumProjection(const hkVector4& direction) const;                     // 0x18
+    virtual hkBool castRay(const hkShapeRayCastInput& input, hkShapeRayCastOutput& results) const; // 0x1C
+    virtual void castRayWithCollector(const hkShapeRayCastInput& input, const hkCdBody& body,
+                                      hkShapeRayCastCollector& collector) const;              // 0x20
+
     virtual u32 getCollisionFilterInfo(u32 key) const; // 0x44
 };

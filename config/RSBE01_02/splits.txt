@@ -3215,9 +3215,19 @@ havok/hkVector4.cpp:
 	.ctors      start:0x80406614 end:0x80406618
 
 havok/hkBuildJacobianFromAtoms.cpp:
-	extab       start:0x80006518 end:0x800065C0
-	extabindex  start:0x800097B4 end:0x800098B0
-	.text       start:0x80289D0C end:0x8028D8A0
+	extab       start:0x800064E0 end:0x800065C0
+	extabindex  start:0x80009760 end:0x800098B0
+	.text       start:0x80287B04 end:0x8028D8BC
+
+havok/hk1dBilateralConstraintBuildJacobian.cpp:
+	extab       start:0x800065C0 end:0x800065F8
+	extabindex  start:0x800098B0 end:0x80009904
+	.text       start:0x8028D8BC end:0x8028F9AC
+
+havok/hkInternalConstraintUtils.cpp:
+	extab       start:0x800065F8 end:0x80006600
+	extabindex  start:0x80009904 end:0x80009910
+	.text       start:0x8028F9AC end:0x8028FBC8
 
 havok/hkChainBuildJacobian.cpp:
 	extab       start:0x80006600 end:0x80006608
@@ -3511,7 +3521,9 @@ havok/hkCapsuleShapeClass.cpp:
 	.sdata2     start:0x805A4088 end:0x805A4098
 
 havok/hkShapeCollection.cpp:
-	.text       start:0x802D0818 end:0x802D0828
+	extab       start:0x800083B8 end:0x800083D0
+	extabindex  start:0x8000B104 end:0x8000B128
+	.text       start:0x802D01B0 end:0x802D0828
 
 havok/hkShapeCollectionClass.cpp:
 	extab       start:0x800083D0 end:0x800083D8
@@ -3613,7 +3625,9 @@ havok/hkShapeContainerClass.cpp:
 	.bss        start:0x80532868 end:0x805328B0
 
 havok/hkShapeType.cpp:
-	.text       start:0x802D4FE4 end:0x802D51F4
+	extab       start:0x8000857C end:0x80008584
+	extabindex  start:0x8000B38C end:0x8000B398
+	.text       start:0x802D4EC0 end:0x802D51F4
 
 havok/hkMeshShape.cpp:
 	extab       start:0x80008584 end:0x800085D4
@@ -3992,12 +4006,11 @@ havok/hkAgent1nMachine.cpp:
 	extabindex  start:0x8000B554 end:0x8000B5E4
 	.text       start:0x802FC6AC end:0x802FEDA0
 
-havok/hkLinkedCollidable.cpp:
-	.text       start:0x802FF394 end:0x802FF53C
+havok/hkAgentNnMachine.cpp:
+	extab       start:0x8000870C end:0x80008754
+	extabindex  start:0x8000B5E4 end:0x8000B650
+	.text       start:0x802FEDA0 end:0x80300794
 	.data       start:0x8048884C end:0x804888A0
-
-havok/hkLinkedCollidable_part2.cpp:
-	.text       start:0x80300488 end:0x803004F4
 
 havok/hkLinkedCollidableClass.cpp:
 	extab       start:0x80008754 end:0x8000875C
@@ -4167,6 +4180,11 @@ havok/hkLookAtIkSolver.cpp:
 	extabindex  start:0x8000BFEC end:0x8000BFF8
 	.text       start:0x8032DA40 end:0x8032E138
 
+havok/hkTwoJointsIkSolver.cpp:
+	extab       start:0x80009170 end:0x80009180
+	extabindex  start:0x8000BFF8 end:0x8000C010
+	.text       start:0x8032E138 end:0x8032E740
+
 havok/hkSkeletonMapperClass.cpp:
 	extab       start:0x80009180 end:0x80009188
 	extabindex  start:0x8000C010 end:0x8000C01C
@@ -4224,6 +4242,11 @@ havok/hkSkeletonClass.cpp:
 	.rodata     start:0x80414E80 end:0x80414F00
 	.bss        start:0x80533550 end:0x80533578
 	.sdata2     start:0x805A4928 end:0x805A4938
+
+havok/hkSkeletonUtils.cpp:
+	extab       start:0x800091E0 end:0x80009214
+	extabindex  start:0x8000C0A0 end:0x8000C0B8
+	.text       start:0x8032F10C end:0x8032F3EC
 
 havok/hkRagdollInstanceClass.cpp:
 	extab       start:0x80009214 end:0x8000921C

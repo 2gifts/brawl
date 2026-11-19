@@ -1,8 +1,32 @@
-// Havok translation unit hkShapeType.o (main.dol 0x802D4FE4-0x802D51F4).
+// Havok translation unit hkShapeType.o (main.dol 0x802D4EC0-0x802D51F4).
 // Functions in address order:
+//   0x802D4EC0   292  hkRegisterAlternateShapeTypes
 //   0x802D4FE4   528  hkGetShapeTypeName
 
 #include <havok/hkShapeType.h>
+#include <havok/hkCollisionDispatcher.h>
+
+// Tells the dispatcher which shape types can also be handled as a more general type (every convex shape as
+// HK_SHAPE_CONVEX, the list and mesh shapes as collections, the MOPP shape as a bv tree, ...). Name from the
+// DebugMode map.
+void hkRegisterAlternateShapeTypes(hkCollisionDispatcher* dis) {
+    dis->registerAlternateShapeType(HK_SHAPE_SPHERE, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_TRIANGLE, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_BOX, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_CAPSULE, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_CYLINDER, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_CONVEX_VERTICES, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_CONVEX_TRANSLATE, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_CONVEX_TRANSFORM, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_CONVEX_PIECE, HK_SHAPE_CONVEX);
+    dis->registerAlternateShapeType(HK_SHAPE_TRIANGLE_COLLECTION, HK_SHAPE_COLLECTION);
+    dis->registerAlternateShapeType(HK_SHAPE_LIST, HK_SHAPE_COLLECTION);
+    dis->registerAlternateShapeType(HK_SHAPE_CONVEX_LIST, HK_SHAPE_LIST);
+    dis->registerAlternateShapeType(HK_SHAPE_MOPP, HK_SHAPE_BV_TREE);
+    dis->registerAlternateShapeType(HK_SHAPE_CONVEX, HK_SHAPE_SPHERE_REP);
+    dis->registerAlternateShapeType(HK_SHAPE_PLANE, HK_SHAPE_HEIGHT_FIELD);
+    dis->registerAlternateShapeType(HK_SHAPE_SAMPLED_HEIGHT_FIELD, HK_SHAPE_HEIGHT_FIELD);
+}
 
 const char* hkGetShapeTypeName(int type) {
     switch (type) {

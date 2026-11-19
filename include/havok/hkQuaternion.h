@@ -16,6 +16,8 @@ struct hkQuaternion {
     // Builds the quaternion from a rotation matrix (calls hkQuadReal::quaternionFromRotatation).
     void set(const hkRotation& r);
     void setFlippedRotation(const hkQuaternion& q);
+    // The shortest rotation from "from" to "to", scaled down by gain (weak copy in hkTwoJointsIkSolver.o).
+    void setShortestRotationDamped(hkReal gain, const hkVector4& from, const hkVector4& to);
     // this = conjugate(q0) * q1 (out of line in hkSimulation.o).
     void setInverseMul(const hkQuaternion& q0, const hkQuaternion& q1);
     // Scales to unit length; defined in src/havok/hkFootPlacementIkSolver.cpp.

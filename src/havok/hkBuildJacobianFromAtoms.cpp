@@ -1,7 +1,26 @@
 #include <types.h>
-// Havok translation unit hkBuildJacobianFromAtoms.o (main.dol 0x80289D0C-0x8028D8A0): the jacobian builders of the
-// constraint atoms, each after its atom's numSolverResults.
-// Not yet decompiled. Functions in address order:
+// Havok translation unit hkBuildJacobianFromAtoms.o (main.dol 0x80287B04-0x8028D8BC): the shared Jacobian helpers,
+// the atom-list builder and the jacobian builders of the constraint atoms, each followed by its atom's
+// numSolverResults. Names from the DebugMode map. Functions in address order:
+//   0x80287B04  1252  hkBallSocketConstraintBuildJacobian
+//   0x80287FE8   992  hk1dAngularLimitBuildJacobian
+//   0x802883C8   992  _hk1dAngularLimitBuildJacobian
+//   0x802887A8   772  hk1dAngularVelocityMotorBeginJacobian
+//   0x80288AAC   116  hk1dAngularVelocityMotorCommitJacobian
+//   0x80288B20    32  hkReplacePreviousRhs
+//   0x80288B40    68  hkBeginConstraints
+//   0x80288B84    68  _hkBeginConstraints (out-of-line copy of the inline)
+//   0x80288BC8  2708  hkSolverBuildJacobianFromAtomsNotContact
+//   0x8028965C   172  hkConstraintQueryIn copy constructor (weak)
+//   0x80289708   260  hkTransform copy constructor (weak)
+//   0x8028980C     8  hkPadSpu<const hkTransform*>::val (weak)
+//   0x80289814     8  hkPadSpu<void*>::val (weak)
+//   0x8028981C     8  hkEnum<hkConstraintAtom::AtomType, u16> conversion (weak)
+//   0x80289824    32  hkBridgeConstraintAtom::callBridgeFromAtom
+//   0x80289844    12  hkBridgeConstraintAtom::numSolverResults
+//   0x80289850   940  hkSetLocalTransformsConstraintAtom::setLocalTransformsFromAtom
+//   0x80289BFC     8  numSolverResults (hkSetLocalTransformsConstraintAtom)
+//   0x80289C04   264  hkSetLocalTranslationsConstraintAtom::setLocalTranslationsFromAtom
 //   0x80289D0C     8  numSolverResults (hkSetLocalTranslationsConstraintAtom)
 //   0x80289D14   812  setLocalRotationsFromAtom
 //   0x8028A040     8  numSolverResults (hkSetLocalRotationsConstraintAtom)
@@ -46,6 +65,10 @@
 //   0x8028D5C8     8  fn_8028D5C8
 //   0x8028D5D0   712  fn_8028D5D0
 //   0x8028D898     8  fn_8028D898
+//   0x8028D8A0     4  hkEndConstraints
+//   0x8028D8A4     8  hkAddByteOffsetCpuPtr<void*> (weak)
+//   0x8028D8AC     8  hkAddByteOffsetConst<const hkConstraintAtom> (weak)
+//   0x8028D8B4     8  hkPadSpu<void*>::operator= (weak)
 
 #include <havok/hkSetLocalTranslationsConstraintAtom.h>
 #include <havok/hkSetLocalRotationsConstraintAtom.h>
@@ -54,6 +77,170 @@
 #include <havok/hkConstraintQueryIn.h>
 #include <havok/hkJacobianSchema.h>
 #include <havok/hkRotation.h>
+
+#include <havok/hkSetLocalTransformsConstraintAtom.h>
+#include <havok/hkTransform.h>
+
+// Motor input of the angular velocity motor rows. HYPOTHESIS: names and the meaning of the members.
+struct hk1dAngularVelocityMotorInfo {
+    hkReal m_rhsFactor;      // 0x00
+    hkReal m_maxForce;       // 0x04
+    hkReal m_tauFactor;      // 0x08 scaled by in.unk04
+    hkReal m_dampFactor;     // 0x0C scaled by in.unk04
+    hkReal m_minForce;       // 0x10
+    hkReal m_velocityFactor; // 0x14
+};
+
+// Motor schema (type 5, 0x1C bytes). HYPOTHESIS: member names.
+struct hkJacobianMotorSchemaData {
+    u32 m_tag;         // 0x00
+    hkReal m_one;      // 0x04
+    hkReal m_tau;      // 0x08
+    hkReal m_damping;  // 0x0C
+    hkReal m_maxForce; // 0x10
+    hkReal m_minForce; // 0x14
+    hkReal m_velocity; // 0x18
+};
+
+// Header schema written in front of every constraint's rows (type 1, 0x18 bytes). HYPOTHESIS: member names.
+struct hkJacobianHeaderSchemaData {
+    u32 m_tag;                // 0x00
+    int m_jacobianOffset;     // 0x04 the rows' offset from the Jacobian base
+    u32 m_accumulatorAOffset; // 0x08
+    u32 m_accumulatorBOffset; // 0x0C
+    int m_solverResultStride; // 0x10 HYPOTHESIS
+    void* m_solverResults;    // 0x14
+};
+
+// Byte distance from base to ptr.
+static inline int hkGetByteOffsetInt(const void* base, const void* ptr) {
+    return (const char*)ptr - (const char*)base;
+}
+
+// Ends the motor rows: writes the motor schema and the rhs of the last row. Not matched yet: the target keeps the
+// loads after the preceding stores.
+void hk1dAngularVelocityMotorCommitJacobian(const hk1dAngularVelocityMotorInfo& info, const hkConstraintQueryIn& in,
+                                            hkConstraintQueryOut& out) {
+    hkJacobianMotorSchemaData* schema = (hkJacobianMotorSchemaData*)(hkJacobianSchema*)out.m_jacobianSchemas;
+    hkReal* jac = (hkReal*)(hkJacobianElement*)out.m_jacobians;
+    hkReal s = in.unk04;
+    schema->m_tau = info.m_tauFactor * s;
+    schema->m_damping = info.m_dampFactor * s;
+    schema->m_maxForce = info.m_maxForce;
+    schema->m_minForce = info.m_minForce;
+    schema->m_velocity = info.m_velocityFactor;
+    schema->m_one = 1.0f;
+    schema->m_tag = 0x050A001C;
+    jac[7] = info.m_rhsFactor * in.m_builderParam;
+    out.m_jacobians = (hkJacobianElement*)(jac + 8);
+    out.m_jacobianSchemas = (hkJacobianSchema*)(schema + 1);
+}
+
+// Overwrites the rhs (word 3) of the row `rowsBack` rows (0x30 bytes each) behind the Jacobian cursor.
+// HYPOTHESIS: parameter order and names.
+void hkReplacePreviousRhs(const hkConstraintQueryIn& in, hkConstraintQueryOut& out, int rowsBack, hkReal rhs) {
+    char* row = (char*)(hkJacobianElement*)out.m_jacobians;
+    row -= (s16)rowsBack * 0x30;
+    ((hkReal*)row)[3] = rhs * in.m_builderParam;
+}
+
+// Writes the header schema of a constraint. The out-of-line copy of the inline follows hkBeginConstraints (the
+// atom-list builder calls it).
+static inline void hkBeginConstraintsBody(const hkConstraintQueryIn& in, hkConstraintQueryOut& out,
+                                          void* solverResults, int solverResultStride) {
+    hkJacobianHeaderSchemaData* h = (hkJacobianHeaderSchemaData*)(hkJacobianSchema*)out.m_jacobianSchemas;
+    int offset = hkGetByteOffsetInt((hkJacobianElement*)out.m_jacobiansBase, (hkJacobianElement*)out.m_jacobians);
+    u32 accA = in.m_accumulatorAOffset;
+    h->m_tag = 0x01010018;
+    h->m_jacobianOffset = offset;
+    h->m_accumulatorAOffset = accA;
+    h->m_accumulatorBOffset = in.m_accumulatorBOffset;
+    h->m_solverResults = solverResults;
+    h->m_solverResultStride = solverResultStride;
+    out.m_jacobianSchemas = (hkJacobianSchema*)(h + 1);
+}
+
+void hkBeginConstraints(const hkConstraintQueryIn& in, hkConstraintQueryOut& out, void* solverResults,
+                        int solverResultStride) {
+    hkBeginConstraintsBody(in, out, solverResults, solverResultStride);
+}
+
+// The same body written out (the target's copy of the inline is register-allocated as a function of its own).
+void _hkBeginConstraints(const hkConstraintQueryIn& in, hkConstraintQueryOut& out, void* solverResults,
+                         int solverResultStride) {
+    hkJacobianHeaderSchemaData* h = (hkJacobianHeaderSchemaData*)(hkJacobianSchema*)out.m_jacobianSchemas;
+    int offset = hkGetByteOffsetInt((hkJacobianElement*)out.m_jacobiansBase, (hkJacobianElement*)out.m_jacobians);
+    u32 accA = in.m_accumulatorAOffset;
+    h->m_tag = 0x01010018;
+    h->m_jacobianOffset = offset;
+    h->m_accumulatorAOffset = accA;
+    h->m_accumulatorBOffset = in.m_accumulatorBOffset;
+    h->m_solverResults = solverResults;
+    h->m_solverResultStride = solverResultStride;
+    out.m_jacobianSchemas = (hkJacobianSchema*)(h + 1);
+}
+
+// The bridge's builder takes the constraint data; the header written for the bridge atom is taken back first.
+typedef void (*hkBridgeBuildJacobianCall)(hkConstraintData* data, const hkConstraintQueryIn& in,
+                                          hkConstraintQueryOut& out);
+
+void hkBridgeConstraintAtom::callBridgeFromAtom(const hkConstraintQueryIn& in, hkTransform& baseA, hkTransform& baseB,
+                                                hkConstraintQueryOut& out) const {
+    out.m_jacobianSchemas = (hkJacobianSchema*)((char*)(hkJacobianSchema*)out.m_jacobianSchemas - 0x18);
+    ((hkBridgeBuildJacobianCall)m_buildJacobianFunc)(m_constraintData, in, out);
+}
+
+int hkBridgeConstraintAtom::numSolverResults() const {
+    return 100000;
+}
+
+// this = a * b with b's rotation columns and translation all rotated by a (the body of hkTransform::setMul, inlined
+// here; b is read through a separate pointer indexed per row, which keeps its base out of the loop addressing).
+static inline void hkTransform_setMul(hkTransform& t, const hkTransform& a, const hkTransform& b) {
+    hkRotation r = a.m_rotation;
+    const hkTransform* bp = &b;
+    for (int i = 0; i < 4; i++) {
+        hkReal* out = &t.m_rotation.m_col0.x + i * 4;
+        hkReal x = (&bp->m_rotation.m_col0.x)[i * 4 + 0];
+        hkReal y = (&bp->m_rotation.m_col0.x)[i * 4 + 1];
+        hkReal z = (&bp->m_rotation.m_col0.x)[i * 4 + 2];
+        out[0] = x * r.m_col0.x + y * r.m_col1.x + z * r.m_col2.x;
+        out[1] = x * r.m_col0.y + y * r.m_col1.y + z * r.m_col2.y;
+        out[2] = x * r.m_col0.z + y * r.m_col1.z + z * r.m_col2.z;
+        out[3] = 0.0f;
+    }
+    t.m_translation.add4(a.m_translation);
+}
+
+// Moves the constraint space of both bodies: base = world transform * atom's local transform.
+void hkSetLocalTransformsConstraintAtom::setLocalTransformsFromAtom(const hkConstraintQueryIn& in, hkTransform& baseA,
+                                                                    hkTransform& baseB) const {
+    hkTransform_setMul(baseA, *in.m_transformA.m_value, m_transformA);
+    hkTransform_setMul(baseB, *in.m_transformB.m_value, m_transformB);
+}
+
+int hkSetLocalTransformsConstraintAtom::numSolverResults() const {
+    return 0;
+}
+
+// this = t * v (the body of hkVector4::setTransformedPos with the components read in x, y, z order).
+static inline void hkVector4_setTransformedPos(hkVector4& o, const hkTransform& t, const hkVector4& v) {
+    const hkRotation& r = t.m_rotation;
+    hkReal vx = v.x;
+    hkReal vy = v.y;
+    hkReal vz = v.z;
+    o.x = t.m_translation.x + (vx * r.m_col0.x + vy * r.m_col1.x + vz * r.m_col2.x);
+    o.y = t.m_translation.y + (vx * r.m_col0.y + vy * r.m_col1.y + vz * r.m_col2.y);
+    o.z = t.m_translation.z + (vx * r.m_col0.z + vy * r.m_col1.z + vz * r.m_col2.z);
+    o.w = 0.0f;
+}
+
+// Moves the constraint pivots: base translation = world transform * atom's local translation.
+void hkSetLocalTranslationsConstraintAtom::setLocalTranslationsFromAtom(const hkConstraintQueryIn& in,
+                                                                        hkTransform& baseA, hkTransform& baseB) const {
+    hkVector4_setTransformedPos(baseA.m_translation, *in.m_transformA, m_translationA);
+    hkVector4_setTransformedPos(baseB.m_translation, *in.m_transformB, m_translationB);
+}
 
 int hkSetLocalTranslationsConstraintAtom::numSolverResults() const {
     return 0;
@@ -370,3 +557,35 @@ extern "C" void fn_8028D474(Node * __restrict self, const Blob *src,
 }
 }
 
+// The end of a constraint's rows writes nothing. HYPOTHESIS: parameters.
+void hkEndConstraints() {}
+
+// Out-of-line copies of templates the atom-list builder calls (hkAddByteOffsetCpuPtr<void*>,
+// hkAddByteOffsetConst<const hkConstraintAtom>, hkPadSpu<void*>::operator=); they keep their map labels.
+extern "C" void* fn_8028D8A4(void* base, int offset) {
+    return (char*)base + offset;
+}
+
+extern "C" const void* fn_8028D8AC(const void* base, int offset) {
+    return (const char*)base + offset;
+}
+
+extern "C" void** fn_8028D8B4(void** slot, void* value) {
+    *slot = value;
+    return slot;
+}
+
+// More out-of-line copies the atom-list builder calls: hkPadSpu<const hkTransform*>::val, hkPadSpu<void*>::val and
+// the hkEnum<AtomType, u16> conversion. They keep their map labels. (The hkConstraintQueryIn copy constructor at
+// 0x8028965C copies member by member with float loads; not reproduced.)
+extern "C" const hkTransform* fn_8028980C(const hkPadSpu<const hkTransform*>* p) {
+    return p->m_value;
+}
+
+extern "C" void* fn_80289814(const hkPadSpu<void*>* p) {
+    return p->m_value;
+}
+
+extern "C" int fn_8028981C(const hkEnum<hkConstraintAtom::AtomType, u16>* e) {
+    return e->m_storage;
+}

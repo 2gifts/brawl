@@ -481,3 +481,19 @@ float fn_80294804(int arg0, Work* arg1, float farg0, float farg1) {
 }
 }
 
+
+// Writes the header schema of a constraint (map name hkInitHeader; the modifier builders of hkBuildJacobianFromAtoms
+// call it). Same body as hkBuildJacobianFromAtoms' _hkBeginConstraints with the output last. HYPOTHESIS: the
+// parameter names.
+void hkInitHeader(const hkConstraintQueryIn& in, void* solverResults, int solverResultStride, hkConstraintQueryOut& out) {
+    hkJacobianHeaderSchema* h = (hkJacobianHeaderSchema*)(hkJacobianSchema*)out.m_jacobianSchemas;
+    int offset = (char*)(hkJacobianElement*)out.m_jacobians - (char*)(hkJacobianElement*)out.m_jacobiansBase;
+    u32 accA = in.m_accumulatorAOffset;
+    h->m_tag = 0x01010018;
+    h->unk04 = offset;
+    h->unk08 = accA;
+    h->unk0C = in.m_accumulatorBOffset;
+    h->unk14 = (u32)solverResults;
+    h->unk10 = solverResultStride;
+    out.m_jacobianSchemas = (hkJacobianSchema*)(h + 1);
+}

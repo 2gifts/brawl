@@ -38,3 +38,7 @@ enum hkShapeType {
 
 // Returns the HK_SHAPE_* name for a type value ("unknown" when out of range).
 const char* hkGetShapeTypeName(int type);
+
+struct hkCollisionDispatcher;
+// Registers which shape types can also be handled as a more general type (hkShapeType.cpp).
+void hkRegisterAlternateShapeTypes(hkCollisionDispatcher* dispatcher);

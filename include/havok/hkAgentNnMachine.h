@@ -19,7 +19,10 @@ struct hkAgentNnEntry {
     u8 m_size;                           // 0x03 bytes of this entry (the track walks add it to step to the next)
     u8 unk4[0x08 - 0x04];                // 0x04 not identified
     s8 m_collisionQualityIndex;          // 0x08
-    u8 unk9[0x10 - 0x09];                // 0x09 not identified
+    u8 unk9[0x0C - 0x09];                // 0x09 not identified
+    // 0x0C index of this entry in each collidable's m_collisionEntries (CopyAndRelinkAgentEntry relinks them).
+    // HYPOTHESIS: the name.
+    u16 m_agentIndexOnCollidable[2];
     hkContactMgr* m_contactMgr;          // 0x10
     hkLinkedCollidable* m_collidable[2]; // 0x14
 

@@ -33,10 +33,9 @@
 namespace jj_fn_802CB484 {
 union ByteSlot { unsigned char b; int align; };
 extern "C" {
-void fn_802D4EC0(void*);
 void fn_802CB484(void* p) {
  ByteSlot a,b,c,d,e,f;
- fn_802D4EC0(p);
+ hkRegisterAlternateShapeTypes((hkCollisionDispatcher*)(p));
  hkBvAgent::registerAgent((void*)(p));
  hkMultiSphereAgent::registerAgent((hkCollisionDispatcher*)(p));
  a.b=0; ((hkCollisionDispatcher*)(p))->setEnableChecks(*(const hkBool*)(&a.b));
