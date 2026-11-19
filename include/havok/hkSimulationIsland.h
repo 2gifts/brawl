@@ -73,6 +73,7 @@ struct hkSimulationIsland : hkConstraintOwner {
     HK_DECLARE_REF_ALLOCATOR(0x30)
     hkSimulationIsland(hkWorld* world);
     virtual ~hkSimulationIsland();
+    virtual void calcStatistics(hkStatisticsCollector* collector) const;
 
     // The 0x26 bit fields as one byte.
     u8& flags26() { return *(u8*)&m_flags; }

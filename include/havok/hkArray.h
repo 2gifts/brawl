@@ -124,6 +124,19 @@ struct hkArray : hkArrayBase {
         m_size = newSize;
         return (T*)m_data + oldSize;
     }
+    // HYPOTHESIS: the name. Returned as an hkBool (hkEntity::deallocateInternalArrays tests the byte).
+    hkBool isEmpty() const {
+        return m_size == 0;
+    }
+    // Drops the elements and frees the storage (unless it is not owned); keeps the FORCE_SIGN flag.
+    void clearAndDeallocate() {
+        if ((m_capacityAndFlags & DONT_DEALLOCATE_FLAG) == 0) {
+            hkThreadMemory::s_instance->deallocateChunk(m_data, getCapacity() * sizeof(T), 0x15);
+        }
+        m_data = 0;
+        m_size = 0;
+        m_capacityAndFlags = DONT_DEALLOCATE_FLAG | (m_capacityAndFlags & FORCE_SIGN_FLAG);
+    }
     // Drops the elements, keeping the storage.
     void clear() {
         m_size = 0;

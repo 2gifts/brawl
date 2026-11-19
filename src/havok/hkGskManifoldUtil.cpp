@@ -26,3 +26,88 @@ void hkGskManifoldUtil::hkGskManifold_cleanup(hkGskManifold* manifold, void* arg
     manifold->m_countA = 0;
     manifold->m_countB = 0;
 }
+
+// Marks the vertex ids the points use, keeps only those (both lists are compacted in place, the first list's new
+// length is the new offset of the old second list) and rewrites every point's offsets. Draft (88%): register
+// choice of the compaction pointers and of the final remap loop.
+void hkGskManifoldUtil::hkGskManifold_garbageCollect(hkGskManifold* manifold) {
+    u8 used[16] = {0};
+    hkGskManifoldEntry* entries = manifold->getEntries();
+    {
+        hkGskManifoldEntry* e = entries;
+        for (int i = 0; i < manifold->m_countC; i++) {
+            int numVertices = e->unk0 + e->unk1;
+            used[e->m_vertexOffsets[0] >> 4] = 1;
+            used[e->m_vertexOffsets[1] >> 4] = 1;
+            if (numVertices >= 3) {
+                used[e->m_vertexOffsets[2] >> 4] = 1;
+            }
+            if (numVertices == 4) {
+                used[e->m_vertexOffsets[3] >> 4] = 1;
+            }
+            e++;
+        }
+    }
+    int newOffsets[16];
+    u16* dst = (u16*)&manifold->m_points[manifold->m_countC];
+    u16* src = dst;
+    int numKept = 0;
+    int offset = 0;
+    int numVertices = manifold->m_countA + manifold->m_countB;
+    for (int k = 0; k < numVertices; k++) {
+        newOffsets[k] = offset;
+        if (used[k]) {
+            *dst++ = *src;
+            numKept++;
+            offset += 0x10;
+        }
+        src++;
+    }
+    int newCountA = (newOffsets[manifold->m_countA] >> 4) & 0xFF;
+    manifold->m_countA = newCountA;
+    manifold->m_countB = numKept - newCountA;
+    hkGskManifoldEntry* e = entries;
+    for (int i = 0; i < manifold->m_countC; i++) {
+        e->m_vertexOffsets[0] = newOffsets[e->m_vertexOffsets[0] >> 4];
+        e->m_vertexOffsets[1] = newOffsets[e->m_vertexOffsets[1] >> 4];
+        e->m_vertexOffsets[2] = newOffsets[e->m_vertexOffsets[2] >> 4];
+        e->m_vertexOffsets[3] = newOffsets[e->m_vertexOffsets[3] >> 4];
+        e++;
+    }
+}
+
+// Word copy from lower to higher index (the vertex lists move down over a freed point).
+static inline void hkGskManifold_copyWords(const u32* src, u32* dst, int lastIndex) {
+    for (int i = lastIndex; i >= 0; i--) {
+        *dst++ = *src++;
+    }
+}
+
+// The last point moves into the freed slot, the vertex id lists move down over the old last point (copied as
+// words), then the unused vertex ids are dropped.
+void hkGskManifoldUtil::hkGskManifold_removePoint(hkGskManifold* manifold, int index) {
+    manifold->m_countC--;
+    manifold->m_points[index] = manifold->m_points[manifold->m_countC];
+    hkGskManifold_copyWords((const u32*)&manifold->m_points[manifold->m_countC + 1],
+                            (u32*)&manifold->m_points[manifold->m_countC],
+                            (manifold->m_countA + manifold->m_countB - 1) >> 1);
+    hkGskManifold_garbageCollect(manifold);
+}
+
+#include <havok/hkPredGskAgent3.h>
+
+hkResult hkGskManifoldWork::convertPointPoint(const hkGskManifoldEntry& point, hkGskManifoldPointContact& out) const {
+    int offsetA = point.m_vertexOffsets[0];
+    int offsetB = point.m_vertexOffsets[1];
+    const hkVector4& a = *(const hkVector4*)((const u8*)m_vertices + offsetA);
+    const hkVector4& b = *(const hkVector4*)((const u8*)m_vertices + offsetB);
+    hkVector4 separation;
+    separation.setSub4(a, b);
+    if (separation.lengthSquared3() > m_maxDistanceSquared) {
+        return 1;
+    }
+    out.m_separation = separation;
+    out.m_separatingNormal = m_separatingNormal;
+    out.m_position = a;
+    return 0;
+}

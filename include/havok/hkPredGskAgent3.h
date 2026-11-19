@@ -13,9 +13,26 @@ struct hkContactMgr;
 // copy in hkPredGskAgent3.o). HYPOTHESIS: the size (from the stack frames of its users); 16-byte aligned (it holds
 // vectors: the callers align their stack).
 struct hkGskManifoldWork {
-    u8 unk0[0x120];
+    // 0x000 the manifold's vertices in world space, addressed by the points' byte offsets (list A then list B).
+    // HYPOTHESIS: the names and the split of the unknown words.
+    hkVector4 m_vertices[16];
+    hkVector4 m_separatingNormal; // 0x100
+    hkReal unk110[3];             // 0x110
+    hkReal m_maxDistanceSquared;  // 0x11C a point pair further apart is dropped
+
     hkGskManifoldWork() {}
+
+    // Builds the contact of a point/point feature pair: position = vertex A, the vector from B to A, and the
+    // separating normal. Fails when the vertices are further apart than the tolerance.
+    hkResult convertPointPoint(const hkGskManifoldEntry& point, struct hkGskManifoldPointContact& out) const;
 } __attribute__((aligned(16)));
+
+// Output of the hkGskManifoldWork feature conversions (0x30 bytes). HYPOTHESIS: the names.
+struct hkGskManifoldPointContact {
+    hkVector4 m_position;         // 0x00
+    hkVector4 m_separation;       // 0x10 from the point on B to the point on A
+    hkVector4 m_separatingNormal; // 0x20
+};
 
 // Agent3 helpers of the predictive GSK agents (map names; not written yet). HYPOTHESIS: the parameter lists, from
 // the cylinder agent's calls.

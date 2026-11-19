@@ -39,7 +39,7 @@ void* hkNullAgent3::process(void* unk0, void* unk1, void* agent) {
 }
 
 void hkCollisionDispatcher::setEnableChecks(const hkBool& enable) {
-    m_enableChecks = enable.m_bool;
+    m_enableChecks = enable;
 }
 
 #pragma push
@@ -269,3 +269,99 @@ extern "C" void fn_802CB64C(Obj *o) {
 }
 }
 
+
+#include <havok/hkString.h>
+#include <havok/hkShapeType.h>
+
+// The warning text printed when a registration overrides a more specialized one (in the unit's .rodata).
+// TODO: clean up: write it as a string literal once this unit's .rodata is split.
+extern "C" const char lbl_80410050[];
+
+// Writes value into the table entries of the pair (typeA, typeB); -1 stands for every shape type and counts as one
+// level less specialized. Types that can be treated as typeA or typeB (m_shapeInheritance) are registered first, one
+// level deeper. With a buffer, every entry remembers the pair and depth that wrote it; with checks enabled an entry
+// written from a deeper (more specialized) registration is reported before it is overwritten.
+void hkCollisionDispatcher::internalRegisterCollisionAgent(u8* table, int value, int typeA, int typeB, int typeA2,
+                                                           int typeB2, void* buffer, int depth) {
+    m_flagA = 1;
+    for (int i = 0; i < m_shapeInheritance.m_size; i++) {
+        ShapeInheritance& inheritance = m_shapeInheritance[i];
+        int alternate = inheritance.m_alternateType;
+        if (alternate == typeA || alternate == typeB) {
+            if (alternate == typeA) {
+                internalRegisterCollisionAgent(table, value, inheritance.m_primaryType, typeB, typeA2, typeB2, buffer,
+                                               depth + 1);
+            } else {
+                internalRegisterCollisionAgent(table, value, typeA, inheritance.m_primaryType, typeA2, typeB2, buffer,
+                                               depth + 1);
+            }
+        }
+    }
+    int startA = typeA;
+    int endA = typeA + 1;
+    int startB = typeB;
+    int endB = typeB + 1;
+    if (typeA == -1) {
+        endA = 32;
+        depth++;
+        startA = 1;
+    }
+    if (typeB == -1) {
+        startB = 1;
+        endB = 32;
+        depth++;
+    }
+    for (int a = startA; a < endA; a++) {
+        u8* tableEntry = &table[a * 32 + startB];
+        s8* entry = (s8*)buffer + (a * 32 + startB) * 3;
+        for (int b = startB; b < endB; b++, tableEntry++, entry += 3) {
+            *tableEntry = value;
+            if (buffer != 0) {
+                if (m_enableChecks && depth > entry[2]) {
+                    const char* oldA = hkGetShapeTypeName(entry[0]);
+                    const char* oldB = hkGetShapeTypeName(entry[1]);
+                    const char* newA = hkGetShapeTypeName(typeA);
+                    char text[1024];
+                    hkString::snprintf(text, 1000, lbl_80410050, newA, hkGetShapeTypeName(typeB), oldA, oldB);
+                }
+                entry[2] = depth;
+                entry[0] = typeA2;
+                entry[1] = typeB2;
+            }
+        }
+    }
+}
+
+// Agent3 registrations use the 0x200-byte agent sectors with 0x80-byte entries. A pair of different types whose
+// agent does not ignore the symmetric version first gets a flipped twin registration for (typeB, typeA).
+void hkCollisionDispatcher::registerAgent3(const hkAgent3Funcs& funcs, int typeA, int typeB) {
+    Agent3FuncsIntern f;
+    m_agentEntrySize = 0x80;
+    m_agentSectorSize = 0x200;
+    m_flagB = 1;
+    (hkAgent3Funcs&)f = funcs;
+    f.unk30 = 0;
+    hkBool registerFlipped = false;
+    if (typeA != typeB) {
+        if (!funcs.m_ignoreSymmetricVersion) {
+            registerFlipped = true;
+        }
+    }
+    if (registerFlipped) {
+        f.unk30 = 2;
+        m_agent3Func[m_numAgent3Funcs] = f;
+        internalRegisterCollisionAgent(m_lookupE94, m_numAgent3Funcs, typeB, typeA, typeB, typeA, m_buffers[2], 0);
+        if (f.m_isPredictive) {
+            internalRegisterCollisionAgent(m_lookup1294, m_numAgent3Funcs, typeA, typeB, typeA, typeB, m_buffers[3],
+                                           0);
+        }
+        m_numAgent3Funcs++;
+        f.unk30 = 1;
+    }
+    m_agent3Func[m_numAgent3Funcs] = f;
+    internalRegisterCollisionAgent(m_lookupE94, m_numAgent3Funcs, typeA, typeB, typeA, typeB, m_buffers[2], 0);
+    if (f.m_isPredictive) {
+        internalRegisterCollisionAgent(m_lookup1294, m_numAgent3Funcs, typeA, typeB, typeA, typeB, m_buffers[3], 0);
+    }
+    m_numAgent3Funcs++;
+}

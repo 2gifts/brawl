@@ -61,12 +61,10 @@ hkCapsuleShape::hkCapsuleShape(const hkVector4& vertexA, const hkVector4& vertex
 
 void hkCapsuleShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
     const hkVector4* vertices = &m_vertexA;
-    while (--numIds >= 0) {
-        u16 id = *ids;
-        *out = *(const hkVector4*)((const char*)vertices + id);
-        out->setIntW(id);
-        out++;
-        ids++;
+    for (int i = 0; i <= numIds - 1; i++) {
+        int id = ids[i];
+        out[i] = *(const hkVector4*)((const char*)vertices + id);
+        out[i].setIntW(id);
     }
 }
 

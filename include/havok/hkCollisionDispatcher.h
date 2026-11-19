@@ -72,13 +72,15 @@ struct hkCollisionDispatcher : hkReferencedObject {
     u8 m_lookup190[0x400]; // 0x190 lookup table of registration indices, filled for the (typeA, typeB) pair
     u8 m_lookup590[0x400]; // 0x590 lookup table filled for the reverse pair when symmetricB is set
     hkAgentFuncs m_agentFuncs[64]; // 0x990, stride 0x14
-    u8 unkE90[0xE94 - 0xE90];
+    int m_numAgent3Funcs; // 0xE90 number of agent3 registrations (index of the next m_agent3Func entry)
     u8 m_lookupE94[0x400]; // 0xE94 lookup table for the (typeA, typeB) pair with value 1
     u8 m_lookup1294[0x400]; // 0x1294 lookup table for the reverse pair with value 1
     // 0x1694 the agent3 registrations, indexed by an agent entry's type (stride 0x34).
     // HYPOTHESIS: the word after the functions.
     struct Agent3FuncsIntern : hkAgent3Funcs {
-        u32 unk30; // 0x30
+        // HYPOTHESIS: the separating-normal slot is cleared here too (registerAgent3 clears four slots).
+        Agent3FuncsIntern() { m_sepNormalFunc = 0; }
+        u32 unk30; // 0x30 HYPOTHESIS: 0 = own registration, 1 = with a flipped twin, 2 = the flipped twin
     };
     Agent3FuncsIntern m_agent3Func[16];
     // 0x19D4 collision quality index for each pair of object quality types (hkSimpleConstraintContactMgr's constructor
@@ -101,13 +103,14 @@ struct hkCollisionDispatcher : hkReferencedObject {
     }
 
     u8 m_flagA; // 0x1C08 set to 1 by internalRegisterCollisionAgent
-    u8 unk1C09[0x1C0C - 0x1C09];
+    u8 m_flagB; // 0x1C09 set to 1 by registerAgent3
+    u8 unk1C0A[0x1C0C - 0x1C0A];
     // The agent track sizes hkSimulationIsland's constructor copies into its track (as u16s).
     // HYPOTHESIS: the names (0x1C0C becomes the track's sector size and bytes used, 0x1C10 the 0x14 halfword).
     int m_agentSectorSize; // 0x1C0C
     int m_agentEntrySize;  // 0x1C10
 
-    u8 m_enableChecks; // 0x1C14 set by setEnableChecks
+    hkBool m_enableChecks; // 0x1C14 set by setEnableChecks
     u8 unk1C15[0x1C18 - 0x1C15];
     // One entry per registerAlternateShapeType call: primaryType can also be handled as alternateType.
     struct ShapeInheritance {

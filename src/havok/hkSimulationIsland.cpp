@@ -165,3 +165,45 @@ void hkSimulationIsland::mergeConstraintInfo(const hkSimulationIsland* other) {
 // No-op in this build (the target function body is a bare return).
 void hkSimulationIsland::markForWrite() {
 }
+
+#include <havok/hkConstraintInstance.h>
+#include <havok/hkConstraintInternal.h>
+
+#include <havok/hkStatisticsCollector.h>
+
+// hkAgentMachineUtil (carved into hkAgent1nMachine.cpp under their fn_ labels).
+// TODO: clean up: name them in symbols.txt (calcNnStatisticsContactMgrsOnly / calcNnStatistics) and declare them in a
+// header.
+extern "C" void fn_802FECD0(const hkAgentNnTrack& track, hkStatisticsCollector* collector);
+extern "C" void fn_802FEB48(const hkAgentNnTrack& track, hkStatisticsCollector* collector);
+
+// The island's entities with their constraint arrays, its actions and the agent track.
+void hkSimulationIsland::calcStatistics(hkStatisticsCollector* collector) const {
+    collector->beginObject(0, 8, this);
+    collector->addArrayStorage("EntityPtrs", 8, m_entities, sizeof(hkEntity*));
+    for (int i = 0; i < m_entities.getSize(); i++) {
+        hkEntity* entity = m_entities[i];
+        collector->addChildObject("Entity", 2, entity);
+        collector->pushDir("Constraints");
+        collector->addArrayStorage("ConMstPtr", 8, entity->m_constraintsMaster, sizeof(hkConstraintInternal));
+        collector->addArrayStorage("ConSlvPtr", 8, entity->m_constraintsSlave, sizeof(hkConstraintInstance*));
+        for (int j = 0; j < entity->m_constraintsMaster.getSize(); j++) {
+            // TODO: clean up: the first word of hkConstraintInternal is the constraint (name the member).
+            hkConstraintInstance* constraint = (hkConstraintInstance*)entity->m_constraintsMaster[j].m_unk00;
+            collector->addChildObject("ConInstance", 2, constraint);
+            collector->addChildObject("ConData", 1,
+                                      ((hkConstraintInstance*)entity->m_constraintsMaster[j].m_unk00)->m_data);
+        }
+        collector->addArrayStorage("Runtime", 4, entity->m_constraintRuntime, sizeof(u8));
+        collector->popDir();
+    }
+    collector->addArrayStorage("ActionPtrs", 8, m_actions, sizeof(hkAction*));
+    for (int k = 0; k < m_actions.getSize(); k++) {
+        collector->addChildObject("Actions", 2, m_actions[k]);
+    }
+    fn_802FECD0(m_agentTrack, collector);
+    collector->pushDir("CollAgents");
+    fn_802FEB48(m_agentTrack, collector);
+    collector->popDir();
+    collector->endObject();
+}

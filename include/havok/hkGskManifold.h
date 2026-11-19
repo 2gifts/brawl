@@ -12,10 +12,16 @@ struct hkGskPointRemover : hkReferencedObject {
 
 // One 8-byte entry of the manifold point list (the list starts at manifold + 0x04).
 struct hkGskManifoldEntry {
-    u8 unk0;  // 0x00 cleared by the zombie routine
+    u8 unk0;  // 0x00 cleared by the zombie routine; with unk1 the number of support vertices of the point
     u8 unk1;  // 0x01 cleared by the zombie routine
     u16 key;  // 0x02 0xFFFF marks a free entry
-    u32 unk4; // 0x04
+    // 0x04 the point's support vertices (unk0 + unk1 of them, up to four): byte offsets (index * 0x10) into the
+    // vertex id lists that follow the point list. HYPOTHESIS: the name.
+    // BYTES: a union with a word; entry copies move the four offsets as one word.
+    union {
+        u8 m_vertexOffsets[4];
+        u32 m_vertexOffsetsWord;
+    };
 };
 
 // Contact manifold of the GSK agents (map name hkGskManifold), embedded in the agent at 0x0C. Its first three bytes
@@ -25,6 +31,8 @@ struct hkGskManifold {
     u8 m_countB; // 0x01 HYPOTHESIS: count of 2-byte entries
     u8 m_countC; // 0x02 HYPOTHESIS: count of 8-byte entries
     u8 unk3;     // 0x03 part of the 4-byte header (not identified)
+    // 0x04 the point list (m_countC entries), followed by the two vertex id lists (u16 each). Variable length.
+    hkGskManifoldEntry m_points[0];
 
     // Size in bytes of the header plus the lists (header of 4 bytes).
     u32 getTotalSizeInBytes() const;

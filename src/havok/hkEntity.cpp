@@ -252,3 +252,44 @@ void fn_802E13DC(Entity* arg0, Visitor* arg1) {
 
 }
 } // namespace jj_fn_802E13DC
+
+// True when an array of listener pointers holds no listener (removed listeners leave null slots).
+template <typename T>
+static inline int hkEntity_hasListener(const hkArray<T*>& listeners) {
+    int found = 0;
+    for (int i = 0; i < listeners.getSize(); i++) {
+        if (listeners[i] != 0) {
+            found = 1;
+            break;
+        }
+    }
+    return found;
+}
+
+// Frees the storage of the internal arrays that are empty (listener arrays count as empty when every slot is null).
+void hkEntity::deallocateInternalArrays() {
+    if (m_collidable.m_collisionEntries.getSize() == 0) {
+        m_collidable.m_collisionEntries.clearAndDeallocate();
+    }
+    if (m_constraintsMaster.getSize() == 0) {
+        m_constraintsMaster.clearAndDeallocate();
+    }
+    if (m_constraintsSlave.getSize() == 0) {
+        m_constraintsSlave.clearAndDeallocate();
+    }
+    if (m_constraintRuntime.getSize() == 0) {
+        m_constraintRuntime.clearAndDeallocate();
+    }
+    if (!hkEntity_hasListener(m_collisionListeners)) {
+        m_collisionListeners.clearAndDeallocate();
+    }
+    if (!hkEntity_hasListener(m_activationListeners)) {
+        m_activationListeners.clearAndDeallocate();
+    }
+    if (!hkEntity_hasListener(m_entityListeners)) {
+        m_entityListeners.clearAndDeallocate();
+    }
+    if (m_actions.isEmpty()) {
+        m_actions.clearAndDeallocate();
+    }
+}

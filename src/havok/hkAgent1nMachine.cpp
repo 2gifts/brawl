@@ -208,26 +208,18 @@ extern "C" void fn_802FCB14(char* self) {
 // hkAgentMachineUtil.o (0x802FEA60-0x802FEDA0, carved into this unit): memory statistics of the agent tracks.
 #include <havok/hkAgentNnMachine.h>
 
-// Statistics collector interface as these functions call it: 0x10 adds a memory chunk (name, flags, data, used,
-// allocated), 0x14 adds an object referenced from the chunk (name, flags, object).
-// TODO: clean up: move into an hkStatisticsCollector header once its other slots are known.
-struct hkAgentMachineUtilCollector {
-    virtual ~hkAgentMachineUtilCollector();
-    virtual void beginObject();
-    virtual void addChunk(const char* name, int flags, const void* data, int used, int allocated);
-    virtual void addReferencedObject(const char* name, int flags, const void* object);
-};
+#include <havok/hkStatisticsCollector.h>
 
 // Draft (both functions): the target dispatches the stream command through a jump table whose four non-agent
 // entries go to the advance; every switch spelling here gives a compare chain.
 // The sectors of an Nn track, then each agent entry's agent (CALL_AGENT entries) and contact manager.
-extern "C" void fn_802FEB48(const hkAgentNnTrack& track, hkAgentMachineUtilCollector* collector) {
+extern "C" void fn_802FEB48(const hkAgentNnTrack& track, hkStatisticsCollector* collector) {
     int i;
     for (i = 0; i < track.m_sectors.m_size - 1; i++) {
-        collector->addChunk("Sector", 8, track.m_sectors[i], track.m_sectorSize, track.m_sectorSize);
+        collector->addArray("Sector", 8, track.m_sectors[i], track.m_sectorSize, track.m_sectorSize);
     }
     if (i < track.m_sectors.m_size) {
-        collector->addChunk("Sector", 8, track.m_sectors[i], track.m_bytesUsedInLastSector,
+        collector->addArray("Sector", 8, track.m_sectors[i], track.m_bytesUsedInLastSector,
                             track.m_sectorSize);
     }
     for (int s = 0; s < track.m_sectors.m_size;) {
@@ -239,10 +231,11 @@ extern "C" void fn_802FEB48(const hkAgentNnTrack& track, hkAgentMachineUtilColle
         while (entry < end) {
             switch (entry->m_streamCommand) {
             case HK_AGENT_STREAM_CALL_AGENT:
-                collector->addReferencedObject("Agent", 8, *(void**)entry->unk4);
+                // TODO: clean up: CALL_AGENT entries keep the agent pointer at 0x04; name it in hkAgentNnEntry.
+                collector->addChildObject("Agent", 8, *(void**)entry->unk4);
             case HK_AGENT_STREAM_CALL:
             case HK_AGENT_STREAM_CALL_WITH_TIM:
-                collector->addReferencedObject("ContactMgr", 8, entry->m_contactMgr);
+                collector->addChildObject("ContactMgr", 8, entry->m_contactMgr);
                 break;
             case HK_AGENT_STREAM_NULL:
             case HK_AGENT_STREAM_END:
@@ -257,7 +250,7 @@ extern "C" void fn_802FEB48(const hkAgentNnTrack& track, hkAgentMachineUtilColle
 }
 
 // Only the contact managers of an Nn track.
-extern "C" void fn_802FECD0(const hkAgentNnTrack& track, hkAgentMachineUtilCollector* collector) {
+extern "C" void fn_802FECD0(const hkAgentNnTrack& track, hkStatisticsCollector* collector) {
     for (int s = 0; s < track.m_sectors.m_size;) {
         hkAgentNnEntry* entry = (hkAgentNnEntry*)track.m_sectors[s];
         s++;
@@ -269,7 +262,7 @@ extern "C" void fn_802FECD0(const hkAgentNnTrack& track, hkAgentMachineUtilColle
             case HK_AGENT_STREAM_CALL:
             case HK_AGENT_STREAM_CALL_WITH_TIM:
             case HK_AGENT_STREAM_CALL_AGENT:
-                collector->addReferencedObject("ContactMgr", 8, entry->m_contactMgr);
+                collector->addChildObject("ContactMgr", 8, entry->m_contactMgr);
                 break;
             case HK_AGENT_STREAM_NULL:
             case HK_AGENT_STREAM_END:
