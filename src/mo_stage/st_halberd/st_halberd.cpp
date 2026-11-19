@@ -25,7 +25,7 @@ stHalberd* stHalberd::create() {
     return new (Heaps::StageInstance) stHalberd;
 }
 
-stHalberd::stHalberd() : stMelee("stHalberd", Stages::Halberd) {
+stHalberd::stHalberd() : stMelee("stHalberd", Stages::Halberd), m_subject(0, 1) {
     m_state = 0;
     m_frame = 0.0f;
     m_frameNext = 0.0f;
@@ -90,7 +90,6 @@ stHalberd::stHalberd() : stMelee("stHalberd", Stages::Halberd) {
 
 stHalberd::~stHalberd() {
     releaseArchive();
-    __dt__9cmSubjectFv(&m_subject, -1);
 }
 
 bool stHalberd::loading() {

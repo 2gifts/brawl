@@ -138,7 +138,7 @@ class stNewpork : public stMelee {
     bool m_chimeraHit;              // 0x2A8: the Chimera hit a fighter
     float m_chimeraHitStop;         // 0x2AC: frames the Chimera's animation is frozen after a hit
     Vec3f m_chimeraSpeed;           // 0x2B0: speed of the Chimera when it flies away
-    stNewporkSubject m_subject;     // 0x2BC: camera subject that follows the Chimera
+    cmSubject m_subject;            // 0x2BC: camera subject that follows the Chimera
     float m_areaCooldown;           // 0x340
     float m_areaCooldown2;          // 0x344
     s8 m_screenFill;                // 0x348: handle of the dark screen fill

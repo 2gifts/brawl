@@ -150,3 +150,7 @@ void grAdventureMoveAttackGround::setVisibilityByClipping(u32 unk1) {
     }
     m_isVisibleByClipping = unk1;
 }
+
+// TODO: clean up - this only reproduces the loop of the inlined soArrayVectorAbstract<soCollisionAttackPart>::set without its guard;
+// find where the original sets this (it is the state of the optimizer when the weak functions are compiled).
+#pragma opt_loop_invariants off

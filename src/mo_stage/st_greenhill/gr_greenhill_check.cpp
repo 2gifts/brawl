@@ -531,3 +531,7 @@ void grGreenhillCheck::onDamage(int index, soDamage* damage, soDamageAttackerInf
         m_yakumono->setTeam(team);
     }
 }
+
+// TODO: clean up - this only reproduces the loop of the inlined soArrayVectorAbstract<soCollisionAttackPart>::set without its guard;
+// find where the original sets this (it is the state of the optimizer when the weak functions are compiled).
+#pragma opt_loop_invariants off
