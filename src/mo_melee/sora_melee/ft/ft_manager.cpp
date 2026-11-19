@@ -435,7 +435,7 @@ Vec3f ftManager::getFighterCenterPos(int entryId, int instanceIndex) const {
     return ftExternalValueAccesser::getHipPos(getFighter(entryId, instanceIndex));
 }
 
-Vec2f* ftManager::getFighterRhombusCenterPos(int entryId, int instanceIndex) const {
+Vec2f ftManager::getFighterRhombusCenterPos(int entryId, int instanceIndex) const {
     return soExternalValueAccesser::getRhombusCenterPos(getFighter(entryId, instanceIndex));
 }
 

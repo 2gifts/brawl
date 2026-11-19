@@ -11,6 +11,10 @@ class soStopModule;
 class soItemManageModule;
 class soCollisionShieldModule;
 class soCameraModule;
+class soDamageAttackerInfo;
+class soDamageModule;
+class soModelModule;
+class soCollisionSearchModule;
 
 class soExternalValueAccesser {
 public:
@@ -21,8 +25,12 @@ public:
     static float getLr(StageObject* stageObject);
     static float getScl(StageObject* stageObject);
     static Vec3f getPrevRoughPos(StageObject* stageObject);
+#ifdef SO_EXTERNAL_VALUE_ACCESSER_IMPL
+    static s8 getClipOutStatus(StageObject* stageObject); // BYTES: the defining unit tail calls the camera's signed byte unchanged
+#else
     static u32 getClipOutStatus(StageObject* stageObject);
-    static Vec2f* getRhombusCenterPos(StageObject* stageObject); // HYPOTHESIS: pointer to the ground rhombus centre
+#endif
+    static Vec2f getRhombusCenterPos(StageObject* stageObject);
     static SituationKind getSituationKind(StageObject* stageObject);
     static int getStatusKind(StageObject* stageObject);
     static int getMotionKind(StageObject* stageObject);
@@ -45,5 +53,14 @@ public:
     static soItemManageModule* getItemManageModule(StageObject* stageObject);
     static void* getGlowModule(StageObject* stageObject);
     static soStopModule* getStopModule(StageObject* stageObject);
+    static int getTeam2ndNo(StageObject* stageObject);
+    static void* getConstantIndefinite(StageObject* stageObject, u32 paramId, u32 paramIndex);
+    static void getAttackerInfo(StageObject* stageObject, soDamageAttackerInfo* attackerInfo);
+    static soModelModule* getModelModule(StageObject* stageObject);
+    static soCollisionShieldModule* getCollisionReflectorModule(StageObject* stageObject);
+    static soCollisionSearchModule* getCollisionSearchModule(StageObject* stageObject);
+    static void* getCatchModule(StageObject* stageObject);
+    static void* getCaptureModule(StageObject* stageObject);
+    static soDamageModule* getDamageModule(StageObject* stageObject);
 };
 // TODO size assertion

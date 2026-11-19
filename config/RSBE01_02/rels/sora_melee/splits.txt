@@ -1426,6 +1426,31 @@ mo_melee/sora_melee/so/so_kinetic_energy_normal.cpp:
 	.rodata     start:0x00000BA8 end:0x00000BB8
 	.data       start:0x00013608 end:0x00013698
 
+mo_melee/sora_melee/so/so_kinetic_energy_local_normal.cpp:
+	.text       start:0x0008A674 end:0x0008A710
+	.rodata     start:0x00000BB8 end:0x00000BC0
+	.data       start:0x00013698 end:0x00013730
+
+mo_melee/sora_melee/so/so_kinetic_energy_rot_normal.cpp:
+	.text       start:0x0008A710 end:0x0008AA78
+	.rodata     start:0x00000BC0 end:0x00000BD0
+	.data       start:0x00013730 end:0x000137C0
+
+mo_melee/sora_melee/so/so_kinetic_energy_3f.cpp:
+	.text       start:0x0008AA78 end:0x0008B1F8
+	.rodata     start:0x00000BD0 end:0x00000BE0
+	.data       start:0x000137C0 end:0x00013848
+
+mo_melee/sora_melee/so/so_kinetic_energy_stop.cpp:
+	.text       start:0x0008B1F8 end:0x0008B574
+	.rodata     start:0x00000BE0 end:0x00000BF8
+	.data       start:0x00013848 end:0x000138D8
+
+mo_melee/sora_melee/so/so_external_value_accesser.cpp:
+	.text       start:0x0008C9CC end:0x0008CF80
+	.rodata     start:0x00000C08 end:0x00000C10
+	.data       start:0x00013A30 end:0x00013A70
+
 mo_melee/sora_melee/so/so_general_work.cpp:
 	.text       start:0x0008D8B4 end:0x0008E230
 	.ctors      start:0x00000028 end:0x0000002C
@@ -2666,6 +2691,9 @@ mo_melee/sora_melee/so/so_array_vector_destructor_soArticle_10.cpp:
 
 mo_melee/sora_melee/so/so_array_vector_accessors_soArticle_10_part1.cpp:
 	.text       start:0x000D371C end:0x000D37BC
+
+mo_melee/sora_melee/so/so_event_observer_add_sub_D37BC.cpp:
+	.text       start:0x000D37BC end:0x000D56A8
 
 mo_melee/sora_melee/so/so_event_unit_work_area_soLinkEventObserver_1_D56A8.cpp:
 	.text       start:0x000D56A8 end:0x000D5878
