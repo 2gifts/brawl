@@ -827,3 +827,17 @@ void fn_117_1799C(void* object, void* parameters, void* entries) {
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_13960 {
+
+extern "C" void* fn_117_13960(void* object, short deleting) {
+    if (object != 0) {
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

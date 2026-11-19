@@ -1906,3 +1906,19 @@ extern "C" void* getInstanceAt__21ftPurinArticleSubPoolFl(void* object, int inde
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_8A88 {
+extern "C" void* __dt__18soGlowModuleSimpleFv(void*, short);
+
+extern "C" void* fn_96_8A88(void* object, short deleting) {
+    if (object) {
+        __dt__18soGlowModuleSimpleFv(object, static_cast<short>(-1));
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

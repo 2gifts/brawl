@@ -1785,3 +1785,23 @@ extern "C" void fn_105_109C8(void*,
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_F934 {
+
+extern "C" void* __dt__15soKineticEnergyFv(void*, short);
+
+extern "C" void* __dt__25ftKineticEnergyControllerFv(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            short baseDeleting = 0;
+            __dt__15soKineticEnergyFv(object, baseDeleting);
+        }
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

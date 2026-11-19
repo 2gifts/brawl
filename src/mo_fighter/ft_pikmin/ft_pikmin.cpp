@@ -1280,3 +1280,37 @@ extern "C" const float lbl_113_rodata_8;
 extern "C" float getSlopeAngleLimit__25soModuleAccesserBuildDataCFv() { return lbl_113_rodata_8; }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_3004 {
+extern "C" void* __dt__17soSoundModuleImplFv(void*, short);
+
+extern "C" void* fn_113_3004(void* object, short deleting) {
+    if (object != 0) {
+        __dt__17soSoundModuleImplFv(static_cast<unsigned char*>(object) + 0xC, -1);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_E4A4 {
+extern "C" void* __dt__15soKineticEnergyFv(void*, short);
+
+extern "C" void* __dt__25ftKineticEnergyControllerFv(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            short baseDeleting = 0;
+            __dt__15soKineticEnergyFv(object, baseDeleting);
+        }
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

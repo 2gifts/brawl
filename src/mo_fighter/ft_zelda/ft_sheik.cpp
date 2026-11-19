@@ -603,3 +603,99 @@ extern "C" void* fn_104_1D07C(void* object, int index) {
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_18360 {
+extern "C" void* fn_104_183CC(void*, short);
+extern "C" void* __dt__20soAnimCmdInterpreterFv(void*, short);
+
+extern "C" void* fn_104_18360(void* object, short deleting) {
+    if (object != 0) {
+        unsigned char* storage = static_cast<unsigned char*>(object);
+        fn_104_183CC(storage + 0x50, -1);
+        __dt__20soAnimCmdInterpreterFv(object, -1);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_195F8 {
+extern "C" void* fn_104_19668(void* object, short deleting);
+extern "C" void* fn_104_19728(void* object, short deleting);
+
+extern "C" void* fn_104_195F8(void* object, short deleting) {
+    if (object != 0) {
+        fn_104_19668(static_cast<unsigned char*>(object) + 0x1F40, -1);
+        fn_104_19728(object, 0);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_19728 {
+extern "C" void* fn_104_197EC(void*, short);
+
+// Nondeleting body of the observed instance-pool lifetime operation at 19728.
+// Its motion subpool starts at +4; the complete receiver layout stays opaque.
+static inline void destroyMotionPoolBase(void* object) {
+    if (object != 0) {
+        fn_104_197EC(static_cast<unsigned char*>(object) + 4,
+                     static_cast<short>(-1));
+    }
+}
+
+extern "C" void* fn_104_19728(void* object, short deleting) {
+    if (object != 0) {
+        destroyMotionPoolBase(object);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_197EC {
+
+extern "C" void fn_104_1984C(void*, short);
+
+extern "C" void* fn_104_197EC(void* object, short deleting) {
+    if (object != 0) {
+        unsigned char* members = static_cast<unsigned char*>(object);
+        short memberDeleting = -1;
+        fn_104_1984C(members + 8, memberDeleting);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_1984C {
+
+extern "C" void* __dt__23wnZeldaLightingBowArrowFv(void*, short);
+
+extern "C" void* fn_104_1984C(void* object, short deleting) {
+    if (object != 0) {
+        unsigned char* members = static_cast<unsigned char*>(object);
+        short memberDeleting = -1;
+        __dt__23wnZeldaLightingBowArrowFv(members + 4, memberDeleting);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

@@ -757,3 +757,20 @@ extern "C" void fn_92_CAB4(void* self) {
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_42E4 {
+
+extern "C" void* __dt__17soSoundModuleImplFv(void*, short);
+
+extern "C" void* fn_92_42E4(void* object, short deleting) {
+    if (object != 0) {
+        __dt__17soSoundModuleImplFv(static_cast<unsigned char*>(object) + 0xC, -1);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

@@ -773,3 +773,19 @@ extern "C" s32 fn_117_23DC8(void) {
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_2114C {
+extern "C" void* __dt__15soKineticEnergyFv(void*, short);
+
+extern "C" void* fn_117_2114C(void* object, short deleting) {
+    if (object != 0) {
+        __dt__15soKineticEnergyFv(object, static_cast<short>(0));
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

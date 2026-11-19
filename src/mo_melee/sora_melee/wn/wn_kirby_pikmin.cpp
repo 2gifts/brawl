@@ -265,3 +265,15 @@ extern "C" void fn_27_30F7C8(void* self) {
 }
 }
 
+void operator delete(void* p);
+// TODO: clean up, give variables real names
+namespace jj_30C3EC {
+
+extern "C" void* __dt__26wnKirbyPikminParamAccesserFv(void* p, s32 n) {
+    if (p != nullptr && n > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+}
+

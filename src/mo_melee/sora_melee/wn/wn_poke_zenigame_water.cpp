@@ -118,3 +118,15 @@ extern "C" void fn_27_376050(Object* object) {
 }
 }
 
+void operator delete(void* p);
+// TODO: clean up, give variables real names
+namespace jj_373A40 {
+
+extern "C" void* __dt__32wnPokeZenigameWaterParamAccesserFv(void* p, int n) {
+    if (p != 0 && n > 0) {
+        operator delete(p);
+    }
+    return p;
+}
+}
+

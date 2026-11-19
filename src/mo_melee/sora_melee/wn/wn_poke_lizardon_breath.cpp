@@ -434,3 +434,20 @@ extern "C" int fn_27_36D2CC(gfTask* self, NullableModule* m, soModuleAccesser* a
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_36A0A4 {
+extern "C" void* __dt__18soEffectModuleImplFv(void*, short);
+
+extern "C" void* fn_27_36A0A4(void* object, short deleting) {
+    if (object != 0) {
+        unsigned char* storage = static_cast<unsigned char*>(object);
+        __dt__18soEffectModuleImplFv(storage + 0x14, -1);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

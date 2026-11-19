@@ -764,3 +764,41 @@ extern "C" void fn_123_C914(void*,
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_41F8 {
+
+extern "C" void* __dt__17soSoundModuleImplFv(void*, short);
+
+extern "C" void* fn_123_41F8(void* object, short deleting) {
+    if (object != 0) {
+        unsigned char* members = static_cast<unsigned char*>(object);
+        short memberDeleting = -1;
+        __dt__17soSoundModuleImplFv(members + 0xC, memberDeleting);
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
+// TODO: clean up, give variables real names
+namespace jj_B974 {
+
+extern "C" void* fn_123_396C(void*, short);
+
+extern "C" void* __dt__25ftKineticEnergyControllerFv(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            short baseDeleting = 0;
+            fn_123_396C(object, baseDeleting);
+        }
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+

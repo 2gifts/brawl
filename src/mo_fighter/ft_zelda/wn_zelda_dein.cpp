@@ -319,3 +319,21 @@ extern "C" void fn_104_132B0(void* self) {
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_11D64 {
+extern "C" void __dt__17soArticleMediatorFv(void*, short);
+
+extern "C" void* fn_104_11D64(void* self, short deleting) {
+    if (self != 0) {
+        if (self != 0) {
+            __dt__17soArticleMediatorFv(self, 0);
+        }
+        if (deleting > 0) {
+            operator delete(self);
+        }
+    }
+    return self;
+}
+}
+

@@ -60,3 +60,19 @@ extern "C" void fn_27_26F1F8(void* self) {
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_26F0D0 {
+extern "C" void* __dt__18soDamageModuleImplFv(void*, short);
+
+extern "C" void* __dt__18ykDamageModuleImplFv(void* self, int flag) {
+    if (self) {
+        __dt__18soDamageModuleImplFv(self, 0);
+        if (flag > 0) {
+            operator delete(self);
+        }
+    }
+    return self;
+}
+}
+

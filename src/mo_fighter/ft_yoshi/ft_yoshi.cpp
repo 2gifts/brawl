@@ -1359,3 +1359,23 @@ extern "C" void* getInstanceAt__21ftPurinArticleSubPoolFl(void* object, int inde
 }
 }
 
+void operator delete(void*);
+// TODO: clean up, give variables real names
+namespace jj_D4EC {
+
+extern "C" void* __dt__15soKineticEnergyFv(void*, short);
+
+extern "C" void* __dt__25ftKineticEnergyControllerFv(void* object, short deleting) {
+    if (object != 0) {
+        if (object != 0) {
+            short baseDeleting = 0;
+            __dt__15soKineticEnergyFv(object, baseDeleting);
+        }
+        if (deleting > 0) {
+            operator delete(object);
+        }
+    }
+    return object;
+}
+}
+
