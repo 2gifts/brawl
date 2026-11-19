@@ -255,6 +255,7 @@ typedef struct Fn803DADECCopy {
     u32 words[0x90];
 } Fn803DADECCopy;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void *fn_803DADEC(void *arg0, void *arg1) {
     u8 *walk = (u8 *)arg0;
     u8 *candidate = (u8 *)arg0 + 0xE3C;
@@ -298,6 +299,7 @@ extern int fn_803E4668(Obj *);
 extern int fn_803E1458(void *, u32, u32, int *);
 extern int fn_803E1494(void *, u32, u32, int *, u32 *);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803DABBC(Obj *obj, u32 len, u32 *out) {
     int spC;
     u32 count;

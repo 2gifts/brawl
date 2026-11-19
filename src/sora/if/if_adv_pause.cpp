@@ -260,6 +260,7 @@ struct Self {
     u8 f147;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_8010A36C(Self* self, int* out) {
     gfPadStatus status;
     u32 flags = self->flags30;

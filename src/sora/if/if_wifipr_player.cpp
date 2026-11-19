@@ -399,6 +399,7 @@ struct Self {
     int state;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800FD8E0(Self* self) {
     int old = self->state;
     if (lbl_804090F0[old].f4 != 0) {
@@ -427,6 +428,7 @@ struct Obj {
     void* m_1c;
 };
 
+// TODO: clean up, give variables real names
 extern "C" Obj* fn_800FD698(Obj* p, s32 flags) {
     if (p != nullptr) {
         p->m_1c = lbl_8045C768;
@@ -488,6 +490,7 @@ struct SelfObj {
     VCall* unk14;
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800FDDD4(SelfObj* self) {
     switch (self->unk10) {
     case 2: {

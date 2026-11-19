@@ -41,6 +41,7 @@ s32 gsiInterlockedDecrement(s32 *arg0)
     return result;
 }
 
+// TODO: clean up, give variables real names
 int socket(int domain, int type, int protocol) {
     int result = SOSocket(domain, type, 0);
 
@@ -51,6 +52,7 @@ int socket(int domain, int type, int protocol) {
     return -1;
 }
 
+// TODO: clean up, give variables real names
 int closesocket(int s) {
     int result = SOClose(s);
 
@@ -71,6 +73,7 @@ int shutdown(int s, int how) {
     return -1;
 }
 
+// TODO: clean up, give variables real names
 int listen(int s, int backlog) {
     int result = SOListen(s, backlog);
 
@@ -81,6 +84,7 @@ int listen(int s, int backlog) {
     return -1;
 }
 
+// TODO: clean up, give variables real names
 int recv(int s, char* buf, int len, int flags) {
     int result = SORecv(s, buf, len, 4);
 
@@ -91,6 +95,7 @@ int recv(int s, char* buf, int len, int flags) {
     return -1;
 }
 
+// TODO: clean up, give variables real names
 int send(int s, const char* buf, int len, int flags) {
     int result = SOSend(s, buf, len, flags);
 
@@ -101,6 +106,7 @@ int send(int s, const char* buf, int len, int flags) {
     return -1;
 }
 
+// TODO: clean up, give variables real names
 int sendto(int s, const char* buf, int len, int flags, const void* to, int tolen) {
     u8 addr[8];
     int result;
@@ -171,6 +177,7 @@ int GOAGetLastError(int s) {
     return lbl_805A1044;
 }
 
+// TODO: clean up, give variables real names
 int CanReceiveOnSocket(int sock) {
     int readFlag = 0;
 
@@ -180,6 +187,7 @@ int CanReceiveOnSocket(int sock) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int CanSendOnSocket(int sock) {
     int writeFlag = 0;
 
@@ -206,6 +214,7 @@ void gsiTimeInSec(s64* t) {
     }
 }
 
+// TODO: clean up, give variables real names
 static inline void gsiFreeThreadMemory(void* ptr) {
     if (ptr != NULL) {
         lbl_80534638.freeCB(ptr);
@@ -297,6 +306,7 @@ int Util_RandInt(int low, int high) {
     return low + seed % range;
 }
 
+// TODO: clean up, give variables real names
 int fn_8035D560(GSIThreadID* thread) {
     GSIThread copy;
     int result;
@@ -390,14 +400,17 @@ void fn_8035D248(GSICriticalSection* theCrit) {
     OSInitMutex((OSMutex*)theCrit);
 }
 
+// TODO: clean up, give variables real names
 void fn_8035D24C(GSICriticalSection* theCrit) {
     OSLockMutex((OSMutex*)theCrit);
 }
 
+// TODO: clean up, give variables real names
 void fn_8035D250(GSICriticalSection* theCrit) {
     OSUnlockMutex((OSMutex*)theCrit);
 }
 
+// TODO: clean up, give variables real names
 void fn_8035D254(GSICriticalSection* theCrit) {}
 
 void fn_8035D770(void) {
@@ -446,6 +459,7 @@ static inline void readChunk(u8 *src, u8 *buf, s32 len) {
         buf[i] = 0;
     }
 }
+// TODO: clean up, give variables real names
 void fn_8035DAA4(u8 *arg0, u8 *arg1, s32 arg2, s32 arg3) {
     u8 *table;
     u8 *start;
@@ -499,6 +513,7 @@ void SocketShutDown(void) {}
 extern int SOSetSockOpt(int a, int b, int c, const void *data, int length);
 extern int lbl_805A1044;
 
+// TODO: clean up, give variables real names
 int SetReceiveBufferSize(int s, int value) {
     int tmp;
     int result;
@@ -513,6 +528,7 @@ int SetReceiveBufferSize(int s, int value) {
 extern int SOSetSockOpt(int a, int b, int c, const void *data, int length);
 extern int lbl_805A1044;
 
+// TODO: clean up, give variables real names
 int SetSendBufferSize(int s, int value) {
     int tmp;
     int result;
@@ -539,6 +555,7 @@ typedef struct Context {
 } Context;
 #define lbl_80534638 (*(Allocator*)&lbl_80534638)
 extern void *fn_8035D2A8(void *);
+// TODO: clean up, give variables real names
 int fn_8035D364(const char *name, Context **out)
 {
     Context *p;

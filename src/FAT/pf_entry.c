@@ -42,6 +42,7 @@ struct PF2_ENT_ITER {
     u8 log2_entries_per_sector;
 };
 
+// TODO: clean up, give variables real names
 u8 PFENT_getcurrentDateTimeForEnt(s16 *arg0, s16 *arg1) {
     s32 date[3];
     s32 time[4];
@@ -53,6 +54,7 @@ u8 PFENT_getcurrentDateTimeForEnt(s16 *arg0, s16 *arg1) {
 }
 
 
+// TODO: clean up, give variables real names
 int PFENT_ITER_GetEntryOfPath(PF2_ENT_ITER* iter, PF2_DIR_ENT* entry, PF2_VOLUME* vol, PF2_STR* str, u32 no_look_last_token) {
     return fn_803DE800(iter, entry, vol, str, 0, no_look_last_token);
 }

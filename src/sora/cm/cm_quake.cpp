@@ -114,6 +114,7 @@ inline void clear(int* begin, int* end) {
     int* p = begin;
     do { *p = 0; ++p; } while (p < end);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_8009D2DC() {
     if (lbl_805A0280 == 0) {
         char* p = (char*)__nw__FUlQ25Heaps8HeapType(0x274, 1);
@@ -146,6 +147,7 @@ inline void clear(int* begin, int* end) {
     do { *p = 0; ++p; } while (p < end);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8009DEE8() {
     if (lbl_805A0280 == 0) {
         char* p = static_cast<char*>(operator new(0x274, (Heaps::HeapType)1));
@@ -192,6 +194,7 @@ inline void zeroRange(int* begin, int* end) {
     do { *p = 0; ++p; } while (p < end);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8009E090(float farg0) {
     if (lbl_805A0280 == 0) {
         Obj* obj = (Obj*)__nw__FUlQ25Heaps8HeapType(0x274, 1);

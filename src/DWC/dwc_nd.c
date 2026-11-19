@@ -329,6 +329,7 @@ extern void fn_80352260(int, void *, void *);
 extern void fn_80335390(void);
 extern void fn_80335450(void);
 
+// TODO: clean up, give variables real names
 void fn_8035874C(int arg0, int arg1) {
     lbl_805A1030[0] = (void*)arg1;
     fn_80352260(arg0, fn_80335390, fn_80335450);
@@ -352,6 +353,7 @@ static inline int getblock(u8 *out, const char *in, int size) {
     return n;
 }
 
+// TODO: clean up, give variables real names
 int fn_80356738(s8 *out, const char *in, int size) {
     u8 buf[3];
     int len = 0;
@@ -389,6 +391,7 @@ extern int fn_803960EC(void *, char **, int *);
 extern void fn_8034F028(void *, const void *, unsigned int);
 extern unsigned int fn_803568D0(void *, const char *, int);
 extern int fn_80392AB8(const char *, int);
+// TODO: clean up, give variables real names
 int fn_80358490(void *arg0, Context *ctx) {
  char *body;
  int ignored;

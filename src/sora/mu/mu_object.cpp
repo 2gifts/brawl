@@ -1622,6 +1622,7 @@ struct Holder {
     Obj* target;
 };
 
+// TODO: clean up, give variables real names
 s32 fn_800B803C(Holder* h) {
     Obj* t = h->target;
     if (t)
@@ -1642,6 +1643,7 @@ public:
     virtual void m4();
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800B805C(int* self) {
     A* obj = *(A**)(self + 1);
     if (!obj)
@@ -1668,6 +1670,7 @@ public:
 };
 
 extern "C" {
+// TODO: clean up, give variables real names
 void fn_800B858C(Parent* p) {
     if (p->m_child) {
         p->m_child->v1();
@@ -1680,6 +1683,7 @@ namespace jj_800B8608 {
 // Release a heap allocation when requested, preserving its original pointer.
 extern "C" void __dl__FPv(void*);
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_800B8608(void* arg0, int arg1) {
     if (arg0 != 0 && arg1 > 0) {
         __dl__FPv(arg0);
@@ -1694,6 +1698,7 @@ void __dt__6gfTaskFv(void*, int);
 void __dl__FPv(void*);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_800B85B0(void* p, int n) {
     if (p) {
         __dt__6gfTaskFv(p, 0);
@@ -1710,6 +1715,7 @@ extern "C" int fn_8006CA64();
 extern "C" int fn_8006C90C();
 extern "C" int fn_8006C9EC();
 extern "C" int fn_8006C790();
+// TODO: clean up, give variables real names
 extern "C" void fn_800B881C(unsigned char* p, int index) {
     int flags = 0;
     if ((unsigned int)((p[16] >> 7) & 1) != 1) {
@@ -1728,6 +1734,7 @@ namespace jj_800B8648 {
 extern "C" s32 fn_8006C7D4(s32);
 extern "C" s32 fn_8006C870(s32);
 extern "C" s32 fn_8006C950(s32);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u8 fn_800B8648(u8* arg0, s32 arg1, s32 arg2, s32 arg3) {
     if ((u32)((*(u8*)(arg0 + 0x10) >> 7) & 1) == 1U) return 0;
     u32 orval;
@@ -1817,6 +1824,7 @@ struct Obj {
 };
 
 extern "C" {
+// TODO: clean up, give variables real names
 void fn_800B8350(Obj* self, s32 arg1, Iface* arg2) {
     C* c;
     VT* z;
@@ -1947,6 +1955,7 @@ struct Obj {
 extern "C" {
 extern f32 lbl_805A2200;
 
+// TODO: clean up, give variables real names
 void fn_800B807C(Obj* self, s32 arg1, Iface* arg2) {
     s32 r0;
     s32 flag;

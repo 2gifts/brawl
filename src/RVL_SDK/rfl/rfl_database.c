@@ -66,6 +66,7 @@ int RFLiIsValidID(void* arg0) {
 
 /* jj_803D51A4 */
 
+// TODO: clean up, give variables real names
 u16 fn_803D51A4(void) {
     u16 count = 0;
     unsigned int i = 0;
@@ -95,6 +96,7 @@ extern int RFLiGetLastReason(void);
 extern void RFLiClearDBBuffer(void);
 extern State *RFLiGetManager(void);
 extern int RFLGetAsyncStatus(void);
+// TODO: clean up, give variables real names
 int RFLiBootLoadDatabaseAsync(void (*callback)(void)) {
     Context *p;
     if (RFLAvailable() == 0) return 5;
@@ -160,6 +162,7 @@ extern void fn_803CFBE4(s32 a, s32 b);
 extern void bootloadCheckCRCCb_(s32 arg0);
 extern void alarmCheckCb_(void);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void bootloadDBcallback_(void) {
     s32 *p;
     s32 *q;

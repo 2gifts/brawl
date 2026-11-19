@@ -62,6 +62,7 @@ const char* NtBase::getErrorStr(s32 error) {
 }
 
 // HYPOTHESIS: lbl_805A0418 holds a (start index, player count) pair per station.
+// TODO: clean up, give variables real names
 int NtBase::setSIDPlayer(u8 station, u8 count) {
     u8* slot = &lbl_805A0418[station * 2];
     slot[1] = count;
@@ -99,6 +100,7 @@ extern "C" void fn_80147394(void) {
     lbl_805A03D0 = 1;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_801473A0(void) {
     lbl_805A03D0 = 0;
 }
@@ -112,6 +114,7 @@ public:
 
 extern char lbl_8045F4A8[];
 
+// TODO: clean up, give variables real names
 extern "C" int fn_80146F34(unsigned char* p) {
     unsigned char a = p[0];
     int r = (unsigned char)(a + p[1]) == 0;
@@ -167,6 +170,7 @@ void init__6mtRandFl(mtRand*, u32);
 
 #pragma push
 #pragma opt_propagation off
+// TODO: clean up, give variables real names
 extern "C" void fn_80146E44(void) {
     NtMutexes* base = &lbl_8049EC30;
     OSMutex NtMutexes::*first = &NtMutexes::m0;

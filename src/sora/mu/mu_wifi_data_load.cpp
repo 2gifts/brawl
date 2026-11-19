@@ -189,6 +189,7 @@ namespace jj_800DACB0 {
 extern "C" {
 void fn_80030F98(void* a, int b);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800DACB0(void* p)
 {
     fn_80030F98(*(void**)((char*)p + 0x60), 0x2b);
@@ -213,6 +214,7 @@ struct Fn5CObj {
     int m5C;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800DAD80(Fn5CObj* self) {
     if (self->m5C == 0) {
         self->m5C = fn_800BEEB8(1, self->m4C, 0x44, self->m40, self->m44, self->m58, 0, 0x2A, 0x2B, 0, 0, 0xF0);
@@ -241,6 +243,7 @@ struct StateEntry {
 extern "C" {
 extern const StateEntry lbl_80408550[];
 
+// TODO: clean up, give variables real names
 void fn_800DAC20(Menu* self) {
     if (self->previousState != self->state) {
         if (lbl_80408550[self->stateIndex].enter)
@@ -269,6 +272,7 @@ struct State {
     char pad3[8];
     Task* task;
 };
+// TODO: clean up, give variables real names
 extern "C" int fn_800DADF8(State* self) {
     int result;
     int status;

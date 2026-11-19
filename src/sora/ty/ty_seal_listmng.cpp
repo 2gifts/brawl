@@ -121,6 +121,7 @@ extern "C" {
 void readRequest__14gfFileIOHandleFPCcQ25Heaps8HeapTypeii(void* self, const char* name, int heap, int a, int b);
 extern char lbl_80455180[];
 
+// TODO: clean up, give variables real names
 int fn_800AD8F8(unsigned char* arg0) {
     if (arg0[0x3EA8] != 0) {
         return 0;
@@ -142,6 +143,7 @@ void __dt__14gfFileIOHandleFv(void*, int);
 void __dl__FPv(void*);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_800AD87C(char* self, int flag) {
     if (self) {
         unsigned char flagByte = self[0x3EB0];
@@ -165,6 +167,7 @@ extern GG* g_GameGlobal;
 extern "C" void fn_80052BCC(unsigned short, unsigned short);
 extern "C" void fn_80052C24(unsigned short, int);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800AEC70(char* self) {
     char* p = self;
     int off = 0;
@@ -206,6 +209,7 @@ struct Context {
     u32 mask;
 };
 
+// TODO: clean up, give variables real names
 extern "C" u32 fn_800AE200(Context* self, int mode, int skip) {
     u32 n = 0;
     switch (mode) {
@@ -316,6 +320,7 @@ struct Context {
     char pad2ef8[8];
     u32 mask;
 };
+// TODO: clean up, give variables real names
 extern "C" void fn_800ADD1C(Context* self, u32 mode, int skip) {
     switch (mode) {
     case 0:

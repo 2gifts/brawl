@@ -411,6 +411,7 @@ inline int inline_fn(struct Ctx *arg0) {
 
 extern int fn_803E8DC0(void *, unsigned short *, unsigned int, unsigned int, unsigned short);
 
+// TODO: clean up, give variables real names
 int fn_803E2468(struct Ctx *arg0, int arg1, int *arg2) {
     unsigned short temp_r28;
     unsigned short var_r27;
@@ -483,6 +484,7 @@ typedef struct Info { char pad0[0x10]; u32 value; char pad14[8]; u32 count; char
 typedef struct Record { int key; u32 value; int owner; } Record;
 typedef struct Context { int owner; char pad4[4]; int *state; char padc[0x10]; int flag; char pad20[0x10]; Record *record; Info *info; } Context;
 extern int fn_803E0A88(Context *, int, int, int, u32 *, u32 *);
+// TODO: clean up, give variables real names
 int fn_803E119C(Context *ctx, int key, int arg2, u32 *out) {
     u32 value, other;
     Info *info = ctx->info;

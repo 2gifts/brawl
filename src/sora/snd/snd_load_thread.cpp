@@ -133,6 +133,7 @@ extern "C" void OSLockMutex(void*);
 extern "C" void OSUnlockMutex(void*);
 extern "C" void fn_801DEF60(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80079AA4(unsigned char* self, s32 a, s32 b, s32 c) {
     OSLockMutex(self + 0x340);
     if (*(u32*)(self + 0xcc8) < 0x95) {

@@ -171,6 +171,7 @@ extern u8 lbl_80598098[0x40];
 extern u8 lbl_8059FF18[2];
 extern u8 lbl_8059FF1C[3];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 s32 fn_803EC6E8(u8 *arg0)
 {
     u8 sp8[0x10];
@@ -265,6 +266,7 @@ extern void* fn_803D634C(void* dest, int value, u32 size);
 #define SWAP16(v) ((u16)((((v) & 0xFF) << 8) | (((v) >> 8) & 0xFF)))
 #define SWAP32(v) ((((v) << 24) | (((v) << 8) & 0xFF0000)) | (((v) >> 24) | (((v) >> 8) & 0xFF00)))
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 s32 fn_803ECB5C(u8* vol, u8* buf, u32* outType, s32 sectors)
 {
     u32 nsec;
@@ -451,6 +453,7 @@ extern void fn_803D80C4(void*);
 #define lbl_805A127C (*(int*)&lbl_805A127C)
 #define lbl_80598098 ((char*)&lbl_80598098)
 
+// TODO: clean up, give variables real names
 int fn_803ECFB8(void* arg0) {
     if (arg0 == 0) {
         return -0x14;

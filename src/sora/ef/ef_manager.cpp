@@ -455,6 +455,7 @@ struct Blk {
 
 #pragma auto_inline off
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8005B6F0(Arg* arg0) {
     Blk b;
     Node* sentinel;
@@ -572,6 +573,7 @@ extern float lbl_805A1908;
 extern void* g_gfSceneRoot;
 extern void* g_ecMgr;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8005B838(Self* self, int arg1) {
     Mtx34 spA0;
     Mtx34 sp70;
@@ -675,6 +677,7 @@ extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 extern "C" void* fn_8005AD3C(void*);
 extern void* lbl_805A0110;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005C5F0() {
     if (lbl_805A0110 == 0) {
         void* p = __nw__FUlQ25Heaps8HeapType(0x13C, 2);

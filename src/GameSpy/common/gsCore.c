@@ -9,10 +9,12 @@ GSCoreMgr lbl_805348E0 = { 0 };
 // one was matched in a translation unit of its own; they follow the GameSpy SDK's
 // gsCore.c.
 
+// TODO: clean up, give variables real names
 void fn_8035E380(void) {
     fn_8035D254(&lbl_805348E0.mQueueCrit);
 }
 
+// TODO: clean up, give variables real names
 void fn_8035E390(void) {
     GSCoreMgr* aCore = &lbl_805348E0;
 
@@ -45,6 +47,7 @@ void fn_8035E390(void) {
     }
 }
 
+// TODO: clean up, give variables real names
 int fn_8035E848(void) {
     GSCoreMgr* aCore = &lbl_805348E0;
 
@@ -60,6 +63,7 @@ int fn_8035E848(void) {
     return result;
 }
 
+// TODO: clean up, give variables real names
 void fn_8035E87C(GSTask* task, u32 timeoutMs) {
     GSCoreMgr* aCore = &lbl_805348E0;
     int aTaskSlot = -1;
@@ -84,6 +88,7 @@ void fn_8035E87C(GSTask* task, u32 timeoutMs) {
     fn_8035D250(&aCore->mQueueCrit);
 }
 
+// TODO: clean up, give variables real names
 GSTask* fn_8035EA18(void) {
     GSTask* aTask;
 

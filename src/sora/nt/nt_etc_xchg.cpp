@@ -6,6 +6,7 @@
 
 // Function bodies below are taken from https://github.com/jj-link/brawl.
 
+// TODO: clean up, give variables real names
 extern "C" unsigned int fn_8014E708(unsigned int x) {
     return ((x + 0x1D45U) / 7474U) & 0xFFFFU;
 }
@@ -69,6 +70,7 @@ extern "C" void fn_8014E6B4(void* self, u32 value) {
 
 extern "C" void fn_8014F0F0(void*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8014F6CC(void* self) {
     fn_8014F0F0(reinterpret_cast<u8*>(self) - 0x18);
 }
@@ -121,6 +123,7 @@ inline bool terminated(u8* thread) {
     return OSIsThreadTerminated(thread + 8) == 1;
 }
 
+// TODO: clean up, give variables real names
 extern "C" int fn_8014F584(Object* self, int value) {
     if (self->thread != 0) {
         if (!terminated(self->thread))
@@ -180,6 +183,7 @@ static inline s32 findLine(u16* data, u32 size, s32 remaining, u32& idx) {
     return remaining;
 }
 
+// TODO: clean up, give variables real names
 extern "C" u32 fn_8014F320(s32* arg0, s32 arg1, u16* arg2, u32 arg3) {
     u32 idx;
     u16* data;

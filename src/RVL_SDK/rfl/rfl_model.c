@@ -142,6 +142,7 @@ extern unsigned char lbl_805A49F1;
 extern unsigned char lbl_805A49F2;
 extern unsigned char lbl_805A49F3;
 
+// TODO: clean up, give variables real names
 void RFLLoadDrawSetting(Arg arg) {
     Color4 c0;
     Color4 c1;

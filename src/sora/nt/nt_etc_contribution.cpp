@@ -79,17 +79,20 @@ struct Fn154C4CObj;
 extern "C" void fn_80154C4C(Fn154C4CObj* self, void* p);
 extern "C" void fn_80154C60(void* self, int value, int idx);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80154DFC(void* self, int value, int idx) {
     fn_80154C60(reinterpret_cast<u8*>(self) - 0x340, value, idx);
 }
 
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80154E04(void* self, void* p) {
     fn_80154C4C((Fn154C4CObj*)(reinterpret_cast<u8*>(self) - 0x344), p);
 }
 
 extern "C" void fn_80154C8C(void*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80154E0C(void* self) {
     fn_80154C8C(reinterpret_cast<u8*>(self) - 0x348);
 }
@@ -104,12 +107,14 @@ struct Fn154C4CObj {
     void* ptr;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80154C4C(Fn154C4CObj* self, void* p) {
     self->ptr = p;
     self->b = 1;
     self->a = 1;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80154C60(void* self, int value, int idx) {
     *(int*)((char*)self + 0x378) = value;
     *(unsigned char*)((char*)self + 0x37C) = 1;
@@ -131,6 +136,7 @@ extern "C" void* __dt__8gfThreadFv(void*, short);
 extern "C" void __dl__FPv(void*);
 extern char lbl_804616D8[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_80154420(void* p, int flag)
 {
     if (p != 0) {
@@ -209,6 +215,7 @@ struct Thread {
     int f388;
 };
 
+// TODO: clean up, give variables real names
 extern "C" Thread* fn_801542C4(Thread* self, int heap)
 {
     self->vtable = __vt__8gfThread;

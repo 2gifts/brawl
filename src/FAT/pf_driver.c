@@ -12,6 +12,7 @@ unsigned char lbl_805643F0[0xd0] __attribute__((aligned(8))) = { 0 };
 
 extern void fn_803D8E00(void *self, int mode);
 
+// TODO: clean up, give variables real names
 void fn_803D80B0(int *arg0) {
     *arg0 &= ~4;
     fn_803D8E00(arg0, 0);
@@ -19,11 +20,13 @@ void fn_803D80B0(int *arg0) {
 
 extern void fn_803D8E00(void* self, int mode);
 
+// TODO: clean up, give variables real names
 void fn_803D80C4(u32* self) {
     *self |= 0x4;
     fn_803D8E00(self, 1);
 }
 
+// TODO: clean up, give variables real names
 int fn_803D8988(const unsigned int *p)
 {
     return (p[0] >> 2) & 1;
@@ -31,6 +34,7 @@ int fn_803D8988(const unsigned int *p)
 
 // The disk-geometry converters of this build, as in VFipdm_disk_convert_*; the
 // disk argument is unused.
+// TODO: clean up, give variables real names
 s32 fn_803D781C(void* p_disk, u32 sector, u32 num_sector, u16 bps, u32* p_block, u32* p_num_block) {
     u32 ratio;
     s32 err = 0;
@@ -51,6 +55,7 @@ s32 fn_803D781C(void* p_disk, u32 sector, u32 num_sector, u16 bps, u32* p_block,
     return err;
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803D78CC(void* p_disk, u32 block, u32 num_block, u16 bps, u32* p_sector, u32* p_num_sector) {
     u32 ratio;
     s32 err = 0;
@@ -377,6 +382,7 @@ extern s32 fn_803D7B04(void *, void *);
 extern s32 fn_803D7ECC(void *, s32, u32, u32, u32, s32);
 extern u32 fn_803D87AC(Obj *, u32, u32);
 
+// TODO: clean up, give variables real names
 s32 fn_803D8C48(Obj *self, s32 a1, u32 offset, u32 length, u32 a4, s32 a5)
 {
     s32 result;

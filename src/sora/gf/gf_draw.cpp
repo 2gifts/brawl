@@ -35,6 +35,7 @@ struct ParseLocals {
     u32 file;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8001AA88(void *arg0, const Resource **source) {
     const Resource *resource = *source;
     ParseLocals locals;
@@ -134,6 +135,7 @@ struct Header {
     }
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_8001ABE4(u16 count) {
     Header* h = (Header*)alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(
         3, count * 0x30 + 0x1C);
@@ -157,6 +159,7 @@ public:
 extern "C" {
 extern gfHeapManager* lbl_8059FFC8;
 
+// TODO: clean up, give variables real names
 void fn_8001AC98(int unused, void* arg1) {
     lbl_8059FFC8->free(arg1);
     lbl_8059FFC8 = 0;
@@ -189,6 +192,7 @@ void fn_8016EDA8(void *, void *, void *, void *, void *);
 int strncmp(const char *, const char *, unsigned long);
 char *strncpy(char *, const char *, unsigned long);
 
+// TODO: clean up, give variables real names
 void fn_8001ACC4(Manager *mgr, const char *name, int a2, int a3, int a4) {
     int count;
     Entry *p1;

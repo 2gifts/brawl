@@ -8,6 +8,7 @@
 // Checked: without this pragma 10 functions in this unit stop matching.
 #pragma auto_inline off
 
+// TODO: clean up, give variables real names
 void* fn_803EB4EC(void* arg0, void* arg1) {
     if (arg0 != 0) {
         return 0;
@@ -15,6 +16,7 @@ void* fn_803EB4EC(void* arg0, void* arg1) {
     return arg1;
 }
 
+// TODO: clean up, give variables real names
 s32 fn_803EB504(s32 arg0) {
     if (arg0 == 0) {
         return 0;
@@ -27,6 +29,7 @@ s32 fn_803EB504(s32 arg0) {
 
 s32 fn_803EAAE4(s32 arg0);
 
+// TODO: clean up, give variables real names
 s32 fn_803EBA18(s8 arg0) {
     s32 result = fn_803EAAE4(arg0);
     return fn_803EB504(result);
@@ -35,6 +38,7 @@ s32 fn_803EBA18(s8 arg0) {
 // PrFile2 -> FA error table
 extern s32 lbl_80492FE8[0xA0 / 4];
 
+// TODO: clean up, give variables real names
 s32 fn_803EB48C(s32 err) {
     if (err == 0) return 0;
     if (err == -1) return -1;
@@ -50,18 +54,22 @@ int PFAPI_convertReturnValue(int err) {
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB5D8(PF2_DIR* dir) {
     return PFAPI_convertReturnValue(PFDIR_closedir(dir));
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB5FC(void) {
     return fn_803EB48C(fn_803EA188());
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB620(PF2_FILE* file) {
     return PFAPI_convertReturnValue(fn_803E5774(file));
 }
 
+// TODO: clean up, give variables real names
 u32 fn_803EB6E0(void* buf, u32 size, u32 count, PF2_FILE* file) {
     u32 count_read;
 
@@ -69,14 +77,17 @@ u32 fn_803EB6E0(void* buf, u32 size, u32 count, PF2_FILE* file) {
     return count_read;
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB708(PF2_FILE* file, s32 offset, s32 origin) {
     return PFAPI_convertReturnValue(fn_803E5D00(file, offset, origin));
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB7A0(FAEntryInfo* dta) {
     return PFAPI_convertReturnValue(PFDIR_fsnext((PF2_DTA*)dta));
 }
 
+// TODO: clean up, give variables real names
 u32 fn_803EB824(void* buf, u32 size, u32 count, PF2_FILE* file) {
     u32 count_written;
 
@@ -84,10 +95,12 @@ u32 fn_803EB824(void* buf, u32 size, u32 count, PF2_FILE* file) {
     return count_written;
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB84C(s8 drv_char) {
     return PFAPI_convertReturnValue(fn_803EA198(drv_char));
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB874(void) {
     int err;
 
@@ -98,6 +111,7 @@ int fn_803EB874(void) {
     return PFAPI_convertReturnValue(err);
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB8B4(s8 drv_char) {
     int result = 0;
     int err = fn_803EAE34(drv_char, &result);
@@ -108,6 +122,7 @@ int fn_803EB8B4(s8 drv_char) {
     return PFAPI_convertReturnValue(err);
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB948(s8 drv_char) {
     return PFAPI_convertReturnValue(fn_803EA788(drv_char));
 }
@@ -120,6 +135,7 @@ extern struct PF2_VOLUME_SET {
 } lbl_805644C0;
 
 
+// TODO: clean up, give variables real names
 s32 fn_803EB3BC(const s8* mode) {
     s32 flags;
     s32 i;
@@ -145,6 +161,7 @@ s32 fn_803EB3BC(const s8* mode) {
     }
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803EB528(s32* drv_list, void* dev) {
     int result;
 
@@ -170,6 +187,7 @@ done:
     return PFAPI_convertReturnValue(result);
 }
 
+// TODO: clean up, give variables real names
 PF2_FILE* fn_803EB644(const char* path, const char* mode) {
     PF_STR str;
     PF2_FILE* file;
@@ -190,6 +208,7 @@ PF2_FILE* fn_803EB644(const char* path, const char* mode) {
     return fn_803EB4EC((void*)err, file);
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB72C(const char* pattern, int attr, FAEntryInfo* dta) {
     PF_STR str;
     int result = PFSTR_InitStr(&str, pattern, 1);
@@ -202,6 +221,7 @@ int fn_803EB72C(const char* pattern, int attr, FAEntryInfo* dta) {
     return PFAPI_convertReturnValue(result);
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB7C4(const char* path, FAStat* st) {
     PF_STR str;
     int result = PFSTR_InitStr(&str, path, 1);
@@ -213,6 +233,7 @@ int fn_803EB7C4(const char* path, FAStat* st) {
     return PFAPI_convertReturnValue(result);
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB8F8(const char* path) {
     PF_STR str;
     s32 result = PFSTR_InitStr(&str, path, 1);
@@ -224,6 +245,7 @@ int fn_803EB8F8(const char* path) {
     return PFAPI_convertReturnValue(result);
 }
 
+// TODO: clean up, give variables real names
 PF2_DIR* fn_803EB970(const char* path) {
     PF_STR str;
     PF2_DIR* dir;
@@ -236,6 +258,7 @@ PF2_DIR* fn_803EB970(const char* path) {
     return fn_803EB4EC((void*)result, dir);
 }
 
+// TODO: clean up, give variables real names
 int fn_803EB9C8(const char* path) {
     PF_STR str;
     s32 result = PFSTR_InitStr(&str, path, 1);

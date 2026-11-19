@@ -18,6 +18,7 @@ s32 nanddrv_format(PDM_DISK* p_disk, const u8* param) {
     return p_disk ? 0 : -20;
 }
 
+// TODO: clean up, give variables real names
 s32 nanddrv_pread(PDM_DISK* p_disk, u8* p_buf, u32 block, u32 num_blocks, u32* p_num_success) {
     *p_num_success = 0;
     if (p_disk == NULL || p_buf == NULL || num_blocks == 0 || p_num_success == NULL) {
@@ -128,6 +129,7 @@ s32 VFi_NandCreateDir(const char* path, u8 perm, u8 attr) {
     return result;
 }
 
+// TODO: clean up, give variables real names
 s32 VFi_NandPrivateDelete(const char* path) {
     s32 count = lbl_805A1228;
     s32 result = 0;
@@ -142,6 +144,7 @@ s32 VFi_NandPrivateDelete(const char* path) {
     return result;
 }
 
+// TODO: clean up, give variables real names
 s32 VFi_NandClose(NANDFileInfo* info) {
     s32 count = lbl_805A1228;
     s32 result = 0;
@@ -156,6 +159,7 @@ s32 VFi_NandClose(NANDFileInfo* info) {
     return result;
 }
 
+// TODO: clean up, give variables real names
 s32 VFi_NandGetLength(NANDFileInfo* info, u32* length) {
     s32 count = lbl_805A1228;
     s32 result = 0;
@@ -170,6 +174,7 @@ s32 VFi_NandGetLength(NANDFileInfo* info, u32* length) {
     return result;
 }
 
+// TODO: clean up, give variables real names
 void VFi_NandSetNANDFuncNormal(u32 i_handleIdx) {
     if (i_handleIdx < 26) {
         lbl_80563798[i_handleIdx].create = VFi_NandCreate;
@@ -179,6 +184,7 @@ void VFi_NandSetNANDFuncNormal(u32 i_handleIdx) {
     }
 }
 
+// TODO: clean up, give variables real names
 void VFi_NandSetNANDFuncEx(u32 i_handleIdx) {
     if (i_handleIdx < 26) {
         lbl_80563798[i_handleIdx].create = VFi_NandPrivateCreate;

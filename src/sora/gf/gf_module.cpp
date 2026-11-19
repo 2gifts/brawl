@@ -86,6 +86,7 @@ extern "C" {
 void __dt__14gfFileIOHandleFv(void* p, int flag);
 void __dl__FPv(void* p);
 
+// TODO: clean up, give variables real names
 void* fn_80026C1C(void* p, int n) {
     if (p) {
         __dt__14gfFileIOHandleFv((char*)p + 0x14, -1);
@@ -129,6 +130,7 @@ void __construct_array(void*, void (*)(void*), void (*)(void*), unsigned long, i
 void __dt__14gfFileIOHandleFv(void*, int);
 extern Object* lbl_805A0038;
 
+// TODO: clean up, give variables real names
 void fn_80026B14() {
     if (lbl_805A0038 == 0) {
         unsigned char* obj = (unsigned char*)__nw__FUlQ25Heaps8HeapType(0x3C8, 1);
@@ -173,6 +175,7 @@ void release__14gfFileIOHandleFv(void*);
 void* create__8gfModuleFPvPvUl(void*, void*, u32);
 void* fn_80026828(void*, void*, u32);
 void free__13gfHeapManagerFPv(void*);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_80026CBC(s32 arg0) {
     struct Loop { char* e; s32 i; } loop;
     loop.e = (char*)(arg0 + 8);

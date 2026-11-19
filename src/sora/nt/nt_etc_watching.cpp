@@ -97,6 +97,7 @@ extern "C" void fn_801571F0(void* self) {
 
 extern "C" void fn_80155F08(void*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_801571F8(void* self) {
     fn_80155F08(reinterpret_cast<u8*>(self) - 0x344);
 }
@@ -111,6 +112,7 @@ struct Slot {
     s32 cnt;
 };
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_80157048(s32 unused, u8* data) {
     Slot slots[7];
     s32 i;
@@ -170,6 +172,7 @@ inline bool terminated(u8* thread) {
     return OSIsThreadTerminated((OSThread*)(thread + 8)) == 1;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80155C50(void* arg0) {
     char* base = lbl_80461718;
     u8* self = (u8*)arg0;
@@ -303,6 +306,7 @@ void* getInstance__8ipSwitchFv(void);
 int fn_8004B278(int, void*, int);
 void netReport__FPCce(const char*, ...);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_80156164(void* self, void* arg1) {
     char buf[0x10];
     char* base = (char*)lbl_80461718;
@@ -411,6 +415,7 @@ extern "C" {
     extern char lbl_80461718[];
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80155F54(void* arg0, void** arg1, int* arg2) {
     const char* base = lbl_80461718;
     int spC = 0;

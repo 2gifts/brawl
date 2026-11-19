@@ -108,6 +108,7 @@ extern "C" s32 fn_800FB3A4(void) {
     return 0x1;
 }
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_800FB3AC(void) {
     return 0x1;
 }
@@ -125,6 +126,7 @@ extern "C" void fn_800B9984(void*);
 extern "C" int fn_800FAD8C(void*);
 extern "C" void fn_800FB098(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FB554(unsigned char* self)
 {
     fn_800B9984(self + 0x100);
@@ -140,6 +142,7 @@ void fn_801971D0(void*, void*);
 void fn_8000D6DC(void*, void*);
 extern void* g_gfSceneRoot;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800FB3B4(void* self) {
     char* p = (char*)self;
     if (*(void**)(p + 0x48)) {
@@ -170,6 +173,7 @@ struct Task {
     unsigned char effect;
 };
 
+// TODO: clean up, give variables real names
 extern "C" void* fn_800FB834(Task* self, int flags) {
     unsigned char effect;
 
@@ -217,6 +221,7 @@ extern char lbl_8049E550[];
 extern char* g_gfApplication;
 extern char* g_gfSceneRoot;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_800FB8BC(void* self, int arg1) {
     char* s = (char*)self;
 

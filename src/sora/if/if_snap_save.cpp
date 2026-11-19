@@ -741,6 +741,7 @@ struct Result { unsigned int width, height, size; };
 extern "C" int fn_80260730(void*, void*, unsigned int, unsigned char, unsigned char, unsigned int, Result*);
 extern "C" int fn_802608BC(void*, void*, unsigned int, void*, unsigned int, unsigned char, unsigned char, unsigned int);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_800F27C8(void* self, void* data, unsigned int size) {
     unsigned char work[0x1c08];
     Result result;
@@ -762,6 +763,7 @@ struct Listener { virtual void f0(); virtual void f1(); virtual void f2(); virtu
 struct Resource { unsigned char pad[0x0C]; Listener* listener; void* l1; void* l1b; Listener* l2; };
 struct Item { unsigned char pad[0x10]; u32 unk10; Resource* resource; };
 struct Self { unsigned char pad[0x40]; PClass* p; Item* items[6]; void* extra; unsigned char pad2[0x68]; unsigned long long time; };
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800F28F0(Self* self) {
     Item* first;
     int i = 0;
@@ -832,6 +834,7 @@ extern void* g_GameGlobal;
 extern u8 lbl_805A25BC[4];
 extern u8 lbl_80408C70[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800F1AB0(FnObj* self, s32 a1, s32* a2, s32* a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 s9, s32 s10, u8 s11) {
     s32 sp1C;
     s32 sp18;
@@ -956,6 +959,7 @@ static inline int getDirection() {
 extern "C" void fn_80152A60(void*, const void*, unsigned int);
 extern "C" void fn_80153610(void*, void*, int, int, int, int, int);
 extern "C" void* fn_800F27C8(void*, const void*, unsigned int);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_800F2AEC(Self* self) {
     switch (self->state) {
     case 0:

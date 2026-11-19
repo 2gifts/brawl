@@ -364,6 +364,7 @@ typedef struct { char pad[0x10]; u64 t; } St;
 extern u64 OSGetTime(void);
 extern void OSTicksToCalendarTime(u64, Cal*);
 
+// TODO: clean up, give variables real names
 void SBS_GetServerTime(int* a, int* b) {
     Cal c;
     OSTicksToCalendarTime(OSGetTime() - lbl_8048E680.t, &c);

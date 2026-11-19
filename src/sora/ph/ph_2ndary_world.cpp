@@ -274,6 +274,7 @@ struct Obj {
 
 extern "C" void fn_8011728C(Node*, int, int);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8008674C(Obj* self, const Vec2f* a, const Vec2f* b) {
     register f32 t0, t1, t2, by, ay, bx, ax;
     Rect rect;
@@ -328,6 +329,7 @@ static inline void makeRect(RectF& r, const Vec2f& a, const Vec2f& b) {
     r.b = t3;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80086694(Outer* self, const Vec2f* pos, const float* radius) {
     self->buf->flag = 0;
     Vec2f b(pos->m_x + *radius, pos->m_y - *radius);
@@ -357,6 +359,7 @@ struct FTElement {
 
 extern "C" void fn_801EC868(void* pIn, void* pOut, f32 x, f32 y, f32 z);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800831AC(s32 unused, s32 i, s32 j, FTElement*** pArr) {
     s32 oj = j << 2;
     s32 oi = i << 2;
@@ -429,6 +432,7 @@ void fn_801EC868(const MTX34*, MTX34*, float, float, float);
 void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
 float fn_801ED04C(const VEC3*);
 void fn_801ED008(const VEC3*, VEC3*);
+// TODO: clean up, give variables real names
 int fn_80088FB8(void*, A* a, B* b) {
     int result = 0;
     if (lbl_805A1BB8 != a->weight && b != 0) {
@@ -508,6 +512,7 @@ extern const float lbl_805A1BE0;
 extern const float lbl_805A1BE4;
 extern const float lbl_805A1BE8;
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800835B4(void* self, Node* node, int arg2, int arg3)
 {
     if (lbl_805A1BB8 != node->weight && node->parent != 0) {
@@ -565,6 +570,7 @@ struct Node {
     int childCount;
 };
 extern "C" void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
+// TODO: clean up, give variables real names
 extern "C" void fn_8008A750(void* arg0, Node* node, MTX34 input) {
     int j, k;
     Node *child, *grand;
@@ -631,6 +637,7 @@ void fn_801EC41C(const MTX34*, MTX34*);
 void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8008A3CC(void* arg0, Node* node) {
     int j;
     Node* child;
@@ -720,6 +727,7 @@ extern const float lbl_805A1BFC;
 extern const float lbl_805A1C00;
 extern const float lbl_805A1C04;
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_80084524(Context* self, Node* node) {
     if (lbl_805A1BB8 != node->weight || node->parent == 0) {
         MTX34 identity;
@@ -831,6 +839,7 @@ extern const float lbl_805A1C08;
 extern const float lbl_805A1C0C;
 }
 
+// TODO: clean up, give variables real names
 extern "C" int fn_80084AD8(Context* self, Node* node, int unused,
     float* scale, void* arg4, int useInitial, unsigned int mode,
     unsigned char depth, unsigned char a, unsigned char b, unsigned char c) {
@@ -990,6 +999,7 @@ static inline bool finiteVector(const Vec2f& value) {
     return finiteComponent(value.m_x) && finiteComponent(value.m_y);
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80086AC0(CollisionOwner* self, unsigned char* arg1, int arg2) {
     Vec2f start(
         *(float*)(arg1 + 0x40),
@@ -1167,6 +1177,7 @@ struct Matrix34 {
 
 extern "C" void fn_8003E6DC(const Matrix34*, Vec3*);
 
+// TODO: clean up, give variables real names
 static inline Vec3 getScale(const Matrix34* m)
 {
     Vec3 v;
@@ -1259,6 +1270,7 @@ static int findGroup(Manager* self, int id)
     return -1;
 }
 
+// TODO: clean up, give variables real names
 extern "C" int fn_8008270C(
     Manager* self, int id, int* index, int arg3, int arg4, unsigned char arg5,
     int arg6, int arg7, unsigned char arg8, unsigned char arg9,
@@ -1516,6 +1528,7 @@ extern const float lbl_805A1C24;
 extern const float lbl_805A1C5C;
 }
 
+// TODO: clean up, give variables real names
 static inline float norm(Vec2f& v) {
     float d = v.lengthSq();
     return (float)(double)nw4r::ut::Abs(d) <= lbl_805A1C20
@@ -1543,6 +1556,7 @@ static inline void setVec(Vec2f& out, float x, float y) {
         fn_8008785C(&(h), self, &(s), &movement); \
     else fn_8008734C(&(h), self, &(s), &movement);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
     Segment movement;
     Segment segment;

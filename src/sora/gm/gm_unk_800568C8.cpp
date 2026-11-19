@@ -317,6 +317,7 @@ inline void setBit(unsigned int* bits, int idx) {
     int n = idx * 2;
     bits[n / 32] |= (1 << (n % 32));
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_80056DB0(int arg0) {
     int idx;
     switch (arg0) {
@@ -337,6 +338,7 @@ typedef unsigned int u32;
 extern "C" void* fn_8004E5B8(char*);
 extern "C" char* g_GameGlobal;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80059F94(int arg0) {
     int ret = 0;
     switch (arg0) {
@@ -389,6 +391,7 @@ extern "C" u32* fn_8004E634(void*);
 extern "C" u8* fn_8004E7B8(void*, int);
 extern "C" u32 fn_8005297C();
 extern void* g_GameGlobal;
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80056E68() {
     if (!(*fn_8004E580(g_GameGlobal) & 0x80000000) && *fn_8004E634(g_GameGlobal) / 60 / 60 >= 10) {
         *fn_8004E580(g_GameGlobal) |= 0x40000000;
@@ -416,6 +419,7 @@ struct Blob { Pair p[10]; };
 extern const Blob lbl_80406F98;
 struct Table { Blob b; s32 pad; };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline s32 testRange(s32 r9, s32 r4) {
     s32 result = 1;
     for (s32 i = r9; i <= r4; i++) {
@@ -431,6 +435,7 @@ inline s32 testRange(s32 r9, s32 r4) {
     return result;
 }
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_800596EC(s32 arg0) {
     Table t;
     s32 r9 = 0;
@@ -458,6 +463,7 @@ extern "C" s32 fn_800596EC(s32 arg0) {
 namespace jj_80058320 {
 extern "C" int fn_800557F8(int arg0, int arg1, int arg2);
 
+// TODO: clean up, give variables real names
 extern "C" int fn_80058320(int arg0) {
     int ret = 0;
     switch (arg0) {
@@ -514,6 +520,7 @@ extern void* g_GameGlobal;
 void* fn_8004E5D8(void*, void*);
 int fn_80055888(int, int);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_80059890(s32 arg0) {
     s32 fourth;
     s32 third;
@@ -581,6 +588,7 @@ extern "C" s32 fn_80059890(s32 arg0) {
 
 namespace jj_80058F64 {
 extern "C" u8* fn_8004E5D8(void*, int);
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80058F64(int arg0) {
     int off;
     int result = 0;
@@ -665,6 +673,7 @@ struct GG {
 extern "C" Rec* fn_8004E5D8(GG*, int);
 extern "C" GG* g_GameGlobal;
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800589C8(int arg0) {
     int result = 0;
     u32 count = 0;
@@ -756,6 +765,7 @@ extern "C" {
 extern void* g_GameGlobal;
 void* fn_8004E5D8(void*, void*);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_80058544(s32 arg0) {
     s32 result = 0;
     switch (arg0) {
@@ -855,6 +865,7 @@ extern void* g_GameGlobal;
 void* fn_8004E5C4(void*);
 u8* fn_8004E7B8(void*, int);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_80058C48(s32 arg0) {
     s32 result = 0;
     switch (arg0) {
@@ -924,6 +935,7 @@ extern void* g_GameGlobal;
 unsigned char* fn_8004E790(void*, int);
 int fn_80055888(int, int);
 unsigned int fn_8004F4A0(int);
+// TODO: clean up, give variables real names
 int fn_80059C00(int arg) {
     int result = 0;
     unsigned char* a = fn_8004E790(g_GameGlobal, 0);

@@ -783,6 +783,7 @@ union C {
     u16 h[2];
 };
 
+// TODO: clean up, give variables real names
 extern "C" C fn_80111C70(const s32* arg0, s32 arg1) {
     C c;
     c.w = 0xFFFFu;
@@ -793,6 +794,7 @@ extern "C" C fn_80111C70(const s32* arg0, s32 arg1) {
 }
 
 namespace jj_80110C78 {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_80110C78(void* arg0, u32 arg1, u32 arg2, u32 arg3) {
     u16 count = *(u16*)((u8*)arg0 + 6);
     void* entry;
@@ -850,6 +852,7 @@ struct Object {
 extern "C" int fn_80041D64(Box*, Box*);
 extern "C" void fn_80111458(Object*, Item*, Item*);
 
+// TODO: clean up, give variables real names
 inline void run(Object* arg) {
     u32 i;
     int offset;
@@ -882,6 +885,7 @@ inline void run(Object* arg) {
     }
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8011112C(Object* self) {
     run(self);
 }
@@ -915,6 +919,7 @@ struct Object {
 extern "C" int fn_80041D64(Box*, Box*);
 extern "C" void fn_80111458(Object*, Item*, Item*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8011135C(void* arg0, void* arg1) {
     Object* self = (Object*)arg0;
     Object* other = (Object*)arg1;

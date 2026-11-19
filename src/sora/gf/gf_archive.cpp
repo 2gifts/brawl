@@ -252,6 +252,7 @@ static inline unsigned int findlast(int* s) {
     }
     return 0xFFFFFFFF;
 }
+// TODO: clean up, give variables real names
 extern "C" void fn_80014480(int arg0, char* arg1) {
     struct Locals {
         char flag;
@@ -306,6 +307,7 @@ extern "C" void fn_80014028(void*);
         }                                                             \
     }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80013DEC(u8* self) {
     u32 index;
     u32 index1;
@@ -396,6 +398,7 @@ extern "C" void fn_80014BF4(void*, void*, s32);
         } \
     }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800134C4(u8* self, u8* arg1) {
     u8* archive;
     u32 index;
@@ -475,6 +478,7 @@ struct ArchiveFlags { u8 complete : 1; u8 padding : 2; u8 special : 1; u8 low : 
             ((EntryFlags*)flags)->owned = 0; \
         } \
     }
+// TODO: clean up, give variables real names
 static inline void clearNodes1(u8* node) {
     CLEAR_NODE(node)
     u8* next = FIELD(node,u8*,4);
@@ -499,6 +503,7 @@ static inline void clearNodes4(u8* node) {
     if (next != NULL) clearNodes3(next);
     gfHeapManager::free(node);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80014ED4(u8* self, const char* path, Heaps::HeapType heapType) {
     u32 lastIndex;
     int size;

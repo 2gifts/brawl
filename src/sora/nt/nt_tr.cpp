@@ -216,6 +216,7 @@ struct Entry {
     unsigned char padE4C[4];
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80143B48(void* arg) {
     float value = lbl_805A2B50;
     Entry* p = (Entry*)((char*)arg + 0x44);
@@ -256,6 +257,7 @@ extern "C" void netReport__FPCce(const char*, ...);
 extern "C" void *memcpy(void *, const void *, unsigned long);
 extern char lbl_8045E7E8[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_8014615C(char *base, int idx, char *data, int len) {
     char *s = base + idx * 0x18;
     char *msg = lbl_8045E7E8;
@@ -318,6 +320,7 @@ struct WifiEntry {
     unsigned char rest : 7;
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_80145B98(NtRecv* self, unsigned int arg1) {
     unsigned char idx;
     unsigned char other;
@@ -407,6 +410,7 @@ struct Object {
     Entry entries[4];
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80143D80(unsigned char* self, int idx) {
     unsigned char* entry = NULL;
     Entry* e = &((Object*)self)->entries[idx];
@@ -490,6 +494,7 @@ struct TopBit { u8 f : 1; u8 rest : 7; };
 struct Bit4 { u8 hi : 3; u8 f : 1; u8 lo : 4; };
 struct StateWord { int st : 8; int rest : 24; };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_801454A4(u8 arg0, int arg1, int arg2) {
     char* base = lbl_8045E7E8;
     (lbl_805A03A8 + arg0 * 0xE50)[0x46] = 1;
@@ -591,11 +596,13 @@ struct Object {
 
 extern "C" Object* lbl_805A03A8;
 
+// TODO: clean up, give variables real names
 static inline bool isPending(unsigned int aid) {
     Entry* e = &lbl_805A03A8->entries[aid];
     return e->w14 != e->w18;
 }
 
+// TODO: clean up, give variables real names
 static inline unsigned int findBusy() {
     unsigned int i;
     for (i = 0; i < 4; i++) {
@@ -606,6 +613,7 @@ static inline unsigned int findBusy() {
     return i;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 static inline int sendTo(Object* self, unsigned char aid, void* src, int size) {
     void* out;
     int ret;
@@ -629,6 +637,7 @@ static inline int sendTo(Object* self, unsigned char aid, void* src, int size) {
     return 1;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80145D38(Object* self) {
     switch (self->state) {
     case 1: {

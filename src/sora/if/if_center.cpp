@@ -565,6 +565,7 @@ public:
     virtual void s13(void*);
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DE9B4(void* arg0) {
     char* base = (char*)arg0;
     int i;
@@ -604,6 +605,7 @@ struct S { char pad[8]; Obj2* o; };
 struct T { char pad[0x10]; void* p10; void* anim; };
 struct E { char pad[0x10]; void* p10; };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DEAE4(S* self) {
     int i;
     T* t = *(T**)((char*)self + 0x50);
@@ -650,6 +652,7 @@ public:
     void* field_E4;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DEE60(void* arg0) {
     char* base = (char*)arg0;
     int i;
@@ -707,6 +710,7 @@ extern "C" void fn_800B753C(void*, float);
 extern const float lbl_805A2368;
 extern const float lbl_805A2374;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DEF4C(Self* self) {
     int i;
     void* model = self->model;
@@ -754,6 +758,7 @@ extern "C" void fn_800B753C(void*, float);
 extern const float lbl_805A2368;
 extern const float lbl_805A2374;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DF038(void* arg0) {
     float rate = lbl_805A2368;
     int i;
@@ -822,6 +827,7 @@ struct Ctx {
     Model* model;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DF168(Ctx* self) {
     int i;
     Model* m = self->model;
@@ -868,6 +874,7 @@ struct V {
 struct Ent { char p[0x10]; void* v10; };
 struct Obj { char p[0x10]; void* v10; void* v14; };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DED0C(void* s) {
     char* self = (char*)s;
     int i;
@@ -896,6 +903,7 @@ extern char lbl_8059E220[6];
 void fn_800B20B0(MuObject*, int);
 void fn_800B21C4(MuObject*, int);
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DD960(Owner* self, Entry* entry, int count, nw4r::g3d::ResFile* res) {
     char buf[0x40];
     int n;

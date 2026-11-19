@@ -717,6 +717,7 @@ done:
 }
 
 namespace jj_8005F220 {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" bool fn_8005F220(void* self, s32 arg1) {
     u32 count = *(u32*)((char*)self + 0x5C);
     u32 i;
@@ -753,6 +754,7 @@ done:
 }
 
 namespace jj_8005F2AC {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" bool fn_8005F2AC(void* self, s32 arg1) {
     u32 count = *(u32*)((char*)self + 0x5C);
     u32 i;
@@ -822,6 +824,7 @@ public:
     }
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800607C8(EcMgr* self, u32 key) {
     Entry* entry = self->find(key);
     return !entry ? 0 : entry->model;
@@ -868,6 +871,7 @@ public:
     }
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_80060858(EcMgr* self, u32 key) {
     Entry* entry = self->find(key);
     return !entry ? 0 : entry->model;
@@ -914,6 +918,7 @@ extern void* g_GameGlobal;
 u32 fn_8004E958(void* p);
 void* fn_8018D3F0(void* a, const char* b);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_80061160(Owner* self, u32 a1, s32 a2, u32 a3, u32 a4, u32 a5, u32 a6, u8 a7, f32 f) {
     Tbl1 ids = lbl_80407198;
     Tbl2 names = lbl_804073B0;
@@ -999,6 +1004,7 @@ struct Manager {
 
 extern "C" u32 fn_80061944(Entry*, f32);
 
+// TODO: clean up, give variables real names
 extern "C" u8 fn_8005F56C(Manager* self, int group, u32* low, u32* high, f32 value) {
     u32 i;
     Entry* entry = self->entries + self->first;
@@ -1067,6 +1073,7 @@ static inline Entry* findEntry(Owner* self, unsigned int id)
     return 0;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005EB68(Owner* self, unsigned int id)
 {
     Entry* entry = findEntry(self, id);
@@ -1133,6 +1140,7 @@ struct Resource {
 extern "C" Resource* GetResTex__Q34nw4r3g3d7ResFileCFi(void*, void*);
 extern "C" void change_mdl_tex__12ecEffectWorkFPCcPCcPQ34nw4r3g3d7ResFilei(Entry*, int, void*, void*, int);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80060A18(
     Manager* self, u32 key, int arg2, void* arg3, void* arg4, int arg5
 ) {
@@ -1186,6 +1194,7 @@ static inline void findEntry(Owner* self, unsigned int id, Entry*& result)
     result = 0;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8005F08C(Owner* self)
 {
     int id = searchResourceID__5ecMgrFPc(self);
@@ -1220,6 +1229,7 @@ public:
     virtual bool f0(void* a, void* b);
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800613B8(Matrix* arg0, nw4r::g3d::ScnMdlSimple* arg1, u32 arg2, Vec3f* arg3, Vec3f* arg4, Vec3f* arg5) {
     Matrix sp10(true);
     sp10.setSRT(*arg3, *arg4, *arg5);

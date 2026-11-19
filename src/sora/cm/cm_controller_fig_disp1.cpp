@@ -112,6 +112,7 @@ inline bool matchesPad(u32 source, const PadMatchSub& sub) {
     return false;
 }
 
+// TODO: clean up, give variables real names
 inline u8 getPadMask(const gfPadStatus* pad) {
     u8 mask = 0;
     u32 current;
@@ -162,6 +163,7 @@ inline int isStickEmpty(PadOutput* self, f32 threshold) {
     return update;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800A9AD4(PadOutput* self, int arg1) {
     self->buttonMask = 0;
     f32 threshold = lbl_805A212C;

@@ -319,6 +319,7 @@ static inline int update_suffix(char *buf, u32 num, int i, int j,
     return 0;
 }
 
+// TODO: clean up, give variables real names
 int fn_803E855C(char *buf, u32 num)
 {
     int i, j;

@@ -118,6 +118,7 @@ struct Buffer {
     float duplicate[4];
 } __attribute__((aligned(16)));
 
+// TODO: clean up, give variables real names
 extern "C" void fn_800960C8(int arg0, void** arg1) {
     Buffer buffer;
     float* object = (float*)*arg1;
@@ -168,6 +169,7 @@ void fn_801F52E4(int);
 extern unsigned char lbl_805A1D08, lbl_805A1D09, lbl_805A1D0A, lbl_805A1D0B;
 extern float lbl_805A1D0C, lbl_805A1D10, lbl_805A1D14;
 
+// TODO: clean up, give variables real names
 void fn_8009616C() {
     fn_801A12AC(0x7ff);
     fn_801EFB10();

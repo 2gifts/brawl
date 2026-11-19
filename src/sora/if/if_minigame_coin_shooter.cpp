@@ -559,6 +559,7 @@ void IfCoinShooterLabel::create(Type type, int value, u32 sealId) {
     }
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80101810(...) {}
 
 void IfCoinShooterLabel::reset() {

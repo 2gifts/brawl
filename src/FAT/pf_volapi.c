@@ -11,6 +11,7 @@ int fn_803EA188(void) {
 extern char *fn_803EA100(s8);
 extern int lbl_805644C0[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 s32 fn_803EAE34(s8 arg0, s32 *arg1) {
     char *p;
     u16 v;
@@ -41,6 +42,7 @@ extern void PFDRV_ClearMountRequested(void *);
 extern void PFDRV_ClearUnmountRequested(void *);
 #define lbl_805644C0 ((char*)&lbl_805644C0)
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 static inline int finish(char *self, int flags)
 {
     int status = PFDRV_unmount(self, flags);
@@ -55,6 +57,7 @@ static inline int finish(char *self, int flags)
     *(u16 *)(self + 0x1F8C) &= ~8;
     return 0;
 }
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803E96F4(char *self, int flags)
 {
     int result = 0;
@@ -91,6 +94,7 @@ extern int fn_803E1E24(char *);
 extern void fn_803EBBDC(s32 *);
 #define lbl_805644C0 ((char*)&lbl_805644C0)
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 static inline int find_id(int id)
 {
     unsigned int i;
@@ -103,6 +107,7 @@ static inline int find_id(int id)
     return 0;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_803E94E8(char *arg0)
 {
     s32 sp8;

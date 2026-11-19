@@ -108,6 +108,7 @@ extern int fn_803CFF50(int a, void *b, void *c);
 extern void fn_803CFBE4(int a, void *b);
 extern void loadResGetlengthcallback_(void);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void loadResOpencallback_(void) {
     int r;
     char *p;
@@ -132,6 +133,7 @@ extern void RFLiFree(s32 p);
 extern s32 fn_803CF870(s32 a, s32 b, s32 c, void *d, s32 e);
 extern void loadResRead1stcallback_(void);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void loadResGetlengthcallback_(void) {
     s32 temp_r3;
     s32 temp_r3_2;
@@ -155,6 +157,9 @@ void loadResGetlengthcallback_(void) {
 /* jj_803CD484 */
 extern void *RFLiGetLoader(void);
 
+// TODO: clean up. This zeroes the RFLLoader state through raw byte offsets from RFLiGetLoader()
+// (u16/u32 stores at +0x00..). Replace with a real RFLLoader struct and named fields once the
+// layout is known, then re-check that the codegen still matches.
 void RFLiInitLoader(void)
 {
     char *p = (char *)RFLiGetLoader();

@@ -307,6 +307,7 @@ typedef int s32;
 extern "C" {
 s32 fn_80041DCC(s32, f32 *, f32, f32, f32, f32);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 s32 fn_800113C0(s32 arg0, s32 arg1)
 {
     f32 vec[3];

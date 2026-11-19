@@ -480,6 +480,7 @@ s32 PFCACHE_DoWriteSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_hea
 typedef struct Node Node;
 struct Node { unsigned short flags; char pad[10]; int a,b; char pad14[4]; int c,d; Node *next,*prev; };
 typedef struct Obj { char pad[0x1630]; Node *first,*second; } Obj;
+// TODO: clean up, give variables real names
 void fn_803DA9AC(Obj *obj) {
     Node *n, *head, *n2, *head2;
     while ((n = obj->first)->flags & 1) {

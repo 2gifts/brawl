@@ -44,6 +44,7 @@ extern "C" void fn_8010F940(void* self) {
 
 extern "C" void setHelpControllerNo__9IfStgeditFUl(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8010F950(void* self) {
     setHelpControllerNo__9IfStgeditFUl(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x10));
 }
@@ -63,6 +64,7 @@ struct Flags8 {
     unsigned char rest : 7;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8010F310() {
     unsigned char* self = (unsigned char*)__nw__FUlQ25Heaps8HeapType(0x1C, 0x28);
     if (self != 0) {
@@ -96,6 +98,7 @@ extern "C" {
 void cancelRequest__14gfFileIOHandleFv(void*);
 void free__13gfHeapManagerFPv(void*);
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_8010F754(void* self)
 {
     u8* p = reinterpret_cast<u8*>(self);
@@ -128,6 +131,7 @@ void fn_801971D0(void*, void*);
 void fn_8000D6DC(void*, void*);
 extern void* g_gfSceneRoot;
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_8010F7EC(void* self) {
     char* p = (char*)self;
     void* spC = 0;
@@ -218,6 +222,7 @@ extern "C" {
 extern Self* lbl_805A0350;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8010F39C() {
     delete lbl_805A0350;
     lbl_805A0350 = 0;
@@ -226,6 +231,7 @@ extern "C" void fn_8010F39C() {
 
 namespace jj_8010F624 {
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_8010F624(void* obj) {
     char* self = (char*)obj;
     void* res2;
@@ -276,6 +282,7 @@ namespace jj_8010F4AC {
 
 extern char lbl_8045D840[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8010F4AC(void* obj, int async) {
         void* res2;
     char* self = (char*)obj;

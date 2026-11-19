@@ -428,6 +428,7 @@ public:
     virtual u16 fn_80138ED8(u16, u16);
 };
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80138CB4(Class_8045DD44* self) {
     int x, y;
     for (int i = 0; i < self->count; ++i) {

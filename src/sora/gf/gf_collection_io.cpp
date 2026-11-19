@@ -706,6 +706,7 @@ extern "C" void __dl__FPv(void*);
 
 extern "C" {
 
+// TODO: clean up, give variables real names
 void* fn_8003C4A4(void* ptr, int flag) {
     if (ptr != 0 && flag > 0) {
         __dl__FPv(ptr);
@@ -730,6 +731,7 @@ struct Obj {
     int f190;
 };
 
+// TODO: clean up, give variables real names
 extern "C" int fn_800390C8(Obj* __restrict self) {
     int r;
     if (self->flag5c == 0) {
@@ -777,6 +779,7 @@ struct Args {
     int index;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_8003B420(u8* self, Args* arg) {
     char path[0x40];
     char buf[0x40];
@@ -860,6 +863,7 @@ extern "C" void fn_8003CFC0(void* self) {
 namespace jj_8003CFC8 {
 extern "C" void fn_80038F6C(void*);
 
+// TODO: clean up, give variables real names
 extern "C" void fn_8003CFC8(void* self) {
     fn_80038F6C(reinterpret_cast<u8*>(self) - 0x4);
 }

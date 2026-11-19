@@ -11,6 +11,7 @@ extern "C" {
 extern int lbl_8045D908[4];
 int fn_80110190(int*, int*, int*);
 
+// TODO: clean up, give variables real names
 int fn_80110310(int* a, int* b) {
     return fn_80110190(a, b, (int*)&lbl_8045D908);
 }
@@ -18,6 +19,7 @@ int fn_80110310(int* a, int* b) {
 }
 
 namespace jj_8011031C {
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8011031C(void* arg0) {
     if (arg0 == 0) return;
 
@@ -63,6 +65,7 @@ struct gfPadStatus {
     unsigned int m_controllerType;
 };
 
+// TODO: clean up, give variables real names
 int fn_8010FF20(unsigned int mask) {
     int i = 0;
     while (i < 8) {
@@ -84,6 +87,7 @@ extern "C" void getSysPadStatus__11gfPadSystemFiP11gfPadStatus(void*, int, void*
 extern void* g_gfPadSystem;
 extern u32 lbl_8045D918[];
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_8010FFBC(s32 arg0) {
     u8 buf[0x40];
     s32 i;
@@ -113,6 +117,7 @@ struct PadStatusLocal {
     unsigned int index;
 };
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_80110058(s32 arg0) {
     PadStatusLocal st;
     s32 i;
@@ -135,6 +140,7 @@ extern "C" {
 
 extern s32 lbl_8045D938[4];
 
+// TODO: clean up, give variables real names
 s32 fn_801100F4(s32 mask) {
     gfPadStatus sp8;
     for (s32 i = 0; i < 8; i++) {
@@ -162,6 +168,7 @@ struct Flags1B {
     unsigned char rest : 6;
 };
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80110368(unsigned char* p) {
     if (p != 0) {
         if (p[1] != 0 || !((p[0x3E] >> 7) & 1) || p[0x3D] == 0) {
@@ -204,6 +211,7 @@ static inline unsigned int getMask(unsigned char* p) {
     return mask;
 }
 
+// TODO: clean up, give variables real names
 extern "C" void fn_80110410(unsigned char* p) {
     if (p != 0) {
         maskMotor__11gfPadSystemFUs(g_gfPadSystem, getMask(p) ^ 0xFF);
@@ -215,6 +223,7 @@ extern "C" void fn_80110410(unsigned char* p) {
 
 namespace jj_80110190 {
 
+// TODO: clean up, give variables real names
 extern "C" s32 fn_80110190(s32* arg0, s32* arg1, s32* arg2) {
     gfPadStatus status;
     s32 i;
@@ -282,6 +291,7 @@ static inline unsigned int getMask(Entry* p)
     return mask;
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8011058C(unsigned char* self)
 {
     Entry* d;
@@ -354,6 +364,7 @@ static inline void pick3(u8* mode, f32 p0, f32 p1, f32 p2) {
     }
 }
 
+// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8010F960(s32 kind, u8* mode, s32* id, s32 force) {
     if (force == 0) {
         *id = 0;
