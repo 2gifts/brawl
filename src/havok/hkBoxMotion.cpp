@@ -109,6 +109,37 @@ void hkBoxMotion::applyTorque(hkReal timestep, const hkVector4& torque) {
     applyAngularImpulse(impulse);
 }
 
-// Not yet decompiled in this unit:
-//   0x802E4BE0   804  applyPointImpulse
-//   0x802E4F04   420  applyAngularImpulse
+
+// The impulse is taken to the body's local frame, scaled by the inverse inertia diagonal and rotated back.
+void hkBoxMotion::applyAngularImpulse(const hkVector4& impulse) {
+    const hkRotation& r = getTransform().m_rotation;
+    hkVector4 impulseLocal;
+    impulseLocal._setRotatedInverseDir(r, impulse);
+    hkVector4 dAngVelLocal;
+    dAngVelLocal.setMul4(m_inertiaAndMassInv, impulseLocal);
+    hkVector4 dAngVel;
+    dAngVel._setRotatedDir(r, dAngVelLocal);
+    m_angularVelocity.add4(dAngVel);
+}
+
+// Linear part: impulse times the inverse mass. Angular part: (point - center of mass) x impulse, applied like
+// applyAngularImpulse.
+void hkBoxMotion::applyPointImpulse(const hkVector4& impulse, const hkVector4& point) {
+    hkVector4 relPos;
+    relPos.setSub4(point, m_motionState.m_sweptTransform.m_centerOfMass1);
+    hkVector4 angImpulse;
+    angImpulse.setCross(relPos, impulse);
+    hkReal massInv = m_inertiaAndMassInv.w;
+    m_linearVelocity.x = massInv * impulse.x + m_linearVelocity.x;
+    m_linearVelocity.y = massInv * impulse.y + m_linearVelocity.y;
+    m_linearVelocity.z = massInv * impulse.z + m_linearVelocity.z;
+    m_linearVelocity.w = massInv * impulse.w + m_linearVelocity.w;
+    const hkRotation& r = getTransform().m_rotation;
+    hkVector4 impulseLocal;
+    impulseLocal._setRotatedInverseDir(r, angImpulse);
+    hkVector4 dAngVelLocal;
+    dAngVelLocal.setMul4(m_inertiaAndMassInv, impulseLocal);
+    hkVector4 dAngVel;
+    dAngVel._setRotatedDir(r, dAngVelLocal);
+    m_angularVelocity.add4(dAngVel);
+}

@@ -75,21 +75,12 @@
 #include <havok/hkLinSoftConstraintAtom.h>
 #include <havok/hkConstraintAtom.h>
 #include <havok/hkConstraintQueryIn.h>
+#include <havok/hk1dConstraintInfo.h>
 #include <havok/hkJacobianSchema.h>
 #include <havok/hkRotation.h>
 
 #include <havok/hkSetLocalTransformsConstraintAtom.h>
 #include <havok/hkTransform.h>
-
-// Motor input of the angular velocity motor rows. HYPOTHESIS: names and the meaning of the members.
-struct hk1dAngularVelocityMotorInfo {
-    hkReal m_rhsFactor;      // 0x00
-    hkReal m_maxForce;       // 0x04
-    hkReal m_tauFactor;      // 0x08 scaled by in.unk04
-    hkReal m_dampFactor;     // 0x0C scaled by in.unk04
-    hkReal m_minForce;       // 0x10
-    hkReal m_velocityFactor; // 0x14
-};
 
 // Motor schema (type 5, 0x1C bytes). HYPOTHESIS: member names.
 struct hkJacobianMotorSchemaData {
@@ -313,19 +304,6 @@ void hkSkipSolverResults(int numSolverResults, hkConstraintQueryOut& out) {
     out.m_jacobianSchemas = (hkJacobianSchema*)(schema + 1);
 }
 
-// Input of the angular friction rows (built on the stack by the atom builder).
-// HYPOTHESIS: the names.
-struct hk1dAngularFrictionInfo {
-    const hkVector4* m_constrainedDofW; // 0x00 first friction axis (a column of base A)
-    void* m_solverResults;              // 0x04 from the query input
-    hkReal m_maxFrictionTorque;         // 0x08
-    int m_numFriction;                  // 0x0C
-};
-
-// Builds the friction rows of the angular friction axes (fn_8028DC9C). HYPOTHESIS: the name.
-void hk1dAngularFrictionBuildJacobian(const hk1dAngularFrictionInfo& info, const hkConstraintQueryIn& in,
-                                      hkConstraintQueryOut& out);
-
 // Without friction the atom's solver results are skipped.
 void hkAngFrictionConstraintAtom::buildJacobianFromAngFrictionAtom(const hkConstraintQueryIn& in,
                                                                    const hkRotation& baseA, const hkRotation& baseB,
@@ -361,15 +339,6 @@ int hkLinMotorConstraintAtom::numSolverResults() const {
 int hk2dAngConstraintAtom::numSolverResults() const {
     return 2;
 }
-
-// Input of the one-dimensional angular rows (0x30 bytes). HYPOTHESIS: the member names.
-struct hk1dAngularBilateralInfo {
-    hkVector4 m_zeroErrorAxisAinW;      // 0x00
-    hkVector4 m_perpZeroErrorAxisAinW;  // 0x10
-    hkVector4 m_constrainedDofBinW;     // 0x20
-};
-void hk1dAngularBilateralConstraintBuildJacobian(const hk1dAngularBilateralInfo& info, const hkConstraintQueryIn& in,
-                                                 hkConstraintQueryOut& out);
 
 int hkAngConstraintAtom::numSolverResults() const {
     return m_numConstrainedAxes;
@@ -420,16 +389,6 @@ extern "C" int fn_8028A6F0(void) {
     return 1;
 }
 
-// Input of the one-dimensional linear rows: the two pivots and the constrained direction (0x30 bytes).
-// HYPOTHESIS: the member names.
-struct hk1dLinearBilateralInfo {
-    hkVector4 m_pivotA;           // 0x00
-    hkVector4 m_pivotB;           // 0x10
-    hkVector4 m_constrainedDofW;  // 0x20
-};
-void hk1dLinearBilateralConstraintBuildJacobian(const hk1dLinearBilateralInfo& info, const hkConstraintQueryIn& in,
-                                                hkConstraintQueryOut& out);
-
 // Keeps the pivots on a plane: one linear row along the axis of body B's base picked by the atom.
 void hkLinConstraintAtom::buildJacobianFromLinAtom(const hkConstraintQueryIn& in, const hkTransform& baseA,
                                                    const hkTransform& baseB, hkConstraintQueryOut& out) const {
@@ -439,14 +398,6 @@ void hkLinConstraintAtom::buildJacobianFromLinAtom(const hkConstraintQueryIn& in
     info.m_constrainedDofW = baseB.getColumn(m_axisIndex);
     hk1dLinearBilateralConstraintBuildJacobian(info, in, out);
 }
-
-// Input of the one-dimensional linear limit rows (0x38 bytes). HYPOTHESIS: the member names.
-struct hk1dLinearLimitInfo : hk1dLinearBilateralInfo {
-    hkReal m_min; // 0x30
-    hkReal m_max; // 0x34
-};
-void hk1dLinearLimitBuildJacobian(const hk1dLinearLimitInfo& info, const hkConstraintQueryIn& in,
-                                  hkConstraintQueryOut& out);
 
 // Keeps the pivots' distance along body B's first base axis within [m_min, m_max]. The target reads column 0 of
 // the base, not the column of m_axisIndex.
