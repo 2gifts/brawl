@@ -2288,3 +2288,39 @@ void itGokulinCustomizer::onNotifyEventChangeStatus(BaseItem* item, int statusKi
         itGokulinRelease(moduleAccesser);
     }
 }
+
+// Ends Tingle's effect (int work 0x10000000): effect 2 restores the other fighters' footing, effect 4 the owner's zoom.
+// TODO: clean up - placeholder name of this non-virtual itTingleCustomizer helper (0x29EF44), defined with C linkage so
+// the hooks' calls keep its symbol; ftManager::enumEntryId is declared with an int but takes the entry id array.
+extern "C" void fn_27_29EF44(itTingleCustomizer* self, BaseItem* item) {
+    soWorkManageModule* work = &itWork(item);
+    int effect = work->getInt(0x10000000);
+    if (effect < 0) {
+        return;
+    }
+    int entryIds[8];
+    int entryCount = g_ftManager->enumEntryId(reinterpret_cast<int>(entryIds));
+    u32 ownerTaskId = item->m_moduleAccesser->getTeamModule().getTeamOwnerId();
+    switch (effect) {
+    case 2:
+        for (int i = 0; i < entryCount; i++) {
+            int entryId = entryIds[i];
+            if (g_ftManager->isValidEntryId(entryId) && entryId != g_ftManager->getEntryIdFromTaskId(ownerTaskId, NULL)) {
+                g_ftManager->getOwner(entryId)->setSlipMul(lbl_27_rodata_46C8[0]);
+                g_ftManager->getOwner(entryId)->setSlipInterval(true);
+            }
+        }
+        break;
+    case 4:
+        if (ownerTaskId != 0xFFFFFFFF) {
+            int entryId = g_ftManager->getEntryIdFromTaskId(ownerTaskId, NULL);
+            if (g_ftManager->isValidEntryId(entryId)) {
+                g_ftManager->setZoom(entryId, lbl_27_rodata_46C8[0], 0, 1);
+            }
+        }
+        break;
+    }
+    work->setInt(-1, 0x10000000);
+}
+
+void itTingleCustomizer::onDestruct(BaseItem* item) { fn_27_29EF44(this, item); }
