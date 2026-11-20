@@ -23,6 +23,16 @@
 #include <ft/robot/ft_robot_unk8.h>
 #include <st/stage.h>
 #include <nw4r/ut/ut_Color.h>
+#include <mt/mt_prng.h>
+#include <gf/gf_task_scheduler.h>
+#include <so/damage/so_damage_util_actor.h>
+#include <cm/cm_camera_controller.h>
+#include <gf/gf_loupe.h>
+#include <so/ground/so_ground_util.h>
+#include <ft/ft_info.h>
+#include <ft/ft_audience_manager.h>
+
+extern ftInfo g_ftInfo;
 
 void Fighter::setAvailableFinal(bool isDiscretion) {
     soModuleAccesser* moduleAccesser = m_moduleAccesser;
@@ -856,12 +866,13 @@ void Fighter::processUpdate() {
                 }
             }
 
-            // HYPOTHESIS: a Fighter flag byte inside _272 (offset 0x138) enables the damage recovery below.
-            if ((((u8)_272[0x28] >> 3) & 1) == true && !owner->isSubOwner() && g_ftManager->unk6c_80 == true) {
+            // HYPOTHESIS: a Fighter flag bit at 0x138 enables the damage recovery below.
+            if (unk138_loupeDamage == true && !owner->isSubOwner() && g_ftManager->isUnk6c_80() == true) {
                 soDamageModule& damageModule = moduleAccesser->getDamageModule();
                 float threshold = soValueAccesser::getConstantFloat(moduleAccesser, 0xc8d, 0);
                 if (damageModule.getDamage(0) < threshold) {
-                    int frame = moduleAccesser->getWorkManageModule().getInt(0x1000002d) + 1;
+                    int frame = moduleAccesser->getWorkManageModule().getInt(0x1000002d);
+                    frame++;
                     if (frame >= soValueAccesser::getConstantInt(moduleAccesser, 0x5a14, 0)) {
                         frame = 0;
                         float recovery = soValueAccesser::getConstantFloat(moduleAccesser, 0xc8e, 0);
@@ -872,7 +883,7 @@ void Fighter::processUpdate() {
             }
 
             if (!owner->isSubOwner() && owner->getFinalContinue() == true) {
-                if (isAcceptFinal() == true && !g_ftManager->isProcessTechnique() && g_ftManager->m_isGameStarted == true) {
+                if (isAcceptFinal() == true && !g_ftManager->isProcessTechnique() && g_ftManager->isGameStarted() == true) {
                     g_ftManager->setFinal(m_entryId, false);
                 }
             }
@@ -896,27 +907,24 @@ void Fighter::processUpdate() {
 
     if (soSlow::getInstance()->isEstimate() == true && !moduleAccesser->getStopModule().isStop() &&
         moduleAccesser->getSituationModule().getKind() == 2) {
-        int statusKind = moduleAccesser->getStatusModule().getStatusKind();
-        if (g_ftCommonDataAccesser.getFtStatusData(getFtKind(), statusKind)->unk0_5) {
-            soControllerModule& controller = moduleAccesser->getControllerModule();
-            float stickY = -soValueAccesser::getConstantFloat(moduleAccesser, 0xc5e, 0);
-            if (controller.getStickY() < stickY) {
-                moduleAccesser->getGroundModule().setCloudThrough(false, 0);
+        if (g_ftCommonDataAccesser.getFtStatusData(getFtKind(), moduleAccesser->getStatusModule().getStatusKind())->unk0_5) {
+            if (moduleAccesser->getControllerModule().getStickY() < -soValueAccesser::getConstantFloat(moduleAccesser, 0xc5e, 0)) {
+                moduleAccesser->getGroundModule().setPassableCheck(false, 0);
             } else {
-                moduleAccesser->getGroundModule().setCloudThrough(true, 0);
+                moduleAccesser->getGroundModule().setPassableCheck(true, 0);
             }
         }
     }
 
-    // HYPOTHESIS: per-frame state inside _272 (offsets 0x114-0x139), reset after every update.
-    *reinterpret_cast<float*>(&_272[0x4]) = 0.0f;
-    *reinterpret_cast<int*>(&_272[0x8]) = 0;
-    *reinterpret_cast<float*>(&_272[0x10]) = 0.0f;
-    *reinterpret_cast<float*>(&_272[0xc]) = 0.0f;
-    _272[0x28] &= ~0xe0;
-    *reinterpret_cast<float*>(&_272[0x20]) = 0.0f;
-    *reinterpret_cast<float*>(&_272[0x18]) = 0.0f;
-    _272[0x29] |= 0x80;
+    unk114 = 0.0f;
+    unk118 = 0;
+    unk120 = 0.0f;
+    unk11C = 0.0f;
+    unk138_0 = false;
+    unk138_1 = unk138_2 = false;
+    unk130 = 0.0f;
+    unk128 = 0.0f;
+    unk139_0 = true;
     processDamageFlySe();
 }
 
@@ -1469,6 +1477,790 @@ void Fighter::notifyEventPikminFinalAttack(float damage, int attackerTaskId) {
         if (fighter != 0) {
             lbl_27_bss_2CBC.notifyLogEventCollisionHit(damage, fighter->m_taskId, m_taskId, 0);
         }
+    }
+}
+
+bool Fighter::isHeartSwapEnableCondition() {
+    if (m_moduleAccesser->getWorkManageModule().isFlag(0x12000007) == true ||
+        g_ftCommonDataAccesser.getFtStatusData(getFtKind(), m_moduleAccesser->getStatusModule().getStatusKind())->unk4_0 != 0 ||
+        m_moduleAccesser->getWorkManageModule().isFlag(0x12000018) == true) {
+        return false;
+    }
+    return true;
+}
+
+bool Fighter::isTreadPassive() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    switch (moduleAccesser->getSituationModule().getKind()) {
+    case 0:
+    case 1:
+    case 2: {
+        int statusKind = moduleAccesser->getStatusModule().getStatusKind();
+        if (g_ftCommonDataAccesser.getFtStatusData(getFtKind(), statusKind)->unk0_1 == 2) {
+            return false;
+        }
+        return moduleAccesser->getCollisionHitModule().getTotalStatus(0) == 0;
+    }
+    default:
+        return false;
+    }
+}
+
+void Fighter::dropDragoonAll() {
+    u8 count = g_ftManager->getDragoonCount(m_entryId);
+    for (int i = count - 1; i >= 0; i--) {
+        int variation = g_ftManager->getDragoonVariation(m_entryId, static_cast<u8>(i));
+        g_ftManager->removeDragoon(m_entryId, static_cast<u8>(variation));
+        if (m_moduleAccesser->getItemManageModule().haveItem(static_cast<itKind>(0x14), static_cast<u8>(variation), 0, false)) {
+            float rnd = 0.5f * randf();
+            float idx = static_cast<float>(i);
+            float angle = 45.0f + 45.0f * idx + 45.0f * rnd;
+            m_moduleAccesser->getItemManageModule().dropItem(angle, 1.0f, 0);
+        }
+    }
+}
+
+bool Fighter::isEnableWarp() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (getCaptureModule(moduleAccesser).unk1C() == true ||
+        moduleAccesser->getSituationModule().getKind() == 5) {
+        return false;
+    }
+    if (!moduleAccesser->getWorkManageModule().isFlag(0x12000034)) {
+        float limit = soValueAccesser::getConstantFloat(moduleAccesser, 0xce2, 0);
+        if (moduleAccesser->getKineticModule().getEnergy(4)->getSpeed().lengthSq() > limit * limit) {
+            return false;
+        }
+    }
+    int statusKind = moduleAccesser->getStatusModule().getStatusKind();
+    return g_ftCommonDataAccesser.getFtStatusData(getFtKind(), statusKind)->unk0_30 == 0;
+}
+
+bool Fighter::setMetal(bool setStatus, float health, int frames) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (setStatus == true) {
+        int duration = frames;
+        if (frames == -1) {
+            moduleAccesser->getControllerModule().setRumble(0xd, 0, false, -1);
+            duration = soValueAccesser::getConstantInt(moduleAccesser, 0x5a7d, 0);
+        }
+        moduleAccesser->getWorkManageModule().setInt(duration, 0x10000025);
+        float power = health;
+        if (-1.0f == health) {
+            power = soValueAccesser::getConstantFloat(moduleAccesser, 0xd9d, 0);
+        }
+        moduleAccesser->getWorkManageModule().setFloat(power, 0x1100000c);
+        moduleAccesser->getParamCustomizeModule().addCustomize(3);
+        moduleAccesser->getModelModule().switchEnvMap(true);
+        moduleAccesser->getWorkManageModule().onFlag(0x12000012);
+    } else if (moduleAccesser->getWorkManageModule().isFlag(0x12000012) == true) {
+        moduleAccesser->getParamCustomizeModule().removeCustomize(3);
+        moduleAccesser->getModelModule().switchEnvMap(false);
+        moduleAccesser->getWorkManageModule().offFlag(0x12000012);
+    }
+    // MATCH-ONLY: symbols.txt mangles Fighter::onSetMetal as (bool) while native setMetal forwards (bool, float, int).
+    typedef void (*OnSetMetalFn)(Fighter*, bool, float, int);
+    OnSetMetalFn* vtbl = *reinterpret_cast<OnSetMetalFn**>(reinterpret_cast<u8*>(this) + 0x3c);
+    vtbl[0x2d0 / 4](this, setStatus, health, frames);
+    return true;
+}
+
+static u8 s_invalidLoupeNo = 0xff;
+static s32 s_invalidPhysicsId = -1;
+
+void Fighter::createModel(u32 resId, void* unk2) {
+    ftData* data = g_ftCommonDataAccesser.getData(m_kind);
+    bool spycloak = getOwner()->getSpycloak();
+    u8 loupeNo;
+    if ((spycloak == true || getOwner()->isSubOwner() == true) ? true : false) {
+        loupeNo = s_invalidLoupeNo;
+    } else {
+        loupeNo = static_cast<u8>(g_ftManager->getPlayerNo(m_entryId));
+    }
+    if (spycloak == true) {
+        unk2 = NULL;
+    } else if (unk2 == NULL) {
+        unk2 = data->unk48;
+    }
+    m_moduleAccesser->getModelModule().constructInstance(
+        spycloak == true ? static_cast<gfSceneRoot::LayerType>(5) : static_cast<gfSceneRoot::LayerType>(1),
+        data->unk74, true, 1, g_soCommonDataAccesser.getResFileTex(),
+        spycloak == true ? "FB" : NULL, "ExtMtl", resId, unk2, loupeNo, 0);
+    soModelModule& model = m_moduleAccesser->getModelModule();
+    int nodeId = model.getRealNodeId(model.getCorrectNodeId(0x12d));
+    u32 etcResId = m_moduleAccesser->getResourceModule().getResourceIdAccesser()->getEtcResId();
+    if (etcResId != 0xffff) {
+        u8 flag = (lbl_27_rodata_1E18[getFtKind()] >> 3) & 1;
+        if (resId == 0xffff) {
+            resId = etcResId;
+        }
+        getPhysicsModule(m_moduleAccesser).unk18(
+            resId, data->unk6C, data->unk70, nodeId, s_invalidPhysicsId,
+            soValueAccesser::getConstantIndefinite(m_moduleAccesser, 0xa800, 0), flag, -1);
+    }
+}
+
+void Fighter::attachInstance() {
+    ftData* data = g_ftCommonDataAccesser.getData(m_kind);
+    bool spycloak = getOwner()->getSpycloak();
+    u8 loupeNo;
+    if ((spycloak == true || getOwner()->isSubOwner() == true) ? true : false) {
+        loupeNo = s_invalidLoupeNo;
+    } else {
+        loupeNo = static_cast<u8>(g_ftManager->getPlayerNo(m_entryId));
+    }
+    void* unk2 = spycloak == true ? NULL : data->unk48;
+    m_moduleAccesser->getModelModule().constructInstance(
+        spycloak == true ? static_cast<gfSceneRoot::LayerType>(5) : static_cast<gfSceneRoot::LayerType>(1),
+        data->unk74, true, 1, g_soCommonDataAccesser.getResFileTex(),
+        spycloak == true ? "FB" : NULL, "ExtMtl", 0xffff, unk2, loupeNo, 0);
+    int nodeId = m_moduleAccesser->getModelModule().getRealNodeId(
+        m_moduleAccesser->getModelModule().getCorrectNodeId(0x12d));
+    u32 etcResId = m_moduleAccesser->getResourceModule().getResourceIdAccesser()->getEtcResId();
+    if (etcResId != 0xffff) {
+        ftKind kind = getFtKind();
+        getPhysicsModule(m_moduleAccesser).unk18(
+            etcResId, data->unk6C, data->unk70, nodeId, s_invalidPhysicsId,
+            soValueAccesser::getConstantIndefinite(m_moduleAccesser, 0xa800, 0),
+            (lbl_27_rodata_1E18[kind] >> 3) & 1, -1);
+    }
+    int hipNode = m_moduleAccesser->getModelModule().getCorrectNodeId(0x12d);
+    int xRotNode = m_moduleAccesser->getModelModule().getCorrectNodeId(0x12e);
+    Vec3f pos = m_moduleAccesser->getModelModule().getNodeGlobalPosition(xRotNode, false);
+    soMotionModule& motion = m_moduleAccesser->getMotionModule();
+    motion.setShareAdjustNode(hipNode, pos.m_y / 10.688f);
+    Vec3f trans = m_moduleAccesser->getMotionModule().calcNode(0x20, hipNode);
+    getCaptureModule(m_moduleAccesser).unk14(xRotNode, hipNode, trans.m_y);
+    getCatchModule(m_moduleAccesser).unk14(xRotNode, hipNode, trans.m_y);
+    m_moduleAccesser->getShadowModule().setYOffset(trans.m_y);
+}
+
+void Fighter::setSuperStar(bool setStatus, int duration, bool checkStatus) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (checkStatus == true) {
+        if (g_ftCommonDataAccesser.getFtStatusData(getFtKind(), moduleAccesser->getStatusModule().getStatusKind())->unk4_2 != 0) {
+            return;
+        }
+    }
+    if (setStatus == true) {
+        int frames = soValueAccesser::getConstantInt(moduleAccesser, 0x5a77, 0);
+        if (duration == -1) {
+            duration = frames;
+            moduleAccesser->getControllerModule().setRumble(0x12, 0, false, -1);
+        }
+        moduleAccesser->getWorkManageModule().setInt(duration, 0x1000001e);
+        moduleAccesser->getCollisionHitModule().setInvincibleFrameGlobal(duration, true, 0);
+        moduleAccesser->getEffectModule().removeTime(0x55);
+        moduleAccesser->getEffectModule().reqTimeFollow(
+            static_cast<EfID>(0x55), 0, duration,
+            &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f),
+            soValueAccesser::getConstantFloat(moduleAccesser, 0xbe9, 0), 0);
+        moduleAccesser->getEffectModule().removeCommon(0x17);
+        moduleAccesser->getEffectModule().reqCommon(0x17, static_cast<float>(duration));
+        if (moduleAccesser->getWorkManageModule().getInt(0x1000001f) == -1) {
+            int handle = moduleAccesser->getSoundModule().playSENo3d(static_cast<SndID>(0x2074), true);
+            moduleAccesser->getWorkManageModule().setInt(handle, 0x1000001f);
+        }
+        moduleAccesser->getWorkManageModule().onFlag(0x1200000e);
+    } else if (moduleAccesser->getWorkManageModule().isFlag(0x1200000e) == true) {
+        int handle = moduleAccesser->getWorkManageModule().getInt(0x1000001f);
+        if (handle != -1) {
+            moduleAccesser->getSoundModule().stopSEHandle(handle, 0);
+            moduleAccesser->getWorkManageModule().setInt(-1, 0x1000001f);
+        }
+        moduleAccesser->getEffectModule().removeTime(0x55);
+        moduleAccesser->getEffectModule().removeCommon(0x17);
+        moduleAccesser->getWorkManageModule().offFlag(0x1200000e);
+    }
+}
+
+void Fighter::setFlower(bool setStatus, float rate, float size, bool unk4, bool unk5) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (setStatus == true) {
+        if (moduleAccesser->getWorkManageModule().isFlag(0x12000009) == true) {
+            float clatter = moduleAccesser->getControllerModule().getClatterTime(1);
+            float maxClatter = soValueAccesser::getConstantFloat(moduleAccesser, 0xd84, 0);
+            float next = clatter + rate;
+            if (next > maxClatter) {
+                next = maxClatter;
+            }
+            moduleAccesser->getControllerModule().setClatterTime(next, 1);
+        } else if (moduleAccesser->getItemManageModule().attachItem(static_cast<itKind>(0x2f), 0, unk4) == true) {
+            float base = rate + static_cast<float>(soValueAccesser::getConstantInt(moduleAccesser, 0x5a69, 0));
+            float arg3 = soValueAccesser::getConstantFloat(moduleAccesser, 0xd83, 0);
+            float arg2 = soValueAccesser::getConstantFloat(moduleAccesser, 0xd82, 0);
+            moduleAccesser->getControllerModule().startClatter(base, arg2, arg3, 0, -1, 1, false);
+        }
+        if (moduleAccesser->getWorkManageModule().isFlag(0x12000009) == true) {
+            moduleAccesser->getWorkManageModule().addFloat(size, 0x11000006);
+            float flowerScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xd86, 0) +
+                moduleAccesser->getWorkManageModule().getFloat(0x11000006) *
+                soValueAccesser::getConstantFloat(moduleAccesser, 0xd88, 0);
+            float maxScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xd87, 0);
+            if (flowerScale > maxScale) {
+                flowerScale = maxScale;
+            }
+            float scale = flowerScale * soValueAccesser::getConstantFloat(moduleAccesser, 0xbe9, 0);
+            moduleAccesser->getItemManageModule().scaleAttach(static_cast<itKind>(0x2f), scale);
+        }
+    } else if (moduleAccesser->getWorkManageModule().isFlag(0x12000009) == true) {
+        moduleAccesser->getWorkManageModule().offFlag(0x12000009);
+        moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x11000006);
+        if (unk5 == true) {
+            moduleAccesser->getItemManageModule().dropAttach(static_cast<itKind>(0x2f), 90.0f, 0.0f);
+        } else {
+            moduleAccesser->getItemManageModule().ejectAttach(static_cast<itKind>(0x2f), true, false);
+        }
+    }
+}
+
+void Fighter::setCurry(bool setStatus, int duration) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (setStatus == true) {
+        bool knockedOut;
+        if (static_cast<bool>(g_ftManager->m_isStamina) == true &&
+            getOwner()->getHitPoint() < 1.0f &&
+            m_moduleAccesser->getWorkManageModule().isFlag(0x12000018) == false) {
+            knockedOut = true;
+        } else {
+            knockedOut = false;
+        }
+        if (knockedOut == true) {
+            return;
+        }
+        if (duration == -1) {
+            duration = soValueAccesser::getConstantInt(moduleAccesser, 0x5a6c, 0);
+        }
+        moduleAccesser->getWorkManageModule().setInt(duration, 0x10000019);
+        if (!moduleAccesser->getWorkManageModule().isFlag(0x1200000a)) {
+            float angle = soValueAccesser::getConstantFloat(moduleAccesser, 0xd8b, 0);
+            moduleAccesser->getWorkManageModule().setFloat(angle, 0x11000007);
+            float angleSpeed = soValueAccesser::getConstantFloat(moduleAccesser, 0xd8c, 0);
+            moduleAccesser->getWorkManageModule().setFloat(angleSpeed, 0x11000008);
+            moduleAccesser->getWorkManageModule().setInt(0, 0x1000001a);
+            if (!getOwner()->getCurry()) {
+                moduleAccesser->getEffectModule().removeAll(8);
+                moduleAccesser->getEffectModule().reqEmit(static_cast<EfID>(0x53), 8);
+            }
+            if (moduleAccesser->getWorkManageModule().getInt(0x1000002e) == -1) {
+                int handle = moduleAccesser->getSoundModule().playSENo3d(static_cast<SndID>(0x1f4d), true);
+                moduleAccesser->getWorkManageModule().setInt(handle, 0x1000002e);
+            }
+            moduleAccesser->getWorkManageModule().onFlag(0x1200000a);
+        }
+    } else if (moduleAccesser->getWorkManageModule().isFlag(0x1200000a) == true) {
+        moduleAccesser->getEffectModule().removeAll(8);
+        if (moduleAccesser->getWorkManageModule().isFlag(0x12000008) == true) {
+            moduleAccesser->getEffectModule().reqEmit(static_cast<EfID>(0x48), 8);
+        }
+        int handle = moduleAccesser->getWorkManageModule().getInt(0x1000002e);
+        if (handle != -1) {
+            moduleAccesser->getSoundModule().stopSEHandle(handle, 0);
+            moduleAccesser->getWorkManageModule().setInt(-1, 0x1000002e);
+        }
+        moduleAccesser->getWorkManageModule().offFlag(0x1200000a);
+    }
+}
+
+void Fighter::notifyEventCollisionAttack(float power, const soCollisionLog* collisionLog, soModuleAccesser* moduleAccesser) {
+    gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(collisionLog->m_taskCategory), collisionLog->m_taskId);
+    soCollisionAttackData* attackData = moduleAccesser->getCollisionAttackModule().getData(collisionLog->m_damageIndex, collisionLog->m_isAbsolute);
+    int hitStop = soDamageUtilActor::calcHitStopFrame(moduleAccesser, power, 1.0f, 1.0f, attackData, 0);
+    switch (collisionLog->m_kind) {
+    case 1:
+        if (task != NULL) {
+            soCollisionHitModule* hitModule = soExternalValueAccesser::getCollisionHitModule(&dynamic_cast<StageObject&>(*task));
+            if (hitModule->isReactionFrame() == true) {
+                hitStop = hitModule->getReactionFrame();
+            }
+        }
+        break;
+    case 2:
+        if (task != NULL) {
+            soCollisionShieldModule* shieldModule = soExternalValueAccesser::getCollisionShieldModule(&dynamic_cast<StageObject&>(*task));
+            if (shieldModule->isTurn(collisionLog->_35) == true) {
+                unk138_0 = true;
+            } else {
+                unk130 = power;
+                unk134 = moduleAccesser->getCollisionAttackModule().getPosX() < shieldModule->getPosX(collisionLog->_35) ? 1.0f : -1.0f;
+            }
+        }
+        break;
+    case 0:
+        if (moduleAccesser->getSituationModule().getKind() == 0 && task != NULL) {
+            if (!moduleAccesser->getCollisionAttackModule().checkRebound(moduleAccesser, &dynamic_cast<StageObject&>(*task), collisionLog, power, &unk128, &unk12C)) {
+                return;
+            }
+            hitStop = soDamageUtilActor::calcHitStopFrame(moduleAccesser, unk128, 1.0f, 1.0f, attackData, 0);
+        }
+        break;
+    }
+    if (unk114 < power) {
+        unk114 = power;
+    }
+    if (unk118 < hitStop) {
+        unk118 = hitStop;
+    }
+    // MATCH-ONLY: symbols.txt mangles Fighter::notifyEventCollisionAttackFighter without power while native forwards (float, const soCollisionLog*, soModuleAccesser*).
+    typedef void (*NotifyAttackFighterFn)(Fighter*, float, const soCollisionLog*, soModuleAccesser*);
+    NotifyAttackFighterFn* vtbl = *reinterpret_cast<NotifyAttackFighterFn**>(reinterpret_cast<u8*>(this) + 0x3c);
+    vtbl[0x2e8 / 4](this, power, collisionLog, moduleAccesser);
+    moduleAccesser->getStatusModule().checkAttack(moduleAccesser, const_cast<soCollisionLog*>(collisionLog), power);
+}
+
+void Fighter::notifyHaveItem(itParam::SizeKind sizeKind, BaseItem* item, u32 nodeIndex, u32 index, bool silent) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    int subKind = item->soGetSubKind();
+    int trait = item->getParam(static_cast<itValueAccesser::ParamInt>(0x5bce));
+    if (!silent) {
+        moduleAccesser->getEffectModule().req(
+            static_cast<EfID>(0x35), nodeIndex,
+            &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), 1.0f,
+            &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), false, 0);
+        if (!(trait & 0x2000)) {
+            moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1fad), false, false, 0);
+        }
+    }
+    setItemHoldAnim(item, index, true);
+    switch (subKind) {
+    case 0xd:
+        moduleAccesser->getWorkManageModule().onFlag(0x1200002d);
+        switch (moduleAccesser->getSituationModule().getKind()) {
+        case 0:
+            moduleAccesser->getStatusModule().changeStatusRequest(0xa4, moduleAccesser);
+            break;
+        default:
+            moduleAccesser->getStatusModule().changeStatusRequest(0xad, moduleAccesser);
+            break;
+        }
+        break;
+    case 0x45: {
+        moduleAccesser->getLinkModule().link(3, item->m_taskId);
+        int targetNode = item->getParam(static_cast<itValueAccesser::ParamInt>(0x5bcd));
+        moduleAccesser->getLinkModule().setModelConstraintPosOrt(3, 0, targetNode, 3, true);
+        moduleAccesser->getStatusModule().changeStatusRequest(0xdc, moduleAccesser);
+        item->updateLogAttackInfo();
+        break;
+    }
+    case 0x15: {
+        Vec3f pos = moduleAccesser->getPostureModule().getPos();
+        moduleAccesser->getItemManageModule().warpItem(&pos, index);
+        moduleAccesser->getLinkModule().link(3, item->m_taskId);
+        int targetNode = item->getParam(static_cast<itValueAccesser::ParamInt>(0x5bcd));
+        moduleAccesser->getLinkModule().setModelConstraintPosOrt(3, 0, targetNode, 3, true);
+        moduleAccesser->getStatusModule().changeStatusRequest(0xde, moduleAccesser);
+        break;
+    }
+    case 0x1b:
+    case 0x1d:
+        setHammer(true, subKind == 0x1b);
+        break;
+    case 0:
+        moduleAccesser->getWorkManageModule().onFlag(0x1200002b);
+        break;
+    }
+    int playerNo = g_ftManager->getPlayerNo(m_entryId);
+    if (!(item->m_2260 & (1 << playerNo)) && !(trait & 0x200000)) {
+        getOwner()->addLogInt(1, 0x1e, 0);
+        item->setHavedLog(playerNo, true);
+    }
+}
+
+void Fighter::processFixCamera() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    StageObject::processFixCamera();
+    if (moduleAccesser->getSituationModule().getKind() != 5) {
+        if (moduleAccesser->getCameraModule().isClipIn(false) == true) {
+            setLoupe(false);
+            if (moduleAccesser->getWorkManageModule().isFlag(0x1200001b) == true &&
+                moduleAccesser->getWorkManageModule().getInt(0x10000020) <= 0) {
+                setCursor(true);
+            } else {
+                setCursor(false);
+            }
+            if (moduleAccesser->getWorkManageModule().isFlag(0x1200001c) == true) {
+                setNameCursor(true);
+            } else {
+                setNameCursor(false);
+            }
+        } else {
+            s8 loupeNo = moduleAccesser->getModelModule().getLoupeNo();
+            if (moduleAccesser->getSituationModule().getKind() != 5 &&
+                ((moduleAccesser->getWorkManageModule().isFlag(0x12000019) == true &&
+                  moduleAccesser->getVisibilityModule().isVisible() == true) ||
+                 moduleAccesser->getWorkManageModule().isFlag(0x1200003a) == true) &&
+                static_cast<u8>(loupeNo) != s_invalidLoupeNo) {
+                setLoupe(true);
+                soCameraClipSphere* sphere = moduleAccesser->getCameraModule().getClipSphere(0);
+                Vec3f offset(sphere->m_offset.m_x, sphere->m_offset.m_y, sphere->m_offset.m_z);
+                Vec3f pos = moduleAccesser->getModelModule().getNodeGlobalPosition(sphere->m_nodeId, &offset, false, false);
+                float scale = moduleAccesser->getPostureModule().getScale();
+                gfLoupe::setPlayerLoupeInfo(static_cast<u8>(loupeNo), &pos, 2.0f * (sphere->m_radius * scale));
+            } else {
+                setLoupe(false);
+            }
+            setCursor(false);
+            setNameCursor(false);
+        }
+        if (CameraController::getInstance()->m_currentControllerKind != CameraController::Tech) {
+            if (moduleAccesser->getCameraModule().isClipIn(true) == true) {
+                setLoupeDamage(false);
+            } else {
+                if (moduleAccesser->getSituationModule().getKind() != 5 &&
+                    moduleAccesser->getWorkManageModule().isFlag(0x1200001a) == true &&
+                    !moduleAccesser->getWorkManageModule().isFlag(0x12000007) &&
+                    !moduleAccesser->getWorkManageModule().isFlag(0x12000018) &&
+                    moduleAccesser->getCollisionHitModule().getInvincibleFrameGlobal(0) <= 0) {
+                    setLoupeDamage(true);
+                } else {
+                    setLoupeDamage(false);
+                }
+            }
+        }
+    } else {
+        setCursor(false);
+        setNameCursor(false);
+        setLoupe(false);
+        setLoupeDamage(false);
+    }
+    if (soSlow::getInstance()->isAdjust() == true && !g_ftManager->m_isHomerun) {
+        int deadReason = checkDead();
+        if (deadReason != -1) {
+            toDead(static_cast<Dead::Reason>(deadReason));
+        }
+    }
+}
+
+int Fighter::checkDead() {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    int deadReason = -1;
+    if (!moduleAccesser->getWorkManageModule().isFlag(0x12000001) &&
+        moduleAccesser->getSituationModule().getKind() != 5) {
+        Vec3f pos;
+        if (!moduleAccesser->getLinkModule().isModelConstraint()) {
+            pos = moduleAccesser->getPostureModule().getPos();
+        } else {
+            soModelModule& model = moduleAccesser->getModelModule();
+            pos = model.getNodeGlobalPosition(model.getCorrectNodeId(0x12d), false);
+        }
+        switch (soGroundUtil::checkDeadArea(&pos, 0.0f, 0.0f)) {
+        case 2: deadReason = 2; break;
+        case 3: deadReason = 3; break;
+        case 0: deadReason = 0; break;
+        case 1: deadReason = 1; break;
+        }
+        if (deadReason != -1) {
+            Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(2));
+            if (speed.length() < 0.00001f ||
+                (g_ftManager->m_mode == 1 && moduleAccesser->getWorkManageModule().isFlag(0x12000034) == true)) {
+                bool ignore = false;
+                m_outsideEventPresenter.notifyOutsideEventOutsideDeadArea(
+                    static_cast<soGroundUtil::DeadAreaCheckResult>(deadReason), &ignore);
+                if (ignore == true) {
+                    deadReason = -1;
+                }
+            }
+            if (deadReason == 0) {
+                if (moduleAccesser->getWorkManageModule().isFlag(0x12000029)) {
+                    deadReason = -1;
+                } else if (!g_ftManager->m_noDeadUp) {
+                    SituationKind sit = moduleAccesser->getSituationModule().getKind();
+                    if (sit != 0 && sit != 1) {
+                        if (speed.m_y <= soValueAccesser::getConstantFloat(moduleAccesser, 0xce6, 0) &&
+                            !moduleAccesser->getWorkManageModule().isFlag(0x22000004) &&
+                            !moduleAccesser->getStopModule().isDamage()) {
+                            deadReason = -1;
+                        }
+                    }
+                }
+            }
+        }
+        if (g_ftManager->m_mode == 1) {
+            if (unk139_1 != true) {
+                if (moduleAccesser->getGroundModule().isCrush(0.5f, 0) == true) {
+                    deadReason = 4;
+                }
+            }
+            unk139_1 = false;
+        }
+    }
+    return deadReason;
+}
+
+Fighter::Fighter(s32 entryId, ftKind kind, Heaps::HeapType instHeap, soModuleAccesser* acc)
+    : StageObject(static_cast<ftInfo*>(&g_ftInfo)->getNamePtr(kind), 10, 6, 3, false, acc),
+      soStatusEventObserver(-1, -1),
+      soSituationEventObserver(-1, -1),
+      soCollisionAttackEventObserver(-1, -1),
+      soCollisionHitEventObserver(-1, -1),
+      soCollisionShieldEventObserver(-1, -1),
+      soCollisionReflectorEventObserver(-1, -1),
+      soCollisionAbsorberEventObserver(-1, -1),
+      soCollisionSearchEventObserver(-1, -1),
+      soCaptureEventObserver(-1, -1),
+      soItemManageEventObserver(-1, -1),
+      soMotionEventObserver(-1, -1),
+      soDamageEventObserver(-1, -1),
+      ftEntryEventObserver(g_ftManager->getEntryEventManageId(entryId), -1),
+      soTurnEventObserver(-1, -1),
+      m_entryId(entryId),
+      m_kind(kind),
+      unk138_loupe(0),
+      unk138_loupeDamage(0),
+      unk138_cursor(0),
+      unk138_nameCursor(0),
+      unk138_7(0),
+      unk139_0(1),
+      unk139_1(0),
+      m_outsideEventPresenter(-1, entryId) { }
+
+Fighter::~Fighter() { }
+
+static inline void resetScalingCore(soModuleAccesser* accesser) {
+    float scale = accesser->getWorkManageModule().getFloat(0x1100000b);
+    accesser->getPostureModule().setScale(scale);
+    if (accesser->getWorkManageModule().isFlag(0x12000014) == true) {
+        accesser->getWorkManageModule().offFlag(0x12000014);
+        accesser->getParamCustomizeModule().removeCustomize(0);
+        accesser->getSoundModule().setSEPitch(accesser->getWorkManageModule().getFloat(0x11000011));
+    }
+    if (accesser->getWorkManageModule().isFlag(0x12000015) == true) {
+        accesser->getWorkManageModule().offFlag(0x12000015);
+        accesser->getParamCustomizeModule().removeCustomize(1);
+        accesser->getSoundModule().setSEPitch(accesser->getWorkManageModule().getFloat(0x11000011));
+    }
+    accesser->getWorkManageModule().setInt(0, 0x10000023);
+}
+
+void Fighter::startScaling(ScalingKind kind, ScalingType type) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (moduleAccesser->getWorkManageModule().isFlag(0x12000021) == true ||
+        moduleAccesser->getWorkManageModule().isFlag(0x12000032) == true ||
+        moduleAccesser->getWorkManageModule().isFlag(0x12000018) == true) {
+        return;
+    }
+    int status = moduleAccesser->getWorkManageModule().getInt(0x10000023);
+    int curKind = moduleAccesser->getWorkManageModule().getInt(0x10000024);
+    if (kind == 2 || curKind != kind) {
+        switch (type) {
+        case 0:
+            if (curKind != kind) {
+                resetScalingCore(m_moduleAccesser);
+            }
+            moduleAccesser->getWorkManageModule().setInt(kind, 0x10000024);
+            moduleAccesser->getWorkManageModule().setInt(4, 0x10000023);
+            moduleAccesser->getStatusModule().changeStatusRequest(0xf2, moduleAccesser);
+            break;
+        case 1:
+            if (curKind != kind) {
+                resetScalingCore(m_moduleAccesser);
+            }
+            moduleAccesser->getWorkManageModule().setInt(kind, 0x10000024);
+            moduleAccesser->getWorkManageModule().setInt(6, 0x10000023);
+            moduleAccesser->getStatusModule().changeStatusRequest(0xf3, moduleAccesser);
+            break;
+        }
+    } else {
+        switch (type) {
+        case 0:
+            if (status < 3) {
+                if (curKind != kind) {
+                    resetScalingCore(m_moduleAccesser);
+                }
+                moduleAccesser->getWorkManageModule().setInt(kind, 0x10000024);
+                moduleAccesser->getWorkManageModule().setInt(4, 0x10000023);
+                moduleAccesser->getStatusModule().changeStatusRequest(0xf2, moduleAccesser);
+            } else if (status > 4) {
+                moduleAccesser->getWorkManageModule().setInt(kind, 0x10000024);
+                moduleAccesser->getWorkManageModule().setInt(1, 0x10000023);
+                moduleAccesser->getStatusModule().changeStatusRequest(0xf3, moduleAccesser);
+            } else {
+                if (kind == 1) {
+                    int frame = soValueAccesser::getConstantInt(moduleAccesser, 0x5a79, 0);
+                    moduleAccesser->getWorkManageModule().setInt(frame, 0x10000021);
+                } else {
+                    int frame = soValueAccesser::getConstantInt(moduleAccesser, 0x5a7b, 0);
+                    moduleAccesser->getWorkManageModule().setInt(frame, 0x10000022);
+                }
+            }
+            break;
+        case 1:
+            if (status < 3) {
+                if (curKind != kind) {
+                    resetScalingCore(m_moduleAccesser);
+                }
+                moduleAccesser->getWorkManageModule().setInt(kind, 0x10000024);
+                moduleAccesser->getWorkManageModule().setInt(6, 0x10000023);
+                moduleAccesser->getStatusModule().changeStatusRequest(0xf3, moduleAccesser);
+            } else if (status < 5) {
+                moduleAccesser->getWorkManageModule().setInt(kind, 0x10000024);
+                moduleAccesser->getWorkManageModule().setInt(2, 0x10000023);
+                moduleAccesser->getStatusModule().changeStatusRequest(0xf2, moduleAccesser);
+            } else {
+                if (kind == 1) {
+                    int frame = soValueAccesser::getConstantInt(moduleAccesser, 0x5a79, 0);
+                    moduleAccesser->getWorkManageModule().setInt(frame, 0x10000021);
+                } else {
+                    int frame = soValueAccesser::getConstantInt(moduleAccesser, 0x5a7b, 0);
+                    moduleAccesser->getWorkManageModule().setInt(frame, 0x10000022);
+                }
+            }
+            break;
+        }
+    }
+}
+
+void Fighter::notifyThrowItem(BaseItem* item, u32 nodeIndex, int* outUnk) {
+    soModuleAccesser* moduleAccesser = m_moduleAccesser;
+    if (moduleAccesser->getMotionModule().getKind() == 0xfe) {
+        if (item->soGetSubKind() == 0x48) {
+            *reinterpret_cast<bool*>(outUnk) = true;
+            return;
+        }
+        moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1fae), false, false, 0);
+    } else {
+        if (item->getParam(static_cast<itValueAccesser::ParamInt>(0x5b69)) == 0) {
+            if (item->soGetSubKind() == 0x48) {
+                moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x70), false, false, 0);
+            } else {
+                moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1fb0), false, false, 0);
+            }
+            if (!moduleAccesser->getWorkManageModule().isFlag(0x1200002a)) {
+                moduleAccesser->getControllerModule().setRumble(0x1b, 0, false, -1);
+            } else {
+                moduleAccesser->getControllerModule().setRumble(0x1c, 0, false, -1);
+            }
+        } else {
+            moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1fb0), false, false, 0);
+            if (!moduleAccesser->getWorkManageModule().isFlag(0x1200002a)) {
+                moduleAccesser->getControllerModule().setRumble(0x1d, 0, false, -1);
+            } else {
+                moduleAccesser->getControllerModule().setRumble(0x1e, 0, false, -1);
+            }
+        }
+        int idx = moduleAccesser->getMotionModule().getKind() - 0xff;
+        ftDataCommon::ThrowEffectTable* table = g_ftCommonData.dataCommon->throwEffectTable;
+        if (idx >= 0 && idx < table->count) {
+            moduleAccesser->getEffectModule().req(
+                table->entries[idx].ef1, 0,
+                &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, table->entries[idx].yRot, 0.0f), 1.0f,
+                &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), false, 0);
+            if (table->entries[idx].ef2 != 0) {
+                moduleAccesser->getEffectModule().req(
+                    table->entries[idx].ef2, nodeIndex,
+                    &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), 1.0f,
+                    &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), false, 0);
+            }
+        }
+    }
+    item->updateLogAttackInfo();
+}
+
+void Fighter::notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    const ftStatusFlagData* ftStatusData = g_ftCommonDataAccesser.getFtStatusData(getFtKind(), statusKind);
+    ftOwner* owner = getOwner();
+    int hitStop = 0;
+    if (ftStatusData->unk4_7) {
+        hitStop = soValueAccesser::getConstantInt(moduleAccesser, 0x5a03, 0);
+        if (moduleAccesser->getPostureModule().setStickLR(soValueAccesser::getConstantFloat(moduleAccesser, 0xc70, 0)) == true) {
+            moduleAccesser->getPostureModule().updateRotYLr();
+        }
+    }
+    moduleAccesser->getWorkManageModule().setInt(hitStop, 0x10000037);
+    updateNodeSRT();
+    for (int i = 1; i < 0x13; i++) {
+        moduleAccesser->getStatusModule().unableTransitionTermGroup(i);
+        moduleAccesser->getStatusModule().enableTransitionTermAll(i);
+    }
+    moduleAccesser->getStatusModule().clearTransitionTermAll(0x13);
+    moduleAccesser->getStatusModule().unableTransitionTermGroup(0x13);
+    moduleAccesser->getGroundModule().selectCliffHangData(0, 0);
+    moduleAccesser->getCameraModule().setQuake(true);
+    if (!ftStatusData->unk4_12) {
+        moduleAccesser->getCameraModule().resetCameraRange(0);
+        moduleAccesser->getCameraModule().setEnableUpdatePos(true, -1);
+        moduleAccesser->getCameraModule().setEnableInterpolatePos(false, -1);
+    }
+    bool checkCatch = false;
+    if (!moduleAccesser->getWorkManageModule().isFlag(0x12000018) &&
+        moduleAccesser->getWorkManageModule().isFlag(0x1200002c) == true) {
+        checkCatch = !ftStatusData->isUnk0_4();
+    }
+    moduleAccesser->getCollisionHitModule().setCheckCatch(checkCatch, 0);
+    if (!ftStatusData->unk0_26) {
+        getPhysicsModule(moduleAccesser).unk50();
+    }
+    if (statusData->m_situationKind != 5) {
+        getPhysicsModule(moduleAccesser).unkD8(1);
+    } else {
+        getPhysicsModule(moduleAccesser).unkD8(0);
+    }
+    moduleAccesser->getKineticModule().resumeEnergyAll();
+    moduleAccesser->getWorkManageModule().offFlag(0x12000001);
+    moduleAccesser->getWorkManageModule().offFlag(0x12000029);
+    moduleAccesser->getWorkManageModule().offFlag(0x12000034);
+    moduleAccesser->getWorkManageModule().onFlag(0x12000019);
+    moduleAccesser->getWorkManageModule().onFlag(0x1200001a);
+    moduleAccesser->getWorkManageModule().offFlag(0x1200003a);
+    if (!ftStatusData->unk4_10) {
+        moduleAccesser->getWorkManageModule().setFlag(false, 0x1200001b);
+        setCursor(false);
+        bool showName = !ftStatusData->isUnk4_13();
+        moduleAccesser->getWorkManageModule().setFlag(showName, 0x1200001c);
+        setNameCursor(showName);
+        moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x11000012);
+        moduleAccesser->getWorkManageModule().offFlag(0x1200003c);
+        moduleAccesser->getWorkManageModule().offFlag(0x12000038);
+    }
+    moduleAccesser->getWorkManageModule().setFlag(ftStatusData->unk4_6, 0x12000030);
+    moduleAccesser->getWorkManageModule().setFlag(ftStatusData->unk4_5, 0x12000031);
+    moduleAccesser->getWorkManageModule().setFlag(ftStatusData->unk4_1, 0x12000032);
+    moduleAccesser->getWorkManageModule().setFlag(ftStatusData->unk4_15, 0x12000007);
+    soDamageAttackerInfo attackerInfo;
+    moduleAccesser->getDamageModule().getAttackerInfo(&attackerInfo);
+    if (attackerInfo.m_directSoKind != -1 && statusData->m_situationKind == 0 && ftStatusData->unk0_0) {
+        if (attackerInfo.m_clearFrame == -1) {
+            attackerInfo.m_clearFrame = soValueAccesser::getConstantInt(moduleAccesser, 0x5a2f, 0);
+            moduleAccesser->getDamageModule().restoreAttackerInfo(&attackerInfo);
+        }
+    }
+    moduleAccesser->getWorkManageModule().offFlag(0x12000039);
+    if (moduleAccesser->getWorkManageModule().getInt(0x1000003c) <= 0) {
+        moduleAccesser->getWorkManageModule().offFlag(0x12000004);
+    }
+    if (moduleAccesser->getItemManageModule().isHaveItem(2) == true) {
+        moduleAccesser->getItemManageModule().dropItem(90.0f, 0.0f, 2);
+    }
+    if (moduleAccesser->getItemManageModule().getHaveItemTrait(0).m_mask & 0x20) {
+        moduleAccesser->getItemManageModule().useItem(0ul);
+    }
+    if (moduleAccesser->getWorkManageModule().getFloat(0x1100000e) != 0.0f) {
+        if (!ftStatusData->noTread || moduleAccesser->getWorkManageModule().isFlag(0x22000011)) {
+            Vec3f pos = moduleAccesser->getPostureModule().getPos();
+            if (!g_ftAudienceManager->m_audience->checkTumultRange(pos.m_x)) {
+                moduleAccesser->getWorkManageModule().setFloat(0.0f, 0x1100000e);
+            }
+        }
+    }
+    ftLogTransactor::notifyEventChangeStatus(statusKind, prevStatusKind, statusData, moduleAccesser, owner);
+    if (getGlowModule(moduleAccesser).unk20() == true) {
+        getGlowModule(moduleAccesser).unk80(statusKind, prevStatusKind, statusData, moduleAccesser);
+        int actionKind = owner->getLog().m_logActionInfo.unk4;
+        if (actionKind >= 0x13 && actionKind <= 0x3c) {
+            getGlowModule(moduleAccesser).unk54(owner->getSpecialWeaponGlowAttack());
+        }
+    }
+    getSlopeModule(moduleAccesser).setTopAngleUnlimit(ftStatusData->unk4_11);
+    moduleAccesser->getKineticModule().setConsiderGroundFriction(!ftStatusData->isUnk4_14(), soKineticEnergy::AttributeFlag(1));
+    moduleAccesser->getMotionModule().setShareAnimObjKind(-1);
+    bool noScale = statusKind >= 0x111;
+    if (ftStatusData->unk4_16) {
+        noScale = false;
+    }
+    moduleAccesser->getMotionModule().setTransMoveSpeedNoScale(noScale);
+    if (ftStatusData->unk4_17 == true) {
+        soLinkEventArgs args(0x454);
+        moduleAccesser->getLinkModule().sendEventNodes(-1, args, 0);
     }
 }
 
@@ -3309,7 +4101,7 @@ extern "C" void onDeadEnd__7FighterFv(Fighter* self) {
                 g_ftAudienceManager->m_audience->checkCheerDefeat(info.m_indirectEntryId);
                 g_ftManager->setBeat(self->m_entryId, info.m_indirectEntryId);
             } else {
-                setSUlcide__9ftManagerFi(g_ftManager, self->m_entryId);
+                g_ftManager->setSuicide(self->m_entryId);
             }
             int entry;
             ftManager* manager;
@@ -3332,7 +4124,6 @@ extern "C" void onDeadEnd__7FighterFv(Fighter* self) {
 namespace jj_131020 {
 
 
-extern "C" void setSUlcide__9ftManagerFi(ftManager*, int);
 extern "C" const float lbl_27_rodata_1048;
 
 class Object_vptr_0 {
@@ -3460,7 +4251,7 @@ extern "C" void toKnockOut__7FighterFv(Fighter* self) {
                 g_ftAudienceManager->m_audience->checkCheerDefeat(info.m_indirectEntryId);
                 g_ftManager->setBeat(self->m_entryId, info.m_indirectEntryId);
             } else {
-                setSUlcide__9ftManagerFi(g_ftManager, self->m_entryId);
+                g_ftManager->setSuicide(self->m_entryId);
             }
 
             g_ftManager->setDead(self->m_entryId, 5, -1);

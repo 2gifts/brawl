@@ -16,6 +16,9 @@ struct soLinkEventArgs {
     // HYPOTHESIS: Dedede constructs the shared link event directly.
     friend class ftDedede;
     friend class ftDededeTransactor;
+#ifdef FT_FIGHTER_FIELDS
+    friend class Fighter;
+#endif
     int m_eventKind;
     bool _0x4;
 protected:

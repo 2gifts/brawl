@@ -97,6 +97,11 @@ typedef ftKind FighterKind;
 
 class ftEntryEventObserver : public soEventObserver<ftEntryEventObserver> {
 public:
+#ifdef FT_FIGHTER_FIELDS
+    ftEntryEventObserver(short param1, s8 param2) : soEventObserver<ftEntryEventObserver>(0x2) {
+        initialize(param1, param2);
+    }
+#endif
 #ifdef FT_MODULE_BUILDER
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // BYTES: the owning unit's weak copy; the #else units call the sora_melee instance
 #else

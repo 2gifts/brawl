@@ -17,7 +17,7 @@ public:
 #endif
     soCollisionReflectorEventObserver() : soEventObserver<soCollisionReflectorEventObserver>(0xf) {};
     soCollisionReflectorEventObserver(short unitID) : soEventObserver<soCollisionReflectorEventObserver>(unitID) {};
-#ifdef EM_ENEMY_BUILDER
+#if defined(EM_ENEMY_BUILDER) || defined(FT_FIGHTER_FIELDS)
     // The Enemy constructor expands it.
     soCollisionReflectorEventObserver(short manageId, s8 p2) : soEventObserver<soCollisionReflectorEventObserver>(0xf) { initialize(manageId, p2); }
 #else

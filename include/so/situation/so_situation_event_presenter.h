@@ -22,7 +22,11 @@ enum SituationKind {
 class soSituationEventObserver : public soEventObserver<soSituationEventObserver> {
 public:
     soSituationEventObserver(short unitID) : soEventObserver<soSituationEventObserver>(unitID) {};
+#ifdef FT_FIGHTER_FIELDS
+    soSituationEventObserver(short manageId, s8 priority) : soEventObserver<soSituationEventObserver>(0x8) { initialize(manageId, priority); }
+#else
     soSituationEventObserver(short manageId, s8 priority);
+#endif
 
 #if defined(FT_MODULE_BUILDER) || defined(SO_SITUATION_OBSERVER_INLINE)
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // BYTES: the owning unit's weak copy; the #else units call the sora_melee instance

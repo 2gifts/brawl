@@ -52,7 +52,11 @@ public:
 	virtual Vec3f getCenterPos(u32, u32 collisionShieldGroupIndex);
 	virtual float getLR(u32 collisionShieldGroupIndex) const;
 	virtual u32 getGroupNum();
+#ifdef FT_FIGHTER_FIELDS
+	virtual float getPosX(u32 collisionShieldGroupIndex) const;
+#else
 	virtual double getPosX(u32 collisionShieldGroupIndex) const;
+#endif
 	virtual void setTargetProperty(u32, u32 collisionShieldGroupIndex);
 };
 
@@ -115,7 +119,11 @@ public:
 	virtual Vec3f getCenterPos(u32, u32 collisionShieldGroupIndex);
 	virtual float getLR(u32 collisionShieldGroupIndex) const;
 	virtual u32 getGroupNum();
+#ifdef FT_FIGHTER_FIELDS
+	virtual float getPosX(u32 collisionShieldGroupIndex) const;
+#else
 	virtual double getPosX(u32 collisionShieldGroupIndex) const;
+#endif
 	virtual void setTargetProperty(u32, u32 collisionShieldGroupIndex);
 
     virtual bool isObserv(char unk1);

@@ -11,6 +11,9 @@ class soModuleAccesser;
 class soMotionEventObserver : public soEventObserver<soMotionEventObserver> {
 public:
     soMotionEventObserver(short unitID) : soEventObserver<soMotionEventObserver>(unitID) {};
+#ifdef FT_FIGHTER_FIELDS
+    soMotionEventObserver(short manageId, s8 p2) : soEventObserver<soMotionEventObserver>(0xa) { initialize(manageId, p2); }
+#endif
 
 #ifdef FT_MODULE_BUILDER
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // BYTES: the owning unit's weak copy; the #else units call the sora_melee instance

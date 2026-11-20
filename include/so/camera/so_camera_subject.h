@@ -23,7 +23,13 @@ struct soCameraRange {
 static_assert(sizeof(soCameraRange) == 0x14, "Class is wrong size!");
 
 struct soCameraClipSphere {
+#ifdef FT_FIGHTER_FIELDS
+    int m_nodeId;
+    Vec3f m_offset;
+    float m_radius;
+#else
     char _[0x14];
+#endif
 };
 static_assert(sizeof(soCameraClipSphere) == 0x14, "Class is wrong size!");
 
