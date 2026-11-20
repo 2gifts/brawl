@@ -27,6 +27,86 @@ void hkGsk::setFeatureChange(int value) {
     unk14 = value;
 }
 
+// The vertex id a simplex vertex keeps in its w word.
+static inline u16 hkGsk_vertexId(const hkVector4& v) {
+    return (u16)*(const int*)&v.w;
+}
+
+// Writes the simplex back to the cache: the dimensions, then each body's vertex ids sorted in descending order
+// (B's after A's). The three-element sort swaps the last two back when exactly one swap happened, which keeps the
+// winding of a triangle.
+// TODO: clean up: the cache comes in as void* (the symbol name); its type is hkGskCache. Draft (35%): the target
+// keeps each sort variable in one register across the swaps; ours splits the live ranges.
+void hkGsk::exitAndExportCacheImpl(void* arg) {
+    hkGskCache& cache = *(hkGskCache*)arg;
+    int dimA = m_dimA;
+    int dimB = m_dimB;
+    cache.m_dimA = dimA;
+    cache.m_dimB = dimB;
+    {
+        const hkVector4* v = verticesA();
+        u16 v0 = hkGsk_vertexId(v[0]);
+        if (dimA >= 2) {
+            u16 v1 = hkGsk_vertexId(v[1]);
+            int swaps = 0;
+            if (v1 > v0) {
+                u16 t = v1;
+                v1 = v0;
+                v0 = t;
+                swaps = 1;
+            }
+            if (dimA > 2) {
+                u16 v2 = hkGsk_vertexId(v[2]);
+                if (v2 > v0) {
+                    u16 t = v2;
+                    v2 = v0;
+                    v0 = t;
+                    swaps++;
+                }
+                if (swaps == 1) {
+                    u16 t = v2;
+                    v2 = v1;
+                    v1 = t;
+                }
+                cache.m_vertices[2] = v2;
+            }
+            cache.m_vertices[1] = v1;
+        }
+        cache.m_vertices[0] = v0;
+    }
+    {
+        const hkVector4* v = verticesB();
+        u16 v0 = hkGsk_vertexId(v[0]);
+        if (m_dimB >= 2) {
+            u16 v1 = hkGsk_vertexId(v[1]);
+            int swaps = 0;
+            if (v1 > v0) {
+                u16 t = v1;
+                v1 = v0;
+                v0 = t;
+                swaps = 1;
+            }
+            if (m_dimB > 2) {
+                u16 v2 = hkGsk_vertexId(v[2]);
+                if (v2 > v0) {
+                    u16 t = v2;
+                    v2 = v0;
+                    v0 = t;
+                    swaps++;
+                }
+                if (swaps == 1) {
+                    u16 t = v2;
+                    v2 = v1;
+                    v1 = t;
+                }
+                cache.m_vertices[m_dimA + 2] = v2;
+            }
+            cache.m_vertices[m_dimA + 1] = v1;
+        }
+        cache.m_vertices[m_dimA] = v0;
+    }
+}
+
 // The plane gives the normal and the distance (its w). The point: the single vertex of A, the single vertex of B
 // moved along the plane by the distance, or the point kept at 0x130 (weights 1, 0 and 0.5).
 void hkGsk::convertFeatureToClosestDistance(const hkVector4& plane, hkGskClosestDistance& out) const {

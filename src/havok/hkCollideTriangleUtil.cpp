@@ -36,7 +36,7 @@ void hkCollideTriangleUtil::setupClosestPointTriangleCache(const hkVector4* tri,
     cache->y = cc * inv;
     cache->z = ac * inv;
     hkVector4 n;
-    n.setCross(a, c);
+    n.setCrossLegacy(a, c);
     hkReal nn = n.y * n.y + n.x * n.x + n.z * n.z;
     hkReal s = 1.0f / hkRsqrtApprox(nn);
     cache->w = 1.0f / s;

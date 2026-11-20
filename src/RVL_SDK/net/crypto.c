@@ -3,11 +3,11 @@
 // TODO: clean up, give variables real names
 void fn_8038FD6C(void) {}
 
-extern void fn_8038E744(void);
+extern void NCDiGetWirelessMacAddress(void);
 
 // TODO: clean up, give variables real names
 void fn_80390010(void) {
-    fn_8038E744();
+    NCDiGetWirelessMacAddress();
 }
 
 // TODO: clean up, give variables real names

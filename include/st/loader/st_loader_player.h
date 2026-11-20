@@ -19,9 +19,9 @@ public:
     int m_slotId;
     char _0x54[2];
     u8 m_56;
-    Mode m_mode : 8;
+    u8 m_mode; // a Mode; a plain byte: the native code reads it with lbz
     char _0x58[2];
-    gmCharacterKind m_characterKind : 8;
+    u8 m_characterKind; // a gmCharacterKind; a plain byte: the native code reads it with lbz
     char _0x5b[5];
 
     // HYPOTHESIS: the player id type follows m_playerId.

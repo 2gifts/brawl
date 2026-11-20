@@ -112,7 +112,7 @@ hkBool hkCylinderShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCast
     HK_TIMER_BEGIN("rcCylinder");
     {
         hkVector4 offset;
-        offset.setCross(m_perpendicular2, m_perpendicular1);
+        offset.setCrossLegacy(m_perpendicular2, m_perpendicular1);
         offset.setMul4(m_radius, offset);
         hkVector4 start;
         start.setAdd4(m_vertexA, offset);

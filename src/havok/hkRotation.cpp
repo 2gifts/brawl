@@ -48,6 +48,6 @@ hkBool hkRotation::isOrthonormal(hkReal epsilon) const {
         return false;
     }
     hkVector4 cross;
-    cross.setCross(m_col0, m_col1);
+    cross.setCrossLegacy(m_col0, m_col1);
     return cross.equals3(m_col2, epsilon);
 }

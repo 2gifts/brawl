@@ -525,7 +525,7 @@ int hkBvTreeAgent::calcAabbAndQueryTree(const hkCdBody& bodyA, const hkCdBody& b
             hkVector4 arm;
             arm.setSub4(center, msB->m_sweptTransform.m_centerOfMassLocal);
             hkVector4 rotation;
-            rotation.setCross(arm, msB->m_deltaAngle);
+            rotation.setCrossLegacy(arm, msB->m_deltaAngle);
             linearTimInfo.addMul4(input.m_stepInfo.m_deltaTime * msB->m_sweptTransform.m_centerOfMass1.w, rotation);
         }
         hkVector4 zero;

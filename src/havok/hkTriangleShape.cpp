@@ -78,7 +78,7 @@ hkBool hkTriangleShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCast
     hkVector4 edge2;
     edge2.setSub4(m_vertexC, m_vertexA);
     hkVector4 normal;
-    normal.setCross(edge1, edge2);
+    normal.setCrossLegacy(edge1, edge2);
     hkReal planeDist = m_vertexA.dot3(normal);
     hkReal distFrom = normal.dot3(input.m_from) - planeDist;
     hkReal distTo = normal.dot3(input.m_to) - planeDist;
@@ -100,15 +100,15 @@ hkBool hkTriangleShape::castRay(const hkShapeRayCastInput& input, hkShapeRayCast
             hkVector4 toB;
             toB.setSub4(m_vertexB, hit);
             hkVector4 sideAB;
-            sideAB.setCross(toA, toB);
+            sideAB.setCrossLegacy(toA, toB);
             if (sideAB.dot3(normal) >= tolerance) {
                 hkVector4 toC;
                 toC.setSub4(m_vertexC, hit);
                 hkVector4 sideBC;
-                sideBC.setCross(toB, toC);
+                sideBC.setCrossLegacy(toB, toC);
                 if (sideBC.dot3(normal) >= tolerance) {
                     hkVector4 sideCA;
-                    sideCA.setCross(toC, toA);
+                    sideCA.setCrossLegacy(toC, toA);
                     if (sideCA.dot3(normal) >= tolerance) {
                         results.m_hitFraction = t;
                         if (distFrom > 0.0f) {

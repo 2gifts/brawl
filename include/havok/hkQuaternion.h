@@ -27,7 +27,7 @@ struct hkQuaternion {
     // temporary come from hkTransformAgent::processCollision.
     void setMul(const hkQuaternion& q0, const hkQuaternion& q1) {
         hkVector4 vec;
-        vec.setCross(q0.m_vec, q1.m_vec);
+        vec.setCrossLegacy(q0.m_vec, q1.m_vec);
         vec.addMul4(q0.m_vec.w, q1.m_vec);
         vec.addMul4(q1.m_vec.w, q0.m_vec);
         hkSimdReal w = q0.m_vec.w * q1.m_vec.w - q0.m_vec.dot3(q1.m_vec);
