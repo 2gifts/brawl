@@ -1,11 +1,69 @@
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
+#define FT_MODULE_BUILDER
+#define WN_ROBOT_BEAM_BUILDER
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define FT_REL_LINK_EXTERN
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/robot/wn_robot_beam.h>
+#include <wn/robot/wn_robot_beam_status_uniq_process.h>
+#include <ft/robot/ft_robot_article_pools.h>
+#include <wn/wn_class_info_impl.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_kinetic_energy_normal.h>
 #include <ac/ac_anim_cmd_impl.h>
 #include <so/so_module_accesser.h>
 #include <math.h>
 #include <memory.h>
+
+
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnRobotBeam*) {
+    return reinterpret_cast<const ftRobotArticleDataAccesser*>(&g_ftCommonDataAccesser)->getBeamData(static_cast<ftKind>(subKind), resourceGroup);
+}
+
+// The Robo Beam constructor takes the Robot's own construction descriptor (the same build data), so the generic
+// article array builder is spelled out for it.
+template <>
+void wnClassInfoImpl<46, wnRobotBeam, wnRobotBeamData>::createArray(s32 count, s32 heapType, s32 articleId,
+                                                                    const wnArticleBuildInfo& info,
+                                                                    wnArticleList* list) const {
+    bool found = false;
+    const wnRobotBeamData* data = static_cast<const wnRobotBeamData*>(
+        wnFetchBlasterBulletData(info.kindInfo->subKind, &found, static_cast<const wnRobotBeam*>(nullptr)));
+    for (s32 i = 0; i < count; i++) {
+        wnRobotBeam* article = new ((Heaps::HeapType)heapType)
+            wnRobotBeam(articleId, static_cast<const ftRobotArticleConstructionInfo&>(info), const_cast<wnRobotBeamData*>(data));
+        if (article == nullptr) {
+            OSReport("wnClassInfoImpl::createArray allocation fail
+");
+        } else {
+            soArticle* entry = static_cast<soArticle*>(article);
+            list->insert(entry);
+        }
+    }
+}
+
+// Registers the Robo Beam article class (kind 46) in the class info table during static initialization.
+wnClassInfoImpl<46, wnRobotBeam, wnRobotBeamData> g_wnRobotBeamClassInfo;
+
+wnRobotBeam::wnRobotBeam(s32 articleId, const ftRobotArticleConstructionInfo& info, void* data)
+    : wnWeaponBuilder<wnRobotBeamModuleAccesserBuildConfig>(
+          "RobotBeam", articleId, info,
+          wnModuleAccesserBuildData(0x2e, data,
+              info.getHeapModule()->getInstanceHeap(),
+              info.getHeapModule()->getNWModelInstanceHeap(),
+              info.getHeapModule()->getNWMotionInstanceHeap(),
+              static_cast<u8>(static_cast<wnRobotBeamData*>(data)->m_resGroupNo), -1, &g_soParamAccesserNull,
+              0, 0, 0, 0, 0, 0, 0)) {
+    m_param = static_cast<wnRobotBeamData*>(data)->m_param;
+    soStatusUniqProcess* procs[1];
+    procs[0] = &g_wnRobotBeamStatusUniqProcess;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(procs, 1);
+    Weapon::deactivate(false);
+}
+
+wnRobotBeam::~wnRobotBeam() { }
 
 // Angle between two vectors in radians (main dol).
 
@@ -139,35 +197,6 @@ bool wnRobotBeam::notifyEventCollisionAttackCheck(u32 flags) {
 namespace jj_3A3BAC {
 extern "C" void* fn_27_3A3BAC(void* self) {
     return reinterpret_cast<u8*>(self) + 0x7f8;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_3A55FC {
-extern "C" void setClassInfo__11wnClassInfoFlP11wnClassInfo(void* self, int id, void* data);
-extern "C" void __dl__FPv(void* p);
-
-extern char lbl_27_data_9D048[];
-extern char g_wnClassInfoNull[];
-
-struct stMeleeDerived {
-    void* m_vt0;
-    u32 m_pad4;
-    void* m_vt1;
-};
-
-extern "C" {
-stMeleeDerived* fn_27_3A55FC(stMeleeDerived* self, int flag) {
-    if (self) {
-        self->m_vt0 = lbl_27_data_9D048 + 8;
-        self->m_vt1 = lbl_27_data_9D048;
-        setClassInfo__11wnClassInfoFlP11wnClassInfo(self, 0x2e, g_wnClassInfoNull);
-        if (flag > 0) {
-            __dl__FPv(self);
-        }
-    }
-    return self;
-}
 }
 }
 

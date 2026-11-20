@@ -4,6 +4,14 @@
 #define MT_VEC2F_SCALE_NOINLINE
 #define MT_VEC3F_CTOR_NOINLINE
 #define MT_VEC3F_ASSIGN_NOINLINE
+#define WN_WEAPON_BUILDER
+#define SO_GENERAL_WORK_SIMPLE_CTOR_INLINE
+#define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/poke/wn_poke_fushigisou_leaf_cutter.h>
 #include <wn/wn_activate_desc.h>
 #include <wn/wn_kinetic_energy_normal.h>
@@ -13,6 +21,22 @@
 #include <mt/mt_prng.h>
 #include <math.h>
 
+
+extern soStatusUniqProcess g_wnPokeFushigisouLeafCutterStatusUniqProcessMove;
+
+wnPokeFushigisouLeafCutter::wnPokeFushigisouLeafCutter(s32 articleId, const wnArticleBuildInfo& info,
+                                                       const wnPokeFushigisouLeafCutterData* data) :
+    wnWeaponBuilder<wnPokeFushigisouLeafCutterModuleAccesserBuildConfig>(
+        "PokeFushigisouLeafCutter", articleId, info,
+        wnModuleAccesserBuildData(73, data, info.getHeapModule()->getInstanceHeap(), info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), data->m_resGroupNo, -1, &m_paramAccesser,
+                                  0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    soStatusUniqProcess* uniqProcs[2] = {0, 0};
+    uniqProcs[0] = &g_wnPokeFushigisouLeafCutterStatusUniqProcessMove;
+    m_moduleAccesser->getStatusModule().addRangeUniqProc(uniqProcs, 2);
+    Weapon::deactivate(false);
+}
 
 // HYPOTHESIS: descriptive names, corroborated by the movement-status reader.
 enum {
