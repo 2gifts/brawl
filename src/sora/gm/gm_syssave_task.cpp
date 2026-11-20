@@ -115,12 +115,12 @@ struct Obj { char pad[0xA0]; int a0; char pad2[0x4C]; int f0; };
 struct gfTask { char pad[0x40]; int s; int c; };
 extern "C" {
 void exit__6gfTaskFv(gfTask*);
-Obj* fn_80030548(int);
-int fn_800305B0(int);
-void fn_800307B4();
-int fn_80030DEC(Obj*, int);
-int fn_80030F2C(Obj*);
-void fn_8004EEC8(int, int);
+Obj* createInstance__14gfSysRecorder2FQ25Heaps8HeapType(int);
+int isEnable__14gfSysRecorder2Fi(int);
+void dropInstance__14gfSysRecorder2Fv();
+int getBuffer__14gfSysRecorder2Fi(Obj*, int);
+int saveSystem__14gfSysRecorder2Fv(Obj*);
+void getSaveData__10GameGlobalFPv(int, int);
 }
 extern "C" int g_GameGlobal;
 extern "C" int lbl_8059CE48;
@@ -131,20 +131,20 @@ extern "C" int lbl_805A00FC;
 // TODO: clean up, give variables real names
 extern "C" void fn_8005A238(gfTask* t) {
     if (lbl_805A00FC) {
-        if (lbl_805A00F8) { fn_800307B4(); lbl_805A00F8 = 0; }
+        if (lbl_805A00F8) { dropInstance__14gfSysRecorder2Fv(); lbl_805A00F8 = 0; }
         lbl_805A00F0 = 0;
         exit__6gfTaskFv(t);
         return;
     }
     switch (t->s) {
     case 0: {
-        if (!fn_800305B0(0)) { t->s = 3; return; }
-        lbl_805A00F8 = fn_80030548(lbl_8059CE48);
+        if (!isEnable__14gfSysRecorder2Fi(0)) { t->s = 3; return; }
+        lbl_805A00F8 = createInstance__14gfSysRecorder2FQ25Heaps8HeapType(lbl_8059CE48);
         if (!lbl_805A00F8) { t->s = 3; return; }
-        int r = fn_80030DEC(lbl_805A00F8, 0);
+        int r = getBuffer__14gfSysRecorder2Fi(lbl_805A00F8, 0);
         if (!r) { t->s = 3; return; }
-        fn_8004EEC8(g_GameGlobal, r);
-        if (!fn_80030F2C(lbl_805A00F8)) { t->s = 3; return; }
+        getSaveData__10GameGlobalFPv(g_GameGlobal, r);
+        if (!saveSystem__14gfSysRecorder2Fv(lbl_805A00F8)) { t->s = 3; return; }
         t->s = 1; t->c = 0;
         break;
     }
@@ -162,7 +162,7 @@ extern "C" void fn_8005A238(gfTask* t) {
         }
         break;
     case 3:
-        if (lbl_805A00F8) { fn_800307B4(); lbl_805A00F8 = 0; }
+        if (lbl_805A00F8) { dropInstance__14gfSysRecorder2Fv(); lbl_805A00F8 = 0; }
         exit__6gfTaskFv(t);
         break;
     }
@@ -175,13 +175,13 @@ struct Obj { char pad[0xA0]; int a0; char pad2[0x4C]; int f0; };
 struct Arg { char pad[0x8]; u32 state; int cnt; u8 flag; };
 
 extern "C" {
-void fn_800307B4();
-int fn_800305B0(int);
-Obj* fn_80030548(int);
-int fn_80030DEC(Obj*, int);
-int fn_80030F2C(Obj*);
-int fn_80030F58(Obj*);
-void fn_8004EEC8(int, int);
+void dropInstance__14gfSysRecorder2Fv();
+int isEnable__14gfSysRecorder2Fi(int);
+Obj* createInstance__14gfSysRecorder2FQ25Heaps8HeapType(int);
+int getBuffer__14gfSysRecorder2Fi(Obj*, int);
+int saveSystem__14gfSysRecorder2Fv(Obj*);
+int saveWifi__14gfSysRecorder2Fv(Obj*);
+void getSaveData__10GameGlobalFPv(int, int);
 }
 extern "C" int g_GameGlobal;
 extern "C" int lbl_8059CE48;
@@ -193,7 +193,7 @@ extern "C" void fn_8005A470(Arg* arg) {
     gfTask* t = lbl_805A00F0;
     if (t != 0) {
         if (lbl_805A00F8) {
-            fn_800307B4();
+            dropInstance__14gfSysRecorder2Fv();
             lbl_805A00F8 = 0;
         }
         lbl_805A00F0 = 0;
@@ -203,22 +203,22 @@ extern "C" void fn_8005A470(Arg* arg) {
     u32 state = arg->state;
     switch (state) {
     case 0: {
-        if (!fn_800305B0(0)) {
+        if (!isEnable__14gfSysRecorder2Fi(0)) {
             arg->state = 3;
             return;
         }
-        lbl_805A00F8 = fn_80030548(lbl_8059CE48);
+        lbl_805A00F8 = createInstance__14gfSysRecorder2FQ25Heaps8HeapType(lbl_8059CE48);
         if (!lbl_805A00F8) {
             arg->state = 3;
             return;
         }
-        int r = fn_80030DEC(lbl_805A00F8, 0);
+        int r = getBuffer__14gfSysRecorder2Fi(lbl_805A00F8, 0);
         if (!r) {
             arg->state = 3;
             return;
         }
-        fn_8004EEC8(g_GameGlobal, r);
-        if (!fn_80030F2C(lbl_805A00F8)) {
+        getSaveData__10GameGlobalFPv(g_GameGlobal, r);
+        if (!saveSystem__14gfSysRecorder2Fv(lbl_805A00F8)) {
             arg->state = 3;
             return;
         }
@@ -248,13 +248,13 @@ extern "C" void fn_8005A470(Arg* arg) {
     case 3:
         if (ntFriendInfo::isSaveNeeded() != 0) {
             if (lbl_805A00F8 == 0) {
-                lbl_805A00F8 = fn_80030548(lbl_8059CE48);
+                lbl_805A00F8 = createInstance__14gfSysRecorder2FQ25Heaps8HeapType(lbl_8059CE48);
                 if (!lbl_805A00F8) {
                     arg->state = 6;
                     return;
                 }
             }
-            int p = fn_80030DEC(lbl_805A00F8, 2);
+            int p = getBuffer__14gfSysRecorder2Fi(lbl_805A00F8, 2);
             if (!p) {
                 arg->state = 6;
                 return;
@@ -266,7 +266,7 @@ extern "C" void fn_8005A470(Arg* arg) {
                 return;
             }
             memcpy((void*)p, src, size);
-            if (!fn_80030F58(lbl_805A00F8)) {
+            if (!saveWifi__14gfSysRecorder2Fv(lbl_805A00F8)) {
                 arg->state = 6;
                 return;
             }
@@ -277,7 +277,7 @@ extern "C" void fn_8005A470(Arg* arg) {
         /* fall through */
     case 6:
         if (lbl_805A00F8 != 0) {
-            fn_800307B4();
+            dropInstance__14gfSysRecorder2Fv();
             lbl_805A00F8 = 0;
         }
         arg->state = 7;

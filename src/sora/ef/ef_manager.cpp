@@ -403,8 +403,8 @@ namespace jj_8005B6F0 {
 extern "C" s32 g_efScreen;
 
 extern "C" {
-void* fn_801647B4();
-void fn_80164C0C(void* obj, f32* vec, s32* blk, s32 r6, f32 f1, f32 f2);
+void* GetInstance__Q34nw4r2ef12EffectSystemFv();
+void SetProcessCamera__Q34nw4r2ef12EffectSystemFRCQ34nw4r4math4VEC3RCQ34nw4r4math5MTX34ff(void* obj, f32* vec, s32* blk, s32 r6, f32 f1, f32 f2);
 u32 __cvt_fp2unsigned(f32);
 void fn_8005D7D8(s32 screen, f32 f);
 }
@@ -420,7 +420,7 @@ public:
     virtual void slot0();
     virtual void slot1();
     virtual void slot2();
-    virtual void fn_8005A898();
+    virtual void processEffect__8efEffectFv();
 };
 
 struct Node {
@@ -466,7 +466,7 @@ extern "C" void fn_8005B6F0(Arg* arg0) {
     ListEntry* list;
     f32 vec[3];
 
-    obj = fn_801647B4();
+    obj = GetInstance__Q34nw4r2ef12EffectSystemFv();
 
     *(BlkData*)&b = *(BlkData*)mgr;
     vec[0] = *(f32*)(mgr + 0x6C);
@@ -474,14 +474,14 @@ extern "C" void fn_8005B6F0(Arg* arg0) {
     vec[2] = *(f32*)(mgr + 0x74);
     f32 f2 = *(f32*)(mgr + 0xE0);
     f32 f1 = *(f32*)(mgr + 0xDC);
-    fn_80164C0C(obj, vec, b.w, b.w[10], f1, f2);
+    SetProcessCamera__Q34nw4r2ef12EffectSystemFRCQ34nw4r4math4VEC3RCQ34nw4r4math5MTX34ff(obj, vec, b.w, b.w[10], f1, f2);
 
     list = arg0->lists;
     for (k = 0; k < 3; k++) {
         node = list->head.next;
         sentinel = &list->head;
         while (node != sentinel) {
-            ((Class_8042EC38*)node)->fn_8005A898();
+            ((Class_8042EC38*)node)->processEffect__8efEffectFv();
             node = node->next;
         }
         list++;
@@ -514,10 +514,10 @@ struct Class_8042EC38_base {
 
 class Class_8042EC38 : public Class_8042EC38_base {
 public:
-    virtual void fn_8005C798();
+    virtual void __dt__10efParticleFv();
     virtual void fn_8005CAA0();
-    virtual void fn_8005CA18();
-    virtual void fn_8005A898();
+    virtual void updateRootMatrix__10efParticleFv();
+    virtual void processEffect__8efEffectFv();
     virtual void fn_8005CE70();
 };
 
@@ -552,17 +552,17 @@ struct Sub {
 extern "C" {
 void GXSetFog(int, unsigned char*, float, float, float, float);
 void gfDrawResetLight__Fv();
-void* fn_801AC554(void*, int);
-void fn_801A7DBC(void**, void*);
-void fn_801A8048(void**);
-void fn_801A80CC(void**);
-void fn_801A8194(void**);
-void fn_801ECBF0(void*, float, float, float, float, float, float);
-void fn_801ECCE8(void*, float, float, float, float, float, float, float, float);
-void fn_801F51DC(void*, int);
-void fn_801F5258(void*, int);
-void* fn_801647B4();
-void fn_8005F668(void*);
+void* GetCamera__Q34nw4r3g3d7ScnRootFi(void*, int);
+void GetCameraMtx__Q34nw4r3g3d6CameraCFPQ34nw4r4math5MTX34(void**, void*);
+void GXSetViewport__Q34nw4r3g3d6CameraCFv(void**);
+void GXSetProjection__Q34nw4r3g3d6CameraCFv(void**);
+void GXSetScissor__Q34nw4r3g3d6CameraCFv(void**);
+void C_MTXLightPerspective(void*, float, float, float, float, float, float);
+void C_MTXLightOrtho(void*, float, float, float, float, float, float, float, float);
+void GXLoadPosMtxImm(void*, int);
+void GXLoadNrmMtxImm(void*, int);
+void* GetInstance__Q34nw4r2ef12EffectSystemFv();
+void render__5ecMgrFv(void*);
 void setIdentity__6MatrixFv(void*);
 }
 
@@ -609,35 +609,35 @@ extern "C" void fn_8005B838(Self* self, int arg1) {
         } else {
             r3 = 0;
         }
-        spC = fn_801AC554(r3, 0);
-        fn_801A7DBC(&spC, &spA0);
+        spC = GetCamera__Q34nw4r3g3d7ScnRootFi(r3, 0);
+        GetCameraMtx__Q34nw4r3g3d6CameraCFPQ34nw4r4math5MTX34(&spC, &spA0);
         self->m84 = spA0;
         cam = (CamData*)spC;
         if (cam->flags == 0) {
-            fn_801ECBF0(&sp40, cam->ac, cam->b0, lbl_805A1904, lbl_805A1908, lbl_805A1904, lbl_805A1904);
+            C_MTXLightPerspective(&sp40, cam->ac, cam->b0, lbl_805A1904, lbl_805A1908, lbl_805A1904, lbl_805A1904);
             self->mB4 = sp40;
         } else {
             float c8 = cam->c8;
             float c4 = cam->c4;
             float c0 = cam->c0;
             float bc = cam->bc;
-            fn_801ECCE8(&sp10, bc, c0, c4, c8, lbl_805A1904, lbl_805A1908, lbl_805A1904, lbl_805A1904);
+            C_MTXLightOrtho(&sp10, bc, c0, c4, c8, lbl_805A1904, lbl_805A1908, lbl_805A1904, lbl_805A1904);
             self->mB4 = sp10;
         }
         setIdentity__6MatrixFv(&sp70);
-        fn_801F51DC(&sp70, 0);
-        fn_801F5258(&sp70, 0);
+        GXLoadPosMtxImm(&sp70, 0);
+        GXLoadNrmMtxImm(&sp70, 0);
         self->unkF0 = 0;
-        fn_801A8194(&spC);
-        fn_801A8048(&spC);
-        fn_801A80CC(&spC);
+        GXSetScissor__Q34nw4r3g3d6CameraCFv(&spC);
+        GXSetViewport__Q34nw4r3g3d6CameraCFv(&spC);
+        GXSetProjection__Q34nw4r3g3d6CameraCFv(&spC);
         flag27 = 0;
         var0 = 0;
         if (mode == 0) {
             var0 = self->unk138;
         }
         if (var0 != 0) {
-            mgr = (unsigned char*)fn_801647B4();
+            mgr = (unsigned char*)GetInstance__Q34nw4r2ef12EffectSystemFv();
             mgr[0x5064] = 1;
             flag27 = 1;
         }
@@ -648,14 +648,14 @@ extern "C" void fn_8005B838(Self* self, int arg1) {
             }
         }
         if (flag27 == 1) {
-            mgr = (unsigned char*)fn_801647B4();
+            mgr = (unsigned char*)GetInstance__Q34nw4r2ef12EffectSystemFv();
             mgr[0x5064] = 0;
         }
     } else if (arg1 == 1 && self->unk138 != 0) {
         self->unk138 = 0;
     }
     if (arg1 == 1) {
-        fn_8005F668(g_ecMgr);
+        render__5ecMgrFv(g_ecMgr);
     }
 }
 }

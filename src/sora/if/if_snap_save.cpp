@@ -29,9 +29,9 @@ extern "C" muCollection* fn_800C35CC(void* mem, int kind, nw4r::g3d::ResFile res
                                      void* msgData, nw4r::g3d::ScnGroup* scnGroup, int drawPriority,
                                      Heaps::HeapType heap, Heaps::HeapType heap2, int unk, int unk2);
 extern "C" bool fn_800C39D8(muCollection* collection);
-extern "C" nteFileDataPhoto* fn_80152970(void* mem, Heaps::HeapType heap);
-extern "C" void fn_800C6E3C(muCollection* collection, int unk, int unk2);
-extern "C" void fn_800C6E64(muCollection* collection, int drive, int unk, int unk2);
+extern "C" nteFileDataPhoto* __ct__16nteFileDataPhotoFQ25Heaps8HeapType(void* mem, Heaps::HeapType heap);
+extern "C" void scanAll__12muCollectionFii(muCollection* collection, int unk, int unk2);
+extern "C" void scan__12muCollectionFiii(muCollection* collection, int drive, int unk, int unk2);
 extern "C" void fn_80153488(nteSection* section);
 extern "C" void fn_80153498(nteSection* section, int unk);
 extern "C" void fn_80153610(nteSection* section, void* data, s64 time, Heaps::HeapType heap, int unk, int unk2);
@@ -824,9 +824,9 @@ void* __nw__FUlQ25Heaps8HeapType(u32 size, int heap);
 void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUll(void* heap, int type, s32 align);
 void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(void* heap, int type);
 void* fn_800C35CC(void* self, u32 mode, s32* a, s32* b, s32 c, s32 d, s32 e, s32 f, s32 g, s32 h, s32 i);
-void fn_800F1DD4(void* self, void* file, s32 base, s32 c, s32 heap);
-void fn_800F1ECC(void* self, s32 data, s32 arg2, s32 arg3);
-void* fn_80152970(void* self, void* heap);
+void createModel__14IfSnapSaveTaskFPQ34nw4r3g3d7ResFileiQ25Heaps8HeapTypeQ25Heaps8HeapType(void* self, void* file, s32 base, s32 c, s32 heap);
+void initMsg__14IfSnapSaveTaskFPvQ25Heaps8HeapTypeQ25Heaps8HeapType(void* self, s32 data, s32 arg2, s32 arg3);
+void* __ct__16nteFileDataPhotoFQ25Heaps8HeapType(void* self, void* heap);
 void createThread__8gfThreadFP10gfRunnableUlUlQ25Heaps8HeapType(void* self, void* runnable, u32 a, u32 b, int heap);
 extern u8 __vt__8gfThread[];
 extern u8 __vt__16gfJpegEncodeWork[];
@@ -845,8 +845,8 @@ void fn_800F1AB0(FnObj* self, s32 a1, s32* a2, s32* a3, s32 a4, s32 a5, s32 a6, 
 
     self->unk2C = (u8)(self->unk2C & 0xFFFFFFFD);
     self->unkD0 = a1;
-    fn_800F1DD4(self, a2, a6, a7, s9);
-    fn_800F1ECC(self, a4, a7, s9);
+    createModel__14IfSnapSaveTaskFPQ34nw4r3g3d7ResFileiQ25Heaps8HeapTypeQ25Heaps8HeapType(self, a2, a6, a7, s9);
+    initMsg__14IfSnapSaveTaskFPvQ25Heaps8HeapTypeQ25Heaps8HeapType(self, a4, a7, s9);
     self->unk40 = a5;
     self->unk70 = 0;
     if (a1 == 2) {
@@ -872,7 +872,7 @@ void fn_800F1AB0(FnObj* self, s32 a1, s32* a2, s32* a3, s32 a4, s32 a5, s32 a6, 
         self->unk88 = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl((void*)self->unkD4, 0x19008);
         obj = __nw__FUlQ25Heaps8HeapType(0x14, a7);
         if (obj != NULL) {
-            obj = fn_80152970(obj, (void*)self->unkD4);
+            obj = __ct__16nteFileDataPhotoFQ25Heaps8HeapType(obj, (void*)self->unkD4);
         }
         self->unkBC = obj;
         thread = (GfThreadObj*)__nw__FUlQ25Heaps8HeapType(0x360, a7);
@@ -956,7 +956,7 @@ static inline int getDirection() {
     if ((b.words[1] & 1) || ((signed char)b.b0 < -30)) return 4;
     return 0;
 }
-extern "C" void fn_80152A60(void*, const void*, unsigned int);
+extern "C" void setData__16nteFileDataPhotoFPvUl(void*, const void*, unsigned int);
 extern "C" void fn_80153610(void*, void*, int, int, int, int, int);
 extern "C" void* fn_800F27C8(void*, const void*, unsigned int);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -995,7 +995,7 @@ extern "C" int fn_800F2AEC(Self* self) {
             unsigned char* p = self->buffer88;
             p[0] = (((u8*)g_GameGlobal->getGlobalRecordMenuDatap())[0x28] >> 7) & 1;
             *(u32*)(p + 4) = 0x19000;
-            fn_80152A60(self->objectbc, self->buffer88, 0x19008);
+            setData__16nteFileDataPhotoFPvUl(self->objectbc, self->buffer88, 0x19008);
             fn_80153610(self->object9c, self->objectbc, self->c8, self->cc, self->d4, 0, 0);
             void* buffer = self->buffer84;
             fn_80153610(self->object9c, self->objectbc, self->c8, self->cc, self->d4, 0, 0);

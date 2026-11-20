@@ -96,7 +96,7 @@ void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 void createThread__8gfThreadFP10gfRunnableUlUlQ25Heaps8HeapType(
     void*, void*, unsigned long, unsigned long, int);
 extern "C" unsigned char __vt__8gfThread[];
-void* fn_80038984(void*, int);
+void* __ct__14gfCollectionIOFQ25Heaps8HeapType(void*, int);
 }
 
 struct Base0 {
@@ -136,7 +136,7 @@ extern "C" int fn_8014F584(Object* self, int value) {
     if (self->obj20 == 0) {
         void* o = __nw__FUlQ25Heaps8HeapType(0x194, heap);
         if (o) {
-            o = fn_80038984(o, heap);
+            o = __ct__14gfCollectionIOFQ25Heaps8HeapType(o, heap);
         }
         self->obj20 = o;
         if (!o)
@@ -166,7 +166,7 @@ namespace jj_8014F320 {
 
 extern "C" char lbl_80461030[];
 extern "C" void fn_80014ED4(gfArchive*, const char*, s32, s32);
-extern "C" u16 fn_8014E1EC(void);
+extern "C" u16 getLangId__15nteWiiConnect24Fv(void);
 extern "C" u16* getData__9gfArchiveF11ARCNodeTypeiPiUs(
     gfArchive*, s32, u16, u32*, u16);
 
@@ -197,7 +197,7 @@ extern "C" u32 fn_8014F320(s32* arg0, s32 arg1, u16* arg2, u32 arg3) {
     fn_80014ED4(&archive, lbl_80461030, arg0[1], 0);
 
     data = getData__9gfArchiveF11ARCNodeTypeiPiUs(
-        &archive, 1, fn_8014E1EC(), &size, 0xFFFE);
+        &archive, 1, getLangId__15nteWiiConnect24Fv(), &size, 0xFFFE);
     if (data == 0) {
         data = getData__9gfArchiveF11ARCNodeTypeiPiUs(
             &archive, 1, 1, &size, 0xFFFE);

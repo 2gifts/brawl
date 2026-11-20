@@ -364,9 +364,9 @@ struct Self {
     int ready2;
 };
 
-extern "C" void fn_80078768(Self*);
-extern "C" void fn_80078990(Self*);
-extern "C" void fn_800741EC(sndSystem*, int, unsigned int);
+extern "C" void setupBGMRate__16sndBgmRateSystemFv(Self*);
+extern "C" void setupBGMList__16sndBgmRateSystemFv(Self*);
+extern "C" void startBGM__9sndSystemFii(sndSystem*, int, unsigned int);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_80078648(Self* self) {
@@ -380,15 +380,15 @@ extern "C" void fn_80078648(Self* self) {
         }
         break;
     case 2:
-        fn_80078768(self);
-        fn_80078990(self);
+        setupBGMRate__16sndBgmRateSystemFv(self);
+        setupBGMList__16sndBgmRateSystemFv(self);
         self->state = 3;
         break;
     case 3:
         self->frame++;
         if (self->info != 0 && self->info->frame != 0 &&
             self->info->frame != 0xFFFF && self->info->frame == self->frame) {
-            fn_800741EC(g_sndSystem, self->bgmId, self->endFrame);
+            startBGM__9sndSystemFii(g_sndSystem, self->bgmId, self->endFrame);
         } else if (self->enabled != 0 && self->frame == self->endFrame) {
             self->enabled = 0;
             g_sndSystem->playBGM(self->bgmId, 0, false);

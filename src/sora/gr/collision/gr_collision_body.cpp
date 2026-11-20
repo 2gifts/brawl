@@ -57,7 +57,7 @@ grCollisionTest::grCollisionTest(grCollStatus* status)
 }
 
 // HYPOTHESIS: grCollStatus::clearTouchLine (0x80134468): forgets the touch line of the given touch id.
-extern "C" void fn_80134468(grCollStatus* status, int touchId);
+extern "C" void clearTouchLine__12grCollStatusFQ212grCollStatus7TouchId(grCollStatus* status, int touchId);
 
 // HYPOTHESIS: grCollision::getPreSegment1 (main.dol 0x80111AF4): like the four-argument getSegment, for the segment of the previous frame.
 extern "C" void fn_80111AF4(grCollision* collision, grCollSegmentEx* out, grCollisionLine* line, int unk);
@@ -81,7 +81,7 @@ static inline bool hasLine(grCollisionLineWork* lineWork) {
 }
 
 // HYPOTHESIS: grCollStatus::getTouchLine (main.dol 0x80134524): the line work of a touch id.
-extern "C" grCollisionLineWork* fn_80134524(grCollStatus* status, int touchId);
+extern "C" grCollisionLineWork* getTouchLineWork__12grCollStatusFQ212grCollStatus7TouchId(grCollStatus* status, int touchId);
 // HYPOTHESIS: a 32-bit accumulator of the time test() takes (profiling).
 extern u32 lbl_805A0368;
 
@@ -828,7 +828,7 @@ int grCollisionTest::test() {
     grCollisionLineWork prevGround;
     int mode = m_collStatus->m_setting;
     if (mode == 1) {
-        prevGround = *fn_80134524(m_collStatus, grCollStatus::Touch_Down);
+        prevGround = *getTouchLineWork__12grCollStatusFQ212grCollStatus7TouchId(m_collStatus, grCollStatus::Touch_Down);
     }
     grCollCollection collection(0x300);
     m_collection = &collection;
@@ -957,7 +957,7 @@ void grCollisionTest::updateTouchLine(int touchId, grCollisionLineWork* __restri
 // HYPOTHESIS: grCollStatus::reconstructIgnoreLine (re-collects the status' ignore lines inside the box).
 extern "C" void fn_801373E8(grCollStatus* status, const clAABBox2D* box);
 // HYPOTHESIS: grCollStatus::setStGroundInternal (goes to the ground setting without resetting the touch lines).
-extern "C" void fn_801340A0(grCollStatus* status);
+extern "C" void setStGroundSimple__12grCollStatusFv(grCollStatus* status);
 // HYPOTHESIS: grCollisionLineWork::getPosXDownLine(float x, out): the line below/next to this one at height x.
 // HYPOTHESIS: grCollisionLineWork::isLinkPrev / isLinkNext (target is linked to this line on the left / right).
 // HYPOTHESIS: grCollStatus::getTouchLine (the line work of a touch id).
@@ -1236,7 +1236,7 @@ int grCollisionTest::testAir() {
                 return m_collStatus->m_touchDown;
             }
             if (id == 3) {
-                fn_801340A0(m_collStatus);
+                setStGroundSimple__12grCollStatusFv(m_collStatus);
                 if (m_collStatus->m_setting == 1) {
                     Vec2f dist = m_unk2c4->getDownPos() - m_unk2bc->getDownPos();
                     dist.m_y = 0.0f;
@@ -1295,7 +1295,7 @@ void grCollisionTest::testAttached() {
         if (attached & bit) {
             grCollisionLineWork* lineWork = &m_collStatus->m_collLineWorkArray[(u8)i];
             if (!(isValidLineWork(*lineWork) && isEnabledLineWork(*lineWork))) {
-                fn_80134468(m_collStatus, (u8)i);
+                clearTouchLine__12grCollStatusFQ212grCollStatus7TouchId(m_collStatus, (u8)i);
                 attached &= ~bit;
             }
         }
@@ -1327,7 +1327,7 @@ void grCollisionTest::testAttached() {
     if (attached == 0) {
         m_collStatus->setStAir();
         m_collStatus->m_unk6C = 0;
-        fn_80134468(m_collStatus, 3);
+        clearTouchLine__12grCollStatusFQ212grCollStatus7TouchId(m_collStatus, 3);
     } else if (m_collStatus->m_isCalcLineMove) {
         for (u32 i = 0; i < 4; i++) {
             u8 id = i;
@@ -1444,10 +1444,10 @@ int grCollisionTest::testGround() {
     m_unk2CD = 1;
     if (m_collStatus->m_touchDown) {
         // Stand on the recorded ground line, unless it is gone or too short.
-        ground = *fn_80134524(m_collStatus, 3);
+        ground = *getTouchLineWork__12grCollStatusFQ212grCollStatus7TouchId(m_collStatus, 3);
         if (!(isEnabledLineWork(ground) && ground.m_collisionLine->m_isUnder)) {
             m_collStatus->setStAir();
-            fn_80134468(m_collStatus, 3);
+            clearTouchLine__12grCollStatusFQ212grCollStatus7TouchId(m_collStatus, 3);
             return 0;
         }
         clSegment2D segment;
@@ -2084,7 +2084,7 @@ int grCollisionTest::testRightWallMain() {
     {
         // no further wall line: the shape leaves the wall
         m_collStatus->setStAir();
-        fn_80134468(m_collStatus, 2);
+        clearTouchLine__12grCollStatusFQ212grCollStatus7TouchId(m_collStatus, 2);
         grCollisionLineWork neighbor;
         clSegment2D wallSeg;
         wall.m_collision->getSegment(&wallSeg, wall.m_collisionLine);
@@ -2234,7 +2234,7 @@ int grCollisionTest::testLeftWallMain() {
     {
         // no further wall line: the shape leaves the wall
         m_collStatus->setStAir();
-        fn_80134468(m_collStatus, 1);
+        clearTouchLine__12grCollStatusFQ212grCollStatus7TouchId(m_collStatus, 1);
         grCollisionLineWork neighbor;
         clSegment2D wallSeg;
         wall.m_collision->getSegment(&wallSeg, wall.m_collisionLine);
@@ -2390,7 +2390,7 @@ int grCollisionTest::testTopMain() {
     {
         // no further ceiling line: the shape leaves the ceiling
         m_collStatus->setStAir();
-        fn_80134468(m_collStatus, 0);
+        clearTouchLine__12grCollStatusFQ212grCollStatus7TouchId(m_collStatus, 0);
         grCollisionLineWork neighbor;
         clSegment2D wallSeg;
         wall.m_collision->getSegment(&wallSeg, wall.m_collisionLine);
@@ -3027,7 +3027,7 @@ int grCollisionTest::initialCorrection() {
         m_unk224 = m_touch[3].m_lineWork;
         status->m_collLineWorkArray[3] = m_touch[3].m_lineWork;
         status->m_touchDown = true;
-        fn_801340A0(m_collStatus);
+        setStGroundSimple__12grCollStatusFv(m_collStatus);
     }
     if (m_sides2C8.m_up && m_sides2C8.m_down) {
         // squeezed between floor and ceiling
@@ -3210,7 +3210,7 @@ int grCollisionTest::lastCorrection() {
     }
     if (m_sides2C9.m_down) {
         if (m_collStatus->m_setting == grCollStatus::Setting_Air || m_collStatus->m_setting == grCollStatus::Setting_Air) { // BUG: the test is duplicated (the single test does not match).
-            fn_801340A0(m_collStatus);
+            setStGroundSimple__12grCollStatusFv(m_collStatus);
             m_collStatus->m_collLineWorkArray[3] = m_unk31C;
             m_unk224 = m_unk31C;
         }
@@ -3571,7 +3571,7 @@ void grCollisionTest::updateCollStatusTouchInfo() {
         grCollStatus* status = m_collStatus;
         status->m_collLineWorkArray[3] = m_touch[3].m_lineWork;
         status->m_touchDown = true;
-        fn_801340A0(m_collStatus);
+        setStGroundSimple__12grCollStatusFv(m_collStatus);
     } else if (id == grCollStatus::Touch_Up) {
         m_collStatus->m_collLineWorkArray[0] = m_touch[0].m_lineWork;
         m_collStatus->m_touchUp = true;

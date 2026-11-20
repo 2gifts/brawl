@@ -268,14 +268,14 @@ extern "C" {
 extern char lbl_805A22A8[8];
 extern char lbl_8059E0D8;
 
-void* fn_800BF204(void* self);
+void* __ct__15muNoticeWndTaskFv(void* self);
 void fn_800B96E8(void* p, int v);
-void fn_800BF380(void* self, void* entries, int count, void* resFile, int prio, int heap);
+void createObjResFile__15muNoticeWndTaskFPCviPQ34nw4r3g3d7ResFileiQ25Heaps8HeapType(void* self, void* entries, int count, void* resFile, int prio, int heap);
 void fn_800BF4BC(void* self, Heaps::HeapType a, int b, unsigned char c, unsigned char d);
 void* fn_800B9640(void);
 void* fn_800B9678(void);
 unsigned long strlen(const char* s);
-void fn_800BF850(void* self, int id, const char* str, int len, int flag);
+void printText__15muNoticeWndTaskFUlPCcii(void* self, int id, const char* str, int len, int flag);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void* fn_800BEEB8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, Heaps::HeapType arg7,
@@ -287,7 +287,7 @@ void* fn_800BEEB8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, in
     unsigned long len2;
     char* self = (char*)operator new(0x12C, arg7);
     if (self != 0) {
-        self = (char*)fn_800BF204(self);
+        self = (char*)__ct__15muNoticeWndTaskFv(self);
     }
     *(int*)(self + 0xFC) = arg0;
     *(int*)(self + 0x4C) = arg1;
@@ -295,7 +295,7 @@ void* fn_800BEEB8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, in
     *(int*)(self + 0x110) = arg6;
     *(int*)(self + 0x44) = arg4;
     fn_800B96E8(self + 0x54, argSp14);
-    fn_800BF380(self, lbl_805A22A8, 1, (void*)arg3, arg5, argSp8);
+    createObjResFile__15muNoticeWndTaskFPCviPQ34nw4r3g3d7ResFileiQ25Heaps8HeapType(self, lbl_805A22A8, 1, (void*)arg3, arg5, argSp8);
     fn_800BF4BC(self, arg7, argSp8, argSpC, argSp10);
 
     s1 = (char*)fn_800B9640();
@@ -305,11 +305,11 @@ void* fn_800BEEB8(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, in
 
     switch (*(int*)(self + 0xFC)) {
     case 1:
-        fn_800BF850(self, 2, s1, (int)len1, 2);
-        fn_800BF850(self, 3, s2, (int)len2, 2);
+        printText__15muNoticeWndTaskFUlPCcii(self, 2, s1, (int)len1, 2);
+        printText__15muNoticeWndTaskFUlPCcii(self, 3, s2, (int)len2, 2);
         break;
     case 2:
-        fn_800BF850(self, 4, s1, (int)len1, 2);
+        printText__15muNoticeWndTaskFUlPCcii(self, 4, s1, (int)len1, 2);
         break;
     default:
         ((MuMsg*)*(void**)(self + 0x48))->printf(2, &lbl_8059E0D8);
@@ -328,14 +328,14 @@ extern "C" {
 extern char lbl_805A22A8[8];
 extern char lbl_8059E0D8;
 
-void* fn_800BF204(void* self);
+void* __ct__15muNoticeWndTaskFv(void* self);
 void fn_800B96E8(void* p, int v);
-void fn_800BF380(void* self, void* entries, int count, void* resFile, int prio, int heap);
+void createObjResFile__15muNoticeWndTaskFPCviPQ34nw4r3g3d7ResFileiQ25Heaps8HeapType(void* self, void* entries, int count, void* resFile, int prio, int heap);
 void fn_800BF4BC(void* self, Heaps::HeapType a, int b, unsigned char c, unsigned char d);
 void* fn_800B9640(void);
 void* fn_800B9678(void);
 unsigned long strlen(const char* s);
-void fn_800BF850(void* self, int id, const char* str, int len, int flag);
+void printText__15muNoticeWndTaskFUlPCcii(void* self, int id, const char* str, int len, int flag);
 void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int heap, unsigned long size);
 void* memcpy(void* d, const void* s, unsigned long n);
 
@@ -350,7 +350,7 @@ void* fn_800BF048(int arg0, void* arg1, unsigned long arg2, int arg3, int arg4, 
     unsigned long len2;
     char* self = (char*)operator new(0x12C, arg7);
     if (self != 0) {
-        self = (char*)fn_800BF204(self);
+        self = (char*)__ct__15muNoticeWndTaskFv(self);
     }
     *(int*)(self + 0xFC) = arg0;
     *(int*)(self + 0x4C) = 0;
@@ -364,7 +364,7 @@ void* fn_800BF048(int arg0, void* arg1, unsigned long arg2, int arg3, int arg4, 
     *(int*)(self + 0x110) = arg6;
     *(int*)(self + 0x44) = arg4;
     fn_800B96E8(self + 0x54, argSp14);
-    fn_800BF380(self, lbl_805A22A8, 1, (void*)arg3, arg5, argSp8);
+    createObjResFile__15muNoticeWndTaskFPCviPQ34nw4r3g3d7ResFileiQ25Heaps8HeapType(self, lbl_805A22A8, 1, (void*)arg3, arg5, argSp8);
     fn_800BF4BC(self, arg7, argSp8, argSpC, argSp10);
 
     s1 = (char*)fn_800B9640();
@@ -374,11 +374,11 @@ void* fn_800BF048(int arg0, void* arg1, unsigned long arg2, int arg3, int arg4, 
 
     switch (*(int*)(self + 0xFC)) {
     case 1:
-        fn_800BF850(self, 2, s1, (int)len1, 2);
-        fn_800BF850(self, 3, s2, (int)len2, 2);
+        printText__15muNoticeWndTaskFUlPCcii(self, 2, s1, (int)len1, 2);
+        printText__15muNoticeWndTaskFUlPCcii(self, 3, s2, (int)len2, 2);
         break;
     case 2:
-        fn_800BF850(self, 4, s1, (int)len1, 2);
+        printText__15muNoticeWndTaskFUlPCcii(self, 4, s1, (int)len1, 2);
         break;
     default:
         ((MuMsg*)*(void**)(self + 0x48))->printf(2, &lbl_8059E0D8);
@@ -393,7 +393,7 @@ void* fn_800BF048(int arg0, void* arg1, unsigned long arg2, int arg3, int arg4, 
 namespace jj_800BFCF4 {
 extern "C" {
 void fn_800B9F90(void* out, void* a, int flag);
-int fn_800BA1FC(int arg0);
+int getButtonPushedControllerID__16muMenuControllerFUl(int arg0);
 void setFrameMatCol__8MuObjectFf(void* obj, float frame);
 void playSE__9sndSystemF5SndIDiiii(void* th, int sndID, int a1, int a2, int a3, int a4);
 extern void* g_sndSystem;
@@ -480,7 +480,7 @@ extern "C" int fn_800BFCF4(Self* self) {
         playSE__9sndSystemF5SndIDiiii(g_sndSystem, sndid, 0x10000, 0, 0, -1);
         self->byte100 = pad25;
         if (pad25 != 0) {
-            int r = fn_800BA1FC(0x1300);
+            int r = getButtonPushedControllerID__16muMenuControllerFUl(0x1300);
             self->f124 = r;
             if (r < 0)
                 self->f124 = 0;

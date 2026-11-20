@@ -58,7 +58,7 @@ struct Result { char pad[0x24]; int data; char pad28[4]; int id; float f30; floa
 struct GameGlobal { char pad[0x30]; void* data; };
 extern "C" float lbl_805A2BA8;
 extern "C" GameGlobal* g_GameGlobal;
-extern "C" Result* fn_800AE578(void*, int);
+extern "C" Result* getSealDataId__21tySealListDataManagerFUl(void*, int);
 extern "C" void fn_800AD87C(void*, int);
 inline int find(int id, int i, Slot* p, int count) {
  for (; i<count; ++p, ++i) {
@@ -96,7 +96,7 @@ extern "C" void fn_8015B230(Record* self) {
  for(int i=0;i<40;++i,entry+=12) {
  int id=*(int*)entry;
  if(id<=0) break;
- Result* result=fn_800AE578(*(void**)self,id);
+ Result* result=getSealDataId__21tySealListDataManagerFUl(*(void**)self,id);
  int index=find(result->id,0,rec->slots,40);
  Slot* slot=&rec->slots[index];
  slot->id=*(unsigned int*)((char*)result+0x2C);

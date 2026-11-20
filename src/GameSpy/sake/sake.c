@@ -339,15 +339,15 @@ int sakeiFillSoapRequestFieldValues(SAKERequest request, SAKEField* fields, int 
 }
 
 // TODO: clean up, give variables real names
-extern void fn_8035E00C(void* arg);
+extern void gsifree(void* arg);
 
 void fn_8038D41C(void* arg) {
-    fn_8035E00C(arg);
+    gsifree(arg);
 }
 
 // TODO: clean up, give variables real names
 void fn_8038D84C(SAKERequest request) {
-    fn_8035E00C(request);
+    gsifree(request);
 }
 
 // TODO: clean up, give variables real names

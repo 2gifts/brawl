@@ -76,9 +76,9 @@ extern "C" void fn_800E1D78(IfPlayer* player, Vec3f* pos);
 // HYPOTHESIS: map names IfPhoto::startPause
 extern "C" void fn_800F00D4(void* photo, int arg1, int arg2, int playerNo, bool arg4);
 // HYPOTHESIS: map names IfCenter::dispKumiteKills
-extern "C" void fn_800DF4AC(void* center, int kills);
+extern "C" void dispKumiteKills__8IfCenterFi(void* center, int kills);
 // HYPOTHESIS: map names muNoticeWndTask::dispSubMsg
-extern "C" void fn_800BF928(muNoticeWndTask* wnd, const char* text);
+extern "C" void dispSubMsg__15muNoticeWndTaskFPCc(muNoticeWndTask* wnd, const char* text);
 // HYPOTHESIS: map names IfAdvBoss::eraseBoss
 extern "C" void fn_80109540(IfAdvBoss* boss, int index);
 // HYPOTHESIS: map names IfSnapSaveTask::create, getState
@@ -537,17 +537,17 @@ void IfMngr::initHeartSwap() {
 }
 
 // TODO: clean up, give variables real names
-extern "C" void fn_800FED80(void*);
+extern "C" void dispHistory__17IfMinigameHomerunFifi(void*);
 
 extern "C" void fn_800DCDD4(void* self) {
-    fn_800FED80(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x74));
+    dispHistory__17IfMinigameHomerunFifi(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x74));
 }
 
-extern "C" void fn_801052DC(void*);
+extern "C" void openMenu__18IfMinigameTrainingFii(void*);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DCDFC(void* self) {
-    fn_801052DC(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x78));
+    openMenu__18IfMinigameTrainingFii(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x78));
 }
 
 // TODO: clean up, give variables real names
@@ -607,10 +607,10 @@ extern "C" {
 
 void Destroy__Q34nw4r3g3d6G3dObjFv(void*);
 void exit__6gfTaskFv(void*);
-void fn_8000D7B8(void*);
-void fn_800DFC08(void);
-void fn_80108DE4(void);
-void fn_80108A04(void*, int);
+void removeInfoCamResAnm__11gfSceneRootFv(void*);
+void destroyPlayerLocator__8IfPlayerFv(void);
+void destroyLocator__9IfAdvBossFv(void);
+void __dt__9IfAdvBossFv(void*, int);
 extern void* g_gfSceneRoot;
 
 struct Pad0x8 { char pad[0x8]; };
@@ -660,7 +660,7 @@ void fn_800DC2E0(void* arg0) {
         q += 4;
     }
 
-    fn_800DFC08();
+    destroyPlayerLocator__8IfPlayerFv();
 
     // f70
     Iface0x74* p70 = *(Iface0x74**)(self + 0x70);
@@ -691,8 +691,8 @@ void fn_800DC2E0(void* arg0) {
 
     // f94
     if (*(void**)(self + 0x94)) {
-        fn_80108DE4();
-        fn_80108A04(*(void**)(self + 0x94), 1);
+        destroyLocator__9IfAdvBossFv();
+        __dt__9IfAdvBossFv(*(void**)(self + 0x94), 1);
         *(void**)(self + 0x94) = 0;
     }
 
@@ -730,7 +730,7 @@ void fn_800DC2E0(void* arg0) {
     }
 
     // g_gfSceneRoot
-    fn_8000D7B8(g_gfSceneRoot);
+    removeInfoCamResAnm__11gfSceneRootFv(g_gfSceneRoot);
 
     // fA0
     void* pA0 = *(void**)(self + 0xA0);
@@ -791,25 +791,25 @@ namespace jj_800DBF08 {
 extern "C" {
 void* fn_801B3440(void*, int, int);
 void* fn_801AB6CC(void*, int, int);
-void* fn_800DD528(void*);
+void* __ct__8IfCenterFv(void*);
 void fn_800DD6E4(void*, void*, void*, int, int);
-void fn_800DDAEC(void*, int);
-void fn_800DFAB4(void*, int);
-void* fn_800DFCB4(void*, int);
+void setTimePos__8IfCenterFi(void*, int);
+void createPlayerLocator__8IfPlayerFPQ34nw4r3g3d7ResFilei(void*, int);
+void* __ct__8IfPlayerFi(void*, int);
 void fn_800E023C(void*, unsigned char, int, void*, void*);
-void* fn_800EFBC0(void*);
-void fn_800EFD70(void*, void*, void*, int, void*, int);
-void* fn_800FE850(void*);
-void fn_800FEA90(void*, void*);
-void* fn_801048EC(void*);
+void* __ct__7IfPhotoFv(void*);
+void createModel__7IfPhotoFPQ34nw4r3g3d7ResFilePQ34nw4r3g3d7ResFilePvPQ34nw4r3g3d7ResFileUl(void*, void*, void*, int, void*, int);
+void* __ct__17IfMinigameHomerunFv(void*);
+void createModel__17IfMinigameHomerunFPQ34nw4r3g3d7ResFile(void*, void*);
+void* __ct__18IfMinigameTrainingFv(void*);
 void fn_80104AA4(void*, void*, int, int, int, int);
-void fn_80108D1C(void*);
-void* fn_8010890C(void*);
-void fn_80108AE0(void*, void*);
-void* fn_800FBB18(void*);
-void fn_800FBC38(void*, void*, int);
-void fn_801971D0(void*, void*);
-void fn_8000D6DC(void*, void*);
+void createLocator__9IfAdvBossFPQ34nw4r3g3d7ResFile(void*);
+void* create__9IfAdvBossFPv(void*);
+void createModel__9IfAdvBossFPQ34nw4r3g3d7ResFile(void*, void*);
+void* __ct__14IfWifiIntrMenuFv(void*);
+void createModel__14IfWifiIntrMenuFPQ34nw4r3g3d7ResFilePv(void*, void*, int);
+void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(void*, void*);
+void setInfoCamResAnm__11gfSceneRootFPQ34nw4r3g3d9ResAnmScn(void*, void*);
 
 extern void* g_gfSceneRoot;
 extern const int lbl_80408580[];
@@ -837,7 +837,7 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
 
     void* obj = operator new(0x1e4, Heaps::InfoInstance);
     if (obj) {
-        obj = fn_800DD528(obj);
+        obj = __ct__8IfCenterFv(obj);
     }
 
     *(void**)(self + 0x44) = obj;
@@ -851,7 +851,7 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
         if (*(int*)(self + 4) == 7) {
             a = 1;
         }
-        fn_800DDAEC(x, a);
+        setTimePos__8IfCenterFi(x, a);
     }
 
     int count = 0;
@@ -863,7 +863,7 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
     if (arg2[0x265] != 3 && arg2[0x265] != 4) count++;
     if (arg2[0x2c1] != 3 && arg2[0x2c1] != 4) count++;
 
-    fn_800DFAB4(self + 0x1c, count);
+    createPlayerLocator__8IfPlayerFPQ34nw4r3g3d7ResFilei(self + 0x1c, count);
 
     int bits = (arg2[9] >> 2) & 7;
     *(int*)(self + 0xb4) = bits >= 4 ? bits : 4;
@@ -872,7 +872,7 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
     for (i = 0; i < *(int*)(self + 0xb4); i++) {
         void* obj2 = operator new(0x5d8, Heaps::InfoInstance);
         if (obj2) {
-            obj2 = fn_800DFCB4(obj2, i);
+            obj2 = __ct__8IfPlayerFi(obj2, i);
         }
         unsigned char flags = arg2[9];
         *(void**)(p + 0x4c) = obj2;
@@ -885,10 +885,10 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
     if (*(int*)(self + 0x30)) {
         void* obj3 = operator new(0x78, Heaps::InfoInstance);
         if (obj3) {
-            obj3 = fn_800EFBC0(obj3);
+            obj3 = __ct__7IfPhotoFv(obj3);
         }
         *(void**)(self + 0x70) = obj3;
-        fn_800EFD70(obj3, self + 0x1c, self + 0x30,
+        createModel__7IfPhotoFPQ34nw4r3g3d7ResFilePQ34nw4r3g3d7ResFilePvPQ34nw4r3g3d7ResFileUl(obj3, self + 0x1c, self + 0x30,
                     *(int*)(self + 0x90), self + 0x3c,
                     *(int*)(self + 0xbc));
     }
@@ -896,16 +896,16 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
     if (*(int*)(self + 0x34)) {
         void* obj4 = operator new(0x128, Heaps::InfoInstance);
         if (obj4) {
-            obj4 = fn_800FE850(obj4);
+            obj4 = __ct__17IfMinigameHomerunFv(obj4);
         }
         *(void**)(self + 0x74) = obj4;
-        fn_800FEA90(obj4, self + 0x34);
+        createModel__17IfMinigameHomerunFPQ34nw4r3g3d7ResFile(obj4, self + 0x34);
     }
 
     if (*(int*)(self + 0x38)) {
         void* obj5 = operator new(0x304, Heaps::InfoInstance);
         if (obj5) {
-            obj5 = fn_801048EC(obj5);
+            obj5 = __ct__18IfMinigameTrainingFv(obj5);
         }
         *(void**)(self + 0x78) = obj5;
         fn_80104AA4(obj5, self + 0x38, *(int*)(self + 0x7c),
@@ -914,19 +914,19 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
     }
 
     if (*(int*)(self + 0x40)) {
-        fn_80108D1C(self + 0x40);
-        void* obj6 = fn_8010890C(*(void**)(self + 0x98));
+        createLocator__9IfAdvBossFPQ34nw4r3g3d7ResFile(self + 0x40);
+        void* obj6 = create__9IfAdvBossFPv(*(void**)(self + 0x98));
         *(void**)(self + 0x94) = obj6;
-        fn_80108AE0(obj6, self + 0x40);
+        createModel__9IfAdvBossFPQ34nw4r3g3d7ResFile(obj6, self + 0x40);
     }
 
     if (*(unsigned char*)(self + 0xa8)) {
         void* obj7 = operator new(0xd0, Heaps::InfoInstance);
         if (obj7) {
-            obj7 = fn_800FBB18(obj7);
+            obj7 = __ct__14IfWifiIntrMenuFv(obj7);
         }
         *(void**)(self + 0x8c) = obj7;
-        fn_800FBC38(obj7, self + 0x1c, *(int*)(self + 0x90));
+        createModel__14IfWifiIntrMenuFPQ34nw4r3g3d7ResFilePv(obj7, self + 0x1c, *(int*)(self + 0x90));
     }
 
     unsigned char* rec =
@@ -940,8 +940,8 @@ void fn_800DBF08(char* self, const unsigned char* arg2) {
     }
 
     sp8 = spC;
-    fn_801971D0(&spC, &sp8);
-    fn_8000D6DC(g_gfSceneRoot, &spC);
+    Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(&spC, &sp8);
+    setInfoCamResAnm__11gfSceneRootFPQ34nw4r3g3d9ResAnmScn(g_gfSceneRoot, &spC);
 }
 }
 }

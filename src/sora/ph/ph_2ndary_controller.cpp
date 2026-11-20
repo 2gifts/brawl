@@ -475,9 +475,9 @@ extern "C" void fn_8008AD64(Self* self) {
 namespace jj_80092250 {
 extern "C" {
 void fn_800937B8(void*, int);
-void fn_8009BD44(void*, void*, void*);
-void fn_801EC158(void*);
-void fn_801EC868(void*, void*, float, float, float);
+void getNWMatrixSeparation__6phMathFPCQ34nw4r4math5MTX34PQ34nw4r4math5MTX34PQ34nw4r4math5MTX34(void*, void*, void*);
+void PSMTXIdentity(void*);
+void PSMTXTransApply(void*, void*, float, float, float);
 }
 
 struct V3 {
@@ -505,7 +505,7 @@ extern "C" void fn_80092250(char* self) {
 
     q = *(unsigned int**)(*(char**)self);
     blk = *(Blk*)(q + 0x37);
-    fn_8009BD44(&blk, f98, f68);
+    getNWMatrixSeparation__6phMathFPCQ34nw4r4math5MTX34PQ34nw4r4math5MTX34PQ34nw4r4math5MTX34(&blk, f98, f68);
 
     cnt = *(int*)(self + 4);
     q2 = ((unsigned int**)(*(char**)self))[cnt - 1];
@@ -514,16 +514,16 @@ extern "C" void fn_80092250(char* self) {
     v.a.z = f98[11];
 
     blk = *(Blk*)(q2 + 0x37);
-    fn_8009BD44(&blk, f98, f68);
+    getNWMatrixSeparation__6phMathFPCQ34nw4r4math5MTX34PQ34nw4r4math5MTX34PQ34nw4r4math5MTX34(&blk, f98, f68);
 
     v.b.x = f98[3];
     v.b.y = f98[7];
     v.b.z = f98[11];
 
     Pair p = v;
-    fn_801EC158(f38);
-    fn_801EC868(f38, self + 0x68, p.a.x, p.a.y, p.a.z);
-    fn_801EC868(f38, self + 0x98, p.b.x, p.b.y, p.b.z);
+    PSMTXIdentity(f38);
+    PSMTXTransApply(f38, self + 0x68, p.a.x, p.a.y, p.a.z);
+    PSMTXTransApply(f38, self + 0x98, p.b.x, p.b.y, p.b.z);
     fn_800937B8(self, 1);
 }
 }
@@ -667,8 +667,8 @@ extern "C" char lbl_8059DBFC;
 extern "C" const f32 lbl_805A1C98;
 
 extern "C" {
-void* fn_8008653C(void* mgr, Self* self, char* name);
-void fn_8008F084(Self* self, Entry* arr, u32* p);
+void* addConstraintArray__13ph2ndaryWorldFPvPCUc(void* mgr, Self* self, char* name);
+void initCallBack__18ph2ndaryControllerFPCQ34nw4r4math5MTX34Q34nw4r3g3d6ResMdl(Self* self, Entry* arr, u32* p);
 void fn_80086694(void* mgr, Vec3* v, char* name, Obj* o, f32 a, f32 b);
 s32 fn_800867E8(void* mgr, Obj* o, u8 b, f32* out, f32 a, f32 c);
 s32 fn_80086AC0(void* mgr, Obj* o, u8 b);
@@ -691,12 +691,12 @@ static inline bool isNaNf(f32& x) {
 extern "C" void fn_8008EB3C(Self* self, Entry* arr, nw4r::g3d::ResMdl* mdl) {
     self->b59 = 0;
     if (self->flagF == 0) {
-        self->f24 = fn_8008653C(getMgr(), self, &lbl_8059DBFA);
+        self->f24 = addConstraintArray__13ph2ndaryWorldFPvPCUc(getMgr(), self, &lbl_8059DBFA);
         self->flagF = 1;
     }
     if (self->flagD == 0) {
         u32 mtmp = *(u32*)mdl;
-        fn_8008F084(self, arr, &mtmp);
+        initCallBack__18ph2ndaryControllerFPCQ34nw4r4math5MTX34Q34nw4r3g3d6ResMdl(self, arr, &mtmp);
         self->flagD = 1;
     }
     s32 i = (s32)self->count - 1;
@@ -812,15 +812,15 @@ extern "C" Global* lbl_8049DEC8[9];
 extern "C" char lbl_8059DBF9;
 extern "C" const float lbl_805A1C98, lbl_805A1CA8;
 
-extern "C" int fn_8008653C(Context*, Self*, char*);
-extern "C" void fn_8008F084(Self*, Matrix*, nw4r::g3d::ResMdl*);
-extern "C" void fn_80081DC4(Node*);
-extern "C" void fn_80081EE0(Node*, Matrix*);
+extern "C" int addConstraintArray__13ph2ndaryWorldFPvPCUc(Context*, Self*, char*);
+extern "C" void initCallBack__18ph2ndaryControllerFPCQ34nw4r4math5MTX34Q34nw4r3g3d6ResMdl(Self*, Matrix*, nw4r::g3d::ResMdl*);
+extern "C" void updateMatrixForMyPosture__12ph2ndaryLineFv(Node*);
+extern "C" void updateMatrixForMotion__12ph2ndaryLineFPCQ34nw4r4math5MTX34(Node*, Matrix*);
 extern "C" void fn_80082130(Node*);
 extern "C" void fn_8008674C(Context*, Vec2*, Vec2*);
-extern "C" void fn_8003E388(Matrix*, Matrix*);
-extern "C" void fn_8003E6DC(Matrix*, Position*);
-extern "C" void fn_80083390(
+extern "C" void copy__6MatrixCFP6Matrix(Matrix*, Matrix*);
+extern "C" void getScalingFactor__FP6MatrixP5Vec3f(Matrix*, Position*);
+extern "C" void operationAwakeExecute__13ph2ndaryWorldFP12ph2ndaryLineP12ph2ndaryLinePCfiiiiUcUcUcUcUciUcUc(
     Context*, Node*, Node*, void*, int, bool, int, int,
     int, int, int, int, int, int, int, int);
 
@@ -831,7 +831,7 @@ extern "C" void fn_8008D8B0(
 {
     if (!self->init) {
         Context* ctx = lbl_8049DEC8[0]->ctx;
-        self->handle = fn_8008653C(ctx ? ctx : 0, self, &lbl_8059DBF9);
+        self->handle = addConstraintArray__13ph2ndaryWorldFPvPCUc(ctx ? ctx : 0, self, &lbl_8059DBF9);
         self->init = 1;
     }
 
@@ -847,7 +847,7 @@ extern "C" void fn_8008D8B0(
 
     if (!self->initModel) {
         nw4r::g3d::ResMdl local = *model;
-        fn_8008F084(self, matrices, &local);
+        initCallBack__18ph2ndaryControllerFPCQ34nw4r4math5MTX34Q34nw4r3g3d6ResMdl(self, matrices, &local);
         self->initModel = 1;
     }
 
@@ -870,7 +870,7 @@ extern "C" void fn_8008D8B0(
                         model->GetResNode(self->nodes[i]->index).ptr();
                     u32 id = data ? *(u32*)((char*)data + 0x10) : 0;
                     self->nodes[i]->dc = matrices[id];
-                    fn_80081DC4(self->nodes[i]);
+                    updateMatrixForMyPosture__12ph2ndaryLineFv(self->nodes[i]);
                 }
             }
         }
@@ -884,7 +884,7 @@ extern "C" void fn_8008D8B0(
                 Matrix* m = &matrices[id];
 
                 self->nodes[count]->m13c = *m;
-                fn_80081EE0(self->nodes[count], m);
+                updateMatrixForMotion__12ph2ndaryLineFPCQ34nw4r4math5MTX34(self->nodes[count], m);
                 self->nodes[count]->m16c = *m;
                 fn_80082130(self->nodes[count]);
 
@@ -902,7 +902,7 @@ extern "C" void fn_8008D8B0(
                      lbl_805A1CA8 == self->nodes[count]->b0 &&
                      self->nodes[count]->end == 0)) {
                     self->nodes[count]->dc = *m;
-                    fn_80081DC4(self->nodes[count]);
+                    updateMatrixForMyPosture__12ph2ndaryLineFv(self->nodes[count]);
                 }
             }
         }
@@ -957,15 +957,15 @@ extern "C" void fn_8008D8B0(
             Matrix tmp;
             Position copy;
             Position out;
-            fn_8003E388(&selected->dc, &tmp);
-            fn_8003E6DC(&tmp, &out);
+            copy__6MatrixCFP6Matrix(&selected->dc, &tmp);
+            getScalingFactor__FP6MatrixP5Vec3f(&tmp, &out);
             copy.x = out.x;
             copy.y = out.y;
             copy.z = out.z;
             selected->result = copy;
         }
 
-        fn_80083390(
+        operationAwakeExecute__13ph2ndaryWorldFP12ph2ndaryLineP12ph2ndaryLinePCfiiiiUcUcUcUcUciUcUc(
             context, *(Node**)((char*)self->nodes + offset),
             selected, (char*)self + 0x3c,
             0, self->state == 0, 0, 0, 0, self->mode,
@@ -1021,10 +1021,10 @@ extern "C" {
 void fn_8008AD64(Context*);
 void fn_80091F28(Object*);
 void fn_80091AFC(Object*);
-int fn_8008F230(Object*);
+int getWeaponLineCount__18ph2ndaryControllerFv(Object*);
 void fn_80095990(Object*, int*);
-void fn_801EC158(void*);
-void fn_801EC868(void*, void*, float, float, float);
+void PSMTXIdentity(void*);
+void PSMTXTransApply(void*, void*, float, float, float);
 extern "C" u8 lbl_8059DC01, lbl_8059DC02, lbl_8059DC03, lbl_8059DC04, lbl_8059DC05, lbl_8059DC06, lbl_8059DC07;
 extern "C" const float lbl_805A1CA8;
 }
@@ -1057,9 +1057,9 @@ static inline void resetFirst(Object* o) {
 // TODO: clean up, give variables real names
 static inline void setMatrices(Object* target, nw4r::math::VEC3 v1, nw4r::math::VEC3 v2) {
     char m[0x30];
-    fn_801EC158(m);
-    fn_801EC868(m, target->matrix1, v1.x, v1.y, v1.z);
-    fn_801EC868(m, target->matrix2, v2.x, v2.y, v2.z);
+    PSMTXIdentity(m);
+    PSMTXTransApply(m, target->matrix1, v1.x, v1.y, v1.z);
+    PSMTXTransApply(m, target->matrix2, v2.x, v2.y, v2.z);
 }
 // TODO: clean up, give variables real names
 static inline void restore(Object* o) {
@@ -1183,7 +1183,7 @@ extern "C" void fn_8008F3E0(Context* self, int mode) {
             fn_80095990(o, &n);
             o->flag5c = 1;
             if (self->b) {
-                u8 count = fn_8008F230(self->b);
+                u8 count = getWeaponLineCount__18ph2ndaryControllerFv(self->b);
                 Object* b = self->b;
                 b->flag5e = count;
                 int n2 = count;

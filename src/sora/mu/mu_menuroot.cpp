@@ -25,7 +25,7 @@ public:
 };
 
 // HYPOTHESIS: cmMenuPadController::storeDefault() (map name; its unit is not recovered).
-extern "C" void fn_800A65E8(cmMenuPadController* controller);
+extern "C" void storeDefault__19cmMenuPadControllerFv(cmMenuPadController* controller);
 // HYPOTHESIS: MenuRoot::overwriteMatAlpha() (map name; the shared nw4r header lacks the material access it needs).
 extern "C" void fn_800B05A0(MenuRoot* root);
 void G3DState_Invalidate(u32 flags);
@@ -149,7 +149,7 @@ void MenuRoot::attachScnAnm(gfFileIOHandle* handle) {
         camera->unkFA.m_mask |= 0x80;
         camera->m_transformFlag.m_mask = 0xE1;
         camera->calc();
-        fn_800A65E8(dynamic_cast<cmMenuPadController*>(
+        storeDefault__19cmMenuPadControllerFv(dynamic_cast<cmMenuPadController*>(
             CameraController::getInstance()->getCameraController(CameraController::MenuPad)));
         dynamic_cast<cmMenuFixedController*>(
             CameraController::getInstance()->getCameraController(CameraController::MenuFixed))->storeDefault();
@@ -181,7 +181,7 @@ void MenuRoot::attachScnAnm(void* data) {
         camera->unkFA.m_mask |= 0x80;
         camera->m_transformFlag.m_mask = 0xE1;
         camera->calc();
-        fn_800A65E8(dynamic_cast<cmMenuPadController*>(
+        storeDefault__19cmMenuPadControllerFv(dynamic_cast<cmMenuPadController*>(
             CameraController::getInstance()->getCameraController(CameraController::MenuPad)));
         dynamic_cast<cmMenuFixedController*>(
             CameraController::getInstance()->getCameraController(CameraController::MenuFixed))->storeDefault();

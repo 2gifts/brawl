@@ -85,10 +85,10 @@ void IfWifiprCenter::startBeginMeleeAnim() {
 // TODO: clean up, give variables real names
 extern "C" void fn_800FD448(void) {}
 
-extern "C" void fn_800B6310(void*);
+extern "C" void isClrAnimFinished__8MuObjectFv(void*);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FD508(void* self) {
-    fn_800B6310(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x0));
+    isClrAnimFinished__8MuObjectFv(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x0));
 }
 

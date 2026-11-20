@@ -89,17 +89,17 @@ void nteWatching::notifySBSEndProc(s32 arg, s32 code) {
 }
 
 // TODO: clean up, give variables real names
-extern "C" void fn_80155E84(void*);
+extern "C" void showError__11nteWatchingFll(void*);
 
 extern "C" void fn_801571F0(void* self) {
-    fn_80155E84(reinterpret_cast<u8*>(self) - 0x340);
+    showError__11nteWatchingFll(reinterpret_cast<u8*>(self) - 0x340);
 }
 
-extern "C" void fn_80155F08(void*);
+extern "C" void notifySBSEndProc__11nteWatchingFll(void*);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_801571F8(void* self) {
-    fn_80155F08(reinterpret_cast<u8*>(self) - 0x344);
+    notifySBSEndProc__11nteWatchingFll(reinterpret_cast<u8*>(self) - 0x344);
 }
 
 // TODO: clean up, give variables real names
@@ -161,9 +161,9 @@ namespace jj_80155C50 {
 extern "C" {
 extern char lbl_80461718[];
 int fn_80155F54(void* self, void** out1, int* out2);
-void* fn_80037DD0();
-void* fn_80037E64(void* self, int flag);
-int fn_80037F04(void* self, void* a, int b, int c);
+void* __ct__11gfCryptoAESFv();
+void* __dt__11gfCryptoAESFv(void* self, int flag);
+int encrypt__11gfCryptoAESFPCvUlQ25Heaps8HeapType(void* self, void* a, int b, int c);
 void netReport__FPCce(const char* fmt, ...);
 void* __nw__FUlQ25Heaps8HeapType(unsigned long size, int heap);
 }
@@ -192,14 +192,14 @@ extern "C" int fn_80155C50(void* arg0) {
         if (fn_80155F54(self, &spC, &sp8) != 0) {
             heap = __nw__FUlQ25Heaps8HeapType(0x388, *(int*)(self + 0x354));
             if (heap != 0) {
-                heap = fn_80037DD0();
+                heap = __ct__11gfCryptoAESFv();
             }
             *(void**)(self + 0x39c) = heap;
             netReport__FPCce(base + 0x30C, heap);
             heap = *(void**)(self + 0x39c);
             if (heap != 0) {
                 *(u8*)((u8*)heap + 0x380) = 1;
-                r = fn_80037F04(*(void**)(self + 0x39c), spC, sp8, *(int*)(self + 0x354));
+                r = encrypt__11gfCryptoAESFPCvUlQ25Heaps8HeapType(*(void**)(self + 0x39c), spC, sp8, *(int*)(self + 0x354));
                 if (r != 0) {
                     netReport__FPCce(base + 0x33C, spC, sp8, *(int*)(self + 0x354));
                     while (*(u8*)((u8*)*(void**)(self + 0x39c) + 0x370) == 0) {
@@ -209,7 +209,7 @@ extern "C" int fn_80155C50(void* arg0) {
                 netReport__FPCce(base + 0x390);
                 if (*(int*)((u8*)*(void**)(self + 0x39c) + 0x374) != 0) {
                     netReport__FPCce(base + 0x3B4);
-                    fn_80037E64(*(void**)(self + 0x39c), 1);
+                    __dt__11gfCryptoAESFv(*(void**)(self + 0x39c), 1);
                     *(void**)(self + 0x39c) = 0;
                 }
                 if (spC != 0) {
@@ -245,19 +245,19 @@ struct SwInst {
 struct Class_80454F64_base { char pad[0x8]; };
 class Class_80454F64 : public Class_80454F64_base {
 public:
-    virtual void fn_800A6A94(int);
+    virtual void __dt__15cmPhotoCallBackFv(int);
 };
 
 struct Class_80461670_base { char pad[0x8]; };
 class Class_80461670 : public Class_80461670_base {
 public:
-    virtual void fn_80152F34();
+    virtual void __dt__18nteFileDataSettingFv();
 };
 
 struct Class_80461684_base { char pad[0x8]; };
 class Class_80461684 : public Class_80461684_base {
 public:
-    virtual void fn_80152DC8();
+    virtual void __dt__16nteFileDataStageFv();
 };
 
 struct Class_80461698_base { char pad[0x8]; };
@@ -269,7 +269,7 @@ public:
 struct Class_804616AC_base { char pad[0x8]; };
 class Class_804616AC : public Class_804616AC_base {
 public:
-    virtual void fn_801529F0();
+    virtual void __dt__16nteFileDataPhotoFv();
 };
 
 struct Class_80466494_base { char pad[0x8]; };
@@ -281,29 +281,29 @@ public:
 struct Class_80466B80_base { char pad[0x8]; };
 class Class_80466B80 : public Class_80466B80_base {
 public:
-    virtual void fn_801C8A68();
+    virtual void __dt__Q34nw4r3snd18SoundArchivePlayerFv();
 };
 
 struct Class_80466D44_base { char pad[0x8]; };
 class Class_80466D44 : public Class_80466D44_base {
 public:
-    virtual void fn_801D03F8();
+    virtual void __dt__Q44nw4r3snd6detail5VoiceFv();
 };
 
 struct Class_80488350_base { char pad[0x8]; };
 class Class_80488350 : public Class_80488350_base {
 public:
-    virtual void fn_802EB3A0();
+    virtual void __dt__16hkNullContactMgrFv();
 };
 
-unsigned char fn_801541DC(void*);
-void* fn_801541F0(void*, int);
+unsigned char getSections_Direct__7nteFileFPCUc(void*);
+void* getSectionData_Direct__7nteFileFPUcUl(void*, int);
 void fn_80153488(void*);
 void fn_80153498(void*, int);
 int fn_80153504(void*, int);
 SwObj* fn_80153818(void*, int);
 void* getInstance__8ipSwitchFv(void);
-int fn_8004B278(int, void*, int);
+int setBufferData__13ipKeyRecorderFPCvUl(int, void*, int);
 void netReport__FPCce(const char*, ...);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -317,14 +317,14 @@ int fn_80156164(void* self, void* arg1) {
     int a;
     int t;
 
-    t = fn_801541DC(arg1);
+    t = getSections_Direct__7nteFileFPCUc(arg1);
     if ((unsigned char)t != 1) {
         netReport__FPCce((const char*)(base + 0x484), t);
         return 0;
     }
 
     fn_80153488(buf);
-    v = (int)fn_801541F0(arg1, 0);
+    v = (int)getSectionData_Direct__7nteFileFPUcUl(arg1, 0);
     if (fn_80153504(buf, v) == 0) {
         netReport__FPCce((const char*)(base + 0x4C8));
         fn_80153498(buf, -1);
@@ -347,7 +347,7 @@ int fn_80156164(void* self, void* arg1) {
         a = obj->unk10;
         {
             SwInst* inst = (SwInst*)getInstance__8ipSwitchFv();
-            if (fn_8004B278(inst->unk18, (void*)q, a) != 0) {
+            if (setBufferData__13ipKeyRecorderFPCvUl(inst->unk18, (void*)q, a) != 0) {
                 ok = 1;
             } else {
                 netReport__FPCce((const char*)(base + 0x544));
@@ -376,7 +376,7 @@ int fn_80156164(void* self, void* arg1) {
     }
 
     if (obj != 0) {
-        ((Class_80454F64*)obj)->fn_800A6A94(1);
+        ((Class_80454F64*)obj)->__dt__15cmPhotoCallBackFv(1);
     }
 
     fn_80153498(buf, -1);
@@ -395,21 +395,21 @@ typedef unsigned long long u64;
 extern "C" {
     void* getInstance__8ipSwitchFv(void);
     void netReport__FPCce(const char*, ...);
-    void fn_8004B23C(void*, void**, int*);
-    void fn_8004C050(int);
-    u8 fn_8014F8E8(void);
-    void fn_80152B5C(void*, int);
+    void getBufferData__13ipKeyRecorderFPPvPUl(void*, void**, int*);
+    void clearOnamae__13ipKeyRecorderFP14ipReplayHeader(int);
+    u8 getUploadSizeLimit__9nteGlobalFv(void);
+    void __ct__17nteFileDataReplayFQ25Heaps8HeapType(void*, int);
     void fn_80152BDC(void*, int);
-    void fn_80152C4C(void*, int, int);
+    void setData__17nteFileDataReplayFPvUl(void*, int, int);
     void fn_80153488(void*);
     void fn_80153498(void*, int);
     void fn_80153610(void*, void*, u64, int, int, int);
-    void fn_80153E2C(void*, int);
-    void fn_80153E3C(void*, int);
+    void __ct__7nteFileFQ25Heaps8HeapType(void*, int);
+    void __dt__7nteFileFv(void*, int);
     void fn_80153EC4(void*, void*);
     int fn_80153810(void*);
-    int fn_80154018(void*);
-    int fn_80154104(void*, int);
+    int getDataFileSize__7nteFileFv(void*);
+    int addSection__7nteFileFP14nteSectionData(void*, int);
     void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUll(int, int, int);
     u64 OSGetTime(void);
     extern char lbl_80461718[];
@@ -434,33 +434,33 @@ extern "C" int fn_80155F54(void* arg0, void** arg1, int* arg2) {
         return 0;
     }
     inst = (u8*)getInstance__8ipSwitchFv();
-    fn_8004B23C(*(void**)(inst + 0x18), (void**)&spC, &sp8);
-    fn_8004C050(spC);
-    lim = (u16)((u8)fn_8014F8E8() * 0xE10 + 0x168);
+    getBufferData__13ipKeyRecorderFPPvPUl(*(void**)(inst + 0x18), (void**)&spC, &sp8);
+    clearOnamae__13ipKeyRecorderFP14ipReplayHeader(spC);
+    lim = (u16)((u8)getUploadSizeLimit__9nteGlobalFv() * 0xE10 + 0x168);
     if (*(u16*)(*(u8**)(*(u8**)((u8*)getInstance__8ipSwitchFv() + 0x18) + 0x24) + 6) > lim) {
         netReport__FPCce(base + 0x438);
         return 0;
     }
-    fn_80152B5C(sp18, 0x2A);
-    fn_80152C4C(sp18, spC, sp8);
+    __ct__17nteFileDataReplayFQ25Heaps8HeapType(sp18, 0x2A);
+    setData__17nteFileDataReplayFPvUl(sp18, spC, sp8);
     fn_80153488(sp10);
     {
         u64 t = OSGetTime();
         fn_80153610(sp10, sp18, t, 0x2A, 0, 0);
     }
-    fn_80153E2C(sp2C, 0x2A);
-    if (fn_80154104(sp2C, fn_80153810(sp10)) == 0) {
+    __ct__7nteFileFQ25Heaps8HeapType(sp2C, 0x2A);
+    if (addSection__7nteFileFP14nteSectionData(sp2C, fn_80153810(sp10)) == 0) {
         netReport__FPCce(base + 0x458);
-        fn_80153E3C(sp2C, -1);
+        __dt__7nteFileFv(sp2C, -1);
         fn_80153498(sp10, -1);
         fn_80152BDC(sp18, -1);
         return 0;
     }
-    type = fn_80154018(sp2C);
+    type = getDataFileSize__7nteFileFv(sp2C);
     heap = alloc__13gfHeapManagerFQ25Heaps8HeapTypeUll(0x2A, type, 0x20);
     if (heap == 0) {
         netReport__FPCce(base + 0x470);
-        fn_80153E3C(sp2C, -1);
+        __dt__7nteFileFv(sp2C, -1);
         fn_80153498(sp10, -1);
         fn_80152BDC(sp18, -1);
         return 0;
@@ -468,7 +468,7 @@ extern "C" int fn_80155F54(void* arg0, void** arg1, int* arg2) {
     fn_80153EC4(sp2C, heap);
     *arg2 = type;
     *arg1 = heap;
-    fn_80153E3C(sp2C, -1);
+    __dt__7nteFileFv(sp2C, -1);
     fn_80153498(sp10, -1);
     fn_80152BDC(sp18, -1);
     return 1;

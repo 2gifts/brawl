@@ -24,16 +24,16 @@ void nteBootTask::startTask() {
 }
 
 // TODO: clean up, give variables real names
-extern "C" void fn_801585EC(void*);
+extern "C" void notify_Error__11nteBootTaskFiii(void*);
 
 extern "C" void fn_80158630(void* self) {
-    fn_801585EC(reinterpret_cast<u8*>(self) - 0x40);
+    notify_Error__11nteBootTaskFiii(reinterpret_cast<u8*>(self) - 0x40);
 }
 
 // TODO: clean up, give variables real names
 namespace jj_801582A4 {
 extern "C" {
-void fn_8014E520(void*, int);
+void __dt__11nteExchangeFv(void*, int);
 void __dt__6gfTaskFv(void*, int);
 void __dl__FPv(void*);
 extern char lbl_80462130[];
@@ -46,7 +46,7 @@ extern "C" void* fn_801582A4(void* self, int flag) {
         *(void**)((char*)self + 0x40) = lbl_80462130 + 0x64;
         void* h = *(void**)((char*)self + 0x48);
         if (h) {
-            fn_8014E520(h, 1);
+            __dt__11nteExchangeFv(h, 1);
             *(void**)((char*)self + 0x48) = 0;
         }
         __dt__6gfTaskFv(self, 0);
@@ -105,21 +105,21 @@ struct Self {
     unsigned int state;
 };
 extern "C" {
-void fn_8014F490(Target*, int, int);
-long long fn_8014CE68(Target*);
-void fn_8014FEC8(long long);
-int fn_8014D108(Target*, int);
-void fn_801505B0(int);
-void fn_801505DC(int);
-int fn_800305B0(int);
-int fn_80150594();
+void _requestJob__11nteExchangeFii(Target*, int, int);
+long long getMyWiiID__15nteWiiConnect24Fv(Target*);
+void setWiiID__9nteGlobalFUx(long long);
+int check_getStatus__15nteWiiConnect24Fi(Target*, int);
+void setEnableNWCMail__9nteGlobalFb(int);
+void setEnableNWCDL__9nteGlobalFb(int);
+int isEnable__14gfSysRecorder2Fi(int);
+int isEnableNWCMail__9nteGlobalFv();
 int fn_8014F584(Target*, int);
-int fn_801505C0();
-unsigned int fn_8014FDF0();
-int fn_8014D794(Target*);
-void fn_8014D854(Target*);
-void fn_8014FE04(int);
-void fn_8014DBDC(Target*);
+int isEnableNWCDL__9nteGlobalFv();
+unsigned int isPermitService__9nteGlobalFv();
+int dl_isRegisterDLTask__15nteWiiConnect24Fv(Target*);
+void dl_registerDLTask__15nteWiiConnect24Fv(Target*);
+void setPermitService__9nteGlobalFb(int);
+void dl_deleteDLTask__15nteWiiConnect24Fv(Target*);
 }
 // TODO: clean up, give variables real names
 extern "C" void fn_801583AC(Self* self) {
@@ -127,7 +127,7 @@ extern "C" void fn_801583AC(Self* self) {
     case 0:
         break;
     case 1:
-        fn_8014F490(self->target, 4, 0);
+        _requestJob__11nteExchangeFii(self->target, 4, 0);
         self->state = 2;
         break;
     case 2:
@@ -141,13 +141,13 @@ extern "C" void fn_801583AC(Self* self) {
         }
         break;
     case 3:
-        fn_8014FEC8(fn_8014CE68(self->target));
-        fn_801505B0(fn_8014D108(self->target, 1));
-        fn_801505DC(fn_8014D108(self->target, 2));
+        setWiiID__9nteGlobalFUx(getMyWiiID__15nteWiiConnect24Fv(self->target));
+        setEnableNWCMail__9nteGlobalFb(check_getStatus__15nteWiiConnect24Fi(self->target, 1));
+        setEnableNWCDL__9nteGlobalFb(check_getStatus__15nteWiiConnect24Fi(self->target, 2));
         self->state = 4;
         break;
     case 4:
-        if (fn_800305B0(3) && fn_80150594() && fn_8014F584(self->target, 0)) {
+        if (isEnable__14gfSysRecorder2Fi(3) && isEnableNWCMail__9nteGlobalFv() && fn_8014F584(self->target, 0)) {
             self->state = 5;
         } else {
             self->state = 6;
@@ -170,18 +170,18 @@ extern "C" void fn_801583AC(Self* self) {
         }
         break;
     case 6:
-        if (fn_801505C0()) {
-            if (fn_8014FDF0() == 1) {
-                if (fn_8014D794(self->target)) {
-                    fn_8014D854(self->target);
+        if (isEnableNWCDL__9nteGlobalFv()) {
+            if (isPermitService__9nteGlobalFv() == 1) {
+                if (dl_isRegisterDLTask__15nteWiiConnect24Fv(self->target)) {
+                    dl_registerDLTask__15nteWiiConnect24Fv(self->target);
                 } else {
-                    fn_8014FE04(0);
+                    setPermitService__9nteGlobalFb(0);
                 }
-            } else if (fn_8014D794(self->target)) {
-                fn_8014DBDC(self->target);
+            } else if (dl_isRegisterDLTask__15nteWiiConnect24Fv(self->target)) {
+                dl_deleteDLTask__15nteWiiConnect24Fv(self->target);
             }
-        } else if (fn_8014FDF0() == 1) {
-            fn_8014FE04(0);
+        } else if (isPermitService__9nteGlobalFv() == 1) {
+            setPermitService__9nteGlobalFb(0);
         }
         self->state = 0;
         self->done = 1;

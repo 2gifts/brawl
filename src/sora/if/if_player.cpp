@@ -2425,7 +2425,7 @@ struct Sub { char pad[0x10]; int field18; char pad1[0xC]; MuObject* objects[6]; 
 struct State { char pad0[0x8]; Sub sub; char pad2[0xEC]; float field12C; int field130; int field134; };
 extern "C" float lbl_805A23B0;
 extern "C" void setFrameNode__8MuObjectFf(MuObject*, float);
-extern "C" int fn_800B5854(MuObject*, int, int, int, int);
+extern "C" int changeAnimN__8MuObjectFiUlbb(MuObject*, int, int, int, int);
 extern "C" void fn_800E1588(State*, int, int, int);
 // TODO: clean up, give variables real names
 extern "C" void fn_800E3820(State* self, int mode) {
@@ -2441,7 +2441,7 @@ extern "C" void fn_800E3820(State* self, int mode) {
     while (i < 6) { MuObject* obj = p[10]; setFrameNode__8MuObjectFf(obj, lbl_805A23B0); p++; i++; }
     i = 2;
     p = self->sub.objects - 8;
-    while (i < 6) { MuObject* obj = p[10]; fn_800B5854(obj, 1, 0x10, 1, 1); p++; i++; }
+    while (i < 6) { MuObject* obj = p[10]; changeAnimN__8MuObjectFiUlbb(obj, 1, 0x10, 1, 1); p++; i++; }
     fn_800E1588(self, self->sub.field18, 0, 0);
 }
 }
@@ -2508,8 +2508,8 @@ public:
 };
 extern "C" f32 lbl_805A23E4;
 extern "C" f32 lbl_805A23C0;
-extern "C" int fn_800B5854(void*, int, int, int, int);
-extern "C" void fn_800B6838(MuObject*, const Vec3f*);
+extern "C" int changeAnimN__8MuObjectFiUlbb(void*, int, int, int, int);
+extern "C" void setTrans__8MuObjectFP5Vec3f(MuObject*, const Vec3f*);
 extern "C" void fn_800E1840(void*, u32, int);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800E3A90(u8* self) {
@@ -2519,14 +2519,14 @@ extern "C" void fn_800E3A90(u8* self) {
  i = 2;
  p = self + 8;
  do {
-  fn_800B5854(*(MuObject**)(p + 0x28), 0, 0x10, 0, 0);
+  changeAnimN__8MuObjectFiUlbb(*(MuObject**)(p + 0x28), 0, 0x10, 0, 0);
   i++; p += 4;
  } while (i < 6);
  p = self;
  pos = self + 0xFC;
  short n = 0;
  while (n < 4) {
-  fn_800B6838(*(MuObject**)(p + 0x30), (const Vec3f*)pos);
+  setTrans__8MuObjectFP5Vec3f(*(MuObject**)(p + 0x30), (const Vec3f*)pos);
   n++; pos += 0xC; p += 4;
  }
  if (*(u32*)(self + 0x1C) != *(u32*)(self + 0x18)) {
@@ -2567,7 +2567,7 @@ extern "C" f32 lbl_805A23B0;
 extern "C" f32 lbl_805A23B4;
 extern "C" f32 lbl_805A23C0;
 
-extern "C" void fn_800B6838(MuObject*, const Vec3f*);
+extern "C" void setTrans__8MuObjectFP5Vec3f(MuObject*, const Vec3f*);
 extern "C" void fn_800E1588(void*, u32, s32, s32);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -2599,7 +2599,7 @@ extern "C" void fn_800E3E64(u8* self) {
     c = self;
     d = self + 0xFC;
     for (i = 0; i < 4; i++, c += 4, d += 0xC) {
-        fn_800B6838(*(MuObject**)(c + 0x30), (const Vec3f*)d);
+        setTrans__8MuObjectFP5Vec3f(*(MuObject**)(c + 0x30), (const Vec3f*)d);
     }
 
     i = 2;
@@ -2644,8 +2644,8 @@ extern "C" {
 extern "C" Object_vptr_0* lbl_805A02E0;
 extern "C" float lbl_805A23B0, lbl_805A23C0, lbl_805A244C, lbl_805A2454, lbl_805A2458;
 extern "C" float lbl_804088A0[], lbl_804088B0[];
-void fn_800B6F6C(void*,const float*);
-void fn_800B6838(void*,const float*,float,float,float,float);
+void setObjRotate__8MuObjectFP5Vec3f(void*,const float*);
+void setTrans__8MuObjectFP5Vec3f(void*,const float*,float,float,float,float);
 // TODO: clean up, give variables real names
 void fn_800E4FD0(Object* self,int arg1,int arg2) {
 float stack[6];
@@ -2656,7 +2656,7 @@ if(mode!=0) {
 float scale;
 if(mode==1) scale=lbl_805A23B0; else scale=lbl_805A244C;
 stack[0]=lbl_805A23B0; stack[1]=lbl_805A23B0; stack[2]=scale;
-fn_800B6F6C(child,&stack[0]);
+setObjRotate__8MuObjectFP5Vec3f(child,&stack[0]);
 unsigned char flag=((unsigned char*)g_GameGlobal->getGlobalRecordMenuDatap())[0x28];
 float* values=((flag>>7)&1)?lbl_804088B0:lbl_804088A0;
 float base;
@@ -2670,7 +2670,7 @@ float end=sum*lbl_805A2458;
 float offset=end-spacing*lbl_805A2458;
 stack[4]=offset+lbl_805A2454*index;
 stack[5]=lbl_805A23B0;
-fn_800B6838(child,&stack[3],lbl_805A2454,index,offset,end);
+setTrans__8MuObjectFP5Vec3f(child,&stack[3],lbl_805A2454,index,offset,end);
 lbl_805A02E0->slot11(lbl_805A02E0->value,child->handle);
 child->frame->animation->slot8(lbl_805A23C0);
 }
@@ -2753,7 +2753,7 @@ extern "C" const float lbl_805A23B0;
 extern "C" const float lbl_805A23C0;
 extern "C" const float lbl_805A23F0;
 extern "C" const double lbl_805A23B8;
-void fn_800B798C(MuObject* obj, float f);
+void setFrameTexSrt__8MuObjectFf(MuObject* obj, float f);
 void fn_800E5318(Self* self, s32 v);
 }
 
@@ -2783,7 +2783,7 @@ extern "C" void fn_800E5174(Self* self, s32 arg1) {
             } else {
                 f31 = lbl_805A23C0;
                 r28->setFrameNode((f32)self->f3A4 - f31);
-                fn_800B798C(r28, (f32)self->f3A4 - lbl_805A23C0);
+                setFrameTexSrt__8MuObjectFf(r28, (f32)self->f3A4 - lbl_805A23C0);
                 ((MuHolder*)r28)->inner->a->setRate(lbl_805A23B0);
                 ((MuHolder*)r28)->inner->b->setRate(lbl_805A23B0);
             }

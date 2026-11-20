@@ -443,9 +443,9 @@ virtual u32 slot2();
 struct Hdr { u64 time; u64 id; u32 crc; u8 flags; u8 kind; u8 b16; u8 b17; u32 size; u32 csize; };
 struct Holder { Hdr* buf; u8 owned; };
 extern "C" {
-u64 fn_8014FEB4();
+u64 getWiiID__9nteGlobalFv();
 u8 getLanguage__10GameGlobalFv(GameGlobal*);
-u8 fn_8004EAC8(GameGlobal*);
+u8 getDistributionType__10GameGlobalFv(GameGlobal*);
 u32 fn_80204FC8(void*, u32, void*, void*, int);
 u32 NETCalcCRC32(void*, u32);
 // TODO: clean up, give variables real names
@@ -476,10 +476,10 @@ return 0;
 self->owned = 1;
 h = self->buf;
 u8* dst = (u8*)self->buf + 0x20;
-h->time = fn_8014FEB4();
+h->time = getWiiID__9nteGlobalFv();
 g = g_GameGlobal;
 u8 lang = getLanguage__10GameGlobalFv(g);
-u8 hi = fn_8004EAC8(g);
+u8 hi = getDistributionType__10GameGlobalFv(g);
 h->flags = (hi << 5) | lang;
 h->kind = src->kind;
 h->b16 = b;
@@ -500,19 +500,19 @@ return 1;
 // TODO: clean up, give variables real names
 namespace jj_80152FA4 {
 extern "C" {
-void fn_8014F6D4(unsigned char);
-void fn_8014F700(unsigned char);
-void fn_8014F828(unsigned short, unsigned char, unsigned char);
-void fn_8014F848(unsigned short, unsigned char, unsigned char);
-void fn_8014F868(unsigned short, unsigned char, unsigned char);
-void fn_8014F888(unsigned short, unsigned char, unsigned char);
-void fn_8014F8A8(unsigned short, unsigned char, unsigned char);
-void fn_8014F8C8(unsigned short, unsigned char, unsigned char);
-void fn_8014F8F8(unsigned char);
-void fn_8014F908(unsigned int, unsigned int);
-void fn_8014F958(unsigned int, unsigned int);
-void fn_8014F9B8(unsigned char);
-void* fn_8014FE34(void);
+void setContribute__9nteGlobalFUc(unsigned char);
+void setIsInfinityContribute__9nteGlobalFb(unsigned char);
+void setContribute_Start__9nteGlobalFUsUcUc(unsigned short, unsigned char, unsigned char);
+void setContribute_End__9nteGlobalFUsUcUc(unsigned short, unsigned char, unsigned char);
+void setWatch_Start__9nteGlobalFUsUcUc(unsigned short, unsigned char, unsigned char);
+void setWatch_End__9nteGlobalFUsUcUc(unsigned short, unsigned char, unsigned char);
+void setDeliv_Start__9nteGlobalFUsUcUc(unsigned short, unsigned char, unsigned char);
+void setDeliv_End__9nteGlobalFUsUcUc(unsigned short, unsigned char, unsigned char);
+void setUploadSizeLimit__9nteGlobalFUc(unsigned char);
+void setEnableUploadCharacter__9nteGlobalFUx(unsigned int, unsigned int);
+void setEnableUploadStage__9nteGlobalFUx(unsigned int, unsigned int);
+void setCollectionLifetime__9nteGlobalFUc(unsigned char);
+void* getUploadSetting__9nteGlobalFv(void);
 }
 
 union Grp {
@@ -558,10 +558,10 @@ extern "C" void fn_80152FA4(Obj* arg0) {
     int f;
 
     if (!((arg0->src->f0 >> 7) & 1)) {
-        fn_8014F6D4(arg0->src->f0);
+        setContribute__9nteGlobalFUc(arg0->src->f0);
     }
     if (!((arg0->src->f1 >> 7) & 1)) {
-        fn_8014F700(arg0->src->f1 != 0);
+        setIsInfinityContribute__9nteGlobalFb(arg0->src->f1 != 0);
     }
     if (arg0->src->g4.w >> 31) {
         f = 0;
@@ -572,7 +572,7 @@ extern "C" void fn_80152FA4(Obj* arg0) {
         var_r29 = arg0->src->g4.p.b;
     }
     if (f != 0) {
-        fn_8014F828(var_r31, var_r30, var_r29);
+        setContribute_Start__9nteGlobalFUsUcUc(var_r31, var_r30, var_r29);
     }
     if (arg0->src->g8.w >> 31) {
         f = 0;
@@ -583,7 +583,7 @@ extern "C" void fn_80152FA4(Obj* arg0) {
         var_r29 = arg0->src->g8.p.b;
     }
     if (f != 0) {
-        fn_8014F848(var_r31, var_r30, var_r29);
+        setContribute_End__9nteGlobalFUsUcUc(var_r31, var_r30, var_r29);
     }
     if (arg0->src->gC.w >> 31) {
         f = 0;
@@ -594,7 +594,7 @@ extern "C" void fn_80152FA4(Obj* arg0) {
         var_r29 = arg0->src->gC.p.b;
     }
     if (f != 0) {
-        fn_8014F868(var_r31, var_r30, var_r29);
+        setWatch_Start__9nteGlobalFUsUcUc(var_r31, var_r30, var_r29);
     }
     if (arg0->src->g10.w >> 31) {
         f = 0;
@@ -605,7 +605,7 @@ extern "C" void fn_80152FA4(Obj* arg0) {
         var_r29 = arg0->src->g10.p.b;
     }
     if (f != 0) {
-        fn_8014F888(var_r31, var_r30, var_r29);
+        setWatch_End__9nteGlobalFUsUcUc(var_r31, var_r30, var_r29);
     }
     if (arg0->src->g14.w >> 31) {
         f = 0;
@@ -616,7 +616,7 @@ extern "C" void fn_80152FA4(Obj* arg0) {
         var_r29 = arg0->src->g14.p.b;
     }
     if (f != 0) {
-        fn_8014F8A8(var_r31, var_r30, var_r29);
+        setDeliv_Start__9nteGlobalFUsUcUc(var_r31, var_r30, var_r29);
     }
     if (arg0->src->g18.w >> 31) {
         f = 0;
@@ -627,29 +627,29 @@ extern "C" void fn_80152FA4(Obj* arg0) {
         var_r29 = arg0->src->g18.p.b;
     }
     if (f != 0) {
-        fn_8014F8C8(var_r31, var_r30, var_r29);
+        setDeliv_End__9nteGlobalFUsUcUc(var_r31, var_r30, var_r29);
     }
     if (!((arg0->src->f3 >> 7) & 1)) {
-        fn_8014F8F8(arg0->src->f3);
+        setUploadSizeLimit__9nteGlobalFUc(arg0->src->f3);
     }
     {
         unsigned int w1 = arg0->src->w1C;
         unsigned int w2 = arg0->src->w20;
         if (!(w1 >> 31)) {
-            fn_8014F908(w1, w2);
+            setEnableUploadCharacter__9nteGlobalFUx(w1, w2);
         }
     }
     {
         unsigned int w1 = arg0->src->w24;
         unsigned int w2 = arg0->src->w28;
         if (!(w1 >> 31)) {
-            fn_8014F958(w1, w2);
+            setEnableUploadStage__9nteGlobalFUx(w1, w2);
         }
     }
     if (!((arg0->src->f2 >> 7) & 1)) {
-        fn_8014F9B8(arg0->src->f2);
+        setCollectionLifetime__9nteGlobalFUc(arg0->src->f2);
     }
-    unsigned char* d = (unsigned char*)fn_8014FE34();
+    unsigned char* d = (unsigned char*)getUploadSetting__9nteGlobalFv();
     COPY(0) COPY(1) COPY(2) COPY(3) COPY(4) COPY(5) COPY(6) COPY(7)
     COPY(8) COPY(9) COPY(10) COPY(11) COPY(12) COPY(13) COPY(14) COPY(15)
     COPY(16) COPY(17) COPY(18) COPY(19) COPY(20) COPY(21) COPY(22) COPY(23)

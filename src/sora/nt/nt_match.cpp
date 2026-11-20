@@ -517,11 +517,11 @@ struct NetworkState {
 };
 
 extern "C" void* getInstance__12ntFriendInfoFv();
-extern "C" void* fn_8014CB40(void*);
-extern "C" int fn_80350CB4(void*, u64);
-extern "C" void fn_80351A08(FriendData*, u64);
+extern "C" void* getUserData__12ntFriendInfoFv(void*);
+extern "C" int DWC_CheckFriendKey(void*, u64);
+extern "C" void DWC_CreateFriendKeyToken(FriendData*, u64);
 extern "C" char* getFriendInfo__12ntFriendInfoFv(void*);
-extern "C" int fn_80351C70(FriendData*, FriendData*);
+extern "C" int DWC_IsEqualFriendData(FriendData*, FriendData*);
 extern "C" void netReport__FPCce(const char*, ...);
 
 extern "C" char lbl_8045F7B8[];
@@ -532,7 +532,7 @@ extern "C" int fn_801474A0(NetworkState* self, u64 id, bool* found, bool* own) {
     *found = false;
     *own = false;
 
-    if (fn_80350CB4(fn_8014CB40(getInstance__12ntFriendInfoFv()), id) == 0) {
+    if (DWC_CheckFriendKey(getUserData__12ntFriendInfoFv(getInstance__12ntFriendInfoFv()), id) == 0) {
         return 0;
     }
 
@@ -542,14 +542,14 @@ extern "C" int fn_801474A0(NetworkState* self, u64 id, bool* found, bool* own) {
     }
 
     FriendData data;
-    fn_80351A08(&data, id);
+    DWC_CreateFriendKeyToken(&data, id);
 
     FriendData* entry = (FriendData*)(
         getFriendInfo__12ntFriendInfoFv(getInstance__12ntFriendInfoFv()) + 0x50
     );
 
     for (int i = 0; i < 64; ++i, ++entry) {
-        if (fn_80351C70(entry, &data) == 1) {
+        if (DWC_IsEqualFriendData(entry, &data) == 1) {
             netReport__FPCce(lbl_8045F7DC);
             *found = true;
             break;
@@ -631,7 +631,7 @@ namespace jj_80147784 {
 extern "C" {
 extern "C" OSMutex lbl_8049EC30;
 s32 fn_801475A4(void* self, s32 a, u64 id, s32 b);
-int fn_801483A4(u64 id);
+int getAvailableFriendListIndex__10NtMatchingFUx(u64 id);
 void fn_80147C9C(void* self, s32 idx);
 void** getInstance__12ntFriendInfoFv(void);
 void* memset(void* p, int c, unsigned int n);
@@ -666,7 +666,7 @@ extern "C" s32 fn_80147784(FriendSelf* self, u64 id, s32 flag) {
     }
 
     OSLockMutex(&lbl_8049EC30);
-    r = fn_801483A4(id);
+    r = getAvailableFriendListIndex__10NtMatchingFUx(id);
     self->unk3420 = r;
     idx = (s8)r;
     if (idx >= 0) {
@@ -751,10 +751,10 @@ void OSLockMutex(void*);
 void OSUnlockMutex(void*);
 void OSSleepTicks(int, unsigned int);
 void netReport__FPCce(const char*, ...);
-int fn_8033A7DC(void);
-int fn_8033A798(void*, void*);
-unsigned char fn_800C851C(void);
-unsigned char fn_8033A77C(void*);
+int DWC_GetAIDBitmap(void);
+int DWC_GetAIDList(void*, void*);
+unsigned char getMyAID__7NetworkFv(void);
+unsigned char DWC_GetMyAID(void*);
 void* memcpy(void*, const void*, unsigned long);
 extern "C" int gUnk805a03d8;
 extern "C" int g_NtAIDBitmap;
@@ -794,24 +794,24 @@ extern "C" void fn_80148664(int arg0, int arg1, int arg2, int arg3, int arg4) {
             netReport__FPCce(base + 0x3F0);
         }
         OSLockMutex(lbl_8049EC30);
-        int v = fn_8033A7DC();
+        int v = DWC_GetAIDBitmap();
         void* p = lbl_805A0434;
         *(int*)((char*)p + 0x3404) = v;
-        int len = fn_8033A798(&buf, p);
+        int len = DWC_GetAIDList(&buf, p);
         oldFlag = lbl_805A0414;
         lbl_805A0414 = len;
         memcpy(&lbl_805A0410, buf, len);
-        int bitmap = fn_8033A7DC();
+        int bitmap = DWC_GetAIDBitmap();
         g_NtAIDBitmap = bitmap;
         lowBits = bitmap;
         int task = g_muWifiInterfaceTask;
-        unsigned char idx = fn_800C851C();
+        unsigned char idx = getMyAID__7NetworkFv();
         if (idx == 0xFF) {
             idx = 4;
         }
         unsigned char* obj = (unsigned char*)(task + idx * 0x218);
         ((Bits7C*)(obj + 0xC7))->mid = lowBits;
-        lbl_8059E742 = fn_8033A77C(obj);
+        lbl_8059E742 = DWC_GetMyAID(obj);
         netReport__FPCce(base + 0x2E0, lbl_805A0414, g_NtAIDBitmap);
         if (oldFlag > lbl_805A0414 && lbl_805A0414 == 1) {
             netReport__FPCce(base + 0x304);
@@ -827,10 +827,10 @@ extern "C" {
 struct ntFriendInfo;
 void** getInstance__12ntFriendInfoFv(ntFriendInfo* self);
 void netReport__FPCce(const char*, ...);
-void fn_800C8F68(const char*, ...);
-void fn_80146FCC(int);
-void fn_8014B130(int);
-void fn_801473AC(void);
+void netMinReport__FPCce(const char*, ...);
+void setMatchingStatus__6NtBaseFi(int);
+void setErrorStatus__10NtMatchingFl(int);
+void clearErrorStatus__6NtBaseFv(void);
 extern "C" char lbl_8045F7A8[];
 extern "C" int lbl_805A03E8;
 extern "C" int lbl_805A03F4;
@@ -881,18 +881,18 @@ int fn_80149644(char* self) {
         L:
             w = 0; break;
         }
-        if (w == 0) fn_801473AC();
+        if (w == 0) clearErrorStatus__6NtBaseFv();
     }
     switch (g_NtMatchingStatus) {
     case 5: case 10:
         return 1;
     case 7: case 8: case 9: case 12:
-        fn_80146FCC(10);
+        setMatchingStatus__6NtBaseFi(10);
         return 1;
     default:
         netReport__FPCce(base + 0xa84);
-        fn_800C8F68(base + 0xaa0);
-        fn_8014B130(6);
+        netMinReport__FPCce(base + 0xaa0);
+        setErrorStatus__10NtMatchingFl(6);
         return 0;
     }
 }
@@ -905,19 +905,19 @@ void OSLockMutex(void*);
 void OSUnlockMutex(void*);
 void OSSleepTicks(int, unsigned int);
 void netReport__FPCce(const char*, ...);
-void fn_8033A50C(void*, int);
-void fn_8034E57C(void*);
+void DWC_SetConnectionClosedCallback(void*, int);
+void DWC_SetUserRecvCallback(void*);
 void fn_80148664();
-void fn_801489D4();
+void udpRecvCallback__10NtMatchingFUcPUci();
 void* getInstance__12ntFriendInfoFv();
-void fn_8014CB40();
-unsigned long long fn_80351964();
+void getUserData__12ntFriendInfoFv();
+unsigned long long DWC_CreateFriendKey();
 void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 void* fn_80157200(void*, int);
 void fn_801578C4();
-void fn_80146FCC(int);
-void* fn_8014C180();
-void fn_8014C26C(void*, int, int);
+void setMatchingStatus__6NtBaseFi(int);
+void* __ct__16ntFriendInfoSaveFv();
+void startSave__16ntFriendInfoSaveFQ25Heaps8HeapTypeb(void*, int, int);
 void fn_800D221C(int, int);
 extern "C" unsigned char lbl_805A03D0;
 extern "C" void* lbl_805A0434;
@@ -940,12 +940,12 @@ extern "C" void fn_80148810(int arg0, int arg1) {
         if (arg0 == 0) {
             netReport__FPCce(base + 0x420, arg1);
             *(int*)((char*)lbl_805A0434 + 0x3448) = arg1;
-            fn_8033A50C((void*)fn_80148664, 0);
-            fn_8034E57C((void*)fn_801489D4);
+            DWC_SetConnectionClosedCallback((void*)fn_80148664, 0);
+            DWC_SetUserRecvCallback((void*)udpRecvCallback__10NtMatchingFUcPUci);
             unsigned long long* obj = (unsigned long long*)((char*)lbl_805A0434 + 0x3440);
             getInstance__12ntFriendInfoFv();
-            fn_8014CB40();
-            unsigned long long v = fn_80351964();
+            getUserData__12ntFriendInfoFv();
+            unsigned long long v = DWC_CreateFriendKey();
             *obj = v;
             netReport__FPCce(base + 0x440, (unsigned int)v, (unsigned int)(v >> 32), (unsigned int)v);
             void* p = __nw__FUlQ25Heaps8HeapType(0x380, 6);
@@ -954,7 +954,7 @@ extern "C" void fn_80148810(int arg0, int arg1) {
             }
             lbl_805A0430 = (int)p;
             fn_801578C4();
-            fn_80146FCC(4);
+            setMatchingStatus__6NtBaseFi(4);
             if (*(unsigned char*)((char*)lbl_805A0434 + 0x343C) != 0) {
                 int w = gUnk805a03d8;
                 int flag = 0;
@@ -964,10 +964,10 @@ extern "C" void fn_80148810(int arg0, int arg1) {
                 if (flag != 0) {
                     void* q = __nw__FUlQ25Heaps8HeapType(0x48, 6);
                     if (q != 0) {
-                        q = fn_8014C180();
+                        q = __ct__16ntFriendInfoSaveFv();
                     }
                     if (q != 0) {
-                        fn_8014C26C(q, 6, 1);
+                        startSave__16ntFriendInfoSaveFQ25Heaps8HeapTypeb(q, 6, 1);
                     }
                 }
             }
@@ -983,8 +983,8 @@ extern "C" void fn_80148810(int arg0, int arg1) {
 namespace jj_80149C70 {
 class BufferDispatch { public: virtual void f0(); virtual void alloc(unsigned int, Heaps::HeapType); };
 extern "C" {
-void fn_80146FCC(int);
-void fn_801473AC();
+void setMatchingStatus__6NtBaseFi(int);
+void clearErrorStatus__6NtBaseFv();
 void* fn_8014B364(void*);
 extern "C" int lbl_805A03E0, lbl_805A03E8, lbl_805A03F4;
 extern "C" unsigned char lbl_805A03E4, lbl_805A0438;
@@ -995,7 +995,7 @@ void* __nw__FUlQ25Heaps8HeapType(unsigned int, Heaps::HeapType);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80149C70(unsigned char* self, int arg1) {
-    fn_80146FCC(0);
+    setMatchingStatus__6NtBaseFi(0);
     lbl_805A03E0 = 0;
     self[0x33ce] = 0;
     *(int*)(self+0x94) = 0;
@@ -1047,7 +1047,7 @@ extern "C" void fn_80149C70(unsigned char* self, int arg1) {
         default:
         L: w = 0; break;
         }
-        if (w == 0) fn_801473AC();
+        if (w == 0) clearErrorStatus__6NtBaseFv();
     }
     ((BufferDispatch*)(self+0x33b8))->alloc(0x8000, (Heaps::HeapType)6);
     OSInitMutex(&lbl_8049EC78);
@@ -1088,22 +1088,22 @@ extern "C" unsigned char* lbl_805A0434;
 extern "C" int gUnk805a03d8;
 extern "C" char lbl_804603B8[];
 
-extern "C" unsigned long long fn_8014FEB4();
-extern "C" int fn_80336928(void*, int);
-extern "C" int fn_803369C0();
+extern "C" unsigned long long getWiiID__9nteGlobalFv();
+extern "C" int DWC_SetOwnStatusData(void*, int);
+extern "C" int DWC_CanChangeFriendList();
 extern "C" void fn_8014A3A0();
 extern "C" void fn_801475A4(void*, int, int, int, int);
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-extern "C" void* fn_8014C180(void*);
-extern "C" void fn_8014C26C(void*, int, int);
-extern "C" void fn_8014C964(void*);
-extern "C" void fn_8014C970(void*);
-extern "C" void fn_8014CB1C(void*, int);
-extern "C" void fn_803369F0(void*);
-extern "C" void fn_80148210();
-extern "C" void fn_80148280();
-extern "C" void fn_801482C8();
-extern "C" void fn_80339E98(int, void (*)(), int, void (*)(), int, void (*)(), int);
+extern "C" void* __ct__16ntFriendInfoSaveFv(void*);
+extern "C" void startSave__16ntFriendInfoSaveFQ25Heaps8HeapTypeb(void*, int, int);
+extern "C" void lock__12ntFriendInfoFv(void*);
+extern "C" void unlock__12ntFriendInfoFv(void*);
+extern "C" void setDirtyFlag__12ntFriendInfoFb(void*, int);
+extern "C" void DWC_DeleteBuddyFriendData(void*);
+extern "C" void updateServerCallback__10NtMatchingFiiPv();
+extern "C" void changetFriendStatusCallback__10NtMatchingFiUcPCcPv();
+extern "C" void deleteFriendListCallback__10NtMatchingFiiPv();
+extern "C" void DWC_UpdateServersAsync(int, void (*)(), int, void (*)(), int, void (*)(), int);
 
 inline int checkState(int v) {
     int flag = 0;
@@ -1117,7 +1117,7 @@ inline int checkState(int v) {
 extern "C" void fn_8014A0F4() {
     if (lbl_805A0434[0x33f4]) {
         unsigned char* p = *(unsigned char**)ntFriendInfo::getInstance() + 0x4f0;
-        unsigned long long v = fn_8014FEB4();
+        unsigned long long v = getWiiID__9nteGlobalFv();
 
         p[0x32] = v >> 56;
         p[0x33] = v >> 48;
@@ -1128,7 +1128,7 @@ extern "C" void fn_8014A0F4() {
         p[0x38] = v >> 8;
         p[0x39] = v;
 
-        int result = fn_80336928(p, 0x89);
+        int result = DWC_SetOwnStatusData(p, 0x89);
         if (((unsigned int)(-result | result) >> 31) != 0) {
             lbl_805A0434[0x33f4] = 0;
             netReport(lbl_804603B8);
@@ -1140,7 +1140,7 @@ extern "C" void fn_8014A0F4() {
             fn_8014A3A0();
         }
 
-        if (lbl_805A0434[0x3410] && fn_803369C0()) {
+        if (lbl_805A0434[0x3410] && DWC_CanChangeFriendList()) {
             fn_801475A4(
                 lbl_805A0434,
                 *(signed char*)(lbl_805A0434 + 0x3420),
@@ -1154,36 +1154,36 @@ extern "C" void fn_8014A0F4() {
                 if (checkState(gUnk805a03d8)) {
                     void* p = __nw__FUlQ25Heaps8HeapType(0x48, 6);
                     if (p) {
-                        p = fn_8014C180(p);
+                        p = __ct__16ntFriendInfoSaveFv(p);
                     }
                     if (p) {
-                        fn_8014C26C(p, 6, 1);
+                        startSave__16ntFriendInfoSaveFQ25Heaps8HeapTypeb(p, 6, 1);
                     }
                 }
                 lbl_805A0434[0x3412] = 0;
             }
         }
 
-        if (lbl_805A0434[0x3411] && fn_803369C0()) {
+        if (lbl_805A0434[0x3411] && DWC_CanChangeFriendList()) {
             int index = *(signed char*)(lbl_805A0434 + 0x3421);
             char* info = (char*)ntFriendInfo::getInstance()->getFriendInfo();
 
-            fn_8014C964(ntFriendInfo::getInstance());
-            fn_803369F0(info + index * 12 + 0x50);
+            lock__12ntFriendInfoFv(ntFriendInfo::getInstance());
+            DWC_DeleteBuddyFriendData(info + index * 12 + 0x50);
             *(index * 4 + info + 0x350) = 0;
-            fn_8014CB1C(ntFriendInfo::getInstance(), 1);
-            fn_8014C970(ntFriendInfo::getInstance());
-            fn_80339E98(0, fn_80148210, 0, fn_80148280, 0, fn_801482C8, 0);
+            setDirtyFlag__12ntFriendInfoFb(ntFriendInfo::getInstance(), 1);
+            unlock__12ntFriendInfoFv(ntFriendInfo::getInstance());
+            DWC_UpdateServersAsync(0, updateServerCallback__10NtMatchingFiiPv, 0, changetFriendStatusCallback__10NtMatchingFiUcPCcPv, 0, deleteFriendListCallback__10NtMatchingFiiPv, 0);
             lbl_805A0434[0x3411] = 0;
 
             if (lbl_805A0434[0x3412]) {
                 if (checkState(gUnk805a03d8)) {
                     void* p = __nw__FUlQ25Heaps8HeapType(0x48, 6);
                     if (p) {
-                        p = fn_8014C180(p);
+                        p = __ct__16ntFriendInfoSaveFv(p);
                     }
                     if (p) {
-                        fn_8014C26C(p, 6, 1);
+                        startSave__16ntFriendInfoSaveFQ25Heaps8HeapTypeb(p, 6, 1);
                     }
                 }
                 lbl_805A0434[0x3412] = 0;
@@ -1195,13 +1195,13 @@ extern "C" void fn_8014A0F4() {
 
 namespace jj_8014792C {
 extern "C" {
-int fn_803368A0(char*, int);
-int fn_8035129C(void*);
-int fn_803F6150(const void*, const void*, unsigned long);
-void fn_80339E98(int, void (*)(int,int), int, void (*)(), int, void (*)(), int);
-void fn_80148210(int,int);
-void fn_80148280();
-void fn_801482C8();
+int DWC_GetNumFriend(char*, int);
+int DWC_IsValidFriendData(void*);
+int memcmp(const void*, const void*, unsigned long);
+void DWC_UpdateServersAsync(int, void (*)(int,int), int, void (*)(), int, void (*)(), int);
+void updateServerCallback__10NtMatchingFiiPv(int,int);
+void changetFriendStatusCallback__10NtMatchingFiUcPCcPv();
+void deleteFriendListCallback__10NtMatchingFiiPv();
 }
 extern "C" char lbl_8045F890[];
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -1211,11 +1211,11 @@ extern "C" void fn_8014792C(void* arg) {
     unsigned char newOrder[64];
     netReport(lbl_8045F890);
     char* info = (char*)ntFriendInfo::getInstance()->getFriendInfo();
-    *(int*)(self + 0x3408) = fn_803368A0(info + 0x50, 64);
+    *(int*)(self + 0x3408) = DWC_GetNumFriend(info + 0x50, 64);
     memset(self + 0x12, 0, 64);
     char* entry = info + 0x50;
     for (int i = 0; i < 64; i++, entry += 12) {
-        if (fn_8035129C(entry)) self[0x12 + i] = 1;
+        if (DWC_IsValidFriendData(entry)) self[0x12 + i] = 1;
     }
     memcpy(oldOrder, info + 0x27c1, 64);
     for (int i = 0; i < 64; i++) {
@@ -1233,9 +1233,9 @@ extern "C" void fn_8014792C(void* arg) {
     for (int i = 0; i < 64; i++) {
         if (self[0x12 + i] == 1) newOrder[count++] = i + 1;
     }
-    if (fn_803F6150(newOrder, info + 0x27c1, 64)) memcpy(info + 0x27c1, newOrder, 64);
+    if (memcmp(newOrder, info + 0x27c1, 64)) memcpy(info + 0x27c1, newOrder, 64);
     memcpy(self + 0x52, info + 0x27c1, 64);
-    fn_80339E98(0, fn_80148210, 0, fn_80148280, 0, fn_801482C8, 0);
+    DWC_UpdateServersAsync(0, updateServerCallback__10NtMatchingFiiPv, 0, changetFriendStatusCallback__10NtMatchingFiUcPCcPv, 0, deleteFriendListCallback__10NtMatchingFiiPv, 0);
 }
 }
 
@@ -1243,8 +1243,8 @@ extern "C" void fn_8014792C(void* arg) {
 namespace jj_80149204 {
 
 extern "C" {
-int fn_8033CAC0(int, int);
-void fn_8033CAE0(int*, int*);
+int DWC_SetGT2ConnectionLatencyLimit(int, int);
+void DWC_GetGT2ConnectionLatencyLimit(int*, int*);
 int fn_80339F84(unsigned char, void*, void*, int, int, int, void*, int, int, int, int);
 int fn_8033A0C8(unsigned char, void*, int, void*, int, int, int, int);
 int fn_8033A200(int, void*, int, void*, int, int, void*, int);
@@ -1263,7 +1263,7 @@ extern "C" int lbl_805A0400;
 extern "C" int lbl_805A0404;
 extern "C" char* lbl_805A0434;
 extern "C" float lbl_805A2B68;
-void fn_80148A74(void);
+void newClientCallback__10NtMatchingFiPv(void);
 void fn_80148A94(void);
 void fn_8014B874(void);
 }
@@ -1284,8 +1284,8 @@ extern "C" int fn_80149204(void) {
             if (x < 0) {
                 x = 0x5265C00;
             }
-            if (fn_8033CAC0(x, x) == 1) {
-                fn_8033CAE0(&a28, &a2c);
+            if (DWC_SetGT2ConnectionLatencyLimit(x, x) == 1) {
+                DWC_GetGT2ConnectionLatencyLimit(&a28, &a2c);
                 netReport(base + 0x7e0, a2c);
             } else {
                 netReport(base + 0x7f0);
@@ -1341,8 +1341,8 @@ extern "C" int fn_80149204(void) {
         break;
     case 2:
         netReport(base + 0x9a8);
-        if (fn_8033CAC0(0x5265C00, 0x5265C00) == 1) {
-            fn_8033CAE0(&a20, &a24);
+        if (DWC_SetGT2ConnectionLatencyLimit(0x5265C00, 0x5265C00) == 1) {
+            DWC_GetGT2ConnectionLatencyLimit(&a20, &a24);
             netReport(base + 0x7e0, a24);
         } else {
             netReport(base + 0x7f0);
@@ -1350,22 +1350,22 @@ extern "C" int fn_80149204(void) {
         netReport(base + 0x9c0, lbl_805A0404);
         r = fn_8033A0C8((unsigned char)lbl_805A0404,
                         (void*)fn_80148A94, 0,
-                        (void*)fn_80148A74, 0, 0, 0, 0);
+                        (void*)newClientCallback__10NtMatchingFiPv, 0, 0, 0, 0);
         if (r == 0) {
             netReport(base + 0x9e0);
         }
         break;
     case 3:
         netReport(base + 0xa1c, lbl_805A0400);
-        if (fn_8033CAC0(0x5265C00, 0x5265C00) == 1) {
-            fn_8033CAE0(&a18, &a1c);
+        if (DWC_SetGT2ConnectionLatencyLimit(0x5265C00, 0x5265C00) == 1) {
+            DWC_GetGT2ConnectionLatencyLimit(&a18, &a1c);
             netReport(base + 0x7e0, a1c);
         } else {
             netReport(base + 0x7f0);
         }
         lbl_805A0434[0x3413] = 1;
         r = fn_8033A200(lbl_805A0400, (void*)fn_80148A94, 0,
-                        (void*)fn_80148A74, 0, 0,
+                        (void*)newClientCallback__10NtMatchingFiPv, 0, 0,
                         lbl_8059E770, 0);
         if (r == 0) {
             netReport(base + 0xa3c);
@@ -1382,19 +1382,19 @@ extern "C" int fn_80149204(void) {
 namespace jj_80148A94 {
 
 extern "C" {
-void fn_80146FCC(int);
+void setMatchingStatus__6NtBaseFi(int);
 void fn_800CFEB8(void*);
 void fn_800D53D4(void*, unsigned char);
 void fn_800D54DC(void*);
 void fn_80143D80(int, unsigned char);
-void fn_80145B78(int);
-void fn_80145B88(int);
-int fn_8033A77C(void*);
-int fn_8033A798(void*);
-int fn_8033A7DC(void);
+void broadcastMyShortComment__4NtTrFv(int);
+void broadcastMyName__4NtTrFv(int);
+int DWC_GetMyAID(void*);
+int DWC_GetAIDList(void*);
+int DWC_GetAIDBitmap(void);
 unsigned char fn_8033AA14(void);
-unsigned char fn_800C851C(void);
-void fn_8034E50C(int, void*, int);
+unsigned char getMyAID__7NetworkFv(void);
+void DWC_SetRecvBuffer(int, void*, int);
 void* memcpy(void*, const void*, unsigned long);
 int DWC_GetLastErrorEx(int*, int*);
 void DWC_ClearError(void);
@@ -1444,22 +1444,22 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
         OSLockMutex(&lbl_8049EC30);
 
         if (arg0 == 0) {
-            int len = fn_8033A798(&buf);
+            int len = DWC_GetAIDList(&buf);
             unsigned char oldFlag = lbl_805A0414;
             lbl_805A0414 = (unsigned char)len;
             memcpy(&lbl_805A0410, buf, (unsigned long)len);
 
-            int bitmap = fn_8033A7DC();
+            int bitmap = DWC_GetAIDBitmap();
             g_NtAIDBitmap = bitmap;
             unsigned char* initialTask = (unsigned char*)g_muWifiInterfaceTask;
             lowBits = bitmap;
-            unsigned char idx = fn_800C851C();
+            unsigned char idx = getMyAID__7NetworkFv();
             if (idx == 0xFF) {
                 idx = 4;
             }
             unsigned char* obj = initialTask + idx * 0x218;
             ((Bits7C*)(obj + 0xC7))->mid = lowBits;
-            lbl_8059E742 = fn_8033A77C(obj);
+            lbl_8059E742 = DWC_GetMyAID(obj);
 
             netReport(base + 0x2E0, lbl_805A0414, g_NtAIDBitmap);
             if (oldFlag > lbl_805A0414 && lbl_805A0414 == 1) {
@@ -1473,7 +1473,7 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
                     } else {
                         netReport(base + 0x4E8);
                     }
-                    fn_80146FCC(5);
+                    setMatchingStatus__6NtBaseFi(5);
                 } else if (arg3 == 1) {
                     netReport(base + 0x52C);
                 } else {
@@ -1497,7 +1497,7 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
                     return;
                 }
                 if (val != lbl_8059E742) {
-                    fn_8034E50C(
+                    DWC_SetRecvBuffer(
                         val,
                         (void*)(*(int*)((char*)lbl_805A0434 + 0x33C8) + offset),
                         0x2000);
@@ -1507,7 +1507,7 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
             }
 
             int diff;
-            int newVal = fn_8033A7DC();
+            int newVal = DWC_GetAIDBitmap();
             int oldVal = *(int*)((char*)lbl_805A0434 + 0x3404);
             diff = newVal & (oldVal ^ newVal);
             int mask = 1 << lbl_8059E742;
@@ -1535,8 +1535,8 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
                         lbl_8059E743 = lbl_8059E744;
                         netReport(base + 0x644);
                         if ((task[0xFC9] >> 7) & 1) {
-                            fn_80145B88(lbl_805A03A8);
-                            fn_80145B78(lbl_805A03A8);
+                            broadcastMyName__4NtTrFv(lbl_805A03A8);
+                            broadcastMyShortComment__4NtTrFv(lbl_805A03A8);
                         }
                         fn_800D54DC(task);
                     } else {
@@ -1558,8 +1558,8 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
                         }
                         if ((task[0xFC9] >> 7) & 1) {
                             netReport(base + 0x6A4);
-                            fn_80145B88(lbl_805A03A8);
-                            fn_80145B78(lbl_805A03A8);
+                            broadcastMyName__4NtTrFv(lbl_805A03A8);
+                            broadcastMyShortComment__4NtTrFv(lbl_805A03A8);
                         } else {
                             fn_800D53D4(task, (unsigned char)j);
                         }
@@ -1567,7 +1567,7 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
                 }
             }
             if (g_NtMatchingStatus == 7) {
-                fn_80146FCC(8);
+                setMatchingStatus__6NtBaseFi(8);
             }
         } else if (arg0 == 18) {
             int err = DWC_GetLastErrorEx(&sp10, &spC);
@@ -1575,7 +1575,7 @@ extern "C" void fn_80148A94(int arg0, int arg1, int arg2, int arg3) {
             netReport(base + 0x700, err, sp10, spC);
             netReport(base + 0x73C);
             DWC_ClearError();
-            fn_80146FCC(5);
+            setMatchingStatus__6NtBaseFi(5);
         } else if (arg0 == 11) {
             netReport(base + 0x758);
         } else {

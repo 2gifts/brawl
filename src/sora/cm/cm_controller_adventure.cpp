@@ -179,8 +179,8 @@ struct Polygon {
 struct Mesh { u32 count; Polygon* polygons; };
 struct Object { char pad[0x98]; float width, height; Mesh* mesh; };
 
-extern "C" int fn_80041D64(Box*, Box*);
-extern "C" int fn_80041978(Box*, Box*);
+extern "C" int checkIntersect1__10clAABBox2DCFRC10clAABBox2D(Box*, Box*);
+extern "C" int checkIntersect__10clAABBox2DCFRC11clSegment2D(Box*, Box*);
 extern "C" void fn_800A46B4(Object*, Box*, Vec2*, Vec2*);
 extern "C" float lbl_805A1FA0;
 extern "C" float lbl_805A1FCC;
@@ -229,7 +229,7 @@ extern "C" void fn_800A4BE4(Object* self, Vec2* arg) {
                 poly = (Polygon*)((char*)mesh->polygons + outerOffset);
                 other.min.set(&poly->min);
                 other.max.set(&poly->max);
-                if (fn_80041D64(&box, &other)) {
+                if (checkIntersect1__10clAABBox2DCFRC10clAABBox2D(&box, &other)) {
                     j = 0;
                     innerOffset = 0;
                     for (; j < (u16)*(short*)poly; innerOffset += 0xC, ++j) {
@@ -244,7 +244,7 @@ extern "C" void fn_800A4BE4(Object* self, Vec2* arg) {
                             edge.min.set(p);
                             edge.max.set(p + 1);
                         }
-                        if (fn_80041978(&box, &edge))
+                        if (checkIntersect__10clAABBox2DCFRC11clSegment2D(&box, &edge))
                             fn_800A46B4(self, &edge, &pos, &half);
                     }
                 }

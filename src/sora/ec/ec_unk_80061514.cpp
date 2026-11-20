@@ -462,8 +462,8 @@ struct Mtx34S { float m[3][4]; };
 extern "C" {
 extern Mtx34S lbl_80497810;
 extern const float lbl_805A1980;
-void fn_801EC158(Mtx34S*);
-void fn_801EC1B8(Mtx34S*, Mtx34S*, Mtx34S*);
+void PSMTXIdentity(Mtx34S*);
+void PSMTXConcat(Mtx34S*, Mtx34S*, Mtx34S*);
 }
 
 // TODO: clean up, give variables real names
@@ -472,12 +472,12 @@ extern "C" void fn_80065300(void*, int kind, void*, void*, Mtx34S* m) {
     case 1: {
         Mtx34S tmp;
         lbl_80497810 = *m;
-        fn_801EC158(&tmp);
+        PSMTXIdentity(&tmp);
         float s = lbl_805A1980;
         tmp.m[0][2] *= s;
         tmp.m[1][2] *= s;
         tmp.m[2][2] *= s;
-        fn_801EC1B8(m, &tmp, m);
+        PSMTXConcat(m, &tmp, m);
         break;
     }
     case 4:
@@ -516,20 +516,20 @@ struct Owner {
 };
 
 extern "C" {
-void* fn_8018D6D8(ResFile*, u32);
-void* fn_8018D8E0(ResFile*, u32);
-void* fn_8018DCF0(ResFile*, u32);
-void* fn_8018DEF8(ResFile*, u32);
-void* fn_8018DAE8(ResFile*, u32);
-void* fn_8018E100(ResFile*, u32);
-AnmObjShpRes* fn_8019BC04(MEMAllocator*, int*, ResAnmShp, ResMdl, bool);
+void* GetResAnmChr__Q34nw4r3g3d7ResFileCFUl(ResFile*, u32);
+void* GetResAnmVis__Q34nw4r3g3d7ResFileCFUl(ResFile*, u32);
+void* GetResAnmTexPat__Q34nw4r3g3d7ResFileCFUl(ResFile*, u32);
+void* GetResAnmTexSrt__Q34nw4r3g3d7ResFileCFUl(ResFile*, u32);
+void* GetResAnmClr__Q34nw4r3g3d7ResFileCFUl(ResFile*, u32);
+void* GetResAnmShp__Q34nw4r3g3d7ResFileCFUl(ResFile*, u32);
+AnmObjShpRes* Construct__Q34nw4r3g3d12AnmObjShpResFP12MEMAllocatorPiQ34nw4r3g3d9ResAnmShpQ34nw4r3g3d6ResMdlb(MEMAllocator*, int*, ResAnmShp, ResMdl, bool);
 extern float lbl_805A1958;
 }
 
 // TODO: clean up, give variables real names
 inline void chrInner(u32 index, ResMdl model, gfModelAnimation* a) {
     int size;
-    ResAnmChr anim(fn_8018D6D8(&a->m_resFile, index));
+    ResAnmChr anim(GetResAnmChr__Q34nw4r3g3d7ResFileCFUl(&a->m_resFile, index));
     MEMAllocator* alloc = gfHeapManager::getMEMAllocator((Heaps::HeapType)3);
     if (anim.IsValid()) {
         AnmObjChrRes* obj = AnmObjChrRes::Construct(alloc, &size, anim, model, false);
@@ -551,7 +551,7 @@ inline void chr(u32 index, ResMdl model, gfModelAnimation* a) {
 inline void visInner(ResMdl model, u32 index, gfModelAnimation* a) {
     int size;
     AnmObjVisRes* obj;
-    void* anim = fn_8018D8E0(&a->m_resFile, index);
+    void* anim = GetResAnmVis__Q34nw4r3g3d7ResFileCFUl(&a->m_resFile, index);
     MEMAllocator* alloc = gfHeapManager::getMEMAllocator((Heaps::HeapType)3);
     if (anim) {
         obj = AnmObjVisRes::Construct(alloc, &size, ResAnmVis(anim), model);
@@ -588,20 +588,20 @@ inline void name(u32 index, void* model, gfModelAnimation* a) { \
         name##Inner(index, ResMdl(model), a); \
 }
 
-HELPER(pat, GetResAnmTexPatNumEntries, fn_8018DCF0, ResAnmTexPat,
+HELPER(pat, GetResAnmTexPatNumEntries, GetResAnmTexPat__Q34nw4r3g3d7ResFileCFUl, ResAnmTexPat,
        AnmObjTexPatRes, m_anmObjTexPatRes)
 // TODO: clean up, give variables real names
-HELPER(srt, GetResAnmTexSrtNumEntries, fn_8018DEF8, ResAnmTexSrt,
+HELPER(srt, GetResAnmTexSrtNumEntries, GetResAnmTexSrt__Q34nw4r3g3d7ResFileCFUl, ResAnmTexSrt,
        AnmObjTexSrtRes, m_anmObjTexSrtRes)
-HELPER(clr, GetResAnmClrNumEntries, fn_8018DAE8, ResAnmClr,
+HELPER(clr, GetResAnmClrNumEntries, GetResAnmClr__Q34nw4r3g3d7ResFileCFUl, ResAnmClr,
        AnmObjMatClrRes, m_anmObjMatClrRes)
 
 inline void shpInner(u32& index, ResMdl model, gfModelAnimation* a) {
     int size;
-    index = (u32)fn_8018E100(&a->m_resFile, index);
+    index = (u32)GetResAnmShp__Q34nw4r3g3d7ResFileCFUl(&a->m_resFile, index);
     if (index) {
         MEMAllocator* alloc = gfHeapManager::getMEMAllocator((Heaps::HeapType)3);
-        AnmObjShpRes* obj = fn_8019BC04(alloc, &size, ResAnmShp((void*)index), model, false);
+        AnmObjShpRes* obj = Construct__Q34nw4r3g3d12AnmObjShpResFP12MEMAllocatorPiQ34nw4r3g3d9ResAnmShpQ34nw4r3g3d6ResMdlb(alloc, &size, ResAnmShp((void*)index), model, false);
         if (obj) {
             obj->Bind(model);
             if (a->m_anmObjShpRes)
@@ -778,15 +778,15 @@ struct Record {
 };
 
 extern "C" {
-void fn_80062954(Record*, int, int);
-void fn_8005A98C(Entry*);
-Entry* fn_8005C650(void*, u8);
-int fn_8005C8F0(Entry*);
-void fn_8005C9B4(Entry*);
-void fn_8006242C(Record*);
-void fn_80062734(Record*, int);
-void fn_8006526C(void*, int);
-void fn_801AF9F4(void*);
+void end__12ecEffectWorkFbb(Record*, int, int);
+void pause__8efEffectFv(Entry*);
+Entry* create__10efParticleFPCcUc(void*, u8);
+int isAlive__10efParticleFv(Entry*);
+void stopEmitter__10efParticleFv(Entry*);
+void renew_attach__12ecEffectWorkFv(Record*);
+void release__12ecEffectWorkFb(Record*, int);
+void SetCallbackCondition__16ecScnObjCallbackFb(void*, int);
+void UpdateFrame__Q34nw4r3g3d12ScnMdlSimpleFv(void*);
 void nwSMSetVisibility__FPQ34nw4r3g3d12ScnMdlSimpleb(void*, bool);
 void* GetResNode__Q34nw4r3g3d6ResMdlCFPCc(
     const nw4r::g3d::ResMdl*, const char*);
@@ -809,14 +809,14 @@ extern "C" int fn_80061944(Record* self, float rate) {
 
     if (self->collisionEnabled) {
         if (!self->collision.isValid()) {
-            fn_80062954(self, 1, 1);
+            end__12ecEffectWorkFbb(self, 1, 1);
         } else {
             void* col = *(void**)((char*)self + 0x5c);
             if (!((*(u8*)((char*)col + 0x2c) >> 7) & 1) ||
                 !((*(u8*)((char*)self->collisionData + 0x54) >> 4) & 1)) {
-                fn_80062954(self, 1, 1);
+                end__12ecEffectWorkFbb(self, 1, 1);
             } else if (*(int*)((char*)col + 0x10) == 0) {
-                fn_80062954(self, 1, 1);
+                end__12ecEffectWorkFbb(self, 1, 1);
             }
         }
     }
@@ -834,7 +834,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
         self->mode = 1;
         for (u32 i = 0; i < self->count; ++i) {
             if (self->entries[i])
-                fn_8005A98C(self->entries[i]);
+                pause__8efEffectFv(self->entries[i]);
         }
     }
 
@@ -865,7 +865,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
                      offset += 4, ++i, item = (AnimEntry*)((char*)item + 0x10)) {
                     if (item->frame == self->frame && item->data) {
                         *(Entry**)((char*)self->entries + offset) =
-                            fn_8005C650((char*)res + item->data,
+                            create__10efParticleFPCcUc((char*)res + item->data,
                                 (self->flags & 0x100) ? 2
                                     : (((FlagBits*)&self->flags)->b9 ^ 1));
                         if (*(Entry**)((char*)self->entries + offset)) {
@@ -902,7 +902,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
                     nwSMSetVisibility__FPQ34nw4r3g3d12ScnMdlSimpleb(
                         self->model, true);
                     if (self->effect)
-                        fn_8006526C(self->effect, 1);
+                        SetCallbackCondition__16ecScnObjCallbackFb(self->effect, 1);
                 }
                 if (table->field14 && self->entries) {
                     Entry* entry = self->entries[self->count - 1];
@@ -913,7 +913,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
                             *((u8*)self->entries[self->count - 1] + 0x0d) &= ~0x40;
                     }
                 }
-                fn_8006242C(self);
+                renew_attach__12ecEffectWorkFv(self);
                 self->state = 1;
             }
             break;
@@ -924,7 +924,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
             if (self->entries) {
                 for (u32 i = 0; i < self->count; ++i) {
                     if (self->entries[i])
-                        fn_8005C9B4(self->entries[i]);
+                        stopEmitter__10efParticleFv(self->entries[i]);
                 }
             }
             self->mode &= ~0x20;
@@ -932,7 +932,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
 
         int finished = 1;
         if (!(self->mode & 0x10)) {
-            fn_8006242C(self);
+            renew_attach__12ecEffectWorkFv(self);
             if (self->model) {
                 if (self->timer) {
                     if (self->mode & 1) {
@@ -967,7 +967,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
                         }
                     }
 
-                    fn_801AF9F4(self->model);
+                    UpdateFrame__Q34nw4r3g3d12ScnMdlSimpleFv(self->model);
                     self->model->slot6(2, 0);
                     self->model->slot1(1, 0, 0);
                     self->model->slot6(2, 1);
@@ -979,7 +979,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
                     nwSMSetVisibility__FPQ34nw4r3g3d12ScnMdlSimpleb(
                         self->model, false);
                     if (self->effect)
-                        fn_8006526C(self->effect, 0);
+                        SetCallbackCondition__16ecScnObjCallbackFb(self->effect, 0);
                 }
             }
         }
@@ -987,7 +987,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
         if (!(self->mode & 1)) {
             if (self->entries) {
                 for (u32 i = 0; i < self->count; ++i) {
-                    if (self->entries[i] && fn_8005C8F0(self->entries[i])) {
+                    if (self->entries[i] && isAlive__10efParticleFv(self->entries[i])) {
                         finished = 0;
                         break;
                     }
@@ -1001,7 +1001,7 @@ extern "C" int fn_80061944(Record* self, float rate) {
         break;
     }
     case 3:
-        fn_80062734(self, 1);
+        release__12ecEffectWorkFb(self, 1);
         self->result = 0;
         return 1;
     default:

@@ -98,15 +98,15 @@ public:
     virtual void fn_801B4918();
     virtual void fn_801B4AE8();
     virtual void fn_801B4AB8();
-    virtual void fn_801AB788();
-    virtual void fn_801AAC9C();
-    virtual void fn_801AAE34();
-    virtual void fn_801AAFDC();
-    virtual void fn_801AAFE8();
-    virtual void fn_801AAA70();
-    virtual void fn_801ABE70();
-    virtual void fn_801ABFFC();
-    virtual void fn_801AC0B8(void*);
+    virtual void ForEach__Q34nw4r3g3d8ScnGroupFPFPQ34nw4r3g3d6ScnObjPv_Q44nw4r3g3d6ScnObj13ForEachResultPvb();
+    virtual void SetScnObjOption__Q34nw4r3g3d6ScnObjFUlUl();
+    virtual void GetScnObjOption__Q34nw4r3g3d6ScnObjCFUlPUl();
+    virtual void GetValueForSortOpa__Q34nw4r3g3d6ScnObjCFv();
+    virtual void GetValueForSortXlu__Q34nw4r3g3d6ScnObjCFv();
+    virtual void CalcWorldMtx__Q34nw4r3g3d6ScnObjFPCQ34nw4r4math5MTX34PUl();
+    virtual void Insert__Q34nw4r3g3d8ScnGroupFUlPQ34nw4r3g3d6ScnObj();
+    virtual void Remove__Q34nw4r3g3d8ScnGroupFUl();
+    virtual void Remove__Q34nw4r3g3d8ScnGroupFPQ34nw4r3g3d6ScnObj(void*);
 };
 struct Self {
     char pad[0x54];
@@ -114,11 +114,11 @@ struct Self {
     Class_804664C0* field58;
     int field5c;
 };
-extern "C" void fn_801B4CB0(void*, void*, int);
+extern "C" void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjUl(void*, void*, int);
 extern "C" void fn_800DA9CC(Self* self, int flag) {
-    self->field58->fn_801AC0B8(self->field54);
+    self->field58->Remove__Q34nw4r3g3d8ScnGroupFPQ34nw4r3g3d6ScnObj(self->field54);
     if (flag) {
-        fn_801B4CB0(self->field58, self->field54, self->field5c);
+        PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjUl(self->field58, self->field54, self->field5c);
     }
 }
 }
@@ -139,10 +139,10 @@ struct Task { char pad[0x40]; MuObject* model; char pad2[0x10]; Object_vptr_0* s
 extern unsigned char lbl_80408540[];
 extern "C" {
 void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-Task* fn_800DA354(void*);
-void fn_800DA4A8(void*, void*, int, int, int, int);
-int fn_800DA81C(void*, int, int, int, int, int);
-void fn_801B4CB0(void*, void*, int);
+Task* __ct__16muWifiCntWndTaskFv(void*);
+void createObjResFile__16muWifiCntWndTaskFPCviPQ34nw4r3g3d7ResFileiQ25Heaps8HeapType(void*, void*, int, int, int, int);
+int dispNum__16muWifiCntWndTaskFiiiii(void*, int, int, int, int, int);
+void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjUl(void*, void*, int);
 nw4r::g3d::ResNodeData* GetResNode__Q34nw4r3g3d6ResMdlCFPCc(void*, const char*);
 }
 inline int clampCount(int count) {
@@ -156,7 +156,7 @@ inline int clampCount(int count) {
 extern "C" Task* fn_800DA15C(int count, int priority, Source* source, const char* name, int draw, int heap, Heaps::HeapType allocator) {
  int node;
  Task* task = (Task*)__nw__FUlQ25Heaps8HeapType(0x68, heap);
- if (task) task = fn_800DA354(task);
+ if (task) task = __ct__16muWifiCntWndTaskFv(task);
  int limit = clampCount(count);
  node = 0;
  nw4r::g3d::ResMdl mdl;
@@ -166,7 +166,7 @@ extern "C" Task* fn_800DA15C(int count, int priority, Source* source, const char
  nw4r::g3d::ResNodeData* res = GetResNode__Q34nw4r3g3d6ResMdlCFPCc(&mdl, name);
  if (res) node = res->m_nodeIndex;
  task->node = node;
- fn_800DA4A8(task, lbl_80408540, 2, priority, draw, allocator);
+ createObjResFile__16muWifiCntWndTaskFPCviPQ34nw4r3g3d7ResFileiQ25Heaps8HeapType(task, lbl_80408540, 2, priority, draw, allocator);
  task->scene = (Object_vptr_0*)nw4r::g3d::ScnMdl::Construct(gfHeapManager::getMEMAllocator(allocator), 0, 4, task->model->m_sceneModel);
  Object_vptr_0* scene = task->scene;
  int c;
@@ -176,15 +176,15 @@ extern "C" Task* fn_800DA15C(int count, int priority, Source* source, const char
  }
  float f;
  if (task->mode == 0) {
-  fn_800DA81C(task, 0, task->count, 1, 0, 1);
+  dispNum__16muWifiCntWndTaskFiiiii(task, 0, task->count, 1, 0, 1);
   f = (float)(task->count - 1);
  } else {
-  fn_800DA81C(task, 0, 2, 0, 0, 1);
-  fn_800DA81C(task, 0, 2, 1, 2, 3);
+  dispNum__16muWifiCntWndTaskFiiiii(task, 0, 2, 0, 0, 1);
+  dispNum__16muWifiCntWndTaskFiiiii(task, 0, 2, 1, 2, 3);
   f = (float)(task->count + 2);
  }
  task->model->setFrameNode(f);
- fn_801B4CB0(task->source, task->scene, task->node);
+ PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjUl(task->source, task->scene, task->node);
  return task;
 }
 }

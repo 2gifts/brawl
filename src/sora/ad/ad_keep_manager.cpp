@@ -9,7 +9,7 @@ extern "C" adSealInfoResult* fn_8015B0E0(void* sealInfo);
 extern "C" void fn_8015B230(adSealInfoResult* sealInfo);
 extern "C" void fn_80052704(u16 id, u8 num);
 extern "C" void fn_80052AC0(u16 id, u8 num);
-extern "C" void fn_8004FB48(u32 id);
+extern "C" void gmSetBGMIDUseEnable__FUl(u32 id);
 extern "C" void fn_80051440(int coins);
 extern "C" void fn_8015A7DC(adKeepManager* keepManager, float rate);
 extern "C" void fn_8015AAA4(adKeepManager* keepManager);
@@ -347,7 +347,7 @@ void adKeepManager::setResultOfTotaling(bool addCoin, bool applyItems) {
                     fn_80052AC0(m_gotRareItems[i].unk4, m_gotRareItems[i].unk8);
                 }
                 if (m_gotRareItems[i].unk0 == 0xB) {
-                    fn_8004FB48(m_gotRareItems[i].unk4);
+                    gmSetBGMIDUseEnable__FUl(m_gotRareItems[i].unk4);
                 }
             }
         }

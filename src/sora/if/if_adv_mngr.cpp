@@ -41,10 +41,10 @@ extern "C" s32 fn_80109C88(s32 state);
 
 extern "C" {
 void fn_80109850(IfAdvPause* pause);
-IfAdvRadarData* fn_8010CF44(IfAdvRadarData* data, void* arg1, void* arg2, void* arg3, void* arg4);
-void fn_8010CF88(IfAdvRadarData* data, int arg);
-void fn_8010D00C();
-void fn_8010A874(IfAdvPause* pause);
+IfAdvRadarData* __ct__14IfAdvRadarDataFPvPvPvPv(IfAdvRadarData* data, void* arg1, void* arg2, void* arg3, void* arg4);
+void create__10IfAdvRadarFP14IfAdvRadarDatai(IfAdvRadarData* data, int arg);
+void destroy__10IfAdvRadarFv();
+void destroyModel__10IfAdvPauseFv(IfAdvPause* pause);
 nw4r::g3d::ScnChoice* fn_801B3440(MEMAllocator* allocator, u32* size, int capacity);
 nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, int capacity);
 void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn* anm);
@@ -58,25 +58,25 @@ void fn_8010C6C8(IfAdvGauge* gauge, s32 value);
 void fn_8010C0FC(IfAdvGauge* gauge, u32 value);
 void fn_8010CA94(IfAdvGauge* gauge, s32 num, u8* stock);
 void fn_8010CCE0(IfAdvGauge* gauge, float scale, u8 count, IfPlayer* player, u8 arg);
-void fn_80108D1C(nw4r::g3d::ResFile* resFile);
-void* fn_8010890C(void* data);
-void fn_80108AE0(void* boss, nw4r::g3d::ResFile* resFile);
-void fn_80108A04(void* boss, int flag);
-void fn_80108DE4();
-void fn_80108E44(nw4r::g3d::ScnGroup* group);
+void createLocator__9IfAdvBossFPQ34nw4r3g3d7ResFile(nw4r::g3d::ResFile* resFile);
+void* create__9IfAdvBossFPv(void* data);
+void createModel__9IfAdvBossFPQ34nw4r3g3d7ResFile(void* boss, nw4r::g3d::ResFile* resFile);
+void __dt__9IfAdvBossFv(void* boss, int flag);
+void destroyLocator__9IfAdvBossFv();
+void startScene__9IfAdvBossFPQ34nw4r3g3d8ScnGroup(nw4r::g3d::ScnGroup* group);
 void fn_80108E5C(void* boss);
 void fn_801092E0(void* boss, IfAdvDispInfo info);
 void fn_80109540(void* boss, int index);
-void fn_80108404(nw4r::g3d::ResFile* resFile);
-void* fn_80108014(int arg, void* data);
-void fn_801081C8(void* zako, nw4r::g3d::ResFile* resFile);
-void fn_801080EC(void* zako, int flag);
-void fn_801084CC();
-void fn_8010852C(nw4r::g3d::ScnGroup* group);
-void fn_80108544(void* zako);
+void createLocator__9IfAdvZakoFPQ34nw4r3g3d7ResFile(nw4r::g3d::ResFile* resFile);
+void* create__9IfAdvZakoFiPv(int arg, void* data);
+void createModel__9IfAdvZakoFPQ34nw4r3g3d7ResFile(void* zako, nw4r::g3d::ResFile* resFile);
+void __dt__9IfAdvZakoFv(void* zako, int flag);
+void destroyLocator__9IfAdvZakoFv();
+void startScene__9IfAdvZakoFPQ34nw4r3g3d8ScnGroup(nw4r::g3d::ScnGroup* group);
+void main__9IfAdvZakoFv(void* zako);
 void fn_80108548(void* zako, IfAdvDispInfo info);
-void fn_80108798(void* zako, int index);
-void fn_80108858(void* zako, int arg1, int arg2);
+void erasesZako__9IfAdvZakoFi(void* zako, int index);
+void zakoDamageOrDeath__9IfAdvZakoFii(void* zako, int arg1, int arg2);
 }
 
 // HYPOTHESIS: the state word of ifAdvTask (private in its header).
@@ -427,12 +427,12 @@ void IfAdvMngr::createModel() {
     m_gauge->createModel(&unk18);
     m_gauge->createModel2(&unk14);
     m_gauge->createModelStRes(&unk18, &unk2C);
-    fn_80108D1C(&unk18);
-    m_boss = fn_8010890C(unk58);
-    fn_80108AE0(m_boss, &unk18);
-    fn_80108404(&unk18);
-    m_zako = fn_80108014(0, unk58);
-    fn_801081C8(m_zako, &unk18);
+    createLocator__9IfAdvBossFPQ34nw4r3g3d7ResFile(&unk18);
+    m_boss = create__9IfAdvBossFPv(unk58);
+    createModel__9IfAdvBossFPQ34nw4r3g3d7ResFile(m_boss, &unk18);
+    createLocator__9IfAdvZakoFPQ34nw4r3g3d7ResFile(&unk18);
+    m_zako = create__9IfAdvZakoFiPv(0, unk58);
+    createModel__9IfAdvZakoFPQ34nw4r3g3d7ResFile(m_zako, &unk18);
     m_pause->createModel(&unk1C, &unk20);
     reinterpret_cast<IfAdvPauseView*>(m_pause)->unk104 = unk28.ptr();
     reinterpret_cast<IfAdvPauseView*>(m_pause)->unk108 = unk40;
@@ -474,15 +474,15 @@ void IfAdvMngr::destroyModel() {
     }
     IfAdvGauge::destroyLocator();
     if (m_boss) {
-        fn_80108A04(m_boss, 1);
+        __dt__9IfAdvBossFv(m_boss, 1);
         m_boss = NULL;
     }
-    fn_80108DE4();
+    destroyLocator__9IfAdvBossFv();
     if (m_zako) {
-        fn_801080EC(m_zako, 1);
+        __dt__9IfAdvZakoFv(m_zako, 1);
         m_zako = NULL;
     }
-    fn_801084CC();
+    destroyLocator__9IfAdvZakoFv();
     if (m_pause) {
         m_pause->destroyModel();
     }
@@ -507,8 +507,8 @@ void IfAdvMngr::startMelee() {
     m_center->startMelee(m_group, 0, 0, 0, 0);
     IfPlayer::startMelee(m_group);
     fn_8010C004(m_group);
-    fn_80108E44(m_group);
-    fn_8010852C(m_group);
+    startScene__9IfAdvBossFPQ34nw4r3g3d8ScnGroup(m_group);
+    startScene__9IfAdvZakoFPQ34nw4r3g3d8ScnGroup(m_group);
     m_choice->Insert(0, m_group);
     m_choice->Insert(1, reinterpret_cast<IfAdvPauseView*>(m_pause)->unk110);
     unkC = 0;
@@ -560,7 +560,7 @@ void IfAdvMngr::meleeMain() {
     }
     IfPlayer::arrowMain(m_players, 7);
     if (m_zako) {
-        fn_80108544(m_zako);
+        main__9IfAdvZakoFv(m_zako);
     }
     if (m_zako) {
         fn_80108E5C(m_boss);
@@ -612,7 +612,7 @@ void IfAdvMngr::meleeMain() {
     if (unk68[0]) {
         if (unk68[0]) {
             if (++unk64[0] == 1 && m_zako) {
-                fn_80108858(m_zako, 1, 0);
+                zakoDamageOrDeath__9IfAdvZakoFii(m_zako, 1, 0);
             }
             if (unk64[0] == 10) {
                 unk64[0] = 0;
@@ -623,13 +623,13 @@ void IfAdvMngr::meleeMain() {
     if (unk6A[0]) {
         if (unk6A[0]) {
             if (++unk66[0] == 1 && m_zako) {
-                fn_80108858(m_zako, 0, 0);
+                zakoDamageOrDeath__9IfAdvZakoFii(m_zako, 0, 0);
             }
             if (unk66[0] == 0x1F) {
                 unk66[0] = 0;
                 unk6A[0] = 0;
                 if (m_zako) {
-                    fn_80108798(m_zako, 0);
+                    erasesZako__9IfAdvZakoFi(m_zako, 0);
                 }
             }
         }
@@ -637,7 +637,7 @@ void IfAdvMngr::meleeMain() {
     if (unk68[1]) {
         if (unk68[1]) {
             if (++unk64[1] == 1 && m_zako) {
-                fn_80108858(m_zako, 1, 1);
+                zakoDamageOrDeath__9IfAdvZakoFii(m_zako, 1, 1);
             }
             if (unk64[1] == 10) {
                 unk64[1] = 0;
@@ -648,13 +648,13 @@ void IfAdvMngr::meleeMain() {
     if (unk6A[1]) {
         if (unk6A[1]) {
             if (++unk66[1] == 1 && m_zako) {
-                fn_80108858(m_zako, 0, 1);
+                zakoDamageOrDeath__9IfAdvZakoFii(m_zako, 0, 1);
             }
             if (unk66[1] == 0x1F) {
                 unk66[1] = 0;
                 unk6A[1] = 0;
                 if (m_zako) {
-                    fn_80108798(m_zako, 1);
+                    erasesZako__9IfAdvZakoFi(m_zako, 1);
                 }
             }
         }
@@ -687,7 +687,7 @@ extern "C" void fn_801077D8(IfAdvMngr* mngr, IfAdvDispInfo info) {
 
 void IfAdvMngr::erasesZako(int index) {
     if (m_zako) {
-        fn_80108798(m_zako, index);
+        erasesZako__9IfAdvZakoFi(m_zako, index);
     }
 }
 

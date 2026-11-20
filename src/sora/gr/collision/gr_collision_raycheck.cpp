@@ -134,7 +134,7 @@ u8 grCollisionRaycheck::raycheck1(clRay2D* ray, grCollision* collision) {
 // TODO: clean up, give variables real names
 namespace jj_8013848C {
 extern "C" {
-void fn_80040518(void*, void*, u32, u32, u32);
+void getAABBox__7clRay2DCFR10clAABBox2D(void*, void*, u32, u32, u32);
 void fn_801380BC(void*, void*);
 extern f32 lbl_805A2A80;
 
@@ -181,7 +181,7 @@ u8 fn_8013848C(void* arg0, void* arg1, const u8* arg2) {
         o->w[2] = w2;
         o->w[3] = w3;
         o->val = val;
-        fn_80040518(arg1, arg0, w2, w1, w0);
+        getAABBox__7clRay2DCFR10clAABBox2D(arg1, arg0, w2, w1, w0);
         fn_801380BC(arg0, (void*)arg2);
         if (o->flag == 1) {
             f32 scale = o->val;

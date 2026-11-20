@@ -849,7 +849,7 @@ struct Object {
     Item* items;
 };
 
-extern "C" int fn_80041D64(Box*, Box*);
+extern "C" int checkIntersect1__10clAABBox2DCFRC10clAABBox2D(Box*, Box*);
 extern "C" void fn_80111458(Object*, Item*, Item*);
 
 // TODO: clean up, give variables real names
@@ -877,7 +877,7 @@ inline void run(Object* arg) {
             for (; j < self->count; innerOffset += 0x60, ++j) {
                 b = (Item*)((u8*)self->items + innerOffset);
                 if (((b->flags >> 6) & 1) && (b->flags & 1) &&
-                    fn_80041D64(&box, &b->box)) {
+                    checkIntersect1__10clAABBox2DCFRC10clAABBox2D(&box, &b->box)) {
                     fn_80111458(self, a, b);
                 }
             }
@@ -916,7 +916,7 @@ struct Object {
     Box box;
 };
 
-extern "C" int fn_80041D64(Box*, Box*);
+extern "C" int checkIntersect1__10clAABBox2DCFRC10clAABBox2D(Box*, Box*);
 extern "C" void fn_80111458(Object*, Item*, Item*);
 
 // TODO: clean up, give variables real names
@@ -929,7 +929,7 @@ extern "C" void fn_8011135C(void* arg0, void* arg1) {
     Item* a;
     int innerOffset;
 
-    if (fn_80041D64(&self->box, &other->box)) {
+    if (checkIntersect1__10clAABBox2DCFRC10clAABBox2D(&self->box, &other->box)) {
         int offset;
         u16 count;
         u32 i;
@@ -939,14 +939,14 @@ extern "C" void fn_8011135C(void* arg0, void* arg1) {
         while (i < count) {
             b = (Item*)((u8*)other->items + offset);
             if (((b->flags >> 6) & 1) && (b->flags & 1) &&
-                fn_80041D64(&self->box, &b->box)) {
+                checkIntersect1__10clAABBox2DCFRC10clAABBox2D(&self->box, &b->box)) {
                 boxB = &b->box;
                 j = 0;
                 innerOffset = 0;
                 while (j < self->count) {
                     a = (Item*)((u8*)self->items + innerOffset);
                     if (((a->flags >> 6) & 1) && (a->flags & 1) &&
-                        fn_80041D64(&a->box, boxB)) {
+                        checkIntersect1__10clAABBox2DCFRC10clAABBox2D(&a->box, boxB)) {
                         fn_80111458(self, a, b);
                     }
                     innerOffset += 0x60;

@@ -1403,7 +1403,7 @@ void addMaxCheck(u32* dst, u32 add, u32 max) {
 // TODO: clean up, give variables real names
 namespace jj_8004EFA8 {
 extern "C" void* memcpy(void*, const void*, unsigned int);
-extern "C" void fn_8006BCA8(char*, const void*);
+extern "C" void utf16to8__7MessageFPcPCw(char*, const void*);
 extern "C" int strcmp(const char*, const char*);
 struct NameSlot { unsigned char pad0[0xE0]; unsigned short used; unsigned char raw[10]; unsigned char pad1[0x38]; };
 struct RawName { unsigned short chars[6]; };
@@ -1419,7 +1419,7 @@ struct Work { RawName raw; char buf[24]; char name[32]; };
 static inline int findName(Manager* mgr, Work& work, int& count, int& index, int& off) {
     while (index < count) {
         NameSlot* slot = (NameSlot*)((char*)mgr->slots + off);
-        if (getName(slot, &work.raw)) fn_8006BCA8(work.buf, &work.raw);
+        if (getName(slot, &work.raw)) utf16to8__7MessageFPcPCw(work.buf, &work.raw);
         if (strcmp(work.name, work.buf) == 0) return index;
         off += 0x124;
         ++index;
@@ -1430,7 +1430,7 @@ static inline int findName(Manager* mgr, Work& work, int& count, int& index, int
 extern "C" void fn_8004EFA8(Manager* mgr, Input* input) {
     memcpy(mgr->data, (char*)input + input->data, 0x4910);
     Work work;
-    fn_8006BCA8(work.name, (char*)input + input->name + 6);
+    utf16to8__7MessageFPcPCw(work.name, (char*)input + input->name + 6);
     int count = 0;
     int i;
     NameSlot* p = mgr->slots;

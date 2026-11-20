@@ -60,14 +60,14 @@ extern const float lbl_805A26A0;
 // TODO: clean up, give variables real names
 namespace jj_800F8680 {
 extern "C" {
-void fn_800B8A0C(void*, int);
+void __dt__5MuMsgFv(void*, int);
 void __dl__FPv(void*);
 }
 
 // TODO: clean up, give variables real names
 extern "C" void* fn_800F8680(void** p, int n) {
     if (p) {
-        fn_800B8A0C(*p, 1);
+        __dt__5MuMsgFv(*p, 1);
         if (n > 0) {
             __dl__FPv(p);
         }
@@ -95,10 +95,10 @@ namespace jj_800F86DC {
 
 extern "C" {
 
-void fn_800B8A0C(void*, int);
-void fn_800B8EDC(void*, void*);
-void fn_800FABEC(void*, void*);
-void fn_800F8548(void*);
+void __dt__5MuMsgFv(void*, int);
+void detachMuObject__5MuMsgFP8MuObject(void*, void*);
+void clear__Q27utility8AutoFileFv(void*, void*);
+void __dt__Q216IfRewardListTask5PanelFv(void*);
 void fn_800F8680(void*);
 void Destroy__Q34nw4r3g3d6G3dObjFv(void*);
 void __destroy_arr(void*, void*, int, int);
@@ -143,7 +143,7 @@ void* fn_800F86DC(void* self, int arg1) {
             q = s;
             j = 0;
             do {
-                fn_800B8EDC(*(void**)(p + 0x334), *(void**)(q + 0x274));
+                detachMuObject__5MuMsgFP8MuObject(*(void**)(p + 0x334), *(void**)(q + 0x274));
                 j++;
                 q += 0x18;
             } while (j < 8);
@@ -153,7 +153,7 @@ void* fn_800F86DC(void* self, int arg1) {
 
         if ((void*)(s + 0x378) != 0) {
             *(void**)(s + 0x384) = lbl_8045B4B8;
-            fn_800FABEC(s + 0x378, lbl_8045B4B8);
+            clear__Q27utility8AutoFileFv(s + 0x378, lbl_8045B4B8);
             release__14gfFileIOHandleFv(s + 0x388);
             __dt__14gfFileIOHandleFv(s + 0x388, -1);
             if ((void*)(s + 0x378) != 0) {
@@ -172,7 +172,7 @@ void* fn_800F86DC(void* self, int arg1) {
 
         if ((void*)(s + 0x360) != 0) {
             *(void**)(s + 0x36C) = lbl_8045B4B8;
-            fn_800FABEC(s + 0x360, lbl_8045B4B8);
+            clear__Q27utility8AutoFileFv(s + 0x360, lbl_8045B4B8);
             release__14gfFileIOHandleFv(s + 0x370);
             __dt__14gfFileIOHandleFv(s + 0x370, -1);
             if ((void*)(s + 0x360) != 0) {
@@ -191,7 +191,7 @@ void* fn_800F86DC(void* self, int arg1) {
 
         if ((void*)(s + 0x348) != 0) {
             *(void**)(s + 0x354) = lbl_8045B4B8;
-            fn_800FABEC(s + 0x348, lbl_8045B4B8);
+            clear__Q27utility8AutoFileFv(s + 0x348, lbl_8045B4B8);
             release__14gfFileIOHandleFv(s + 0x358);
             __dt__14gfFileIOHandleFv(s + 0x358, -1);
             if ((void*)(s + 0x348) != 0) {
@@ -209,11 +209,11 @@ void* fn_800F86DC(void* self, int arg1) {
         }
 
         if ((void*)(s + 0x340) != 0) {
-            fn_800B8A0C(*(void**)(s + 0x340), 1);
+            __dt__5MuMsgFv(*(void**)(s + 0x340), 1);
         }
 
         __destroy_arr(s + 0x334, fn_800F8680, 4, 3);
-        __destroy_arr(s + 0x274, fn_800F8548, 0x18, 8);
+        __destroy_arr(s + 0x274, __dt__Q216IfRewardListTask5PanelFv, 0x18, 8);
 
         if ((void*)(s + 0x270) != 0) {
             void* o = *(void**)(s + 0x270);
@@ -247,7 +247,7 @@ void* fn_800F86DC(void* self, int arg1) {
 
         if ((void*)(s + 0x24C) != 0) {
             *(void**)(s + 0x258) = lbl_8045B4B8;
-            fn_800FABEC(s + 0x24C, lbl_8045B4B8);
+            clear__Q27utility8AutoFileFv(s + 0x24C, lbl_8045B4B8);
             release__14gfFileIOHandleFv(s + 0x25C);
             __dt__14gfFileIOHandleFv(s + 0x25C, -1);
             if ((void*)(s + 0x24C) != 0) {

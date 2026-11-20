@@ -6,7 +6,7 @@
 extern grCollisionManager* lbl_805A0360;
 // HYPOTHESIS: grCollision::getLine1(u16) (gr_collision.o). Kept as a stand-in: the original callers pass the s16 line id
 // without the clrlwi that a call through the u16 member would add.
-extern "C" grCollisionLine* fn_80111B60(grCollision* collision, int index);
+extern "C" grCollisionLine* getLine1__11grCollisionFUs(grCollision* collision, int index);
 // HYPOTHESIS: grCollision::getLineId (gr_collision.o).
 extern "C" u32 fn_80111C70(grCollision* collision, grCollisionLine* line);
 
@@ -41,7 +41,7 @@ bool grCollisionLineWork::getPrevVirtual(grCollisionLineWork* out) const {
         if (collision != NULL) {
             grCollisionJoint* joint = collision->getJointByLineId(lineId);
             if (joint != NULL) {
-                out->m_collisionLine = fn_80111B60(collision, lineId);
+                out->m_collisionLine = getLine1__11grCollisionFUs(collision, lineId);
                 out->m_collisionJoint = joint;
                 out->m_collision = collision;
                 bool valid = out->m_collisionLine != NULL && out->m_collisionJoint != NULL && out->m_collision != NULL;
@@ -68,7 +68,7 @@ bool grCollisionLineWork::getNextVirtual(grCollisionLineWork* out) const {
         if (collision != NULL) {
             grCollisionJoint* joint = collision->getJointByLineId(lineId);
             if (joint != NULL) {
-                out->m_collisionLine = fn_80111B60(collision, lineId);
+                out->m_collisionLine = getLine1__11grCollisionFUs(collision, lineId);
                 out->m_collisionJoint = joint;
                 out->m_collision = collision;
                 bool valid = out->m_collisionLine != NULL && out->m_collisionJoint != NULL && out->m_collision != NULL;

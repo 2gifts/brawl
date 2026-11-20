@@ -41,7 +41,7 @@ void phIkController::setSolverParamData(int idx, const f32* data) {
 // TODO: clean up, give variables real names
 namespace jj_800966EC {
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-extern "C" void* fn_800800D8(void*);
+extern "C" void* __ct__11phContainerFv(void*);
 extern "C" void fn_80080118(void*, int);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -57,7 +57,7 @@ extern "C" void* fn_800966EC(void* self, int arg) {
     *(unsigned int*)((char*)self + 0x1C) = 0x80000000;
     p = __nw__FUlQ25Heaps8HeapType(0x40, 0xD);
     if (p != 0) {
-        p = fn_800800D8(p);
+        p = __ct__11phContainerFv(p);
     }
     *(void**)((char*)self + 0x4) = p;
     fn_80080118(p, arg);
@@ -119,20 +119,20 @@ struct Mat {
  Mat& operator=(const Mat& o) { a=o.a;b=o.b;c=o.c;d=o.d;e=o.e;f=o.f;g=o.g;h=o.h;i=o.i;j=o.j;k=o.k;l=o.l;return *this; }
 };
 struct V { float x,y,z; V() {} V(const V& o) {x=o.x;y=o.y;z=o.z;} V& operator=(const V& o) {x=o.x;y=o.y;z=o.z;return *this;} };
-extern "C" Mat** fn_8032EF00(void*);
-extern "C" int fn_800997D0(void*,s32);
-extern "C" void fn_80283CD0(float*,float*);
-extern "C" void fn_80284F2C(Mat*,float*);
-extern "C" void fn_8003E388(const Mat*,Mat*);
-extern "C" void fn_8003E6DC(const Mat*,V*);
-static inline V getScale(const Mat* m) { V v; fn_8003E6DC(m,&v); return v; }
+extern "C" Mat** accessPoseModelSpace__6hkPoseFv(void*);
+extern "C" int isHaveNodeFromhkIndex__18phIkTwoJointSolverCFi(void*,s32);
+extern "C" void get4x4ColumnMajor__9hkMatrix4CFPf(float*,float*);
+extern "C" void set4x4ColumnMajor__13hkQsTransformFPCf(Mat*,float*);
+extern "C" void copy__6MatrixCFP6Matrix(const Mat*,Mat*);
+extern "C" void getScalingFactor__FP6MatrixP5Vec3f(const Mat*,V*);
+static inline V getScale(const Mat* m) { V v; getScalingFactor__FP6MatrixP5Vec3f(m,&v); return v; }
 extern "C" Mat lbl_804864C0;
 extern "C" float lbl_805A1D28,lbl_805A1D2C;
 // TODO: clean up, give variables real names
 static inline Obj* find(Mgr* m,int id) {
  for(int i=0;i<m->count;++i) {
   Obj* o=m->objs[i];
-  if(o && fn_800997D0(o,id)) return o;
+  if(o && isHaveNodeFromhkIndex__18phIkTwoJointSolverCFi(o,id)) return o;
  }
  return 0;
 }
@@ -158,7 +158,7 @@ struct Mat4 {
 } __attribute__((aligned(16)));
 // TODO: clean up, give variables real names
 extern "C" void fn_800977F0(Mgr* self,Mat* matrices,void* arg) {
- Mat** result=fn_8032EF00(arg);
+ Mat** result=accessPoseModelSpace__6hkPoseFv(arg);
  Mat converted;
  float out[16];
  Mat4 in;
@@ -182,10 +182,10 @@ extern "C" void fn_800977F0(Mgr* self,Mat* matrices,void* arg) {
    const Row& c=Row(src->i,src->j,src->k,src->l);
    const Row& d=Row(zero,zero,zero,one);
    inPtr->set(a,b,c,d);
-   fn_80283CD0(inPtr->in,out);
-   fn_80284F2C(&converted,out);
+   get4x4ColumnMajor__9hkMatrix4CFPf(inPtr->in,out);
+   set4x4ColumnMajor__13hkQsTransformFPCf(&converted,out);
    (*result)[id]=converted;
-   fn_8003E388(&matrices[pos],&copy);
+   copy__6MatrixCFP6Matrix(&matrices[pos],&copy);
    v1=getScale(&copy);
    v2=v1;
    found->out=v2.y;
@@ -233,18 +233,18 @@ struct M12 { float a[12]; };
 
 extern "C" {
 void fn_800977F0(void* self, void* dst, void* buf);
-void fn_800986A8(void* e, void* buf);
+void init__18phIkTwoJointSolverFv(void* e, void* buf);
 void fn_800986AC(void* e, void* buf);
 void fn_800988EC(void* e, void* buf);
 void fn_80098E14(void* e, void* buf);
 void fn_80099838(void* e, void* buf);
-s32 fn_800997D0(void* e, s16 id);
-void fn_8027CD94(void* arr, s32 n, s32 elem);
-void fn_8027EABC(s32 heap, void* p, s32 n, s32 tag);
-void fn_80283D7C(float* dst, const float* src);
-void fn_80284DB0(void* src, float* dst);
-void* fn_8032EB2C(void* buf);
-void fn_8032F030(void* buf);
+s32 isHaveNodeFromhkIndex__18phIkTwoJointSolverCFi(void* e, s16 id);
+void _reserve__11hkArrayUtilFP11hkArrayBaseii(void* arr, s32 n, s32 elem);
+void deallocateChunk__14hkThreadMemoryFPvii(s32 heap, void* p, s32 n, s32 tag);
+void set4x4ColumnMajor__9hkMatrix4FPCf(float* dst, const float* src);
+void get4x4ColumnMajor__13hkQsTransformCFPf(void* src, float* dst);
+void* getPoseModelSpace__6hkPoseFv(void* buf);
+void setToReferencePose__6hkPoseFv(void* buf);
 }
 extern "C" s32 lbl_805A0EC8;
 
@@ -265,21 +265,21 @@ static inline void initBuf(Buf& buf, Pool* pool) {
     s32 cap = buf.a1.cap & 0x3FFFFFFF;
     if (cap < count) {
         s32 d = cap * 2;
-        fn_8027CD94(&buf.a1, (count < d) ? d : count, 0x30);
+        _reserve__11hkArrayUtilFP11hkArrayBaseii(&buf.a1, (count < d) ? d : count, 0x30);
     }
     buf.a1.size = count;
 
     s32 cap2 = buf.a0.cap & 0x3FFFFFFF;
     if (cap2 < count) {
         s32 d = cap2 * 2;
-        fn_8027CD94(&buf.a0, (count < d) ? d : count, 0x30);
+        _reserve__11hkArrayUtilFP11hkArrayBaseii(&buf.a0, (count < d) ? d : count, 0x30);
     }
     buf.a0.size = count;
 
     s32 cap3 = buf.a2.cap & 0x3FFFFFFF;
     if (cap3 < count) {
         s32 d = cap3 * 2;
-        fn_8027CD94(&buf.a2, (count < d) ? d : count, 1);
+        _reserve__11hkArrayUtilFP11hkArrayBaseii(&buf.a2, (count < d) ? d : count, 1);
     }
     buf.a2.size = count;
 
@@ -289,7 +289,7 @@ static inline void initBuf(Buf& buf, Pool* pool) {
 static inline Ent* findEnt(Ctx* self, s16 id) {
     for (s32 k = 0; k < self->nEnts; k++) {
         Ent* q = self->ents[k];
-        if (q != 0 && fn_800997D0(q, id) != 0) return q;
+        if (q != 0 && isHaveNodeFromhkIndex__18phIkTwoJointSolverCFi(q, id) != 0) return q;
     }
     return 0;
 }
@@ -320,7 +320,7 @@ extern "C" void fn_800969E0(Ctx* self, void* dst) {
 
     initBuf(buf, self->sub->pool);
 
-    fn_8032F030(&buf);
+    setToReferencePose__6hkPoseFv(&buf);
     fn_800977F0(self, dst, &buf);
 
     for (i = 0; i < self->nEnts; i++) {
@@ -328,7 +328,7 @@ extern "C" void fn_800969E0(Ctx* self, void* dst) {
         if (e == 0) continue;
         if (e->f1 == 0) continue;
         if (e->f0 == 0) {
-            fn_800986A8(e, &buf);
+            init__18phIkTwoJointSolverFv(e, &buf);
             e->f0 = 1;
         }
         if (e->f3 != 0) fn_80099838(e, &buf);
@@ -338,7 +338,7 @@ extern "C" void fn_800969E0(Ctx* self, void* dst) {
             fn_80098E14(e, &buf);
         }
 
-        float** base = (float**)fn_8032EB2C(&buf);
+        float** base = (float**)getPoseModelSpace__6hkPoseFv(&buf);
 
         for (j = 0; j < self->nRecs; j++) {
             Rec* rec = &self->recs[j];
@@ -348,8 +348,8 @@ extern "C" void fn_800969E0(Ctx* self, void* dst) {
             Ent* found = findEnt(self, id);
 
             if (contains(self, id) && found->f1 != 0) {
-                fn_80284DB0((char*)*base + id * 0x30, raw);
-                fn_80283D7C(mtx, raw);
+                get4x4ColumnMajor__13hkQsTransformCFPf((char*)*base + id * 0x30, raw);
+                set4x4ColumnMajor__9hkMatrix4FPCf(mtx, raw);
                 M12* d = (M12*)((char*)dst + idx * 0x30);
                 m44[0] = mtx[0];   m44[1] = mtx[1];   m44[2] = mtx[2];   m44[3] = mtx[3];
                 m44[4] = mtx[4];   m44[5] = mtx[5];   m44[6] = mtx[6];   m44[7] = mtx[7];
@@ -364,11 +364,11 @@ extern "C" void fn_800969E0(Ctx* self, void* dst) {
     }
 
     if (flags(buf.a2) == 0)
-        fn_8027EABC(lbl_805A0EC8, buf.a2.data, buf.a2.cap & 0x3FFFFFFF, 0x15);
+        deallocateChunk__14hkThreadMemoryFPvii(lbl_805A0EC8, buf.a2.data, buf.a2.cap & 0x3FFFFFFF, 0x15);
     if (flags(buf.a1) == 0)
-        fn_8027EABC(lbl_805A0EC8, buf.a1.data, (buf.a1.cap & 0x3FFFFFFF) * 0x30, 0x15);
+        deallocateChunk__14hkThreadMemoryFPvii(lbl_805A0EC8, buf.a1.data, (buf.a1.cap & 0x3FFFFFFF) * 0x30, 0x15);
     if (flags(buf.a0) == 0)
-        fn_8027EABC(lbl_805A0EC8, buf.a0.data, (buf.a0.cap & 0x3FFFFFFF) * 0x30, 0x15);
+        deallocateChunk__14hkThreadMemoryFPvii(lbl_805A0EC8, buf.a0.data, (buf.a0.cap & 0x3FFFFFFF) * 0x30, 0x15);
 }
 }
 

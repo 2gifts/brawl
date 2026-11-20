@@ -290,7 +290,7 @@ struct ArchiveFlags {
     u8 low : 4;
 };
 
-extern "C" void fn_8001429C(void*);
+extern "C" void releaseEffect__9gfArchiveFv(void*);
 extern "C" void fn_80014028(void*);
 
 #define F(p, t, o) (*(t*)((u8*)(p) + (o)))
@@ -328,7 +328,7 @@ extern "C" void fn_80013DEC(u8* self) {
 
     if (F(self, void*, 0x20) != 0) {
         if ((self[9] >> 3) & 1)
-            fn_8001429C(self);
+            releaseEffect__9gfArchiveFv(self);
         if ((self[9] >> 6) & 1)
             gfHeapManager::free(F(self, void*, 0x20));
         F(self, void*, 0x20) = 0;
@@ -383,7 +383,7 @@ struct ArchiveFlags {
 };
 
 extern "C" void fn_80014028(void*);
-extern "C" void fn_80014BF4(void*, void*, s32);
+extern "C" void createEntryArrayAll__9gfArchiveFP19gfArchiveFileHeaderPv(void*, void*, s32);
 
 #define F(p, t, o) (*(t*)((u8*)(p) + (o)))
 #define CLEAR(node, cursor, flags, index) \
@@ -453,7 +453,7 @@ extern "C" void fn_800134C4(u8* self, u8* arg1) {
             ((ArchiveFlags*)(archive + 9))->special = 0;
             ((ArchiveFlags*)(archive + 9))->complete = 0;
             u8* object = F(self, u8*, 8);
-            fn_80014BF4(object, data, F(object, s32, 20));
+            createEntryArrayAll__9gfArchiveFP19gfArchiveFileHeaderPv(object, data, F(object, s32, 20));
         }
     }
 }
@@ -462,8 +462,8 @@ extern "C" void fn_800134C4(u8* self, u8* arg1) {
 namespace jj_80014ED4 {
 
 extern "C" void fn_80014028(void*);
-extern "C" void fn_8001429C(void*);
-extern "C" void fn_80014AF8(void*, void*, int, void*);
+extern "C" void releaseEffect__9gfArchiveFv(void*);
+extern "C" void setFileImageInternalSub__9gfArchiveFPviPv(void*, void*, int, void*);
 
 #define FIELD(p,t,o) (*(t*)((u8*)(p)+(o)))
 struct EntryFlags { u8 owned : 1; u8 other : 7; };
@@ -536,7 +536,7 @@ extern "C" int fn_80014ED4(u8* self, const char* path, Heaps::HeapType heapType)
             size = ((gfFileIOHandle*)(self+0x6c))->getSize();
             data = ((gfFileIOHandle*)(self+0x6c))->getBuffer();
             if (FIELD(self,void*,0x20) != NULL) {
-                if ((self[9] >> 3) & 1) fn_8001429C(self);
+                if ((self[9] >> 3) & 1) releaseEffect__9gfArchiveFv(self);
                 if ((self[9] >> 6) & 1) gfHeapManager::free(FIELD(self,void*,0x20));
                 FIELD(self,void*,0x20) = NULL;
             }
@@ -581,7 +581,7 @@ gfHeapManager::free(node);
             FIELD(self,void*,0x68) = NULL;
             ((ArchiveFlags*)(self + 9))->special = 0;
             ((ArchiveFlags*)(self + 9))->complete = 0;
-            fn_80014AF8(self, data, size, heap);
+            setFileImageInternalSub__9gfArchiveFPviPv(self, data, size, heap);
             self[9] |= 0x40;
             ((gfFileIOHandle*)(self+0x6c))->release();
             strncpy((char*)self + 0x28, path, 64);

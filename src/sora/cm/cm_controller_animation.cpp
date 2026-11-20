@@ -22,10 +22,10 @@ void cmAnimationController::releaseScnAnmRes() {
 }
 
 // TODO: clean up, give variables real names
-extern "C" void fn_80196FD4(void*);
+extern "C" void GetResAnmCameraNumEntries__Q34nw4r3g3d9ResAnmScnCFv(void*);
 
 extern "C" void fn_800A6590(void* self) {
-    fn_80196FD4(reinterpret_cast<u8*>(self) + 0x20);
+    GetResAnmCameraNumEntries__Q34nw4r3g3d9ResAnmScnCFv(reinterpret_cast<u8*>(self) + 0x20);
 }
 
 // TODO: clean up, give variables real names
@@ -77,11 +77,11 @@ public:
 };
 
 extern "C" {
-void fn_80018778(gfCamera*);
-void fn_800194AC(gfCamera*, s32*);
-s32 fn_801AC554(void*, s32);
-void fn_801AC5EC(void*, s32);
-void fn_801ACB68(void*);
+void calc__8gfCameraFv(gfCamera*);
+void setFromNwCamera__8gfCameraFPQ34nw4r3g3d6Camera(gfCamera*, s32*);
+s32 GetCamera__Q34nw4r3g3d7ScnRootFi(void*, s32);
+void SetCurrentCamera__Q34nw4r3g3d7ScnRootFi(void*, s32);
+void CalcWorld__Q34nw4r3g3d7ScnRootFv(void*);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800A63A0(Self* self, float f) {
@@ -97,11 +97,11 @@ void fn_800A63A0(Self* self, float f) {
     Object_vptr_0* obj = self->m10;
     if (obj != 0) {
         if (obj->slot17() >= 1) {
-            fn_801AC5EC(self->mC, 0);
-            fn_801ACB68(self->mC);
-            s32 sp8 = fn_801AC554(self->mC, 0);
-            fn_800194AC(t, &sp8);
-            fn_80018778(t);
+            SetCurrentCamera__Q34nw4r3g3d7ScnRootFi(self->mC, 0);
+            CalcWorld__Q34nw4r3g3d7ScnRootFv(self->mC);
+            s32 sp8 = GetCamera__Q34nw4r3g3d7ScnRootFi(self->mC, 0);
+            setFromNwCamera__8gfCameraFPQ34nw4r3g3d6Camera(t, &sp8);
+            calc__8gfCameraFv(t);
             self->m10->slot7(f);
             self->m10->slot9();
             P* p = self->m10->m20;
@@ -128,7 +128,7 @@ void fn_800A63A0(Self* self, float f) {
                 t->unkFA.m_mask = t->unkFA.m_mask | 2;
                 self->m1C = self->m1C + 1;
                 t->m_transformFlag.m_mask = 0x43;
-                fn_80018778(t);
+                calc__8gfCameraFv(t);
                 return;
             }
             self->m20 = 1;

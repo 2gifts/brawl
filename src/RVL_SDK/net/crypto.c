@@ -12,16 +12,16 @@ void fn_80390010(void) {
 
 // TODO: clean up, give variables real names
 extern int lbl_805A49C8;
-extern void fn_8038FBB4(int, int, int, int, int*);
+extern void NETAESCreateEx(int, int, int, int, int*);
 
 void fn_8038FD64(int a, int b, int c, int d) {
-    fn_8038FBB4(a, b, c, d, &lbl_805A49C8);
+    NETAESCreateEx(a, b, c, d, &lbl_805A49C8);
 }
 
 // TODO: clean up, give variables real names
 /* jj_8038F4C0 */
 extern int lbl_8059FC38;
-extern void *fn_80212588(int);
+extern void *IOS_Close(int);
 extern char lbl_80491398[];
 extern char lbl_8059FC48;
 void OSReport(const char *msg, ...);
@@ -30,7 +30,7 @@ void OSReport(const char *msg, ...);
 void fn_8038F4C0(void) {
     char *base = lbl_80491398;
     if (lbl_8059FC38 >= 0) {
-        void *r = fn_80212588(lbl_8059FC38);
+        void *r = IOS_Close(lbl_8059FC38);
         if (r == 0) {
             lbl_8059FC38 = -1;
             return;

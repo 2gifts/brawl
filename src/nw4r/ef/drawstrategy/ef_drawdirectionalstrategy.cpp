@@ -476,16 +476,16 @@ DrawDirectionalStrategy::GetCalcAheadFunc(ParticleManager* pManager) {
 namespace jj_8017842C {
 
 extern "C" {
-void fn_801ECD70(void*, void*, void*);
+void PSMTXMultVec(void*, void*, void*);
 
 // TODO: clean up, give variables real names
 void fn_8017842C(void* arg0, void* arg1, s32 arg2) {
     f32 v0[3], v1[3], v2[3], v3[3];
 
-    fn_801ECD70(arg0, arg1, v0);
-    fn_801ECD70(arg0, (u8*)arg1 + 0xC, v1);
-    fn_801ECD70(arg0, (u8*)arg1 + 0x18, v2);
-    fn_801ECD70(arg0, (u8*)arg1 + 0x24, v3);
+    PSMTXMultVec(arg0, arg1, v0);
+    PSMTXMultVec(arg0, (u8*)arg1 + 0xC, v1);
+    PSMTXMultVec(arg0, (u8*)arg1 + 0x18, v2);
+    PSMTXMultVec(arg0, (u8*)arg1 + 0x24, v3);
     GXBegin(GX_QUADS, GX_VTXFMT0, 4);
     {
         f32 z0 = v0[2];

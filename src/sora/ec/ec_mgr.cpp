@@ -651,7 +651,7 @@ workFound:
 }
 
 // HYPOTHESIS: grCollStatus::getTouchLine (main.dol 0x80134524), as declared in gr_collision_body.cpp.
-extern "C" grCollisionLineWork* fn_80134524(grCollStatus* status, int touchId);
+extern "C" grCollisionLineWork* getTouchLineWork__12grCollStatusFQ212grCollStatus7TouchId(grCollStatus* status, int touchId);
 
 void ecMgr::setGroundAttach(u32 handleId, soGroundModule* groundModule) {
     ecEffectWork* work;
@@ -673,15 +673,15 @@ void ecMgr::setGroundAttach(u32 handleId, soGroundModule* groundModule) {
     work = 0;
 workFound:
     if (work) {
-        fn_80062D08(work, fn_80134524(groundModule->getCollStatus(0), 3));
+        fn_80062D08(work, getTouchLineWork__12grCollStatusFQ212grCollStatus7TouchId(groundModule->getCollStatus(0), 3));
     }
 }
 
 // TODO: clean up, give variables real names
-extern "C" void fn_8005F814(void);
+extern "C" void setEffect__5ecMgrF4EfIDUlPC5Vec3fPC5Vec3fPC5Vec3f(void);
 
 extern "C" void fn_8005F7FC(void) {
-    fn_8005F814();
+    setEffect__5ecMgrF4EfIDUlPC5Vec3fPC5Vec3fPC5Vec3f();
 }
 
 extern "C" void fn_80061510(void) {}
@@ -915,8 +915,8 @@ extern "C" {
 extern "C" const Tbl1 lbl_80407198;
 extern "C" const Tbl2 lbl_804073B0;
 extern "C" void* g_GameGlobal;
-u32 fn_8004E958(void* p);
-void* fn_8018D3F0(void* a, const char* b);
+u32 isJustGameFrame__10GameGlobalCFv(void* p);
+void* GetResTex__Q34nw4r3g3d7ResFileCFPCc(void* a, const char* b);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_80061160(Owner* self, u32 a1, s32 a2, u32 a3, u32 a4, u32 a5, u32 a6, u8 a7, f32 f) {
@@ -928,7 +928,7 @@ void fn_80061160(Owner* self, u32 a1, s32 a2, u32 a3, u32 a4, u32 a5, u32 a6, u8
         if (idx < 0x86) {
             Entry* found = findEntry(self, ids.v[idx]);
             if (found) {
-                u32 sp10 = (u32)fn_8018D3F0(found->p8, names.v[idx]);
+                u32 sp10 = (u32)GetResTex__Q34nw4r3g3d7ResFileCFPCc(found->p8, names.v[idx]);
                 u32* pSp10 = &sp10;
                 if (sp10 != 0) {
                     u32 flag = 0;
@@ -977,7 +977,7 @@ void fn_80061160(Owner* self, u32 a1, s32 a2, u32 a3, u32 a4, u32 a5, u32 a6, u8
             }
         }
     }
-    fn_8004E958(g_GameGlobal);
+    isJustGameFrame__10GameGlobalCFv(g_GameGlobal);
     ((ecTraceMgr*)((u8*)self + 0x98))->start(a1, a3, a4, a5, self->slot[self->kind], a6, a7, 0, f);
 }
 }

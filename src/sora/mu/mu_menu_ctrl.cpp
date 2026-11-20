@@ -205,7 +205,7 @@ extern "C" int fn_800BA3D8(muMenuController* self) {
 
 // TODO: clean up, give variables real names
 namespace jj_800B9640 {
-extern "C" int fn_8004D9E8(void* obj);
+extern "C" int isLanguageJp__10GameGlobalFv(void* obj);
 extern "C" void* g_GameGlobal;
 extern "C" void* lbl_8059E080;
 extern "C" void* lbl_8059E08C;
@@ -213,7 +213,7 @@ extern "C" void* lbl_8059E08C;
 // TODO: clean up, give variables real names
 extern "C" void* fn_800B9640(void) {
     void* r;
-    if (fn_8004D9E8(g_GameGlobal) != 0) {
+    if (isLanguageJp__10GameGlobalFv(g_GameGlobal) != 0) {
         r = lbl_8059E080;
     } else {
         r = lbl_8059E08C;
@@ -225,14 +225,14 @@ extern "C" void* fn_800B9640(void) {
 namespace jj_800B9678 {
 #pragma optimization_level 0
 
-extern "C" int fn_8004D9E8(void* obj);
+extern "C" int isLanguageJp__10GameGlobalFv(void* obj);
 extern void* g_GameGlobal;
 extern int lbl_8059E084;
 extern int lbl_8059E094;
 
 // TODO: clean up, give variables real names
 extern "C" int fn_800B9678(void) {
-    if (fn_8004D9E8(g_GameGlobal)) {
+    if (isLanguageJp__10GameGlobalFv(g_GameGlobal)) {
         return lbl_8059E084;
     }
     return lbl_8059E094;
@@ -242,14 +242,14 @@ extern "C" int fn_800B9678(void) {
 namespace jj_800B96B0 {
 #pragma optimization_level 0
 
-extern "C" int fn_8004D9E8(void* obj);
+extern "C" int isLanguageJp__10GameGlobalFv(void* obj);
 extern void* g_GameGlobal;
 extern int lbl_8059E098;
 extern int lbl_8059E09C;
 
 // TODO: clean up, give variables real names
 extern "C" int fn_800B96B0(void) {
-    if (fn_8004D9E8(g_GameGlobal)) {
+    if (isLanguageJp__10GameGlobalFv(g_GameGlobal)) {
         return lbl_8059E098;
     }
     return lbl_8059E09C;

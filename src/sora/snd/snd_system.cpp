@@ -40,11 +40,11 @@ void AXQuit(void);
 }
 
 // HYPOTHESIS: sndHeapSys / sndLoadThread / sndBgmRateSystem members that are still unnamed in the symbols.
-extern "C" bool fn_8007AB34(sndHeapSys* heap, SndGroupID groupId);
+extern "C" bool isLoaded__10sndHeapSysF10SndGroupID(sndHeapSys* heap, SndGroupID groupId);
 extern "C" s32 fn_8007A324(sndHeapSys* heap, int heapLevel, SndGroupID groupId, s32 size);
 extern "C" s32 fn_8007A5EC(sndHeapSys* heap, s32 slot, SndGroupID groupId, s32 size);
-extern "C" nw4r::snd::SoundMemoryAllocatable* fn_8007A314(sndHeapSys* heap, s32 slot);
-extern "C" void fn_8007A78C(sndHeapSys* heap, SndGroupID groupId, s32 slot);
+extern "C" nw4r::snd::SoundMemoryAllocatable* getHeapP__10sndHeapSysFl(sndHeapSys* heap, s32 slot);
+extern "C" void saveState__10sndHeapSysF10SndGroupIDl(sndHeapSys* heap, SndGroupID groupId, s32 slot);
 extern "C" void fn_8007A79C(sndHeapSys* heap);
 extern "C" void fn_8007AA48(sndHeapSys* heap, int heapLevel);
 extern "C" void fn_80079AA4(sndLoadThread* loadThread, SndGroupID groupId, s32 slot, s32 result);
@@ -359,7 +359,7 @@ int sndSystem::loadSoundGroup(SndGroupID sndGroupId, int heapLevel, bool isReque
     if (size == 0) {
         return -3;
     }
-    if (fn_8007AB34(m_sndHeapSys, sndGroupId) != 0) {
+    if (isLoaded__10sndHeapSysF10SndGroupID(m_sndHeapSys, sndGroupId) != 0) {
         return -1;
     }
     slot = fn_8007A324(m_sndHeapSys, heapLevel, sndGroupId, size);
@@ -373,8 +373,8 @@ int sndSystem::loadSoundGroup(SndGroupID sndGroupId, int heapLevel, bool isReque
     if (isRequest) {
         fn_80079AA4(m_loadThread, sndGroupId, slot, result);
     } else {
-        m_archivePlayer.LoadGroup((u32)sndGroupId, fn_8007A314(m_sndHeapSys, slot), 0x10000U);
-        fn_8007A78C(m_sndHeapSys, sndGroupId, slot);
+        m_archivePlayer.LoadGroup((u32)sndGroupId, getHeapP__10sndHeapSysFl(m_sndHeapSys, slot), 0x10000U);
+        saveState__10sndHeapSysF10SndGroupIDl(m_sndHeapSys, sndGroupId, slot);
     }
     return result;
 }
@@ -401,7 +401,7 @@ bool sndSystem::isFinishFree() {
 }
 
 bool sndSystem::isSoundGroupLoaded(SndGroupID sndGroupId) {
-    return fn_8007AB34(m_sndHeapSys, sndGroupId);
+    return isLoaded__10sndHeapSysF10SndGroupID(m_sndHeapSys, sndGroupId);
 }
 
 void sndSystem::loadCommon() {
@@ -409,8 +409,8 @@ void sndSystem::loadCommon() {
 
 // Run by the load thread.
 void sndSystem::loadGroupThread(SndGroupID sndGroupId, int slot) {
-    m_archivePlayer.LoadGroup((u32)sndGroupId, fn_8007A314(m_sndHeapSys, slot), 0x10000U);
-    fn_8007A78C(m_sndHeapSys, sndGroupId, slot);
+    m_archivePlayer.LoadGroup((u32)sndGroupId, getHeapP__10sndHeapSysFl(m_sndHeapSys, slot), 0x10000U);
+    saveState__10sndHeapSysF10SndGroupIDl(m_sndHeapSys, sndGroupId, slot);
 }
 
 void sndSystem::freeGroupThread(int heapLevel, int) {

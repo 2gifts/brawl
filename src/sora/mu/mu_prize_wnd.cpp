@@ -249,8 +249,8 @@ void fn_800C1B20(void* unused, Entry* p) {
 
 namespace jj_800C15AC {
 
-extern "C" void fn_800C09FC(void* self, int v);
-extern "C" int fn_800B5854(void* p, int a, int b, int c, int d);
+extern "C" void openWnd__14muPrizeWndTaskFi(void* self, int v);
+extern "C" int changeAnimN__8MuObjectFiUlbb(void* p, int a, int b, int c, int d);
 
 class VObj {
 public:
@@ -272,12 +272,12 @@ public:
 extern "C" void fn_800C15AC(void* self) {
     char* s = (char*)self;
     *(int*)(s + 0x3cc) = g_sndSystem->getBGMId();
-    fn_800C09FC(self, *(int*)(s + 0x220));
+    openWnd__14muPrizeWndTaskFi(self, *(int*)(s + 0x220));
     {
         VObj* o = *(VObj**)(s + 0x58);
         o->target(*(void**)((char*)o + 0xe4), *(void**)(s + 0x54));
     }
-    fn_800B5854(*(void**)(s + 0x40), 0, 1, 1, 0);
+    changeAnimN__8MuObjectFiUlbb(*(void**)(s + 0x40), 0, 1, 1, 0);
 }
 }
 
@@ -285,11 +285,11 @@ extern "C" void fn_800C15AC(void* self) {
 namespace jj_800C001C {
 
 extern "C" {
-void* fn_800C0164(void*);
+void* __ct__14muPrizeWndTaskFv(void*);
 void fn_800B96E8(void*, int);
-void fn_800C0580(void*, void*, int, void*, int);
+void createObjResFile__14muPrizeWndTaskFPCviPQ34nw4r3g3d7ResFilei(void*, void*, int, void*, int);
 void fn_800C0670(void*, void*);
-int fn_800B5854(void*, int, int, int, int);
+int changeAnimN__8MuObjectFiUlbb(void*, int, int, int, int);
 extern char lbl_804080C0[];
 extern unsigned char lbl_805A22D0;
 }
@@ -304,7 +304,7 @@ extern "C" void* fn_800C001C(void* a0, void* a1, void* a2, int a3, void* a4, int
     char* obj = (char*)operator new(0x3D4, (Heaps::HeapType)0x2A);
 
     if (obj != 0) {
-        obj = (char*)fn_800C0164(obj);
+        obj = (char*)__ct__14muPrizeWndTaskFv(obj);
     }
     *(int*)(obj + 0x114) = a5;
     *(void**)(obj + 0x58) = a2;
@@ -314,7 +314,7 @@ extern "C" void* fn_800C001C(void* a0, void* a1, void* a2, int a3, void* a4, int
         obj[0x2B4] = 1;
     }
     fn_800B96E8(obj + 0x60, 0xF0);
-    fn_800C0580(obj, lbl_804080C0, 5, a0, a3);
+    createObjResFile__14muPrizeWndTaskFPCviPQ34nw4r3g3d7ResFilei(obj, lbl_804080C0, 5, a0, a3);
     tbl = (unsigned char*)&lbl_805A22D0;
     heap = gfHeapManager::getMEMAllocator((Heaps::HeapType)0x2A);
     count = tbl[1] - tbl[0];
@@ -327,7 +327,7 @@ extern "C" void* fn_800C001C(void* a0, void* a1, void* a2, int a3, void* a4, int
         ((void**)(obj + 0x54))[tbl[0] + i] = r;
     }
     fn_800C0670(obj, a1);
-    fn_800B5854(*(void**)(obj + 0x40), 2, 2, 0, 0);
+    changeAnimN__8MuObjectFiUlbb(*(void**)(obj + 0x40), 2, 2, 0, 0);
     return obj;
 }
 }
@@ -374,8 +374,8 @@ void fn_800C0670(Self* self, void* data) {
 namespace jj_800C11F4 {
 
 extern "C" {
-int fn_800AD954(void*);
-char* fn_800AE578(void*, unsigned short);
+int isLoadFinish__21tySealListDataManagerFv(void*);
+char* getSealDataId__21tySealListDataManagerFUl(void*, unsigned short);
 extern char lbl_80456EC0[];
 extern char lbl_80456ED0[];
 }
@@ -388,7 +388,7 @@ extern "C" int fn_800C11F4(char* self)
         return *(int*)(self + 0x10c);
     }
     if (*(void**)(self + 0x2b8) &&
-        !fn_800AD954(*(void**)(self + 0x2b8))) {
+        !isLoadFinish__21tySealListDataManagerFv(*(void**)(self + 0x2b8))) {
         return *(int*)(self + 0x10c);
     }
 
@@ -409,7 +409,7 @@ extern "C" int fn_800C11F4(char* self)
         }
         case 1: {
             sprintf(names + 0x20, lbl_80456EC0,
-                *(char**)(fn_800AE578(*(void**)(self + 0x2b8), *(unsigned short*)(entry + 8)) + 8));
+                *(char**)(getSealDataId__21tySealListDataManagerFUl(*(void**)(self + 0x2b8), *(unsigned short*)(entry + 8)) + 8));
             ((gfFileIOHandle*)sealHandle)->readRequest(names + 0x20, (HeapType)0x2b, 0, 0);
             break;
         }
@@ -438,7 +438,7 @@ void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 void* __ct__20tyFigListDataManagerFb(void*, int);
 void loadRequest__20tyFigListDataManagerFv(void*);
 void readRequest__14gfFileIOHandleFPCcQ25Heaps8HeapTypeii(void* self, const char* name, int heap, int a, int b);
-void* fn_800AD808(void*, int);
+void* __ct__21tySealListDataManagerFb(void*, int);
 void fn_800AD8F8(void*);
 extern const char lbl_80456DD8[];
 }
@@ -495,7 +495,7 @@ extern "C" void fn_800C07D0(void* self) {
     if (hasId(s, 1)) {
         void* p = __nw__FUlQ25Heaps8HeapType(0x3EB4, 0x2A);
         if (p != 0) {
-            p = fn_800AD808(p, 0);
+            p = __ct__21tySealListDataManagerFb(p, 0);
         }
         s->obj2 = p;
         fn_800AD8F8(p);
@@ -610,8 +610,8 @@ class MenuObject { char pad[0x5c]; public: virtual void method(int); };
 extern "C" {
 extern char lbl_80456F5C[];
 void fn_800AD87C(void*, int);
-void fn_800B8A0C(void*, int);
-void fn_800C02D8(void*, int);
+void __dt__5MuMsgFv(void*, int);
+void __dt__24muPrizeWndTask7TexLoadFvFv(void*, int);
 void __destroy_arr(void*, void (*)(void*, int), int, int);
 void __dt__14gfFileIOHandleFv(void*, int);
 void __dt__6gfTaskFv(void*, int);
@@ -650,7 +650,7 @@ void* fn_800C0330(unsigned char* self, int flag) {
    handle->cancelRequest();
    if (*(void**)(cursor + 0x350)) gfHeapManager::free(*(void**)(cursor + 0x350));
   }
-  if (*(void**)(self + 0x5c)) fn_800B8A0C(*(void**)(self + 0x5c), 1);
+  if (*(void**)(self + 0x5c)) __dt__5MuMsgFv(*(void**)(self + 0x5c), 1);
   nw4r::g3d::G3dObj* obj = *(nw4r::g3d::G3dObj**)(self + 0x54);
   if (obj) obj->Destroy();
   cursor = self;
@@ -658,11 +658,11 @@ void* fn_800C0330(unsigned char* self, int flag) {
    MenuObject* entry = *(MenuObject**)(cursor + 0x40);
    if (entry) { if (entry) entry->method(1); }
   }
-  __destroy_arr(self + 0x34c, fn_800C02D8, 8, 16);
+  __destroy_arr(self + 0x34c, __dt__24muPrizeWndTask7TexLoadFvFv, 8, 16);
   __dt__14gfFileIOHandleFv(self + 0x344, -1);
-  __destroy_arr(self + 0x2c4, fn_800C02D8, 8, 16);
+  __destroy_arr(self + 0x2c4, __dt__24muPrizeWndTask7TexLoadFvFv, 8, 16);
   __dt__14gfFileIOHandleFv(self + 0x2bc, -1);
-  __destroy_arr(self + 0x234, fn_800C02D8, 8, 16);
+  __destroy_arr(self + 0x234, __dt__24muPrizeWndTask7TexLoadFvFv, 8, 16);
   __dt__14gfFileIOHandleFv(self + 0x22c, -1);
   __dt__6gfTaskFv(self, 0);
   if (flag > 0) __dl__FPv(self);
@@ -674,7 +674,7 @@ void* fn_800C0330(unsigned char* self, int flag) {
 
 namespace jj_800C1890 {
 
-extern "C" int fn_800B61C0(void*);
+extern "C" int isNodeAnimFinished__8MuObjectFv(void*);
 
 class Object_vptr_0 {
 public:
@@ -730,7 +730,7 @@ extern "C" int fn_800C1890(Self* self) {
     IOPair* p;
     int r0;
 
-    if (fn_800B61C0(self->p40) != 0) {
+    if (isNodeAnimFinished__8MuObjectFv(self->p40) != 0) {
         self->obj58->slot13(self->p54);
         int idx = self->index220 + 1;
         self->index220 = idx;

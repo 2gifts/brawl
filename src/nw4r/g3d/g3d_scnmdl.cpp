@@ -1303,7 +1303,7 @@ ScnMdl::~ScnMdl() {
 // TODO: clean up, give variables real names
 namespace jj_801B0A28 {
 struct ParamData { s32 w[16]; };
-extern "C" void fn_801AFB78(void*, void*, s32*, s32, s32, s32, s32, s32, s32, s32);
+extern "C" void __ct__Q34nw4r3g3d12ScnMdlSimpleFP12MEMAllocatorQ34nw4r3g3d6ResMdlPQ34nw4r4math5MTX34PUlPQ34nw4r4math5MTX34PQ34nw4r4math5MTX33PQ34nw4r4math5MTX34ii(void*, void*, s32*, s32, s32, s32, s32, s32, s32, s32);
 extern "C" char lbl_804663C8[];
 struct Object {
     void* vtable;
@@ -1313,7 +1313,7 @@ struct Object {
     s32 field184;
     Object(void* a1, s32* a2, s32 a3, s32 a4, s32 a5, s32 a6, s32 a7, s32 a8, s32 a9, ParamData* a10, s32 a11, s32 a12) {
         s32 copy = *a2;
-        fn_801AFB78(this, a1, &copy, a3, a4, a5, a6, a7, a8, a9);
+        __ct__Q34nw4r3g3d12ScnMdlSimpleFP12MEMAllocatorQ34nw4r3g3d6ResMdlPQ34nw4r4math5MTX34PUlPQ34nw4r4math5MTX34PQ34nw4r4math5MTX33PQ34nw4r4math5MTX34ii(this, a1, &copy, a3, a4, a5, a6, a7, a8, a9);
         field138 = 0;
         vtable = lbl_804663C8;
         field13C = 0;

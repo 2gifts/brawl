@@ -543,7 +543,7 @@ public:
     void setUpdateRate(float rate);
 };
 
-extern "C" void fn_800B753C(void* self, float rate);
+extern "C" void setFrame__8MuObjectFf(void* self, float rate);
 extern const float lbl_805A2368;
 extern const float lbl_805A2374;
 
@@ -571,7 +571,7 @@ extern "C" void fn_800DE9B4(void* arg0) {
     int i;
     void* anim = *(void**)(base + 0x4C);
     ((gfModelAnimation*)*(void**)((char*)anim + 0x14))->setUpdateRate(lbl_805A2368);
-    fn_800B753C(anim, lbl_805A2374);
+    setFrame__8MuObjectFf(anim, lbl_805A2374);
     char* p = base + 0x34;
     for (i = 0xD; i < 0x18; i++, p += 4) {
         void* e = *(void**)(p + 0x10);
@@ -587,7 +587,7 @@ extern "C" void fn_800DE9B4(void* arg0) {
 
 namespace jj_800DEAE4 {
 extern "C" void setUpdateRate__16gfModelAnimationFf(void*, float);
-extern "C" void fn_800B753C(void*, float);
+extern "C" void setFrame__8MuObjectFf(void*, float);
 extern const float lbl_805A2368;
 extern const float lbl_805A2374;
 
@@ -610,7 +610,7 @@ extern "C" void fn_800DEAE4(S* self) {
     int i;
     T* t = *(T**)((char*)self + 0x50);
     setUpdateRate__16gfModelAnimationFf(t->anim, lbl_805A2368);
-    fn_800B753C(t, lbl_805A2374);
+    setFrame__8MuObjectFf(t, lbl_805A2374);
     E** p = (E**)((char*)self + 0x34);
     for (i = 13; i < 24; i++) {
         E* e = p[4];
@@ -627,7 +627,7 @@ extern "C" void fn_800DEAE4(S* self) {
 namespace jj_800DEE60 {
 
 
-extern "C" void fn_800B753C(void*, float);
+extern "C" void setFrame__8MuObjectFf(void*, float);
 extern const float lbl_805A2368;
 extern const float lbl_805A2374;
 
@@ -659,7 +659,7 @@ extern "C" void fn_800DEE60(void* arg0) {
     void* anim = *(void**)(base + 0x5C);
 
     ((gfModelAnimation*)*(void**)((char*)anim + 0x14))->setUpdateRate(lbl_805A2368);
-    fn_800B753C(anim, lbl_805A2374);
+    setFrame__8MuObjectFf(anim, lbl_805A2374);
 
     char* p = base + 0x34;
     for (i = 0xD; i < 0x18; i++, p += 4) {
@@ -706,7 +706,7 @@ struct Self {
     void* model;
 };
 
-extern "C" void fn_800B753C(void*, float);
+extern "C" void setFrame__8MuObjectFf(void*, float);
 extern const float lbl_805A2368;
 extern const float lbl_805A2374;
 
@@ -717,7 +717,7 @@ extern "C" void fn_800DEF4C(Self* self) {
     char* entry;
 
     ((gfModelAnimation*)*(void**)((char*)model + 0x14))->setUpdateRate(lbl_805A2368);
-    fn_800B753C(model, lbl_805A2374);
+    setFrame__8MuObjectFf(model, lbl_805A2374);
 
     entry = (char*)self + 0x34;
     i = 0xD;
@@ -754,7 +754,7 @@ public:
 };
 
 extern "C" void setUpdateRate__16gfModelAnimationFf(void*, float);
-extern "C" void fn_800B753C(void*, float);
+extern "C" void setFrame__8MuObjectFf(void*, float);
 extern const float lbl_805A2368;
 extern const float lbl_805A2374;
 
@@ -764,7 +764,7 @@ extern "C" void fn_800DF038(void* arg0) {
     int i;
     char* model = (char*)*(void**)((char*)arg0 + 0x64);
     setUpdateRate__16gfModelAnimationFf(*(void**)(model + 0x14), rate);
-    fn_800B753C(model, lbl_805A2374);
+    setFrame__8MuObjectFf(model, lbl_805A2374);
 
     void** p = (void**)((char*)arg0 + 0x34);
     for (i = 0xD; i < 0x18; i++, p++) {
@@ -780,7 +780,7 @@ extern "C" void fn_800DF038(void* arg0) {
 }
 
 namespace jj_800DF168 {
-extern "C" void fn_800B753C(void*, float);
+extern "C" void setFrame__8MuObjectFf(void*, float);
 extern "C" void setUpdateRate__16gfModelAnimationFf(void*, float);
 
 extern const float lbl_805A2368;
@@ -832,7 +832,7 @@ extern "C" void fn_800DF168(Ctx* self) {
     int i;
     Model* m = self->model;
     setUpdateRate__16gfModelAnimationFf(m->animation, lbl_805A2368);
-    fn_800B753C(m, lbl_805A2374);
+    setFrame__8MuObjectFf(m, lbl_805A2374);
 
     char* p = (char*)self + 0x34;
     for (i = 13; i < 24; i++, p += 4) {
@@ -848,7 +848,7 @@ extern "C" void fn_800DF168(Ctx* self) {
 
 namespace jj_800DED0C {
 extern "C" void setUpdateRate__16gfModelAnimationFf(void*, float);
-extern "C" void fn_800B753C(void*, float);
+extern "C" void setFrame__8MuObjectFf(void*, float);
 extern const float lbl_805A2368;
 extern const float lbl_805A2374;
 
@@ -880,7 +880,7 @@ extern "C" void fn_800DED0C(void* s) {
     int i;
     Obj* o = *(Obj**)(self + 0x58);
     setUpdateRate__16gfModelAnimationFf(o->v14, lbl_805A2368);
-    fn_800B753C(o, lbl_805A2374);
+    setFrame__8MuObjectFf(o, lbl_805A2374);
     Ent** p = (Ent**)(self + 0x34);
     for (i = 13; i < 24; i++, p++) {
         Ent* e = p[4];
@@ -900,8 +900,8 @@ struct Entry { const char* name; unsigned char begin, end, kind; };
 struct Owner { char pad[0x10]; MuObject* objects[1]; };
 extern "C" {
 extern char lbl_8059E220[6];
-void fn_800B20B0(MuObject*, int);
-void fn_800B21C4(MuObject*, int);
+void enableSkipMatrix__8MuObjectFb(MuObject*, int);
+void enableSkipMaterial__8MuObjectFb(MuObject*, int);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800DD960(Owner* self, Entry* entry, int count, nw4r::g3d::ResFile* res) {
@@ -919,8 +919,8 @@ extern "C" void fn_800DD960(Owner* self, Entry* entry, int count, nw4r::g3d::Res
         for (j = 0; j < n; j++) {
             slot = (Owner*)((char*)self + (p->begin + j) * 4);
             slot->objects[0] = MuObject::create(res, p->name, p->kind, 0, (HeapType)0x28);
-            fn_800B20B0(slot->objects[0], 1);
-            fn_800B21C4(slot->objects[0], 1);
+            enableSkipMatrix__8MuObjectFb(slot->objects[0], 1);
+            enableSkipMaterial__8MuObjectFb(slot->objects[0], 1);
             slot->objects[0]->changeAnimN(buf);
             *(int*)((char*)slot->objects[0]->m_sceneModel + 0x118) = 8;
         }

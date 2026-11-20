@@ -431,7 +431,7 @@ void fn_80135BA0(void* arg0, int arg1) {
 
 namespace jj_80137FF0 {
 extern "C" {
-    void fn_8015C238(void* a1, int a2);
+    void __dt__Q44nw4r2ut6detail12LinkListImplFv(void* a1, int a2);
     void __dl__FPv(void* a1);
 }
 
@@ -439,7 +439,7 @@ extern "C" {
 extern "C" void* fn_80137FF0(void* arg1, int arg2) {
     if (arg1) {
         if (arg1) {
-            fn_8015C238(arg1, 0);
+            __dt__Q44nw4r2ut6detail12LinkListImplFv(arg1, 0);
         }
         if (arg2 > 0) {
             __dl__FPv(arg1);
@@ -538,7 +538,7 @@ struct Entry {
     u16 flags;
 };
 
-extern "C" int fn_80114A60(void** a, Entry** b);
+extern "C" int isLinkSameDirFlag__19grCollisionLineWorkCFP19grCollisionLineWork(void** a, Entry** b);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80137114(u8* self, Entry** arg) {
@@ -562,7 +562,7 @@ extern "C" int fn_80137114(u8* self, Entry** arg) {
             f = 1;
         }
         if (f) {
-            if (fn_80114A60((void**)p, arg)) {
+            if (isLinkSameDirFlag__19grCollisionLineWorkCFP19grCollisionLineWork((void**)p, arg)) {
                 ret = 1;
                 break;
             }
@@ -575,7 +575,7 @@ extern "C" int fn_80137114(u8* self, Entry** arg) {
 }
 
 namespace jj_80137298 {
-extern "C" int fn_80114A60(void*, void*);
+extern "C" int isLinkSameDirFlag__19grCollisionLineWorkCFP19grCollisionLineWork(void*, void*);
 
 struct Entry {
     u32 a, b, c;
@@ -599,7 +599,7 @@ extern "C" void fn_80137298(void* arg0, u32* arg1) {
             if (p->a == *arg1)
                 equal = 1;
 
-            if (equal != 0 || fn_80114A60(p, arg1) != 0) {
+            if (equal != 0 || isLinkSameDirFlag__19grCollisionLineWorkCFP19grCollisionLineWork(p, arg1) != 0) {
                 u8* q = base + i * 0x10;
 
                 for (; i < base[0x7D] - 1; i++, q += 0x10) {

@@ -56,10 +56,10 @@ void nteCheckData::notifyDoneNDProc(s32 proc, s32 result, u32 size) {
 }
 
 // TODO: clean up, give variables real names
-extern "C" void fn_80157A50(void*);
+extern "C" void showError__12nteCheckDataFll(void*);
 
 extern "C" void fn_801581F4(void* self) {
-    fn_80157A50(reinterpret_cast<u8*>(self) - 0x340);
+    showError__12nteCheckDataFll(reinterpret_cast<u8*>(self) - 0x340);
 }
 
 extern "C" void fn_80157BC4(void*);
@@ -69,11 +69,11 @@ extern "C" void fn_801581FC(void* self) {
     fn_80157BC4(reinterpret_cast<u8*>(self) - 0x344);
 }
 
-extern "C" void fn_80157A78(void*);
+extern "C" void notifyDoneNDProc__12nteCheckDataFllUl(void*);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_80158204(void* self) {
-    fn_80157A78(reinterpret_cast<u8*>(self) - 0x344);
+    notifyDoneNDProc__12nteCheckDataFllUl(reinterpret_cast<u8*>(self) - 0x344);
 }
 
 // TODO: clean up, give variables real names
@@ -91,7 +91,7 @@ extern char lbl_804620C4[];
 void createThread__8gfThreadFP10gfRunnableUlUlQ25Heaps8HeapType(
     void*, void*, unsigned long, unsigned long, int);
 void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-void* fn_801510F4(void*, s8);
+void* __ct__5nteNDFb(void*, s8);
 }
 
 struct gfThread {
@@ -135,7 +135,7 @@ extern "C" gfThread* fn_80157200(gfThread* self, s32 heap)
 
     void* obj = __nw__FUlQ25Heaps8HeapType(0x360, heap);
     if (obj)
-        obj = fn_801510F4(obj, 1);
+        obj = __ct__5nteNDFb(obj, 1);
     self->unk378 = obj;
 
     void* cb = self;
@@ -153,7 +153,7 @@ namespace jj_801572DC {
 
 extern "C" {
 extern char lbl_804620C4[];
-void* fn_80151180(void*, int);
+void* __dt__5nteNDFv(void*, int);
 void* __dt__8gfThreadFv(void*, short);
 }
 
@@ -176,7 +176,7 @@ extern "C" void* fn_801572DC(void* self, int flag) {
             }
         }
         if (*(int*)(p + 0x378) != 0) {
-            fn_80151180(*(void**)(p + 0x378), 1);
+            __dt__5nteNDFv(*(void**)(p + 0x378), 1);
             *(int*)(p + 0x378) = 0;
         }
         if (*(void**)(p + 0x358) != 0) {
@@ -200,15 +200,15 @@ namespace jj_801578C4 {
 extern "C" {
 int OSIsThreadTerminated(void* thread);
 void OSResumeThread(void* thread);
-void* fn_80150460(void);
+void* resetGotDeliveryDataBits__9nteGlobalFv(void);
 u64 getTime__6nteDWCCFv(void* self);
-void fn_8015051C(void);
-s8 fn_800305B0(s32 arg);
-u64 fn_8014FBB8(void);
-void fn_8014FEFC(void);
-u64 fn_801504AC(s32 arg);
-void fn_801E1D80(u64 time, void* out);
-void* fn_80038984(void* obj, s32 type);
+void setServerTime__9nteGlobalFx(void);
+s8 isEnable__14gfSysRecorder2Fi(s32 arg);
+u64 getLastDownload__9nteGlobalFv(void);
+void updateButtonCondition__9nteGlobalFv(void);
+u64 getTime__9nteGlobalFPb(s32 arg);
+void OSTicksToCalendarTime(u64 time, void* out);
+void* __ct__14gfCollectionIOFQ25Heaps8HeapType(void* obj, s32 type);
 void* __nw__FUlQ25Heaps8HeapType(u32 size, s32 type);
 extern u8 lbl_805A0458;
 }
@@ -238,18 +238,18 @@ extern "C" s32 fn_801578C4(void* self) {
     if (*(s32*)(p + 0x354) != 0) {
         return 0;
     }
-    t = getTime__6nteDWCCFv(fn_80150460());
+    t = getTime__6nteDWCCFv(resetGotDeliveryDataBits__9nteGlobalFv());
     if (t == 0) {
         return 0;
     }
-    fn_8015051C();
+    setServerTime__9nteGlobalFx();
     one = 1;
     p[0x37D] = one;
-    p[0x37E] = fn_800305B0(3);
-    fn_801E1D80(fn_8014FBB8(), &b1);
-    fn_801E1D80(fn_801504AC(0), &b2);
+    p[0x37E] = isEnable__14gfSysRecorder2Fi(3);
+    OSTicksToCalendarTime(getLastDownload__9nteGlobalFv(), &b1);
+    OSTicksToCalendarTime(getTime__9nteGlobalFPb(0), &b2);
     if (lbl_805A0458 == 0 && b2.c == b1.c && b2.b == b1.b && b2.a == b1.a) {
-        fn_8014FEFC();
+        updateButtonCondition__9nteGlobalFv();
         p[0x348] = one;
         p[0x374] = one;
         p[0x37C] = one;
@@ -259,11 +259,11 @@ extern "C" s32 fn_801578C4(void* self) {
     if (*(s32*)(p + 0x370) == 0) {
         obj = __nw__FUlQ25Heaps8HeapType(0x194, *(s32*)(p + 0x350));
         if (obj != 0) {
-            obj = fn_80038984(obj, *(s32*)(p + 0x350));
+            obj = __ct__14gfCollectionIOFQ25Heaps8HeapType(obj, *(s32*)(p + 0x350));
         }
         *(void**)(p + 0x370) = obj;
         if (obj == 0) {
-            fn_8014FEFC();
+            updateButtonCondition__9nteGlobalFv();
             p[0x348] = one;
             p[0x374] = one;
             p[0x37C] = one;
@@ -271,7 +271,7 @@ extern "C" s32 fn_801578C4(void* self) {
             return 1;
         }
     }
-    t3 = fn_8014FBB8();
+    t3 = getLastDownload__9nteGlobalFv();
     *(u32*)(p + 0x368) = (u32)(t3 >> 32);
     *(u32*)(p + 0x36C) = (u32)t3;
     p[0x374] = 0;
@@ -285,14 +285,14 @@ extern "C" s32 fn_801578C4(void* self) {
 namespace jj_8015741C {
 
 extern "C" {
-int fn_800305B0(int);
-int fn_8014CB40(ntFriendInfo*);
-int fn_8014CB4C(ntFriendInfo*, int);
-void fn_8014CB7C(ntFriendInfo*);
-void fn_8014FEFC();
-int fn_801515B4(void*, void*, const char*, const char*);
-int fn_801516D4(void*, void*);
-int fn_801517D0(void*, void*, const char*, const char*, const char*);
+int isEnable__14gfSysRecorder2Fi(int);
+int getUserData__12ntFriendInfoFv(ntFriendInfo*);
+int isValid__12ntFriendInfoFPC16DWCstAccUserData(ntFriendInfo*, int);
+void resetData__12ntFriendInfoFv(ntFriendInfo*);
+void updateButtonCondition__9nteGlobalFv();
+int startupND__5nteNDFPvPCcPCc(void*, void*, const char*, const char*);
+int finishND__5nteNDFPv(void*, void*);
+int download__5nteNDFPvPCcPCcPCc(void*, void*, const char*, const char*, const char*);
 }
 
 extern unsigned char lbl_80423690[];
@@ -354,7 +354,7 @@ extern "C" void fn_8015741C(Task* self) {
     s64 start = OSGetTime();
 
     if (self->deliver == 1) {
-        if (fn_800305B0(3)) {
+        if (isEnable__14gfSysRecorder2Fi(3)) {
             unsigned char* global = lbl_80423690;
             if (!global[0])
                 self->context->count++;
@@ -372,13 +372,13 @@ extern "C" void fn_8015741C(Task* self) {
         }
     }
 
-    int value = fn_8014CB40(ntFriendInfo::getInstance());
-    if (!fn_8014CB4C(ntFriendInfo::getInstance(), value)) {
-        fn_8014CB7C(ntFriendInfo::getInstance());
-        fn_8014CB40(ntFriendInfo::getInstance());
+    int value = getUserData__12ntFriendInfoFv(ntFriendInfo::getInstance());
+    if (!isValid__12ntFriendInfoFPC16DWCstAccUserData(ntFriendInfo::getInstance(), value)) {
+        resetData__12ntFriendInfoFv(ntFriendInfo::getInstance());
+        getUserData__12ntFriendInfoFv(ntFriendInfo::getInstance());
     }
 
-    if (!fn_801515B4(self->handler, taskBase(self),
+    if (!startupND__5nteNDFPvPCcPCc(self->handler, taskBase(self),
                      lbl_8059E818, lbl_804620B0))
         goto finish;
 
@@ -394,7 +394,7 @@ extern "C" void fn_8015741C(Task* self) {
     if (self->setting) {
         self->mode = 1;
         self->done = 0;
-        if (!fn_801517D0(self->handler, taskBase(self),
+        if (!download__5nteNDFPvPCcPCcPCc(self->handler, taskBase(self),
                          lbl_8059E820, lbl_8059E828, lbl_8059E828))
             goto disconnect;
 
@@ -407,11 +407,11 @@ extern "C" void fn_8015741C(Task* self) {
         }
     }
 
-    fn_8014FEFC();
+    updateButtonCondition__9nteGlobalFv();
     if (self->deliver) {
         self->mode = 2;
         self->done = 0;
-        if (!fn_801517D0(self->handler, taskBase(self),
+        if (!download__5nteNDFPvPCcPCcPCc(self->handler, taskBase(self),
                          lbl_8059E82C, lbl_8059E828, lbl_8059E828))
             goto disconnect;
 
@@ -427,7 +427,7 @@ extern "C" void fn_8015741C(Task* self) {
     self->result = 0;
 
 disconnect:
-    if (fn_801516D4(self->handler, taskBase(self))) {
+    if (finishND__5nteNDFPv(self->handler, taskBase(self))) {
         while (self->handler->ready)
             OSSleepTicks(TICKS);
     }

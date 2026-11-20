@@ -1538,11 +1538,11 @@ extern "C" int fn_80260730(void*, void*, int, unsigned char, int,
 extern "C" void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUll(void*, int,
                                                               unsigned long);
 extern "C" void free__13gfHeapManagerFPv(void*);
-extern "C" void fn_801D76BC(void*, unsigned int);
+extern "C" void DCInvalidateRange(void*, unsigned int);
 extern "C" int fn_802608BC(void*, void*, unsigned int, void*, unsigned int,
                            unsigned char, int, unsigned int);
-extern "C" void fn_801D7718(const void*, unsigned int);
-extern "C" void fn_801F3194(void);
+extern "C" void DCStoreRange(const void*, unsigned int);
+extern "C" void GXInvalidateTexAll(void);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800C7324(void* arg0, void* arg1, void* heap, int depth,
@@ -1570,10 +1570,10 @@ extern "C" void fn_800C7324(void* arg0, void* arg1, void* heap, int depth,
     output[0] = (unsigned int)buffer;
     output[1] = info[0];
     output[2] = info[1];
-    fn_801D76BC(buffer, allocSize);
+    DCInvalidateRange(buffer, allocSize);
     fn_802608BC(work, data, size, (void*)output[0], allocSize, 6, depth, 0);
-    fn_801D7718((const void*)output[0], allocSize);
-    fn_801F3194();
+    DCStoreRange((const void*)output[0], allocSize);
+    GXInvalidateTexAll();
 }
 }
 
@@ -1589,13 +1589,13 @@ extern "C" {
 extern char lbl_80456FF0[];
 extern char lbl_80457030[];
 extern char lbl_8059E148;
-void fn_800C1B3C(void*, s32, nw4r::g3d::ResFile, nw4r::g3d::ResFile, s32, s32, s32, s32, s32, u8, u8, char*);
+void __ct__10muRecorderFiQ34nw4r3g3d7ResFileQ34nw4r3g3d7ResFilePvPviQ25Heaps8HeapTypeQ25Heaps8HeapTypeUcUcPCc(void*, s32, nw4r::g3d::ResFile, nw4r::g3d::ResFile, s32, s32, s32, s32, s32, u8, u8, char*);
 void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-void* fn_80038984(void*, s32);
+void* __ct__14gfCollectionIOFQ25Heaps8HeapType(void*, s32);
 char* strcat(char*, const char*);
 void __construct_array(void*, void (*)(void*), void (*)(void*), unsigned long, int);
-void fn_800C37B0(void*);
-void fn_800C37CC(void*);
+void __ct__Q212muCollection8FileInfoFv(void*);
+void __dt__Q212muCollection8FileInfoFv(void*);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_800C35CC(void* self, s32 mode, nw4r::g3d::ResFile arg2, nw4r::g3d::ResFile arg3,
@@ -1608,10 +1608,10 @@ extern "C" void* fn_800C35CC(void* self, s32 mode, nw4r::g3d::ResFile arg2, nw4r
  case 3: mappedMode = 4; break;
  default: mappedMode = 0; break;
  }
- fn_800C1B3C(self, mappedMode, arg2, arg3, a,b,c,d,arg_sp8,arg_spC,arg_sp10,lbl_80456FF0);
+ __ct__10muRecorderFiQ34nw4r3g3d7ResFileQ34nw4r3g3d7ResFilePvPviQ25Heaps8HeapTypeQ25Heaps8HeapTypeUcUcPCc(self, mappedMode, arg2, arg3, a,b,c,d,arg_sp8,arg_spC,arg_sp10,lbl_80456FF0);
  *(char**)(p + 0x3C) = lbl_80457030;
  void* child = __nw__FUlQ25Heaps8HeapType(0x194, *(s32*)(p + 0x44));
- if (child != 0) child = fn_80038984(child, *(s32*)(p + 0x44));
+ if (child != 0) child = __ct__14gfCollectionIOFQ25Heaps8HeapType(child, *(s32*)(p + 0x44));
  *(void**)(p + 0x110) = child;
  *(u8*)(p + 0x114) = 0;
  *(s32*)(p + 0x118) = mode;
@@ -1634,7 +1634,7 @@ extern "C" void* fn_800C35CC(void* self, s32 mode, nw4r::g3d::ResFile arg2, nw4r
  *(void**)(p + 0x34C) = p + 0x24C;
  *(s32*)(p + 0x350) = 0;
  *(s32*)(p + 0x354) = 2;
- __construct_array(p + 0x358, fn_800C37B0, fn_800C37CC, 0x14, 2);
+ __construct_array(p + 0x358, __ct__Q212muCollection8FileInfoFv, __dt__Q212muCollection8FileInfoFv, 0x14, 2);
  *(u8*)(p + 0x2C) &= ~2;
  return self;
 }

@@ -272,7 +272,7 @@ struct Obj {
     Node* node;
 };
 
-extern "C" void fn_8011728C(Node*, int, int);
+extern "C" void collect__16grCollCollectionFUsP11grCollision(Node*, int, int);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_8008674C(Obj* self, const Vec2f* a, const Vec2f* b) {
@@ -298,7 +298,7 @@ extern "C" void fn_8008674C(Obj* self, const Vec2f* a, const Vec2f* b) {
 
     self->node->flag = 0;
     __memcpy(&self->node->rect, &rect, sizeof(rect));
-    fn_8011728C(self->node, 0, 0);
+    collect__16grCollCollectionFUsP11grCollision(self->node, 0, 0);
 }
 }
 
@@ -307,7 +307,7 @@ struct RectF { float l, t, r, b; };
 struct RectI { int l, t, r, b; };
 struct Buf { RectF rect; char pad[10]; short flag; };
 struct Outer { char pad[16]; Buf* buf; };
-extern "C" void fn_8011728C(Buf*, int, int);
+extern "C" void collect__16grCollCollectionFUsP11grCollision(Buf*, int, int);
 
 static inline void makeRect(RectF& r, const Vec2f& a, const Vec2f& b) {
     register float t0, t2, t1, t3, ax, bx, by, ay;
@@ -337,7 +337,7 @@ extern "C" void fn_80086694(Outer* self, const Vec2f* pos, const float* radius) 
     RectF r;
     makeRect(r, a, b);
     *(RectI*)&self->buf->rect = *(RectI*)&r;
-    fn_8011728C(self->buf, 0, 0);
+    collect__16grCollCollectionFUsP11grCollision(self->buf, 0, 0);
 }
 }
 
@@ -357,7 +357,7 @@ struct FTElement {
     Block48 data;
 };
 
-extern "C" void fn_801EC868(void* pIn, void* pOut, f32 x, f32 y, f32 z);
+extern "C" void PSMTXTransApply(void* pIn, void* pOut, f32 x, f32 y, f32 z);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_800831AC(s32 unused, s32 i, s32 j, FTElement*** pArr) {
@@ -383,7 +383,7 @@ extern "C" void fn_800831AC(s32 unused, s32 i, s32 j, FTElement*** pArr) {
     do {
         FTElement* src = *reinterpret_cast<FTElement**>(
             reinterpret_cast<u8*>(*pArr) + oi + off);
-        fn_801EC868(&src->data, &buf, diff.x, diff.y, diff.z);
+        PSMTXTransApply(&src->data, &buf, diff.x, diff.y, diff.z);
 
         FTElement* dst = *reinterpret_cast<FTElement**>(
             reinterpret_cast<u8*>(*pArr) + oj + off);
@@ -427,26 +427,26 @@ struct B {
 };
 extern "C" {
 extern "C" const float lbl_805A1BB8;
-void fn_801EC158(MTX34*);
-void fn_801EC868(const MTX34*, MTX34*, float, float, float);
-void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
-float fn_801ED04C(const VEC3*);
-void fn_801ED008(const VEC3*, VEC3*);
+void PSMTXIdentity(MTX34*);
+void PSMTXTransApply(const MTX34*, MTX34*, float, float, float);
+void PSMTXConcat(const MTX34*, const MTX34*, MTX34*);
+float PSVECMag(const VEC3*);
+void PSVECNormalize(const VEC3*, VEC3*);
 // TODO: clean up, give variables real names
 int fn_80088FB8(void*, A* a, B* b) {
     int result = 0;
     if (lbl_805A1BB8 != a->weight && b != 0) {
         MTX34 identity, translation, combined;
-        fn_801EC158(&identity);
-        fn_801EC868(&identity, &translation, b->offset.x, b->offset.y, b->offset.z);
-        fn_801EC1B8(&b->matrix, &translation, &combined);
+        PSMTXIdentity(&identity);
+        PSMTXTransApply(&identity, &translation, b->offset.x, b->offset.y, b->offset.z);
+        PSMTXConcat(&b->matrix, &translation, &combined);
         b->pos.x = combined._03;
         float r1 = b->radius;
         r1 *= b->scale;
         b->pos.y = combined._13;
         b->pos.z = combined._23;
         VEC3 delta = a->pos - a->prev;
-        float length = fn_801ED04C(&delta);
+        float length = PSVECMag(&delta);
         float r2 = a->radius;
         float sum = r1 + r2;
         int active = 1;
@@ -454,13 +454,13 @@ int fn_80088FB8(void*, A* a, B* b) {
         while (active) {
             if (i > 3) break;
             VEC3 diff = a->pos - b->pos;
-            if (fn_801ED04C(&diff) < sum) {
-                fn_801ED008(&diff, &diff);
+            if (PSVECMag(&diff) < sum) {
+                PSVECNormalize(&diff, &diff);
                 a->pos = b->pos + diff * (r1 + r2);
                 VEC3 move;
                 VEC3Sub(&move, &a->pos, &a->prev);
-                if (length < fn_801ED04C(&move)) {
-                    fn_801ED008(&move, &move);
+                if (length < PSVECMag(&move)) {
+                    PSVECNormalize(&move, &move);
                     a->pos = a->prev + move * length;
                 } else {
                     active = 0;
@@ -500,8 +500,8 @@ struct Node {
     Link* parent;
 };
 
-extern "C" float fn_801ED04C(const VEC3*);
-extern "C" void fn_801ED008(const VEC3*, VEC3*);
+extern "C" float PSVECMag(const VEC3*);
+extern "C" void PSVECNormalize(const VEC3*, VEC3*);
 extern "C" const float lbl_805A1BB8;
 extern "C" const float lbl_805A1BBC;
 extern "C" const float lbl_805A1BD0;
@@ -543,8 +543,8 @@ extern "C" void fn_800835B4(void* self, Node* node, int arg2, int arg3)
             node->velocity *= node->damping;
         }
         VEC3 direction = position - previous;
-        if (lbl_805A1BB8 != fn_801ED04C(&direction))
-            fn_801ED008(&direction, &direction);
+        if (lbl_805A1BB8 != PSVECMag(&direction))
+            PSVECNormalize(&direction, &direction);
         previous = position - direction * node->length;
         node->position.x = position.x;
         node->previous = previous;
@@ -569,14 +569,14 @@ struct Node {
     Link** children;
     int childCount;
 };
-extern "C" void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
+extern "C" void PSMTXConcat(const MTX34*, const MTX34*, MTX34*);
 // TODO: clean up, give variables real names
 extern "C" void fn_8008A750(void* arg0, Node* node, MTX34 input) {
     int j, k;
     Node *child, *grand;
     int oi, oj, ok, i;
     if (node->parent)
-        fn_801EC1B8(&input, &node->world, &node->matrix);
+        PSMTXConcat(&input, &node->world, &node->matrix);
     else
         node->matrix = input;
     i = 0;
@@ -587,7 +587,7 @@ extern "C" void fn_8008A750(void* arg0, Node* node, MTX34 input) {
             child = link->child;
             MTX34 m = node->matrix;
             if (child->parent)
-                fn_801EC1B8(&m, &child->world, &child->matrix);
+                PSMTXConcat(&m, &child->world, &child->matrix);
             else
                 child->matrix = m;
             j = 0;
@@ -598,7 +598,7 @@ extern "C" void fn_8008A750(void* arg0, Node* node, MTX34 input) {
                     grand = link2->child;
                     MTX34 m2 = child->matrix;
                     if (grand->parent)
-                        fn_801EC1B8(&m2, &grand->world, &grand->matrix);
+                        PSMTXConcat(&m2, &grand->world, &grand->matrix);
                     else
                         grand->matrix = m2;
                     k = 0;
@@ -633,8 +633,8 @@ struct Node {
 };
 
 extern "C" {
-void fn_801EC41C(const MTX34*, MTX34*);
-void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
+void PSMTXInverse(const MTX34*, MTX34*);
+void PSMTXConcat(const MTX34*, const MTX34*, MTX34*);
 }
 
 // TODO: clean up, give variables real names
@@ -650,9 +650,9 @@ extern "C" void fn_8008A3CC(void* arg0, Node* node) {
     if (node->parent != 0) {
         MTX34 parent = node->parent->parent->matrix;
         MTX34 inverse;
-        fn_801EC41C(&parent, &inverse);
+        PSMTXInverse(&parent, &inverse);
         MTX34 combined;
-        fn_801EC1B8(&inverse, &node->matrix, &combined);
+        PSMTXConcat(&inverse, &node->matrix, &combined);
         node->world = combined;
     }
     i = 0;
@@ -663,8 +663,8 @@ extern "C" void fn_8008A3CC(void* arg0, Node* node) {
             MTX34 combined;
             MTX34 inverse;
             MTX34 parent = child->parent->parent->matrix;
-            fn_801EC41C(&parent, &inverse);
-            fn_801EC1B8(&inverse, &child->matrix, &combined);
+            PSMTXInverse(&parent, &inverse);
+            PSMTXConcat(&inverse, &child->matrix, &combined);
             child->world = combined;
         }
         j = 0;
@@ -675,8 +675,8 @@ extern "C" void fn_8008A3CC(void* arg0, Node* node) {
                 MTX34 combined;
                 MTX34 inverse;
                 MTX34 parent = grand->parent->parent->matrix;
-                fn_801EC41C(&parent, &inverse);
-                fn_801EC1B8(&inverse, &grand->matrix, &combined);
+                PSMTXInverse(&parent, &inverse);
+                PSMTXConcat(&inverse, &grand->matrix, &combined);
                 grand->world = combined;
             }
             k = 0;
@@ -715,12 +715,12 @@ struct Context {
     unsigned char flip;
 };
 extern "C" {
-void fn_801EC158(MTX34*);
-void fn_801ED0B0(const VEC3*, const VEC3*, VEC3*);
-void fn_80162974(MTX34*, const VEC3*, float);
-void fn_801629AC(MTX34*, float, float, float);
-void fn_801EC868(const MTX34*, MTX34*, float, float, float);
-void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
+void PSMTXIdentity(MTX34*);
+void PSVECCrossProduct(const VEC3*, const VEC3*, VEC3*);
+void MTX34RotAxisFIdx__Q24nw4r4mathFPQ34nw4r4math5MTX34PCQ34nw4r4math4VEC3f(MTX34*, const VEC3*, float);
+void MTX34RotXYZFIdx__Q24nw4r4mathFPQ34nw4r4math5MTX34fff(MTX34*, float, float, float);
+void PSMTXTransApply(const MTX34*, MTX34*, float, float, float);
+void PSMTXConcat(const MTX34*, const MTX34*, MTX34*);
 extern "C" const float lbl_805A1BB8;
 extern "C" const float lbl_805A1BBC;
 extern "C" const float lbl_805A1BFC;
@@ -731,22 +731,22 @@ extern "C" const float lbl_805A1C04;
 extern "C" void fn_80084524(Context* self, Node* node) {
     if (lbl_805A1BB8 != node->weight || node->parent == 0) {
         MTX34 identity;
-        fn_801EC158(&identity);
+        PSMTXIdentity(&identity);
         MTX34 current = node->matrix;
         VEC3 direction(node->length, lbl_805A1BB8, lbl_805A1BB8);
         VEC3 up(lbl_805A1BB8, lbl_805A1BBC, lbl_805A1BB8);
         VEC3 axis;
-        fn_801ED0B0(&up, &direction, &axis);
+        PSVECCrossProduct(&up, &direction, &axis);
         MTX34 rotation;
-        fn_80162974(&rotation, &axis, lbl_805A1BFC);
+        MTX34RotAxisFIdx__Q24nw4r4mathFPQ34nw4r4math5MTX34PCQ34nw4r4math4VEC3f(&rotation, &axis, lbl_805A1BFC);
         MTX34 translation;
-        fn_801EC868(&identity, &translation, direction.x, direction.y, direction.z);
+        PSMTXTransApply(&identity, &translation, direction.x, direction.y, direction.z);
         MTX34 combined;
-        fn_801EC1B8(&translation, &rotation, &combined);
+        PSMTXConcat(&translation, &rotation, &combined);
         if (node->flag && node->parent) {
             node->matrix = node->parent->parent->matrix;
         } else {
-            fn_801EC1B8(&current, &combined, &current);
+            PSMTXConcat(&current, &combined, &current);
             node->matrix = current;
         }
     } else if (node->parent) {
@@ -756,24 +756,24 @@ extern "C" void fn_80084524(Context* self, Node* node) {
         if (self->flip) {
             MTX34 current;
             MTX34 rotation;
-            fn_801629AC(&rotation, lbl_805A1BFC, lbl_805A1BB8, lbl_805A1BB8);
+            MTX34RotXYZFIdx__Q24nw4r4mathFPQ34nw4r4math5MTX34fff(&rotation, lbl_805A1BFC, lbl_805A1BB8, lbl_805A1BB8);
             current = node->matrix;
-            fn_801EC1B8(&current, &rotation, &current);
+            PSMTXConcat(&current, &rotation, &current);
             node->matrix = current;
         }
         if (node->parent == 0) {
             MTX34 current;
             MTX34 rotation;
-            fn_801629AC(&rotation, lbl_805A1BB8, lbl_805A1BB8, lbl_805A1C00);
+            MTX34RotXYZFIdx__Q24nw4r4mathFPQ34nw4r4math5MTX34fff(&rotation, lbl_805A1BB8, lbl_805A1BB8, lbl_805A1C00);
             current = node->matrix;
-            fn_801EC1B8(&current, &rotation, &current);
+            PSMTXConcat(&current, &rotation, &current);
             node->matrix = current;
         } else if (node->parent && node->parent->parent->parent == 0) {
             MTX34 current;
             MTX34 rotation;
-            fn_801629AC(&rotation, lbl_805A1BB8, lbl_805A1BB8, lbl_805A1C04);
+            MTX34RotXYZFIdx__Q24nw4r4mathFPQ34nw4r4math5MTX34fff(&rotation, lbl_805A1BB8, lbl_805A1BB8, lbl_805A1C04);
             current = node->matrix;
-            fn_801EC1B8(&current, &rotation, &current);
+            PSMTXConcat(&current, &rotation, &current);
             node->matrix = current;
         }
     }
@@ -823,16 +823,16 @@ struct Context {
 };
 
 extern "C" {
-void fn_801EC158(MTX34*);
-void fn_801EC41C(const MTX34*, MTX34*);
-void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
-void fn_8009BD44(const MTX34*, MTX34*, MTX34*);
-float fn_801ED04C(const VEC3*);
-void fn_801ED008(const VEC3*, VEC3*);
+void PSMTXIdentity(MTX34*);
+void PSMTXInverse(const MTX34*, MTX34*);
+void PSMTXConcat(const MTX34*, const MTX34*, MTX34*);
+void getNWMatrixSeparation__6phMathFPCQ34nw4r4math5MTX34PQ34nw4r4math5MTX34PQ34nw4r4math5MTX34(const MTX34*, MTX34*, MTX34*);
+float PSVECMag(const VEC3*);
+void PSVECNormalize(const VEC3*, VEC3*);
 void fn_800893F0(Context*, Node*);
 int fn_800867E8(Context*, Node*, unsigned char, VEC2*);
 int fn_800879FC(Context*, Node*, unsigned int, int);
-void fn_80081DC4(Node*);
+void updateMatrixForMyPosture__12ph2ndaryLineFv(Node*);
 extern "C" const float lbl_805A1BB8;
 extern "C" const float lbl_805A1BBC;
 extern "C" const float lbl_805A1C08;
@@ -849,7 +849,7 @@ extern "C" int fn_80084AD8(Context* self, Node* node, int unused,
     int hit = 0;
     int moved = 0;
     MTX34 identity;
-    fn_801EC158(&identity);
+    PSMTXIdentity(&identity);
     VEC2 contact;
     if (lbl_805A1BB8 != node->weight && node->parent != 0 &&
         (mode == 0 || depth == 0)) {
@@ -873,8 +873,8 @@ extern "C" int fn_80084AD8(Context* self, Node* node, int unused,
                 acceleration = VEC3(lbl_805A1BB8, lbl_805A1C08, lbl_805A1BB8);
             node->position += acceleration * node->weight * *scale * self->scale;
             VEC3 direction = node->position - node->anchor;
-            if (lbl_805A1BB8 != fn_801ED04C(&direction))
-                fn_801ED008(&direction, &direction);
+            if (lbl_805A1BB8 != PSVECMag(&direction))
+                PSVECNormalize(&direction, &direction);
             node->position = node->anchor + direction * node->length;
             if ((!self->flag || !self->mode) &&
                 (node->childCount == 0 ||
@@ -905,18 +905,18 @@ extern "C" int fn_80084AD8(Context* self, Node* node, int unused,
                     moved = 1;
             }
             MTX34 inverse;
-            fn_801EC41C(&parent, &inverse);
+            PSMTXInverse(&parent, &inverse);
             MTX34 base = identity;
             if (mode != 3) {
                 MTX34 combined;
                 MTX34 current = node->matrix;
-                fn_801EC1B8(&inverse, &current, &combined);
+                PSMTXConcat(&inverse, &current, &combined);
                 MTX34 local, rotation, scaling;
-                fn_8009BD44(&combined, &rotation, &scaling);
-                fn_801EC1B8(&rotation, &base, &local);
-                fn_801EC1B8(&parent, &local, &node->matrix);
+                getNWMatrixSeparation__6phMathFPCQ34nw4r4math5MTX34PQ34nw4r4math5MTX34PQ34nw4r4math5MTX34(&combined, &rotation, &scaling);
+                PSMTXConcat(&rotation, &base, &local);
+                PSMTXConcat(&parent, &local, &node->matrix);
             }
-            fn_80081DC4(node);
+            updateMatrixForMyPosture__12ph2ndaryLineFv(node);
         }
     }
     if (hit == 0)
@@ -959,9 +959,9 @@ extern "C" const float lbl_805A1C20;
 
 float mtSqrtf__Ff(float);
 float rsqrtf__Ff(float);
-void fn_8003DBA8(Vec2f*);
-int fn_800409D4(void*, void*);
-void fn_80111968(void*, void*, void*, int);
+void normalize__5Vec2fFv(Vec2f*);
+int checkIntersect__11clSegment2DFPC11clSegment2DPC11clSegment2D(void*, void*);
+void getSegment__11grCollisionFP15grCollSegmentExP15grCollisionLinei(void*, void*, void*, int);
 }
 
 struct CollisionEntry {
@@ -1035,9 +1035,9 @@ extern "C" int fn_80086AC0(CollisionOwner* self, unsigned char* arg1, int arg2) 
     while (i < self->list->count) {
         entry = (CollisionEntry*)((char*)self->list->entries + offset);
         Segment2 collision;
-        fn_80111968(entry->owner, &collision, entry->object, 0);
+        getSegment__11grCollisionFP15grCollSegmentExP15grCollisionLinei(entry->owner, &collision, entry->object, 0);
 
-        if (fn_800409D4(&collision, &movementSegment)) {
+        if (checkIntersect__11clSegment2DFPC11clSegment2DPC11clSegment2D(&collision, &movementSegment)) {
             if (arg2 == 0) {
                 unsigned char flags = *((unsigned char*)entry->object + 0xF);
                 if (((flags >> 2) & 1) || ((flags >> 3) & 1)) {
@@ -1068,7 +1068,7 @@ extern "C" int fn_80086AC0(CollisionOwner* self, unsigned char* arg1, int arg2) 
                 ? lbl_805A1BB8
                 : lengthSquared * rsqrtf__Ff(lengthSquared);
 
-            fn_8003DBA8(&direction);
+            normalize__5Vec2fFv(&direction);
             float projection = dot / length;
             Vec2f projected;
             Vec2f perpendicular;
@@ -1082,8 +1082,8 @@ extern "C" int fn_80086AC0(CollisionOwner* self, unsigned char* arg1, int arg2) 
 
             radius = mtSqrtf__Ff((float)(double)nw4r::ut::Abs(
                 radius * radius - perpendicularLength * perpendicularLength));
-            fn_8003DBA8(&relative);
-            fn_8003DBA8(&movement);
+            normalize__5Vec2fFv(&relative);
+            normalize__5Vec2fFv(&movement);
 
             float distance;
             if (end.m_x - previous.m_x > lbl_805A1BB8)
@@ -1130,20 +1130,20 @@ extern "C" int fn_80086AC0(CollisionOwner* self, unsigned char* arg1, int arg2) 
                 if (leftDistance < rightDistance) {
                     Vec2f along;
                     Vec2f::copy(along, right - left);
-                    fn_8003DBA8(&along);
+                    normalize__5Vec2fFv(&along);
                     Vec2f point;
                     Vec2f::copy(point, left + along * lbl_805A1BE4);
                     adjustment = point - origin;
                 } else {
                     Vec2f along;
                     Vec2f::copy(along, left - right);
-                    fn_8003DBA8(&along);
+                    normalize__5Vec2fFv(&along);
                     Vec2f point;
                     Vec2f::copy(point, right + along * lbl_805A1BE4);
                     adjustment = point - origin;
                 }
 
-                fn_8003DBA8(&adjustment);
+                normalize__5Vec2fFv(&adjustment);
                 Vec2f answer;
                 Vec2f::copy(answer, origin + adjustment * *(float*)(arg1 + 0x80));
                 *(float*)(arg1 + 0x34) = answer.m_x;
@@ -1175,13 +1175,13 @@ struct Matrix34 {
     float m[3][4];
 };
 
-extern "C" void fn_8003E6DC(const Matrix34*, Vec3*);
+extern "C" void getScalingFactor__FP6MatrixP5Vec3f(const Matrix34*, Vec3*);
 
 // TODO: clean up, give variables real names
 static inline Vec3 getScale(const Matrix34* m)
 {
     Vec3 v;
-    fn_8003E6DC(m, &v);
+    getScalingFactor__FP6MatrixP5Vec3f(m, &v);
     return v;
 }
 
@@ -1239,20 +1239,20 @@ struct Manager {
 };
 
 extern "C" {
-unsigned int fn_8004E96C(void*);
-unsigned int fn_8004E958(void*);
-void fn_8003E388(const Matrix34*, Matrix34*);
-void fn_80089224(Manager*);
+unsigned int isPrevJustGameFrame__10GameGlobalCFv(void*);
+unsigned int isJustGameFrame__10GameGlobalCFv(void*);
+void copy__6MatrixCFP6Matrix(const Matrix34*, Matrix34*);
+void getWindArray__13ph2ndaryWorldFv(Manager*);
 void fn_800835B4(Manager*, Entry*, unsigned char, unsigned char);
 int fn_800838DC(Manager*, Entry*);
 void fn_80084524(Manager*, Entry*);
 int fn_80084AD8(Manager*, Entry*, Entry*, int, int, unsigned char, int, int,
                 unsigned char, unsigned char, unsigned char);
-int fn_800851C8(Manager*, Entry*, Entry*, int, int, unsigned char, int, int,
+int operationGravity__13ph2ndaryWorldFP12ph2ndaryLineP12ph2ndaryLinePCfiiiiUcUcUcUc(Manager*, Entry*, Entry*, int, int, unsigned char, int, int,
                 unsigned char, unsigned char, unsigned char, unsigned char);
 void fn_80082FDC(Manager*, int, int, EntryList*);
 void fn_800831AC(Manager*, int, int, EntryList*);
-void fn_8027EABC(void*, void*, unsigned int, int);
+void deallocateChunk__14hkThreadMemoryFPvii(void*, void*, unsigned int, int);
 extern "C" void* lbl_805A0EC8;
 }
 
@@ -1286,9 +1286,9 @@ extern "C" int fn_8008270C(
         self->slow = 1;
         self->slowMode = 1;
 
-        if (fn_8004E96C(g_GameGlobal) == 1)
+        if (isPrevJustGameFrame__10GameGlobalCFv(g_GameGlobal) == 1)
             self->slowMode = 1;
-        else if (fn_8004E958(g_GameGlobal) == 1)
+        else if (isJustGameFrame__10GameGlobalCFv(g_GameGlobal) == 1)
             self->slowMode = 0;
         else
             self->slowMode = 2;
@@ -1308,7 +1308,7 @@ extern "C" int fn_8008270C(
 
     int result = 0;
     if (groupIndex != -1 && self->groups[groupIndex].enabled) {
-        fn_80089224(self);
+        getWindArray__13ph2ndaryWorldFv(self);
 
         Group* group = self->groups + groupIndex;
         EntryList* list = group->list;
@@ -1334,7 +1334,7 @@ extern "C" int fn_8008270C(
                             arg6, arg7, arg8, arg9, arg10);
                     } else if (*index == -1) {
                         if (!arg11) {
-                            result = fn_800851C8(
+                            result = operationGravity__13ph2ndaryWorldFP12ph2ndaryLineP12ph2ndaryLinePCfiiiiUcUcUcUc(
                                 self, list->at(i), 0, arg3, arg4, arg5,
                                 arg6, arg7, arg8, arg9, arg10, arg15);
                         } else {
@@ -1354,12 +1354,12 @@ extern "C" int fn_8008270C(
                         Matrix34 matrix;
                         Vec3 scale;
 
-                        fn_8003E388(&list->at(*index)->matrix, &matrix);
+                        copy__6MatrixCFP6Matrix(&list->at(*index)->matrix, &matrix);
                         scale = getScale(&matrix);
                         int idx = *index;
                         list->at(idx)->scale = scale;
 
-                        result = fn_800851C8(
+                        result = operationGravity__13ph2ndaryWorldFP12ph2ndaryLineP12ph2ndaryLinePCfiiiiUcUcUcUc(
                             self, list->at(i), list->at(idx),
                             arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
                             arg15);
@@ -1367,11 +1367,11 @@ extern "C" int fn_8008270C(
                         Matrix34 matrix;
                         Vec3 scale;
 
-                        fn_8003E388(&other->at(0)->matrix, &matrix);
+                        copy__6MatrixCFP6Matrix(&other->at(0)->matrix, &matrix);
                         scale = getScale(&matrix);
                         other->at(0)->scale = scale;
 
-                        result = fn_800851C8(
+                        result = operationGravity__13ph2ndaryWorldFP12ph2ndaryLineP12ph2ndaryLinePCfiiiiUcUcUcUc(
                             self, list->at(i), other->at(0), arg3,
                             arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg15);
                     }
@@ -1449,14 +1449,14 @@ extern "C" int fn_8008270C(
     }
 
     if (!(self->flags34 & 0x80000000))
-        fn_8027EABC(lbl_805A0EC8, self->buffer2C, self->raw34() * 4, 0x15);
+        deallocateChunk__14hkThreadMemoryFPvii(lbl_805A0EC8, self->buffer2C, self->raw34() * 4, 0x15);
 
     self->buffer2C = 0;
     self->size30 = 0;
     self->flags34 = (self->flags34 & 0x40000000) | 0x80000000;
 
     if (!(self->flags28 & 0x80000000))
-        fn_8027EABC(lbl_805A0EC8, self->buffer20, self->raw28() * 4, 0x15);
+        deallocateChunk__14hkThreadMemoryFPvii(lbl_805A0EC8, self->buffer20, self->raw28() * 4, 0x15);
 
     self->buffer20 = 0;
     self->size24 = 0;
@@ -1507,19 +1507,19 @@ struct Segment : clSegment2D { int extra; };
 struct Hit { u8 failed; Vec2f p; u8 pValid; Vec2f q; u8 qValid; };
 
 extern "C" {
-void fn_8003DBA8(Vec2f*);
-int fn_800409D4(Segment*, Segment*);
-int fn_80041218(clCircle2D*, Segment*);
+void normalize__5Vec2fFv(Vec2f*);
+int checkIntersect__11clSegment2DFPC11clSegment2DPC11clSegment2D(Segment*, Segment*);
+int checkIntersect__10clCircle2DCFRC11clSegment2D(clCircle2D*, Segment*);
 void fn_8008734C(Hit*, Self*, Segment*, Segment*);
 void fn_800876BC(Hit*, Self*, Segment*, Segment*);
 void fn_8008785C(Hit*, Self*, Segment*, Segment*);
-void fn_80111968(void*, Segment*, void*, int);
-void fn_80113BD0(Entry*, Vec2f*);
-void fn_80113BF8(Entry*, Vec2f*);
-void fn_80113DF8(Entry*, Entry*);
-void fn_80113EC0(Entry*, Entry*);
-Vec2f fn_80114CBC(Entry*, Vec2f*);
-Vec2f fn_80114E9C(Entry*);
+void getSegment__11grCollisionFP15grCollSegmentExP15grCollisionLinei(void*, Segment*, void*, int);
+void getPos0__19grCollisionLineWorkCFP5Vec2f(Entry*, Vec2f*);
+void getPos1__19grCollisionLineWorkCFP5Vec2f(Entry*, Vec2f*);
+void getNext__19grCollisionLineWorkCFP19grCollisionLineWork(Entry*, Entry*);
+void getPrev__19grCollisionLineWorkCFP19grCollisionLineWork(Entry*, Entry*);
+Vec2f getNearSegmetPos__19grCollisionLineWorkCFRC5Vec2f(Entry*, Vec2f*);
+Vec2f getNormalVec__19grCollisionLineWorkFv(Entry*);
 float rsqrtf__Ff(float);
 extern "C" const float lbl_805A1BB8;
 extern "C" const float lbl_805A1BD8;
@@ -1616,8 +1616,8 @@ extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
     int found = 0;
     Vec2f::copy(forward, end - start);
     Vec2f::copy(backward, start - end);
-    fn_8003DBA8(&forward);
-    fn_8003DBA8(&backward);
+    normalize__5Vec2fFv(&forward);
+    normalize__5Vec2fFv(&backward);
     add(start, backward * lbl_805A1BD8);
     add(end, forward * lbl_805A1BD8);
     movement.m_p0Pos = end;
@@ -1635,7 +1635,7 @@ extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
         e = (Entry*)((char*)self->list->entries + offset);
         if (!e->line->target) goto next;
         if (!((e->ground->flags >> 6) & 1)) goto next;
-        fn_80111968(e->collision, &segment, e->line, 0);
+        getSegment__11grCollisionFP15grCollSegmentExP15grCollisionLinei(e->collision, &segment, e->line, 0);
         if (e->line->left || e->line->right) {
             if (B(arg,0x1f4) == 0) { found = 0; goto next; }
         }
@@ -1643,10 +1643,10 @@ extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
             if (e->line->under) goto next;
             if (e->line->upper) goto next;
         }
-        Vec2f::copy(normal, fn_80114E9C(e));
-        fn_8003DBA8(&normal);
+        Vec2f::copy(normal, getNormalVec__19grCollisionLineWorkFv(e));
+        normalize__5Vec2fFv(&normal);
         if (forward.m_x * normal.m_x + forward.m_y * normal.m_y > lbl_805A1BB8) goto next;
-        if (!fn_800409D4(&segment, &movement)) goto next;
+        if (!checkIntersect__11clSegment2DFPC11clSegment2DPC11clSegment2D(&segment, &movement)) goto next;
         found = 1;
         result = end;
         SOLVE(initial,segment)
@@ -1657,34 +1657,34 @@ extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
         endpointB.m_y = lbl_805A1BB8;
         neighborA.line = 0; neighborA.ground = 0; neighborA.collision = 0; neighborA.byte = 0; neighborA.flag = 0;
         neighborB.line = 0; neighborB.ground = 0; neighborB.collision = 0; neighborB.byte = 0; neighborB.flag = 0;
-        fn_80113EC0(e,&neighborA);
-        fn_80113DF8(e,&neighborB);
+        getPrev__19grCollisionLineWorkCFP19grCollisionLineWork(e,&neighborA);
+        getNext__19grCollisionLineWorkCFP19grCollisionLineWork(e,&neighborB);
         if (e->enabled()) {
-            Vec2f::copy(edgeNormal,fn_80114E9C(e));
-            fn_8003DBA8(&edgeNormal);
-            fn_80113BD0(e,&edgeA);
-            fn_80113BF8(e,&edgeB);
+            Vec2f::copy(edgeNormal,getNormalVec__19grCollisionLineWorkFv(e));
+            normalize__5Vec2fFv(&edgeNormal);
+            getPos0__19grCollisionLineWorkCFP5Vec2f(e,&edgeA);
+            getPos1__19grCollisionLineWorkCFP5Vec2f(e,&edgeB);
             if (neighborA.pairEnabled()) {
-                fn_80111968(neighborA.collision,&segmentA,neighborA.line,0);
-                fn_80113BD0(&neighborA,&neighborPointA);
-                endpointA = fn_80114CBC(e,&neighborPointA);
+                getSegment__11grCollisionFP15grCollSegmentExP15grCollisionLinei(neighborA.collision,&segmentA,neighborA.line,0);
+                getPos0__19grCollisionLineWorkCFP5Vec2f(&neighborA,&neighborPointA);
+                endpointA = getNearSegmetPos__19grCollisionLineWorkCFRC5Vec2f(e,&neighborPointA);
                 Vec2f::copy(towardA,start-endpointA);
-                fn_8003DBA8(&towardA);
-                Vec2f::copy(normalA,fn_80114E9C(&neighborA));
-                fn_8003DBA8(&normalA);
+                normalize__5Vec2fFv(&towardA);
+                Vec2f::copy(normalA,getNormalVec__19grCollisionLineWorkFv(&neighborA));
+                normalize__5Vec2fFv(&normalA);
                 float dotA = normalA.m_x*towardA.m_x + normalA.m_y*towardA.m_y;
                 float dotB = edgeNormal.m_x*towardA.m_x + edgeNormal.m_y*towardA.m_y;
                 blockedA = 0;
                 if (dotA > lbl_805A1BB8 && dotB > lbl_805A1BB8) blockedA = 1;
             } else { endpointA = edgeA; endpointB = edgeB; }
             if (neighborB.pairEnabled()) {
-                fn_80111968(neighborB.collision,&segmentB,neighborB.line,0);
-                fn_80113BD0(&neighborB,&neighborPointB);
-                endpointB = fn_80114CBC(e,&neighborPointB);
+                getSegment__11grCollisionFP15grCollSegmentExP15grCollisionLinei(neighborB.collision,&segmentB,neighborB.line,0);
+                getPos0__19grCollisionLineWorkCFP5Vec2f(&neighborB,&neighborPointB);
+                endpointB = getNearSegmetPos__19grCollisionLineWorkCFRC5Vec2f(e,&neighborPointB);
                 Vec2f::copy(towardB,start-endpointB);
-                fn_8003DBA8(&towardB);
-                Vec2f::copy(normalB,fn_80114E9C(&neighborB));
-                fn_8003DBA8(&normalB);
+                normalize__5Vec2fFv(&towardB);
+                Vec2f::copy(normalB,getNormalVec__19grCollisionLineWorkFv(&neighborB));
+                normalize__5Vec2fFv(&normalB);
                 float dotA = normalB.m_x*towardB.m_x + normalB.m_y*towardB.m_y;
                 float dotB = edgeNormal.m_x*towardB.m_x + edgeNormal.m_y*towardB.m_y;
                 blockedB = 0;
@@ -1693,13 +1693,13 @@ extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
         }
         Vec2f::copy(alongA,endpointA-start);
         Vec2f::copy(alongB,endpointB-start);
-        fn_8003DBA8(&alongA);
-        fn_8003DBA8(&alongB);
+        normalize__5Vec2fFv(&alongA);
+        normalize__5Vec2fFv(&alongB);
         Vec2f::copy(extendedA,start+alongA*F(arg,0x84));
         Vec2f::copy(extendedB,start+alongB*F(arg,0x84));
         setCircle(circleA,pointA.m_x,pointA.m_y,lbl_805A1C5C);
         setCircle(circleB,pointB.m_x,pointB.m_y,lbl_805A1C5C);
-        if (!fn_80041218(&circleA,&segment)) {
+        if (!checkIntersect__10clCircle2DCFRC11clSegment2D(&circleA,&segment)) {
             Vec2f::copy(distAA,endpointA-pointA);
             Vec2f::copy(distAB,endpointB-pointA);
             float lengthA = norm(distAA);
@@ -1707,13 +1707,13 @@ extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
             if (lengthA < lengthB) {
                 if (!blockedA) { pointA = extendedA; goto second; }
                 if (!neighborA.enabled()) goto second;
-                Vec2f::copy(otherNormalA,fn_80114E9C(&neighborA));
+                Vec2f::copy(otherNormalA,getNormalVec__19grCollisionLineWorkFv(&neighborA));
                 Vec2f::copy(deltaA,pointA-endpointA);
                 if (otherNormalA.m_x*deltaA.m_x+otherNormalA.m_y*deltaA.m_y < lbl_805A1BB8) {
                     if (!blockedB) pointA = extendedB;
                     goto second;
                 }
-                if (!fn_800409D4(&segmentA,&movement)) goto second;
+                if (!checkIntersect__11clSegment2DFPC11clSegment2DPC11clSegment2D(&segmentA,&movement)) goto second;
                 SOLVE(hitA,segmentA)
                 if (!hitA.failed) {
                     if (hitA.pValid && hitA.qValid) { pointA = hitA.q; goto second; }
@@ -1725,13 +1725,13 @@ extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
             } else {
                 if (!blockedB) { pointA = extendedB; goto second; }
                 if (!neighborB.enabled()) goto second;
-                Vec2f::copy(otherNormalB,fn_80114E9C(&neighborB));
+                Vec2f::copy(otherNormalB,getNormalVec__19grCollisionLineWorkFv(&neighborB));
                 Vec2f::copy(deltaB,pointA-endpointB);
                 if (otherNormalB.m_x*deltaB.m_x+otherNormalB.m_y*deltaB.m_y < lbl_805A1BB8) {
                     if (!blockedA) pointA = extendedA;
                     goto second;
                 }
-                if (!fn_800409D4(&segmentB,&movement)) goto second;
+                if (!checkIntersect__11clSegment2DFPC11clSegment2DPC11clSegment2D(&segmentB,&movement)) goto second;
                 SOLVE(hitB,segmentB)
                 if (!hitB.failed) {
                     if (hitB.pValid && hitB.qValid) { pointA = hitB.p; goto second; }
@@ -1742,7 +1742,7 @@ extern "C" int fn_800879FC(Self* self, char* arg, int unused, int ignore) {
             }
         }
 second:
-        if (!fn_80041218(&circleB,&segment)) {
+        if (!checkIntersect__10clCircle2DCFRC11clSegment2D(&circleB,&segment)) {
             Vec2f::copy(distBA,endpointA-pointB);
             Vec2f::copy(distBB,endpointB-pointB);
             float lengthA = norm(distBA);
@@ -1750,13 +1750,13 @@ second:
             if (lengthA < lengthB) {
                 if (!blockedA) { pointB = extendedA; goto adjust; }
                 if (!neighborA.enabled()) goto adjust;
-                Vec2f::copy(otherNormalC,fn_80114E9C(&neighborA));
+                Vec2f::copy(otherNormalC,getNormalVec__19grCollisionLineWorkFv(&neighborA));
                 Vec2f::copy(deltaC,pointB-endpointA);
                 if (otherNormalC.m_x*deltaC.m_x+otherNormalC.m_y*deltaC.m_y < lbl_805A1BB8) {
                     if (!blockedB) pointB = extendedB;
                     goto adjust;
                 }
-                if (!fn_800409D4(&segmentA,&movement)) goto adjust;
+                if (!checkIntersect__11clSegment2DFPC11clSegment2DPC11clSegment2D(&segmentA,&movement)) goto adjust;
                 SOLVE(hitC,segmentA)
                 if (!hitC.failed) {
                     if (hitC.pValid && hitC.qValid) { pointB = hitC.q; goto adjust; }
@@ -1768,13 +1768,13 @@ second:
             } else {
                 if (!blockedB) { pointB = extendedB; goto adjust; }
                 if (!neighborB.enabled()) goto adjust;
-                Vec2f::copy(otherNormalD,fn_80114E9C(&neighborB));
+                Vec2f::copy(otherNormalD,getNormalVec__19grCollisionLineWorkFv(&neighborB));
                 Vec2f::copy(deltaD,pointB-endpointB);
                 if (otherNormalD.m_x*deltaD.m_x+otherNormalD.m_y*deltaD.m_y < lbl_805A1BB8) {
                     if (!blockedA) pointB = extendedA;
                     goto adjust;
                 }
-                if (!fn_800409D4(&segmentB,&movement)) goto adjust;
+                if (!checkIntersect__11clSegment2DFPC11clSegment2DPC11clSegment2D(&segmentB,&movement)) goto adjust;
                 SOLVE(hitD,segmentB)
                 if (!hitD.failed) {
                     if (hitD.pValid && hitD.qValid) { pointB = hitD.p; goto adjust; }

@@ -177,13 +177,13 @@ struct Obj {
 };
 
 extern "C" {
-void* fn_8016FBF4(void* p);
-int fn_8016FBC8(void* p);
-void fn_8005AD04();
-void fn_801643E0(void* self, void (*f)(), int a, int b);
-void fn_80164480(void* self, void (*f)(), int a, int b);
+void* GetPtr__Q34nw4r2ef10HandleBaseCFv(void* p);
+int IsValid__Q34nw4r2ef10HandleBaseCFv(void* p);
+void create__9efManagerFv();
+void ForeachEmitter__Q34nw4r2ef6EffectFPFPvUl_vUlb(void* self, void (*f)(), int a, int b);
+void ForeachParticleManager__Q34nw4r2ef6EffectFPFPvUl_vUlb(void* self, void (*f)(), int a, int b);
 void fn_8005D118();
-void fn_8005D2E4();
+void foreachEmitterRestore__10efParticleFPvUl();
 void fn_8005D34C();
 
 extern void* lbl_805A0110;
@@ -198,10 +198,10 @@ extern float lbl_805A0138;
 // TODO: clean up, give variables real names
 void fn_8005CE70(Obj* self) {
     int state = self->w0c >> 24;
-    if ((state == 2 || state == 4) && fn_8016FBC8(self->sub) != 0) {
+    if ((state == 2 || state == 4) && IsValid__Q34nw4r2ef10HandleBaseCFv(self->sub) != 0) {
         char* r31;
         if (lbl_805A0110 == 0) {
-            fn_8005AD04();
+            create__9efManagerFv();
         }
         r31 = (char*)lbl_805A0110 + 0x84;
         if (!(self->f55 & 1)) {
@@ -220,7 +220,7 @@ void fn_8005CE70(Obj* self) {
         self->f54 = (u8)v;
         if ((v >> 5) & 1) {
             float f31 = self->f5c;
-            void* r30 = fn_8016FBF4(self->sub);
+            void* r30 = GetPtr__Q34nw4r2ef10HandleBaseCFv(self->sub);
             lbl_805A0138 = f31;
             if (((u8)self->f54 >> 4) & 1) {
                 if (!(self->f55 & 1)) {
@@ -236,13 +236,13 @@ void fn_8005CE70(Obj* self) {
                 }
                 self->f54 = self->f54 & 0xFFFFFFEF;
             }
-            fn_801643E0(r30, fn_8005D118, 0, 0);
-            fn_80164480(r30, fn_8005D34C, 0, 1);
-            ((Object_vptr_1c*)fn_8016FBF4(self->sub))->slot5(r31);
+            ForeachEmitter__Q34nw4r2ef6EffectFPFPvUl_vUlb(r30, fn_8005D118, 0, 0);
+            ForeachParticleManager__Q34nw4r2ef6EffectFPFPvUl_vUlb(r30, fn_8005D34C, 0, 1);
+            ((Object_vptr_1c*)GetPtr__Q34nw4r2ef10HandleBaseCFv(self->sub))->slot5(r31);
         } else {
-            ((Object_vptr_1c*)fn_8016FBF4(self->sub))->slot5(r31);
+            ((Object_vptr_1c*)GetPtr__Q34nw4r2ef10HandleBaseCFv(self->sub))->slot5(r31);
         }
-        void* r30b = fn_8016FBF4(self->sub);
+        void* r30b = GetPtr__Q34nw4r2ef10HandleBaseCFv(self->sub);
         if (((u8)self->f54 >> 4) & 1) {
             if (!(self->f55 & 1)) {
                 lbl_805A0128 = lbl_805A0118[0];
@@ -257,8 +257,8 @@ void fn_8005CE70(Obj* self) {
             }
             self->f54 = self->f54 & 0xFFFFFFEF;
         }
-        fn_801643E0(r30b, fn_8005D2E4, 1, 1);
-        fn_80164480(r30b, fn_8005D34C, 1, 1);
+        ForeachEmitter__Q34nw4r2ef6EffectFPFPvUl_vUlb(r30b, foreachEmitterRestore__10efParticleFPvUl, 1, 1);
+        ForeachParticleManager__Q34nw4r2ef6EffectFPFPvUl_vUlb(r30b, fn_8005D34C, 1, 1);
     }
 }
 }

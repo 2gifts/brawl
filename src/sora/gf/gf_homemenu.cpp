@@ -238,13 +238,13 @@ extern "C" void fn_8003718C(void* self) {
 namespace jj_8003798C {
 
 extern "C" void fn_80228154(int arg0);
-extern "C" void fn_8026F4EC(void* p, void* s);
-extern "C" void fn_8026F698();
-extern "C" int fn_8026F854(int arg0);
-extern "C" void fn_8026F868(void* a, int b, int c);
-extern "C" void* fn_80023AC8();
+extern "C" void HBMCreate(void* p, void* s);
+extern "C" void HBMInit();
+extern "C" int HBMSetAdjustFlag(int arg0);
+extern "C" void HBMCreateMemorySound(void* a, int b, int c);
+extern "C" void* getInstance__13gfFrameBufferFv();
 
-extern "C" void fn_8003623C();
+extern "C" void funcAlloc__9AllocatorFP12MEMAllocatorUl();
 extern "C" void fn_8003626C();
 extern u8 lbl_804954D8[];
 extern u8 lbl_804954E0[];
@@ -312,7 +312,7 @@ extern "C" int fn_8003798C(Self* self) {
     fn_80228154(3);
 
     if ((s8)lbl_804954D8[0] == 0) {
-        *(void**)(lbl_804954E0 + 0x10) = (void*)fn_8003623C;
+        *(void**)(lbl_804954E0 + 0x10) = (void*)funcAlloc__9AllocatorFP12MEMAllocatorUl;
         *(void**)(lbl_804954E0 + 0x14) = (void*)fn_8003626C;
         *(void**)(lbl_804954E0 + 0x00) = (void*)(lbl_804954E0 + 0x10);
         *(u32*)(lbl_804954E0 + 0x08) = 0;
@@ -324,13 +324,13 @@ extern "C" int fn_8003798C(Self* self) {
     }
     *(u32*)(lbl_804954E0 + 0x18) = *(u32*)(lbl_804954E0 + 0x04);
 
-    fn_8026F4EC(&self->m_10, lbl_804954E0);
-    fn_8026F698();
-    fn_8026F854(1);
+    HBMCreate(&self->m_10, lbl_804954E0);
+    HBMInit();
+    HBMSetAdjustFlag(1);
     self->m_9C = 1;
-    fn_8026F868(data4, self->m_98, 0x1D000);
+    HBMCreateMemorySound(data4, self->m_98, 0x1D000);
 
-    u8* t = (u8*)fn_80023AC8();
+    u8* t = (u8*)getInstance__13gfFrameBufferFv();
     ((B1Bits*)b1)->f1 = (t[0x74] >> 3) & 1;
     t[0x74] = t[0x74] | 8;
     return 1;
@@ -343,9 +343,9 @@ extern "C" {
 void fn_80036ED0(void* self);
 void fn_8003718C(void* self);
 void fn_80037244(void* self);
-void fn_80076860(void* snd, int arg);
-void fn_80076A6C(void* snd, int arg);
-void fn_8026F614(void);
+void pause__9sndSystemFb(void* snd, int arg);
+void resume__9sndSystemFb(void* snd, int arg);
+void HBMDelete(void);
 }
 
 extern "C" void* g_gfPadSystem;
@@ -389,7 +389,7 @@ cd4:
                 var_r4 = 1;
             }
             if (var_r4 == 0) {
-                fn_8026F614();
+                HBMDelete();
             }
         }
 
@@ -428,7 +428,7 @@ cd4:
                 var_r3_2 = 1;
             }
             if (var_r3_2 != 0) {
-                fn_80076860(g_sndSystem, 0);
+                pause__9sndSystemFb(g_sndSystem, 0);
                 if (mvMoviePlayer::getInstance() != 0) {
                     if (!mvMoviePlayer::getInstance()->isPause()) {
                         mvMoviePlayer::getInstance()->setPause();
@@ -436,7 +436,7 @@ cd4:
                     }
                 }
             } else {
-                fn_80076A6C(g_sndSystem, 0);
+                resume__9sndSystemFb(g_sndSystem, 0);
                 if (mvMoviePlayer::getInstance() != 0 && self[0xC1] != 0) {
                     mvMoviePlayer::getInstance()->resetPause();
                     self[0xC1] = 0;
@@ -505,15 +505,15 @@ struct FnMgrHdr {
 
 extern "C" {
 int fn_8003798C(void);
-int fn_8021A024(int, s32*);
+int WPADProbe(int, s32*);
 void fn_80227728(int, void*, int);
 void fn_80228138(int);
-int fn_800365B0(void*, void*);
-int fn_8026F6C4(void*);
-int fn_8026F834(void);
-void fn_8026F924(void);
-void fn_8026F958(void);
-u8* fn_80023AC8(void);
+int calcDigitalCursorPos__FUlP5Vec2f(void*, void*);
+int HBMCalc(void*);
+int HBMGetSelectBtnNum__Fv(void);
+void HBMDeleteSound(void);
+void HBMUpdateSound(void);
+u8* getInstance__13gfFrameBufferFv(void);
 extern char lbl_804955D8[];
 extern f32 lbl_805A1678;
 extern f32 lbl_805A16A0;
@@ -540,7 +540,7 @@ extern "C" void fn_80037244(FnObj* self) {
         f29 = lbl_805A1678;
         for (i = 0; i < 4; i++) {
             s32 sp8;
-            s32 r29 = fn_8021A024(i, &sp8);
+            s32 r29 = WPADProbe(i, &sp8);
             fn_80227728(i, cur, 0x10);
             slot->unkC = sp8;
             switch (r29) {
@@ -557,7 +557,7 @@ extern "C" void fn_80037244(FnObj* self) {
             }
             FnSub* sub = slot->unk0;
             if (sub != 0) {
-                s32 r3_2 = fn_800365B0(sub->unk60, &slot->unk4);
+                s32 r3_2 = calcDigitalCursorPos__FUlP5Vec2f(sub->unk60, &slot->unk4);
                 FnSub* s4 = slot->unk0;
                 f32 b = s4->unk70 / f28;
                 f32 a = s4->unk6C / f28;
@@ -594,21 +594,21 @@ extern "C" void fn_80037244(FnObj* self) {
             cur += 0x840;
             slot++;
         }
-        if (fn_8026F6C4(self->slots) >= 0) {
+        if (HBMCalc(self->slots) >= 0) {
             s32 three = 3;
             ((FnB1*)((char*)self + 0xB1))->p3 = 0;
             ((FnB0*)((char*)self + 0xB0))->top = three;
-            fn_8026F924();
+            HBMDeleteSound();
             self->unk9C = 4;
             r29b = ((FnB1*)((char*)self + 0xB1))->p1;
-            FnMgrHdr* mh = (FnMgrHdr*)fn_80023AC8();
+            FnMgrHdr* mh = (FnMgrHdr*)getInstance__13gfFrameBufferFv();
             mh->flag = r29b;
             fn_80228138(0);
             fn_80228138(1);
             fn_80228138(2);
             fn_80228138(3);
             gfShutdownManager* mgr = &g_gfShutdownManager;
-            int st = fn_8026F834();
+            int st = HBMGetSelectBtnNum__Fv();
             switch (st) {
             case 0:
                 break;
@@ -622,7 +622,7 @@ extern "C" void fn_80037244(FnObj* self) {
                 break;
             }
         }
-        fn_8026F958();
+        HBMUpdateSound();
     }
 }
 }
@@ -638,15 +638,15 @@ struct Obj {
 };
 struct Render { char pad[0x24]; int a; int b; char pad2[8]; unsigned short w; unsigned short h; };
 extern "C" {
-void fn_801F47D8(int, int);
-void fn_801F5500(int, int, int, int);
-void fn_801F5484(float, float, float, float, float, float);
-void fn_801F4880(int);
-void fn_801ECF4C(void*, float, float, float, float, float, float);
-void fn_801F50EC(void*, int);
-void fn_8026F708();
+void GXSetPixelFmt(int, int);
+void GXSetScissor(int, int, int, int);
+void GXSetViewport(float, float, float, float, float, float);
+void GXSetDither(int);
+void C_MTXOrtho(void*, float, float, float, float, float, float);
+void GXSetProjection(void*, int);
+void HBMDraw();
 void fn_80036270(void*, unsigned char, int);
-void fn_801F1D10(int);
+void GXSetDispCopyGamma(int);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800374DC(Obj* self, Render* r) {
@@ -659,14 +659,14 @@ extern "C" void fn_800374DC(Obj* self, Render* r) {
    else { self->x = 1.3684211f; self->y = 1.0f; }
   }
   if ((self->active && self->mode == 2) || self->fade) {
-   fn_801F47D8(r->a, r->b);
-   fn_801F5500(0, 0, r->w, r->h);
-   fn_801F5484(0.0f, 0.0f, (float)r->w, (float)r->h, 0.0f, 1.0f);
-   fn_801F4880(0);
+   GXSetPixelFmt(r->a, r->b);
+   GXSetScissor(0, 0, r->w, r->h);
+   GXSetViewport(0.0f, 0.0f, (float)r->w, (float)r->h, 0.0f, 1.0f);
+   GXSetDither(0);
    if (self->active && self->mode == 2) {
-    if (!self->wide) fn_801ECF4C(matrix, 228.0f, -228.0f, -304.0f, 304.0f, 0.0f, 500.0f);
-    else fn_801ECF4C(matrix, 228.0f, -228.0f, -416.0f, 416.0f, 0.0f, 500.0f);
-    fn_801F50EC(matrix, 1); fn_8026F708();
+    if (!self->wide) C_MTXOrtho(matrix, 228.0f, -228.0f, -304.0f, 304.0f, 0.0f, 500.0f);
+    else C_MTXOrtho(matrix, 228.0f, -228.0f, -416.0f, 416.0f, 0.0f, 500.0f);
+    GXSetProjection(matrix, 1); HBMDraw();
    } else if (self->fade) {
     float elapsed = (float)((OSGetTick() - self->tick) / ((*(unsigned int*)0x800000F8 >> 2) / 1000));
     switch (self->state) {
@@ -684,7 +684,7 @@ extern "C" void fn_800374DC(Obj* self, Render* r) {
     }
     fn_80036270(self->ptr, self->alpha, self->wide);
    }
-   fn_801F1D10(0);
+   GXSetDispCopyGamma(0);
   }
  }
 }
@@ -708,21 +708,21 @@ void GXSetBlendMode(int, int, int, int);
 void GXSetZMode(int, int, int);
 void GXBegin(int, int, int);
 
-void fn_801EFB10(void);
-void fn_801EFB44(int, int, int, int, int);
-void fn_801EF280(int, int);
-void fn_801F3D60(int, const void*);
-void fn_801F3C30(int, int, int, int, int);
-void fn_801F3CB0(int, int, int, int, int, int);
-void fn_801F3C70(int, int, int, int, int);
-void fn_801F3D08(int, int, int, int, int, int);
-void fn_801F51DC(const void*, int);
-void fn_801F52E4(int);
-void fn_8025C058(s32, void*, int);
-void fn_801F2FB0(void*, int);
-void* fn_80023AC8(void);
-void fn_801ECF4C(void*, f32, f32, f32, f32, f32, f32);
-void fn_801F50EC(void*, int);
+void GXClearVtxDesc(void);
+void GXSetVtxAttrFmt(int, int, int, int, int);
+void GXSetVtxDesc(int, int);
+void GXSetTevColor(int, const void*);
+void GXSetTevColorIn(int, int, int, int, int);
+void GXSetTevColorOp(int, int, int, int, int, int);
+void GXSetTevAlphaIn(int, int, int, int, int);
+void GXSetTevAlphaOp(int, int, int, int, int, int);
+void GXLoadPosMtxImm(const void*, int);
+void GXSetCurrentMtx(int);
+void TPLGetGXTexObjFromPalette(s32, void*, int);
+void GXLoadTexObj(void*, int);
+void* getInstance__13gfFrameBufferFv(void);
+void C_MTXOrtho(void*, f32, f32, f32, f32, f32, f32);
+void GXSetProjection(void*, int);
 void setIdentity__6MatrixFv(void*);
 
 extern void* lbl_805A0098;
@@ -744,11 +744,11 @@ void fn_80036270(s32 arg0, s8 arg1, s32 arg2) {
     s32 spC;
     Color4 c;
 
-    fn_801EFB10();
-    fn_801EFB44(5, 9, 0, 4, 0);
-    fn_801EFB44(5, 0xD, 1, 3, 0);
-    fn_801EF280(9, 1);
-    fn_801EF280(0xD, 1);
+    GXClearVtxDesc();
+    GXSetVtxAttrFmt(5, 9, 0, 4, 0);
+    GXSetVtxAttrFmt(5, 0xD, 1, 3, 0);
+    GXSetVtxDesc(9, 1);
+    GXSetVtxDesc(0xD, 1);
     GXSetNumChans(1);
     GXSetChanCtrl(4, 0, 1, 1, 0, 0, 2);
     GXSetNumTexGens(1);
@@ -759,25 +759,25 @@ void fn_80036270(s32 arg0, s8 arg1, s32 arg2) {
     c.b = lbl_805A1672;
     c.a = arg1;
     spC = *(s32*)&c;
-    fn_801F3D60(1, &spC);
+    GXSetTevColor(1, &spC);
     GXSetTevOrder(0, 0, 0, 0xFF);
-    fn_801F3C30(0, 0xF, 0xF, 0xF, 8);
-    fn_801F3CB0(0, 0, 0, 0, 1, 0);
-    fn_801F3C70(0, 7, 1, 4, 7);
-    fn_801F3D08(0, 0, 0, 0, 1, 0);
+    GXSetTevColorIn(0, 0xF, 0xF, 0xF, 8);
+    GXSetTevColorOp(0, 0, 0, 0, 1, 0);
+    GXSetTevAlphaIn(0, 7, 1, 4, 7);
+    GXSetTevAlphaOp(0, 0, 0, 0, 1, 0);
     GXSetBlendMode(1, 4, 5, 0);
     GXSetZMode(0, 3, 0);
     setIdentity__6MatrixFv(sp70);
-    fn_801F51DC(sp70, 3);
-    fn_801F52E4(3);
-    fn_8025C058(arg0, sp10, 0);
-    fn_801F2FB0(sp10, 0);
+    GXLoadPosMtxImm(sp70, 3);
+    GXSetCurrentMtx(3);
+    TPLGetGXTexObjFromPalette(arg0, sp10, 0);
+    GXLoadTexObj(sp10, 0);
 
-    u8* p = (u8*)fn_80023AC8();
+    u8* p = (u8*)getInstance__13gfFrameBufferFv();
     f32 f31 = (f32)(s32)*(u16*)(p + 0x34);
     f32 f30 = (f32)(s32)*(u16*)(p + 0x36);
-    fn_801ECF4C(sp30, f30 * lbl_805A1674, -f30 * lbl_805A1674, -f31 * lbl_805A1674, f31 * lbl_805A1674, lbl_805A1678, lbl_805A167C);
-    fn_801F50EC(sp30, 1);
+    C_MTXOrtho(sp30, f30 * lbl_805A1674, -f30 * lbl_805A1674, -f31 * lbl_805A1674, f31 * lbl_805A1674, lbl_805A1678, lbl_805A167C);
+    GXSetProjection(sp30, 1);
 
     f32 b = lbl_805A1680;
     f32 var_f4 = lbl_805A1684;
@@ -816,10 +816,10 @@ void fn_80036270(s32 arg0, s8 arg1, s32 arg2) {
 
 // TODO: clean up, give variables real names
 namespace jj_80037DC8 {
-extern "C" void fn_80036C20(void*);
+extern "C" void returnStatus__10gfHomeMenuFv(void*);
 
 extern "C" void fn_80037DC8(void* self) {
-    fn_80036C20(reinterpret_cast<u8*>(self) - 0x8);
+    returnStatus__10gfHomeMenuFv(reinterpret_cast<u8*>(self) - 0x8);
 }
 }
 

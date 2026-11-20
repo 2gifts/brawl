@@ -69,10 +69,10 @@ bool nteContribution::isAbleToContribute() {
 }
 
 // TODO: clean up, give variables real names
-extern "C" void fn_8014F6E4(void);
+extern "C" void isInfinityContribute__9nteGlobalFv(void);
 
 extern "C" void fn_80154DF8(void) {
-    fn_8014F6E4();
+    isInfinityContribute__9nteGlobalFv();
 }
 
 struct Fn154C4CObj;
@@ -90,11 +90,11 @@ extern "C" void fn_80154E04(void* self, void* p) {
     fn_80154C4C((Fn154C4CObj*)(reinterpret_cast<u8*>(self) - 0x344), p);
 }
 
-extern "C" void fn_80154C8C(void*);
+extern "C" void notifySBSEndProc__15nteContributionFll(void*);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_80154E0C(void* self) {
-    fn_80154C8C(reinterpret_cast<u8*>(self) - 0x348);
+    notifySBSEndProc__15nteContributionFll(reinterpret_cast<u8*>(self) - 0x348);
 }
 
 #pragma dont_inline on
@@ -170,7 +170,7 @@ void createThread__8gfThreadFP10gfRunnableUlUlQ25Heaps8HeapType(
     void*, void*, unsigned long, unsigned long, int);
 void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 void* __ct__6nteDWCFv(void*);
-void* fn_80151B38(void*, int);
+void* __ct__6nteSBSFUc(void*, int);
 }
 
 struct Dwc {
@@ -249,7 +249,7 @@ extern "C" Thread* fn_801542C4(Thread* self, int heap)
 
     obj = __nw__FUlQ25Heaps8HeapType(0x78, heap);
     if (obj)
-        obj = fn_80151B38(obj, 0);
+        obj = __ct__6nteSBSFUc(obj, 0);
     self->worker = (Worker*)obj;
 
     void* c = self;

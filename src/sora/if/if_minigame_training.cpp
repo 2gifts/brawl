@@ -578,7 +578,7 @@ public:
 
 extern "C" {
 extern char lbl_8045D040[];
-void fn_800B8A0C(void*, int);
+void __dt__5MuMsgFv(void*, int);
 void __dl__FPv(void*);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -600,7 +600,7 @@ void* fn_801049E8(char* arg0, int arg1) {
         } while (i < 2);
 
         if (*(void**)(arg0 + 0xC) != 0) {
-            fn_800B8A0C(*(void**)(arg0 + 0xC), 1);
+            __dt__5MuMsgFv(*(void**)(arg0 + 0xC), 1);
             *(void**)(arg0 + 0xC) = 0;
         }
 
@@ -616,8 +616,8 @@ void* fn_801049E8(char* arg0, int arg1) {
 namespace jj_80104AA4 {
 
 extern "C" {
-void fn_80104B6C(void* self, void* table, u32 count, u32 arg, u32 prio);
-void fn_80104C60(void* self, void* data);
+void createObjResFile__18IfMinigameTrainingFPCvlPQ34nw4r3g3d7ResFilel(void* self, void* table, u32 count, u32 arg, u32 prio);
+void initMsg__18IfMinigameTrainingFPv(void* self, void* data);
 }
 
 extern char lbl_80409218[];
@@ -625,8 +625,8 @@ extern char lbl_8045D008[];
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80104AA4(void* self, u32 arg1, void* arg2, u32 arg3, u8* arg4, u32 arg5) {
-    fn_80104B6C(self, lbl_80409218, 2, arg1, 0xC0);
-    fn_80104C60(self, arg2);
+    createObjResFile__18IfMinigameTrainingFPCvlPQ34nw4r3g3d7ResFilel(self, lbl_80409218, 2, arg1, 0xC0);
+    initMsg__18IfMinigameTrainingFPv(self, arg2);
 
     u32 count = 0;
     {

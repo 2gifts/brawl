@@ -60,7 +60,7 @@ extern const u8 lbl_80407BE0[10][2];
 
 struct GameGlobal;
 extern GameGlobal* g_GameGlobal;
-extern "C" int fn_8004D9E8(GameGlobal*);
+extern "C" int isLanguageJp__10GameGlobalFv(GameGlobal*);
 
 // 8 bytes per entry. Stored at lbl_80455AA8.
 struct muEntry8 {
@@ -349,14 +349,14 @@ extern "C" u32 fn_800AFA1C(int idx) {
 }
 
 const char* muMenu::exchangeMuStockchkind2MuCharName(int stockchkind) {
-    if (fn_8004D9E8(g_GameGlobal)) {
+    if (isLanguageJp__10GameGlobalFv(g_GameGlobal)) {
         return lbl_804561E4[stockchkind];
     }
     return lbl_80456564[stockchkind];
 }
 
 extern "C" const char* fn_800AFA8C(int idx) {
-    if (fn_8004D9E8(g_GameGlobal)) {
+    if (isLanguageJp__10GameGlobalFv(g_GameGlobal)) {
         const char* name = lbl_80456338[idx];
         if (name == 0) {
             name = lbl_80456564[idx];
