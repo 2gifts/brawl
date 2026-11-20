@@ -165,6 +165,8 @@ wnArticleManageModuleBuilder<Mediator, N>::wnArticleManageModuleBuilder(soModule
 template wnSelectedArticleMediator<ftZeldaArticleMediator>::~wnSelectedArticleMediator();
 template wnArticleManageModuleBuilder<ftZeldaArticleMediator, 5>::~wnArticleManageModuleBuilder();
 template wnArticleManageModuleBuilder<ftZeldaArticleMediator, 5>::wnArticleManageModuleBuilder(soModuleAccesser*);
+inline wnZeldaLightingBow::~wnZeldaLightingBow() { }
+inline wnZeldaLightingBowArrow::~wnZeldaLightingBowArrow() { }
 ftZeldaArticleMediator::~ftZeldaArticleMediator() { }
 #pragma dont_inline off
 
