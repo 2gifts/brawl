@@ -93,7 +93,17 @@ struct hkVector4 {
         z = s * a.z;
         w = s * a.w;
     }
+    // Lane by lane, w last: the out-of-line weak copy in hkSimpleContactConstraintInfo.o.
     void setCross(const hkVector4& a, const hkVector4& b) {
+        x = a.y * b.z - a.z * b.y;
+        y = a.z * b.x - a.x * b.z;
+        z = a.x * b.y - a.y * b.x;
+        w = 0.0f;
+    }
+    // TODO: clean up: the same product through set(); the near-miss callers in hkBoxMotion, hkBvTreeAgent,
+    // hkCollideTriangleUtil, hkMathUtil, hkMatrix3, hkRotation and hkTriangleShape score higher with it than with
+    // setCross. HYPOTHESIS: those callers really use another inline; the image only proves setCross above.
+    void setCrossLegacy(const hkVector4& a, const hkVector4& b) {
         set(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x, 0.0f);
     }
     // In place, lane order x..w (the out-of-line weak copy in hkSimpleContactConstraintInfo loads x first).

@@ -94,6 +94,24 @@ extern "C" void fn_803144D4(const Data* a, const Data* b, float* outA, float* ou
 } // namespace jj_fn_803144D4
 
 // fn_8031574C: body from https://github.com/jj-link/brawl src/havok/fn_8031574C.cpp (namespaced; memory singletons rebound to our names).
+#include <havok/hkMotionState.h>
+
+// hk4dGskCalcWorstCaseProjectedVelocity (map name): the relative linear velocity along the normal, and the largest
+// normal speed the two bodies' rotations can add (object radius times |angular velocity x normal| per body).
+// TODO: clean up: draft (71%): FPR colouring only (the target keeps frsqrte and frsp in separate registers).
+extern "C" void fn_803151F4(const hkMotionState& msA, const hkMotionState& msB, const hkVector4& normal,
+                            const hkVector4& linearVelocity, const hkVector4* angularVelocity,
+                            hkReal& linearVelocityOut, hkReal& angularVelocityOut) {
+    hkVector4 armA;
+    armA.setCross(angularVelocity[0], normal);
+    hkVector4 armB;
+    armB.setCross(angularVelocity[1], normal);
+    hkReal speedA = msA.m_objectRadius * armA.length3();
+    hkReal speedB = msB.m_objectRadius * armB.length3();
+    angularVelocityOut = speedA + speedB;
+    linearVelocityOut = linearVelocity.dot3(normal);
+}
+
 #include <types.h>
 #include <havok/hkMemory.h>
 #include <havok/hkThreadMemory.h>

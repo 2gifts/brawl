@@ -69,7 +69,7 @@ VFTimeStampCallback lbl_805A1224 = NULL;
 s32 VFipdm_init_diskmanager(u32 config, void* param) {
     s32 i;
 
-    fn_803A976C(&lbl_8053A6E0, 0, sizeof(lbl_8053A6E0));
+    VFipf_memset(&lbl_8053A6E0, 0, sizeof(lbl_8053A6E0));
     for (i = 0; i < 26; i++) {
         lbl_8053A6E0.disk[i].disk_lock_handle = NULL;
     }
@@ -166,7 +166,7 @@ s32 VFSysCreatePrfFileNANDFlash(const s8* i_path, u32 i_size) {
     s8* dst = path;
     const s8* src = i_path;
     u32 size = i_size;
-    fn_803A976C(dst, 0, 255);
+    VFipf_memset(dst, 0, 255);
     for (i = 0; i < 255 && *src; src++, dst++, i++) {
         if (*src == '\\') *dst = '/';
         else *dst = *src;
@@ -204,7 +204,7 @@ s32 VFiPFAPI_ParseOpenModeString(const s8* mode_str) {
 
 // ---------------------------------------------------------------- pf_clib
 
-void* fn_803A9644(void* dst, const void* src, u32 length) { // VFipf_memcpy
+void* VFipf_memcpy(void* dst, const void* src, u32 length) { // VFipf_memcpy
     u8* d = dst;
     const u8* s = src;
 
@@ -222,7 +222,7 @@ void* fn_803A9644(void* dst, const void* src, u32 length) { // VFipf_memcpy
 }
 
 // TODO: clean up, give variables real names
-int fn_803A962C(int a) {
+int VFipf_toupper(int a) {
     if (a < 0x61)
         return a;
     if (a <= 0x7A)
@@ -231,7 +231,7 @@ int fn_803A962C(int a) {
 }
 
 // TODO: clean up, give variables real names
-void* fn_803A976C(void* dst, int c, u32 length) {
+void* VFipf_memset(void* dst, int c, u32 length) {
     u8* p = dst;
     u32* word;
     u32 fill;
@@ -258,7 +258,7 @@ void* fn_803A976C(void* dst, int c, u32 length) {
 }
 
 // TODO: clean up, give variables real names
-u32 fn_803A9864(const s8* s) {
+u32 VFipf_strlen(const s8* s) {
     const s8* p;
 
     for (p = s; *p != 0; p++) {
@@ -267,7 +267,7 @@ u32 fn_803A9864(const s8* s) {
 }
 
 // TODO: clean up, give variables real names
-s8* fn_803A9884(s8* dst, const s8* src) {
+s8* VFipf_strcpy(s8* dst, const s8* src) {
     s8* d = dst;
 
     while ((*d = *src) != 0) {
@@ -278,7 +278,7 @@ s8* fn_803A9884(s8* dst, const s8* src) {
 }
 
 // TODO: clean up, give variables real names
-s32 fn_803A98A8(u8 *arg0, u8 *arg1) {
+s32 VFipf_strcmp(u8 *arg0, u8 *arg1) {
     u8 c;
     u8 d;
     while ((c = *arg0) != 0 && (d = *arg1) != 0 && c == d) {
@@ -289,7 +289,7 @@ s32 fn_803A98A8(u8 *arg0, u8 *arg1) {
 }
 
 // TODO: clean up, give variables real names
-s32 fn_803A98E0(u8 *s1, u8 *s2, u32 n) {
+s32 VFipf_strncmp(u8 *s1, u8 *s2, u32 n) {
     u32 i;
     u8 c1;
 
@@ -316,7 +316,7 @@ void VFiPFCODE_Divide_Width(unsigned int arg0, short *arg1, short *arg2) {
 }
 
 // TODO: clean up, give variables real names
-u16 fn_803A9948(const u8* buf) {
+u16 VFiPF_GET_LE_U16(const u8* buf) {
     return (buf[0] & ~0xFF00) | ((buf[1] << 8) & 0xFF00);
 }
 
@@ -324,12 +324,12 @@ void fn_803A9A70(PF_STR* p_str, u32 code_mode) { // VFiPFSTR_SetCodeMode
     p_str->code_mode = code_mode;
 }
 
-u32 fn_803A9A78(PF_STR* p_str) { // VFiPFSTR_GetCodeMode
+u32 VFiPFSTR_GetCodeMode(PF_STR* p_str) { // VFiPFSTR_GetCodeMode
     return p_str->code_mode;
 }
 
 // TODO: clean up, give variables real names
-void fn_803A9A80(PF_STR* p_str, s8* p_local) {
+void VFiPFSTR_SetLocalStr(PF_STR* p_str, s8* p_local) {
     if (p_str->code_mode == 1 || p_local == NULL) {
         p_str->p_local = p_str->p_head;
         return;
@@ -338,14 +338,14 @@ void fn_803A9A80(PF_STR* p_str, s8* p_local) {
 }
 
 // TODO: clean up, give variables real names
-const s8* fn_803A9AA8(PF_STR* p_str, u32 target) {
+s8* VFiPFSTR_GetStrPos(PF_STR* p_str, u32 target) {
     if (target == 1) {
-        return p_str->p_head;
+        return (s8*)p_str->p_head;
     }
     if (target == 2) {
-        return p_str->p_tail;
+        return (s8*)p_str->p_tail;
     }
-    return p_str->p_local;
+    return (s8*)p_str->p_local;
 }
 
 // TODO: clean up, give variables real names
@@ -355,10 +355,10 @@ s32 VFiPFSTR_InitStr(PF_STR* p_str, const s8* s, u32 code_mode) {
     }
     if (code_mode == 1) {
         p_str->p_head = s;
-        p_str->p_tail = s + fn_803A9864(s);
+        p_str->p_tail = s + VFipf_strlen(s);
     } else if (code_mode == 2) {
         p_str->p_head = s;
-        p_str->p_tail = s + fn_803A9FF8((const u16*)s) * 2;
+        p_str->p_tail = s + VFipf_w_strlen((const u16*)s) * 2;
     } else {
         return 10;
     }
@@ -399,7 +399,7 @@ u16 VFiPFSTR_StrLen(PF_STR* p_str) {
 
 s32 VFiPFSTR_StrCmp(const PF_STR* p_str, const s8* s) {
     if (p_str->code_mode == 1) {
-        return fn_803A98A8((u8*)p_str->p_head, (u8*)s);
+        return VFipf_strcmp((u8*)p_str->p_head, (u8*)s);
     }
     {
     const u16* wide = (const u16*)p_str->p_head;
@@ -428,7 +428,7 @@ s32 VFiPFSTR_StrNCmp(PF_STR* p_str, const s8* s, u32 target, s16 offset, u16 num
         } else {
             p = p_str->p_local + offset;
         }
-        return fn_803A98E0((u8*)p, (u8*)s, num);
+        return VFipf_strncmp((u8*)p, (u8*)s, num);
     }
     {
         const u16* wide;
@@ -460,7 +460,7 @@ void VFiPFSTR_ToUpperNStr(PF_STR* p_str, u16 num, s8* dest) {
     if (p_str->code_mode == 1) {
         const s8* p = p_str->p_head;
         while (num != 0 && *p != 0) {
-            *dest = fn_803A962C(*p);
+            *dest = VFipf_toupper(*p);
             dest++;
             p++;
             num--;
@@ -485,7 +485,7 @@ void VFiPFSTR_ToUpperNStr(PF_STR* p_str, u16 num, s8* dest) {
 }
 
 // TODO: clean up, give variables real names
-s32 fn_803A9FF8(const u16* s) {
+s32 VFipf_w_strlen(const u16* s) {
     const u16* p = s;
 
     while (*p != 0) {
@@ -495,7 +495,7 @@ s32 fn_803A9FF8(const u16* s) {
 }
 
 // TODO: clean up, give variables real names
-u16* fn_803AA01C(u16* dst, const u16* src) {
+u16* VFipf_w_strcpy(u16* dst, const u16* src) {
     u16* d = dst;
 
     while ((*d = *src) != 0) {
@@ -506,7 +506,7 @@ u16* fn_803AA01C(u16* dst, const u16* src) {
 }
 
 // TODO: clean up, give variables real names
-s32 fn_803AA040(u16 *arg0, u16 *arg1, s32 arg2) {
+s32 VFipf_w_strncmp(u16 *arg0, u16 *arg1, s32 arg2) {
     u16 *s1 = arg0;
     u16 *s2 = arg1;
     s32 n = arg2;
@@ -1058,7 +1058,7 @@ void VFipdm_disk_notify_media_insert(PDM_DISK* p_disk) {
     VFipdm_part_set_change_media_state(p_disk, 1);
 }
 
-s32 fn_803AB6EC(PDM_DISK* p_disk, PDM_DISK* lp_disk) { // VFipdm_disk_do_get_permission
+s32 VFipdm_disk_do_get_permission(PDM_DISK* p_disk, PDM_DISK* lp_disk) { // VFipdm_disk_do_get_permission
     s32 err;
 
     if (lp_disk->disk_lock_cnt == 0 || (lp_disk->status & 0x20)) {
@@ -1104,7 +1104,7 @@ s32 VFipdm_disk_get_part_permission(PDM_DISK* p_disk) {
     if (err) {
         return err;
     }
-    return fn_803AB6EC(p_disk, &lbl_8053A6E0.disk[index]);
+    return VFipdm_disk_do_get_permission(p_disk, &lbl_8053A6E0.disk[index]);
 }
 
 // ---------------------------------------------------------------- pdm_partition
@@ -1518,7 +1518,7 @@ s32 VFipdm_open_disk(PDM_INIT_DISK* p_init_disk_tbl, PDM_DISK** pp_disk) {
         return 1;
     }
     *pp_disk = NULL;
-    err = fn_803AB8C4(p_init_disk_tbl, pp_disk);
+    err = VFipdm_disk_open_disk(p_init_disk_tbl, pp_disk);
     if (err != 0) {
         return err;
     }
@@ -1579,7 +1579,7 @@ s32 VFipdm_close_disk(PDM_DISK* p_disk) {
     if (p_disk == NULL) {
         return 1;
     }
-    return fn_803ABA30(p_disk);
+    return VFipdm_disk_close_disk(p_disk);
 }
 
 s32 VFipdm_close_partition(PDM_PARTITION* p_part) {
@@ -2021,7 +2021,7 @@ s32 VFiPFDIR_p_fsfirst(PF_VOLUME* p_vol, PF_STR* p_path, s8 attr, PF_DTA* p_dta)
     p_dta->attr = attr;
     p_dta->status = 0;
 
-    if (fn_803A9A78(&filename) == 1) {
+    if (VFiPFSTR_GetCodeMode(&filename) == 1) {
         fn_803BF90C(p_dta->pattern, NULL, &filename);
         p_dta->status |= 1;
     } else {
@@ -2472,7 +2472,7 @@ s32 VFiPFFILE_p_finfo(PF_FILE* p_file, PF_INFO* p_info) {
 }
 
 s32 VFiPFVOL_detach(s8 drv_char) {
-    s16 index = fn_803A962C(drv_char) - 'A';
+    s16 index = VFipf_toupper(drv_char) - 'A';
     PF_VOLUME* p_vol;
     s32 err;
 
@@ -2641,9 +2641,9 @@ s32 VFiPFPATH_transformFromUnicodeToNormal(s8* dst, const u16* src) {
         space[1] = 0;
         cur = src;
         while (*cur != 0) {
-            if (fn_803AA040((u16*)src, dot, 1) == 0) {
+            if (VFipf_w_strncmp((u16*)src, dot, 1) == 0) {
                 *dst = '.';
-            } else if (fn_803AA040((u16*)src, space, 1) == 0) {
+            } else if (VFipf_w_strncmp((u16*)src, space, 1) == 0) {
                 *dst = ' ';
             } else {
                 *dst = '_';
@@ -2670,19 +2670,19 @@ void fn_803BF90C(u8* short_pattern, u8* long_pattern_bytes, PF_STR* p_pattern) {
     u16* long_pattern = (u16*)long_pattern_bytes;
     u16 star[2];
 
-    if (fn_803A9A78(p_pattern) == 1) {
-        if (fn_803A98A8((u8*)p_pattern->p_head, (u8*)"*.*") == 0) {
-            fn_803A9884((s8*)short_pattern, (const s8*)"*");
+    if (VFiPFSTR_GetCodeMode(p_pattern) == 1) {
+        if (VFipf_strcmp((u8*)p_pattern->p_head, (u8*)"*.*") == 0) {
+            VFipf_strcpy((s8*)short_pattern, (const s8*)"*");
         } else {
-            fn_803A9884((s8*)short_pattern, (const s8*)p_pattern->p_head);
+            VFipf_strcpy((s8*)short_pattern, (const s8*)p_pattern->p_head);
         }
     } else {
         if (VFiPFSTR_StrCmp(p_pattern, (const s8*)"*.*") == 0) {
             star[0] = '*';
             star[1] = 0;
-            fn_803AA01C(long_pattern, star);
+            VFipf_w_strcpy(long_pattern, star);
         } else {
-            fn_803AA01C(long_pattern, (const u16*)p_pattern->p_head);
+            VFipf_w_strcpy(long_pattern, (const u16*)p_pattern->p_head);
         }
         if ((lbl_8053B248.setting & 2) == 2) {
             lbl_8053B248.setting = (lbl_8053B248.setting & ~3) | 1;
@@ -2698,16 +2698,16 @@ s32 VFiPFPATH_cmpName(const s8* sShort, PF_STR* p_pattern, u32 is_short_search) 
     u32 is_end = 0;
     char buf[13];
     char* cur = buf;
-    const s8* pattern = fn_803A9AA8(p_pattern, 3);
+    const s8* pattern = VFiPFSTR_GetStrPos(p_pattern, 3);
 
-    fn_803A9884((s8*)buf, sShort);
-    if ((lbl_8053B248.setting & 2) == 2 && fn_803A9A78(p_pattern) == 2) {
-        if (fn_803A98A8((u8*)buf, (u8*)".") != 0 && fn_803A98A8((u8*)buf, (u8*)"..") != 0
+    VFipf_strcpy((s8*)buf, sShort);
+    if ((lbl_8053B248.setting & 2) == 2 && VFiPFSTR_GetCodeMode(p_pattern) == 2) {
+        if (VFipf_strcmp((u8*)buf, (u8*)".") != 0 && VFipf_strcmp((u8*)buf, (u8*)"..") != 0
             && VFiPFPATH_CheckExtShortName(p_pattern, 3, 1) == 0 && is_short_search == 0) {
             return 1;
         }
     }
-    if (fn_803A98A8((u8*)pattern, (u8*)"*.") == 0) {
+    if (VFipf_strcmp((u8*)pattern, (u8*)"*.") == 0) {
         while (*cur != 0 && *cur != '.') {
             cur++;
         }
@@ -2742,7 +2742,7 @@ s32 VFiPFENT_MakeRootDir(PF_VOLUME* p_vol) {
         if (err != 0) {
             return err;
         }
-        fn_803A976C(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
+        VFipf_memset(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
         for (sector = p_vol->bpb.first_root_dir_sector; sector < p_vol->bpb.first_data_sector; sector++) {
             err = VFiPFSEC_WriteData(p_vol, p_page->p_buf, sector, 0, p_vol->bpb.bytes_per_sector, &written, 0);
             if (err != 0) {
@@ -3116,7 +3116,7 @@ s32 VFiPFFAT_MakeRootDir(PF_VOLUME* p_vol) {
     if (err != 0) return err;
     err = VFiPFCACHE_AllocateDataPage(p_vol, 0xFFFFFFFF, &p_page);
     if (err != 0) return err;
-    fn_803A976C(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
+    VFipf_memset(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
     sector = p_vol->bpb.first_data_sector + ((p_vol->bpb.root_dir_cluster - 2) << p_vol->bpb.log2_sectors_per_cluster);
     for (i = 0; i < p_vol->bpb.sectors_per_cluster; i++) {
         err = VFiPFSEC_WriteData(p_vol, p_page->p_buf, sector + i, 0, p_vol->bpb.bytes_per_sector, &num_success, 0);
@@ -3521,7 +3521,7 @@ s32 VFiPFPATH_cmpNameUni(const u16* p_name, PF_STR* sPattern) {
 
 // TODO: clean up, give variables real names
 s32 VFiPFPATH_cmpTailSFN(const s8* sfn_name, const s8* pattern) {
-    return fn_803A98A8((u8*)sfn_name, (u8*)pattern) != 0;
+    return VFipf_strcmp((u8*)sfn_name, (u8*)pattern) != 0;
 }
 
 void VFiPFPATH_InitTokenOfPath(PF_STR* p_str, s8* path, u32 code_mode) {
@@ -3650,7 +3650,7 @@ s32 VFiPFSEC_ReadFAT(PF_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset, u16 si
     }
     err = VFiPFCACHE_ReadFATPage(p_vol, sector, &p_page);
     if (err != 0) return err;
-    fn_803A9644(p_buf, p_page->p_buf + offset, size);
+    VFipf_memcpy(p_buf, p_page->p_buf + offset, size);
     return 0;
 }
 
@@ -3665,7 +3665,7 @@ s32 VFiPFSEC_WriteFAT(PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u16 offset,
     }
     err = VFiPFCACHE_ReadFATPage(p_vol, sector, &p_page);
     if (err != 0) return err;
-    fn_803A9644(p_page->p_buf + offset, p_buf, size);
+    VFipf_memcpy(p_page->p_buf + offset, p_buf, size);
     err = VFiPFCACHE_WriteFATPage(p_vol, p_page);
     if (err != 0) return err;
     return 0;
@@ -3716,7 +3716,7 @@ s32 VFiPFVOL_p_unmount(PF_VOLUME* p_vol, u32 mode) {
 
 // TODO: clean up, give variables real names
 PF_VOLUME* VFiPFVOL_GetVolumeFromDrvChar(s8 drv_char) {
-    s16 index = fn_803A962C(drv_char) - 'A';
+    s16 index = VFipf_toupper(drv_char) - 'A';
 
     if (index < 0 || index >= 26) {
         return NULL;
@@ -3726,7 +3726,7 @@ PF_VOLUME* VFiPFVOL_GetVolumeFromDrvChar(s8 drv_char) {
 
 // TODO: clean up, give variables real names
 void VFiPFVOL_LoadVolumeLabelFromBuf(const u8* buf, PF_VOLUME* p_vol) {
-    fn_803A9644(p_vol->label, buf, 11);
+    VFipf_memcpy(p_vol->label, buf, 11);
     p_vol->label[11] = 0;
 }
 
@@ -3743,7 +3743,7 @@ s32 VFiPFVOL_unmount(s8 drv_char, u32 mode) {
     s32 err;
 
     result = 0;
-    index = fn_803A962C(drv_char) - 'A';
+    index = VFipf_toupper(drv_char) - 'A';
     if (index < 0 || index >= 26) {
         p_vol = NULL;
     } else {
@@ -3967,7 +3967,7 @@ s32 fn_803C1F84(s8 drv_char, const u8* param) {
     PF_VOLUME* p_vol;
     s32 err;
 
-    index = fn_803A962C(drv_char) - 'A';
+    index = VFipf_toupper(drv_char) - 'A';
     if (index < 0 || index >= 26) {
         p_vol = NULL;
     } else {
@@ -4145,7 +4145,7 @@ s32 VFiPFVOL_InitModule(u32 config, void* param) {
     p_vol = &lbl_8053B248.volumes[0];
     i = 0;
     do {
-        fn_803A976C(p_vol, 0, sizeof(*p_vol));
+        VFipf_memset(p_vol, 0, sizeof(*p_vol));
         i += 1;
         p_vol += 1;
     } while (i < 26);
@@ -4333,7 +4333,7 @@ s8* VF_path2handleidx(s32* o_handle_idx_p, const s8* i_path_p) {
     s8* result = (s8*)i_path_p;
 
     *o_handle_idx_p = -1;
-    fn_803A976C(name, 0, 8);
+    VFipf_memset(name, 0, 8);
     for (; *src != 0; src++, len++) {
         if (*src == '\\' || *src == '/') {
             break;
@@ -4799,7 +4799,7 @@ s32 VFSysCheckExistPrfFile_dvd(struct VF_HANDLE_DEVICE* i_device_p, const s8* i_
     s32 err = 0xB001;
 
     dst = path;
-    fn_803A976C(dst, 0, 255);
+    VFipf_memset(dst, 0, 255);
     i = 0;
     while (i < 255 && *src != 0) {
         if (*src == '/') {
@@ -4878,7 +4878,7 @@ void fn_803C74C8(void* dst, u32 size, u32 version, u8 flag) {
     h[29] = 0;
     h[30] = 0;
     h[31] = 0;
-    fn_803A9644(dst, h, 0x20);
+    VFipf_memcpy(dst, h, 0x20);
 }
 
 // TODO: clean up, give variables real names
@@ -4930,7 +4930,7 @@ s32 VFSysUnmountDrv(s32 i_handle_idx, u32 i_mode) {
         handle_p->drive.pf_drv.p_part = NULL;
         handle_p->drive.pf_drv.cache = NULL;
         handle_p->drive.file_p = NULL;
-        fn_803A976C(handle_p->drive.pf_filename, 0, 0xFF);
+        VFipf_memset(handle_p->drive.pf_filename, 0, 0xFF);
         return 0;
     }
     return VFipf2_errnum();
@@ -5307,7 +5307,7 @@ s32 VFSysReadFile(u32* o_read_size_p, void* o_buf_p, u32 i_size, PF_FILE* i_file
     if (VFipf2_finfo(i_file_p, &info) == 0) {
         remain = info.file_size - i_file_p->cursor.position;
         if (i_size > remain) {
-            fn_803A976C(o_buf_p, 0, i_size);
+            VFipf_memset(o_buf_p, 0, i_size);
             i_size = remain;
         }
         handle_p = vfsys_file_to_handle(i_file_p);
@@ -5515,7 +5515,7 @@ void dCommon_DevideBuff32(void* i_buf, u32 i_size, u32* i_1st_size_p, void* i_2n
 int dCommon_IsPrfFile(void* i_buff_p) {
     s8 buf[0x20];
 
-    fn_803A9644(buf, i_buff_p, 0x20);
+    VFipf_memcpy(buf, i_buff_p, 0x20);
     if (!(buf[0] == 'V' && buf[1] == 'F' && buf[2] == 'F' && buf[3] == ' ')) {
         return 0;
     }
@@ -5526,7 +5526,7 @@ int dCommon_IsPrfFile(void* i_buff_p) {
 s32 dCommon_MakeFsInfoSec(u8* buf, u32 fsInfoSize) {
     PDM_FSINFO fsinfo;
 
-    fn_803A976C(buf, 0, fsInfoSize);
+    VFipf_memset(buf, 0, fsInfoSize);
     fsinfo.free_count = 0xFFFFFFFF;
     fsinfo.next_free = 0xFFFFFFFF;
     return VFipdm_bpb_set_fsinfo_information(&fsinfo, buf);
@@ -6066,7 +6066,7 @@ s32 VFiPFCACHE_InitCaches(PF_VOLUME* p_vol) {
     s32 err;
 
     p_vol->cache.mode = ((p_vol->cache.mode & ~1) | 2) & ~4;
-    fn_803A976C(p_vol->cache.buffers, 0, (p_vol->cache.num_fat_pages + p_vol->cache.num_data_pages) << 9);
+    VFipf_memset(p_vol->cache.buffers, 0, (p_vol->cache.num_fat_pages + p_vol->cache.num_data_pages) << 9);
     err = VFiPFCACHE_InitPageList(p_vol, &p_vol->cache.p_current_fat, p_vol->cache.pages, p_vol->cache.buffers, p_vol->cache.num_fat_pages, p_vol->cache.fat_buff_size, 1);
     if (err != 0) {
         return err;
@@ -6139,7 +6139,7 @@ s32 VFiPFCACHE_DoWriteSector(PF_VOLUME* p_vol, PF_CACHE_PAGE** pp_head, const u8
 
     p_page = VFiPFCACHE_SearchForPage(p_vol, *pp_head, sector);
     if (p_page != 0) {
-        fn_803A9644(p_page->p_buf, p_buf, p_vol->bpb.bytes_per_sector);
+        VFipf_memcpy(p_page->p_buf, p_buf, p_vol->bpb.bytes_per_sector);
         if (p_page->p_mod_sbuf == 0) {
             p_page->stat |= 2;
             p_page->p_mod_sbuf = p_page->p_buf;
@@ -6221,10 +6221,10 @@ u32 VFiPFPATH_GetExtShortNameIndex(PF_STR* p_str, u32* p_index) {
         wide_off = 4;
         while (pos < 8 || VFiPFSTR_StrNCmp(p_str, lbl_8059FE64, 1, pos, 1) != 0) {
             s16 digit;
-            if (fn_803A9A78(p_str) == 1) {
-                digit = (s8)(fn_803A9AA8(p_str, 1)[pos]) - '0';
+            if (VFiPFSTR_GetCodeMode(p_str) == 1) {
+                digit = (s8)(VFiPFSTR_GetStrPos(p_str, 1)[pos]) - '0';
             } else {
-                digit = *(const u16*)(fn_803A9AA8(p_str, 1) + wide_off) - '0';
+                digit = *(const u16*)(VFiPFSTR_GetStrPos(p_str, 1) + wide_off) - '0';
             }
             if (digit < 0 || digit > 9) {
                 break;
@@ -6517,7 +6517,7 @@ s32 VFiPFFAT_GetBeforeChain(PF_VOLUME* p_vol, u32 start_cluster, u32 lActive, u3
         *p_cluster = 0xFFFFFFFF;
         return 10;
     }
-    limit = lbl_804169B0[p_vol->bpb.fat_type].unk4;
+    limit = lbl_804169B0[p_vol->bpb.fat_type].eoc1;
     *p_cluster = 0xFFFFFFFF;
     err = VFiPFFAT_ReadFATSector(p_vol, &p_page, start_cluster);
     if (err != 0) {
@@ -6909,8 +6909,8 @@ void VFSys_create_cache(VF_HANDLE_TYPE* i_handle_p, u32 i_pages, struct MEMiHeap
         cache->pf_cache_page_p = i_heap_handle == NULL ? NULL : MEMAllocFromExpHeapEx(i_heap_handle, page_size, 4);
         cache->pf_cache_buf_p = i_heap_handle == NULL ? NULL : MEMAllocFromExpHeapEx(i_heap_handle, buffer_size, 4);
         if (cache->pf_cache_page_p != NULL && cache->pf_cache_buf_p != NULL) {
-            fn_803A976C(cache->pf_cache_page_p, 0, page_size);
-            fn_803A976C(cache->pf_cache_buf_p, 0, buffer_size);
+            VFipf_memset(cache->pf_cache_page_p, 0, page_size);
+            VFipf_memset(cache->pf_cache_buf_p, 0, buffer_size);
             cache->heap_handle = i_heap_handle;
             cache->cache_pages = i_pages;
         } else if (cache != NULL) {
@@ -6930,7 +6930,7 @@ void VFSys_create_cache(VF_HANDLE_TYPE* i_handle_p, u32 i_pages, struct MEMiHeap
     }
 }
 
-s32 fn_803AB8C4(PDM_INIT_DISK* p_init_disk_tbl, PDM_DISK** pp_disk) { // VFipdm_disk_open_disk
+s32 VFipdm_disk_open_disk(PDM_INIT_DISK* p_init_disk_tbl, PDM_DISK** pp_disk) { // VFipdm_disk_open_disk
     PDM_DISK* p_disk;
     u16 disk_no;
     u16 handle_no;
@@ -6986,7 +6986,7 @@ s32 VFSysUnsetDevice(s32 i_handle_idx) {
         // HYPOTHESIS: this global holds the default VF cache heap.
         if (heap != *(struct MEMiHeapHead**)lbl_805A1218 && heap != NULL) MEMDestroyExpHeap(heap);
     }
-    fn_803A976C(handle, 0, sizeof(*handle));
+    VFipf_memset(handle, 0, sizeof(*handle));
     if (&handle->drive.cache != NULL) {
         handle->drive.cache.heap_handle = NULL;
         handle->drive.cache.cache_pages = 0;
@@ -7061,9 +7061,9 @@ void VFiPFENT_storeLFNEntryFieldsToBuf(u8* buf, PF_DIR_ENT* p_ent, u8 ord, u8 su
         }
         for (; pos < end; pos++) *pos = 0xFFFF;
     }
-    fn_803A9644(buf + 1, name, 10);
-    fn_803A9644(buf + 14, name + 5, 12);
-    fn_803A9644(buf + 28, name + 11, 4);
+    VFipf_memcpy(buf + 1, name, 10);
+    VFipf_memcpy(buf + 14, name + 5, 12);
+    VFipf_memcpy(buf + 28, name + 11, 4);
     fn_803A9958(buf + 1, 10);
     fn_803A9958(buf + 14, 12);
     fn_803A9958(buf + 28, 4);
@@ -7081,7 +7081,7 @@ s32 VFSysCheckExistPrfFile_nandflash_sub(const s8* i_prf_file_name_p, u32 i_hand
     s32 err = 0xB001;
 
     dst = path;
-    fn_803A976C(dst, 0, 255);
+    VFipf_memset(dst, 0, 255);
     i = 0;
     while (i < 255 && *src != 0) {
         if (*src == 0x5C) *dst = '/';
@@ -7158,7 +7158,7 @@ s32 VFiPFENT_RecalcEntryIterator(PF_ENT_ITER* p_iter, u32 may_allocate) {
             if (p_iter->sector != 0xFFFFFFFF && old_sector != 0xFFFFFFFF) {
                 err = VFiPFCACHE_AllocateDataPage(p_iter->p_vol, 0xFFFFFFFF, &page);
                 if (err != 0) return err;
-                fn_803A976C(page->p_buf, 0, p_iter->p_vol->bpb.bytes_per_sector);
+                VFipf_memset(page->p_buf, 0, p_iter->p_vol->bpb.bytes_per_sector);
                 for (i = 0; i < p_iter->p_vol->bpb.sectors_per_cluster; i++) {
                     err = VFiPFSEC_WriteData(p_iter->p_vol, page->p_buf, p_iter->sector + i, 0, p_iter->p_vol->bpb.bytes_per_sector, &num_success, 0);
                     if (err != 0) {
@@ -7265,7 +7265,7 @@ void VFSysInit(void* i_heap_start_address_p, u32 i_size) {
         else handle = NULL;
         end = handle + num_handles;
         for (; handle != end; handle++) {
-            fn_803A976C(handle, 0, sizeof(*handle));
+            VFipf_memset(handle, 0, sizeof(*handle));
             if (&handle->drive.cache != NULL) {
                 handle->drive.cache.heap_handle = NULL;
                 handle->drive.cache.cache_pages = 0;
@@ -7377,9 +7377,9 @@ s32 VFiPFENT_LoadLFNEntryFieldsFromBuf(PF_DIR_ENT* p_ent, const u8* buf) {
     p_ent->ordinal = ord;
     p_ent->check_sum = sum;
     name = p_ent->long_name + (u32)(ord - 1) * 13;
-    fn_803A9644(name, buf + 1, 10);
-    fn_803A9644(name + 5, buf + 14, 12);
-    fn_803A9644(name + 11, buf + 28, 4);
+    VFipf_memcpy(name, buf + 1, 10);
+    VFipf_memcpy(name + 5, buf + 14, 12);
+    VFipf_memcpy(name + 11, buf + 28, 4);
     fn_803A9958((u8*)name, 10);
     fn_803A9958((u8*)(name + 5), 12);
     fn_803A9958((u8*)(name + 11), 4);
@@ -8180,7 +8180,7 @@ static inline s32 pdm_disk_find_handle(u32 handle, PDM_DISK* p_disk, u16* p_hand
     return 0;
 }
 
-s32 fn_803ABA30(PDM_DISK* p_disk) {
+s32 VFipdm_disk_close_disk(PDM_DISK* p_disk) {
     u32 index;
     s32 err;
     u16 handle_no;
@@ -9188,7 +9188,7 @@ struct PF_SFD* VFiPFFILE_GetSFD(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_en
 
     if ((p_vol->cluster_link.flag & 1) != 0) {
         p_first_free_SFD->ffd.cluster_link.buffer = &p_vol->cluster_link.buffer[sfd_num * p_vol->cluster_link.link_max];
-        fn_803A976C(p_first_free_SFD->ffd.cluster_link.buffer, 0, 4 * p_vol->cluster_link.link_max);
+        VFipf_memset(p_first_free_SFD->ffd.cluster_link.buffer, 0, 4 * p_vol->cluster_link.link_max);
         p_first_free_SFD->ffd.cluster_link.max_count = p_vol->cluster_link.link_max;
         p_first_free_SFD->ffd.cluster_link.interval = p_vol->cluster_link.interval;
         p_first_free_SFD->ffd.cluster_link.interval_offset = 0;
@@ -9396,7 +9396,7 @@ static inline int dhash_set_w(const u16* i_Name, u8 i_Arg) {
     s32 newHash;
     newHash = dhash_new(i_Name);
     if (newHash != -1) {
-        fn_803A9644(&lbl_80563360[newHash], lbl_80563350, 16);
+        VFipf_memcpy(&lbl_80563360[newHash], lbl_80563350, 16);
         lbl_80563360[newHash].used = i_Arg;
         return 1;
     }
@@ -9423,7 +9423,7 @@ s32 fn_803BD16C(struct PF_STR* p_path, struct PF_STR* p_dir_path, struct PF_STR*
         return 10;
     }
 
-    code_mode = fn_803A9A78(p_path);
+    code_mode = VFiPFSTR_GetCodeMode(p_path);
     fn_803A9A70(p_dir_path, code_mode);
     fn_803A9A70(p_filename, code_mode);
 
@@ -9678,7 +9678,7 @@ void dCommon_MakeBootSector(u8* buf, enum FatType* type, u32 SPU, u32 SPC, u32 B
     u32 spf;
     *type = dCommon_GetNiceFatType(&spf, SPU, SPC, BPS);
 
-    fn_803A976C(buf, 0, 0x200);
+    VFipf_memset(buf, 0, 0x200);
 
     buf[0] = jump0_1;
     buf[2] = jump2;
@@ -9806,16 +9806,16 @@ s32 VFiPFCACHE_DoReadNumSector(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** p
 
         if (p_page != NULL && p_page->sector != 0xFFFFFFFF) {
             if (p_page->sector <= sector && p_page->sector + p_page->size >= sector + num_success_sector) {
-                fn_803A9644(p_buf, &p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector], num_success_sector << p_vol->bpb.log2_bytes_per_sector);
+                VFipf_memcpy(p_buf, &p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector], num_success_sector << p_vol->bpb.log2_bytes_per_sector);
                 num_rest_sector -= num_success_sector;
             } else if (p_page->sector >= sector && p_page->sector + p_page->size <= sector + num_success_sector) {
-                fn_803A9644(&p_buf[(p_page->sector - sector) << p_vol->bpb.log2_bytes_per_sector], p_page->buffer, p_page->size << p_vol->bpb.log2_bytes_per_sector);
+                VFipf_memcpy(&p_buf[(p_page->sector - sector) << p_vol->bpb.log2_bytes_per_sector], p_page->buffer, p_page->size << p_vol->bpb.log2_bytes_per_sector);
                 num_rest_sector -= p_page->size;
             } else if (p_page->sector > sector && p_page->sector < sector + num_success_sector && p_page->sector + p_page->size >= sector + num_success_sector) {
-                fn_803A9644(&p_buf[(p_page->sector - sector) << p_vol->bpb.log2_bytes_per_sector], p_page->buffer, (p_page->size - ((p_page->sector + p_page->size) - (sector + num_success_sector))) << p_vol->bpb.log2_bytes_per_sector);
+                VFipf_memcpy(&p_buf[(p_page->sector - sector) << p_vol->bpb.log2_bytes_per_sector], p_page->buffer, (p_page->size - ((p_page->sector + p_page->size) - (sector + num_success_sector))) << p_vol->bpb.log2_bytes_per_sector);
                 num_rest_sector -= p_page->size - ((p_page->sector + p_page->size) - (sector + num_success_sector));
             } else if (p_page->sector < sector && p_page->sector + p_page->size > sector && p_page->sector + p_page->size <= sector + num_success_sector) {
-                fn_803A9644(p_buf, &p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector], (p_page->size - (sector - p_page->sector)) << p_vol->bpb.log2_bytes_per_sector);
+                VFipf_memcpy(p_buf, &p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector], (p_page->size - (sector - p_page->sector)) << p_vol->bpb.log2_bytes_per_sector);
                 num_rest_sector -= p_page->size - (sector - p_page->sector);
             }
         }
@@ -9854,7 +9854,7 @@ s32 VFiPFFILE_p_fwrite(struct PF_VOLUME* p_vol, u8* p_buf, u32 size, u32 count, 
         p_file->cursor.offset_in_sector = p_file->cursor.position & (p_vol->bpb.bytes_per_sector - 1);
         err = VFiPFCACHE_AllocateDataPage(p_vol, -1, &p_page);
         switch (err) { case 0: break; default: return err; }
-        fn_803A976C(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
+        VFipf_memset(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
         while (append_size) {
             if (append_size > p_vol->bpb.bytes_per_sector) {
                 err = VFiPFFILE_Cursor_Write(p_file, p_page->p_buf, p_vol->bpb.bytes_per_sector, &size_written);
@@ -10141,7 +10141,7 @@ s32 VFiPFSEC_WriteData(struct PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u16
         err = VFiPFCACHE_ReadDataPageAndFlushIfNeeded(p_vol, sector, &p_page, set_sig);
         switch (err) { case 0: break; default: return err; }
 
-        fn_803A9644(&p_page->p_buf[offset], (void*)p_buf, size);
+        VFipf_memcpy(&p_page->p_buf[offset], (void*)p_buf, size);
 
         err = VFiPFCACHE_WriteDataPage(p_vol, p_page, set_sig);
         switch (err) { case 0: break; default: return err; }
@@ -10179,7 +10179,7 @@ s32 VFiPFSEC_WriteData(struct PF_VOLUME* p_vol, const u8* p_buf, u32 sector, u16
                     err = VFiPFCACHE_ReadDataPageAndFlushIfNeeded(p_vol, sector, &p_page, set_sig);
                     switch (err) { case 0: break; default: return err; }
 
-                    fn_803A9644(p_page->p_buf, (void*)(p_buf + *p_success_size), num_sector << p_vol->bpb.log2_bytes_per_sector);
+                    VFipf_memcpy(p_page->p_buf, (void*)(p_buf + *p_success_size), num_sector << p_vol->bpb.log2_bytes_per_sector);
 
                     err = VFiPFCACHE_WriteDataPage(p_vol, p_page, set_sig);
                     switch (err) { case 0: break; default: return err; }
@@ -10352,4 +10352,1038 @@ s32 fn_803B11A4(PF_VOLUME* p_vol, PF_STR* path) {
     if (!(ent.attr & 0x10)) return 20;
     err = fn_803C1054(p_vol, &ent);
     return err ? err : 0;
+}
+
+#define VFiPFCACHE_ClearModified VFiPFCACHE_ClearModified_inl
+// TODO: clean up - inline helper adapted from the ogws pf_cache.c donor (static + inlined in retail)
+static inline s32 VFiPFCACHE_ClearModified_inl(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE* p_head) {
+    struct PF_CACHE_PAGE* p_page;
+
+    p_page = p_head;
+    do {
+        if ((p_page->stat & 1) == 0) {
+            break;
+        }
+        p_page->stat &= ~2u;
+        p_page = p_page->p_next;
+    } while (p_page != p_head);
+
+    return 0;
+}
+
+#define VFiPFFILE_ReleaseSFD VFiPFFILE_ReleaseSFD_inl
+// TODO: clean up - inline helper adapted from the ogws pf_file.c donor (static + inlined in retail)
+static inline s32 VFiPFFILE_ReleaseSFD_inl(struct PF_SFD* p_sfd) {
+    if (!--p_sfd->num_handlers) {
+        p_sfd->stat &= ~1u;
+        p_sfd->ffd.cluster_link.buffer = 0;
+    }
+    return 0;
+}
+
+#define VFiPFFILE_ReleaseUFD VFiPFFILE_ReleaseUFD_inl
+// TODO: clean up - inline helper adapted from the ogws pf_file.c donor (static + inlined in retail)
+static inline s32 VFiPFFILE_ReleaseUFD_inl(struct PF_FILE* p_file) {
+    p_file->stat &= ~1u;
+    return 0;
+}
+
+// TODO: clean up - body adapted from the ogws pf_path.c donor; give variables real names
+u32 VFiPFPATH_CheckExtShortName(struct PF_STR* p_str, u32 target, u32 wildcard) {
+    u32 result;
+    s16 i;
+    s16 num;
+    u32 is_wildcard;
+    s8 sig[2];
+    s8* p_c;
+    u16* p_wc;
+
+    result = 0;
+    is_wildcard = 0;
+    sig[0] = *(s8*)"~";
+    sig[1] = *(s8*)"1";
+
+    if (p_str == NULL) {
+        return 10;
+    }
+
+    if (VFiPFSTR_StrNCmp(p_str, sig, target, 0, 2) == 0 || (VFiPFSTR_StrNCmp(p_str, (const s8*)".", target, 0, 1) == 0 && (VFiPFSTR_StrNCmp(p_str, (const s8*)".", target, 1, 1) == 0 || VFiPFSTR_StrNCmp(p_str, (const s8*)"\\", target, 0, 1) == 0)) || VFiPFSTR_StrNCmp(p_str, (const s8*)"\\", target, 0, 1) == 0) {
+        i = 2;
+        goto jump;
+        while (1) {
+            if ((u32)VFiPFSTR_GetCodeMode(p_str) == 1) {
+                p_c = (s8*)VFiPFSTR_GetStrPos(p_str, target);
+                num = p_c[i] - '0';
+            } else {
+                p_wc = (u16*)VFiPFSTR_GetStrPos(p_str, target);
+                num = p_wc[i] - '0';
+            }
+
+            if (num < 0 || num > 9) {
+                if (wildcard == 0) {
+                    break;
+                }
+
+                if (VFiPFSTR_StrNCmp(p_str, (const s8*)"\\", target, i, 1) == 0 || VFiPFSTR_StrNCmp(p_str, (const s8*)".", target, i, 1) == 0) {
+                    if (wildcard == 1 && VFiPFSTR_StrNCmp(p_str, (const s8*)"\\", target, i, 1) == 0) {
+                        is_wildcard = 1;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            i++;
+        jump:;
+            if (i < 8) {
+                if ((VFiPFSTR_StrNCmp(p_str, (const s8*)"\\", target, i, 1) == 0 || VFiPFSTR_StrNCmp(p_str, (const s8*)"/", target, i, 1) == 0) == 0 && (VFiPFSTR_StrNCmp(p_str, (const s8*)"\0", target, i, 1) != 0 && VFiPFSTR_StrNCmp(p_str, (const s8*)" ", target, i, 1) != 0)) {
+                    continue;
+                }
+            }
+            break;
+        }
+
+        if (i == 8 || is_wildcard == 1) {
+            if (((VFiPFSTR_StrNCmp(p_str, (const s8*)"\0", target, i, 1) == 0) || (VFiPFSTR_StrNCmp(p_str, (const s8*)"\\", target, i, 1) == 0 || VFiPFSTR_StrNCmp(p_str, (const s8*)"/", target, i, 1) == 0) == 0) || (VFiPFSTR_StrNCmp(p_str, (const s8*)" ", target, i, 1) == 0)) {
+                result = i;
+            }
+        }
+    }
+    return result;
+}
+
+// TODO: clean up - body adapted from the ogws pf_sector.c donor; give variables real names
+s32 VFiPFSEC_ReadData(struct PF_VOLUME* p_vol, u8* p_buf, u32 sector, u16 offset, u32 size, u32* p_success_size, u32 set_sig) {
+    struct PF_CACHE_PAGE* p_page;
+    u32 num_success;
+    u32 num_sector;
+    u32 adjust_sector;
+    u32 rest_sector;
+    s32 err;
+
+    u32 cache_remaining_sectors;  // Extra variable. Not in DWARF.
+
+    *p_success_size = 0;
+    if (!p_vol) {
+        return 10;
+    }
+    if (!p_buf) {
+        return 10;
+    }
+    if (((p_vol->flags & 1) == 0) || !VFiPFDRV_IsInserted(p_vol)) {
+        return 9;
+    }
+    if (offset != 0 || size < p_vol->bpb.bytes_per_sector) {
+        err = VFiPFCACHE_ReadDataPage(p_vol, sector, &p_page, set_sig);
+        if (err) {
+            return err;
+        }
+        VFipf_memcpy(p_buf, &p_page->p_buf[offset], size);
+        *p_success_size = size;
+    } else if (offset == 0 && (size & (p_vol->bpb.bytes_per_sector - 1)) == 0) {
+        err = VFiPFCACHE_ReadDataNumSector(p_vol, p_buf, sector, size >> p_vol->bpb.log2_bytes_per_sector, &num_success);
+        if (err) {
+            return err;
+        }
+        *p_success_size += num_success << p_vol->bpb.log2_bytes_per_sector;
+        if (num_success != (size >> p_vol->bpb.log2_bytes_per_sector)) {
+            return 17;
+        }
+    } else {
+        if (offset == 0) {
+            p_page = VFiPFCACHE_SearchDataCache(p_vol, sector);
+            if (p_page) {
+                cache_remaining_sectors = p_page->sector + p_page->size - sector;
+                num_sector = size >> p_vol->bpb.log2_bytes_per_sector;
+                if (cache_remaining_sectors <= num_sector) {
+                    VFipf_memcpy(p_buf, p_page->p_buf, cache_remaining_sectors << p_vol->bpb.log2_bytes_per_sector);
+                    *p_success_size += cache_remaining_sectors << p_vol->bpb.log2_bytes_per_sector;
+                    sector += cache_remaining_sectors;
+                    size -= cache_remaining_sectors << p_vol->bpb.log2_bytes_per_sector;
+                } else {
+                    if (cache_remaining_sectors > num_sector) {
+                        VFipf_memcpy(p_buf, p_page->p_buf, size);
+                        *p_success_size += size;
+                        size = 0;
+                    }
+                }
+            }
+            if (size != 0) {
+                num_sector = size >> p_vol->bpb.log2_bytes_per_sector;
+                rest_sector = (sector + num_sector) % p_vol->cache.data_buff_size;
+                if (num_sector > rest_sector) {
+                    adjust_sector = num_sector - rest_sector;
+                    err = VFiPFCACHE_ReadDataNumSector(p_vol, p_buf + *p_success_size, sector, adjust_sector, &num_success);
+                    if (err) {
+                        return err;
+                    }
+                    *p_success_size += num_success << p_vol->bpb.log2_bytes_per_sector;
+                    if (num_success != adjust_sector) {
+                        return 17;
+                    }
+                    sector += adjust_sector;
+                    num_sector -= adjust_sector;
+                }
+                if (num_sector != 0) {
+                    err = VFiPFCACHE_ReadDataPage(p_vol, sector, &p_page, set_sig);
+                    if (err) {
+                        return err;
+                    }
+                    VFipf_memcpy(p_buf + *p_success_size, p_page->p_buf, num_sector << p_vol->bpb.log2_bytes_per_sector);
+                    *p_success_size += num_sector << p_vol->bpb.log2_bytes_per_sector;
+                }
+            }
+            goto end;
+        }
+        return 10;
+    }
+end:
+    return 0;
+}
+
+// TODO: clean up - body adapted from the ogws pf_file.c donor; give variables real names
+s32 VFiPFFILE_createEmptyFile(struct PF_VOLUME* p_vol, struct PF_DIR_ENT* p_file_ent, struct PF_STR* p_filename, u32 namelength) {
+    struct PF_DIR_ENT ent;
+    u8 buf[32];
+    u32 position;
+    u8 num_entry_LFNs;
+    u32 i;
+    u8 sum;
+    u32 OldSector;
+    u32 NextChain[2];
+    struct PF_FFD ffd;
+    struct PF_FAT_HINT hint;
+    u32 success_size;
+    s32 pozIdx;
+    s32 err;
+
+    ent = *p_file_ent;
+    VFiPFFAT_InitFFD(&ffd, &hint, ent.p_vol, &ent.start_cluster);
+
+    if (p_vol->num_opened_files >= 5) {
+        return 21;
+    }
+
+    err = VFiPFPATH_parseShortName((s8*)p_file_ent->short_name, p_filename);
+    if (err != 0) {
+        if (p_file_ent->short_name[0] == 0) {
+            return 1;
+        }
+    }
+
+    if (err != 0) {
+        err = VFiPFENT_AdjustSFN(&ent, (s8*)p_file_ent->short_name); /* &ent not p_file_ent */
+        if (err) {
+            return err;
+        }
+        if (VFiPFSTR_GetCodeMode(p_filename) == 1) {
+            VFiPFPATH_transformInUnicode((u16*)p_file_ent->long_name, (const s8*)VFiPFSTR_GetStrPos(p_filename, 1));
+        } else {
+            VFipf_w_strcpy((u16*)p_file_ent->long_name, (const u16*)VFiPFSTR_GetStrPos(p_filename, 1));
+        }
+    } else {
+        p_file_ent->long_name[0] = 0;
+    }
+
+    if (p_vol->bpb.fat_type == FAT_32) {
+        p_file_ent->start_cluster = 1;
+    } else {
+        p_file_ent->start_cluster = 0;
+    }
+
+    p_file_ent->file_size = 0;
+    p_file_ent->p_vol = p_vol;
+    p_file_ent->small_letter_flag = 0;
+    p_file_ent->attr = 0x20;
+
+    p_file_ent->create_time_ms = VFiPFENT_getcurrentDateTimeForEnt(&p_file_ent->create_date, &p_file_ent->create_time);
+    p_file_ent->access_date = p_file_ent->create_date;
+    p_file_ent->modify_time = p_file_ent->create_time;
+    p_file_ent->modify_date = p_file_ent->create_date;
+
+    if (p_file_ent->long_name[0] != 0 && (p_file_ent->small_letter_flag & 0x18) == 0) {
+        num_entry_LFNs = namelength / 13 + (namelength % 13 != 0);
+        err = VFiPFENT_allocateEntryPos(p_file_ent, num_entry_LFNs + 1, &ffd, NextChain, p_filename, (u32*)&pozIdx);
+        if (err) {
+            return err;
+        }
+
+        if ((lbl_8053B248.setting & 2) == 2) {
+            VFiPFPATH_AdjustExtShortName((s8*)p_file_ent->short_name, pozIdx);
+        }
+
+        p_file_ent->num_entry_LFNs = num_entry_LFNs;
+        OldSector = p_file_ent->entry_sector;
+        sum = VFiPFENT_CalcCheckSum(p_file_ent);
+
+        position = (u32)NextChain;
+        for (i = num_entry_LFNs; i >= 1; i--) {
+            VFiPFENT_storeLFNEntryFieldsToBuf(buf, p_file_ent, i, sum, i == num_entry_LFNs);
+            err = VFiPFSEC_WriteData(p_vol, buf, OldSector, p_file_ent->entry_offset, 32, &success_size, 0);
+            if (err) {
+                return err;
+            }
+            if (success_size != 32) {
+                return 17;
+            }
+            p_file_ent->entry_offset += 32;
+            if (p_file_ent->entry_offset >= p_vol->bpb.bytes_per_sector) {
+                p_file_ent->entry_offset = 0;
+                OldSector = *(u32*)position;
+                position += 4;
+            }
+        }
+        p_file_ent->entry_sector = OldSector;
+    } else {
+        err = VFiPFENT_allocateEntry(p_file_ent, 1, &ffd, NextChain, p_filename);
+        if (err) {
+            return err;
+        }
+    }
+
+    if (p_file_ent->start_cluster == 1) {
+        p_file_ent->start_cluster = 0;
+    }
+
+    return VFiPFENT_updateEntry(p_file_ent, 1);
+}
+
+// TODO: clean up - body adapted from the ogws pf_entry.c donor; give variables real names
+s32 VFiPFENT_searchEmptyTailSFN(struct PF_FFD* p_ffd, u32 tail_index, const s8* pattern, u32* p_tail_bit) {
+    struct PF_ENT_ITER iter;
+    u8 attr;
+    s32 err;
+    u32 bit_pos;
+    u32 sfn_taillen;
+    u32 sfn_baselen;
+    u32 i;
+    s8 sfnbuf[13];
+    s8 patbuf[13];
+    struct PF_VOLUME* p_vol;
+
+    p_vol = p_ffd->p_vol;
+    VFipf_memset(p_tail_bit, 0, 4 * p_vol->tail_entry.tracker_size);
+    iter.ffd = *p_ffd;
+    for (err = VFiPFENT_ITER_IteratorInitialize(&iter, 0); !VFiPFENT_ITER_IsAtLogicalEnd(&iter); err = VFiPFENT_ITER_Advance(&iter, 0)) {
+        if (err) {
+            return err;
+        }
+        if (!iter.buf[0]) {
+            break;
+        }
+        if (iter.buf[0] != 229 && (iter.buf[11] & 0xF) != 0xF && (iter.buf[11] & 8) == 0) {
+            VFiPFPATH_getShortName(sfnbuf, iter.buf, 0);
+            for (sfn_taillen = 1; sfnbuf[sfn_taillen] != 126 && sfnbuf[sfn_taillen] && sfn_taillen < 7; ++sfn_taillen);
+            if (sfn_taillen < 7 && sfnbuf[sfn_taillen] == 126) {
+                for (sfn_baselen = sfn_taillen + 1; sfnbuf[sfn_baselen] >= 48 && sfnbuf[sfn_baselen] <= 57; ++sfn_baselen);
+                if (sfnbuf[sfn_baselen] == 46 || !sfnbuf[sfn_baselen]) {
+                    i = sfn_baselen - sfn_taillen - 1;
+                    bit_pos = 0;
+                    while (i) {
+                        bit_pos = bit_pos * 10;
+                        bit_pos += sfnbuf[sfn_baselen - i] - 48;
+                        i--;
+                    }
+                    VFipf_strcpy(patbuf, pattern);
+                    VFiPFPATH_parseShortNameNumeric(patbuf, bit_pos);
+                    if (!VFiPFPATH_cmpTailSFN(sfnbuf, patbuf) && bit_pos >= tail_index && bit_pos < 32 * p_vol->tail_entry.tracker_size + tail_index) {
+                        bit_pos -= tail_index;
+                        p_tail_bit[bit_pos >> 5] |= 1u << bit_pos;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+// TODO: clean up - body adapted from the ogws pf_entry.c donor; give variables real names
+s32 VFiPFENT_findEntryPos(struct PF_FFD* p_ffd, struct PF_DIR_ENT* p_ent, u32 index_search_from, struct PF_STR* p_pattern, u8 attr_required, u8 attr_unwanted, u32* p_lpos, u32* p_ppos) {
+    s32 err;
+    struct PF_ENT_ITER iter;
+    u32 logical_index;
+    u32 is_extsfn;
+
+    is_extsfn = 0;
+
+    if (!p_ffd) {
+        *p_lpos = 999999;
+        *p_ppos = 999999;
+        return 10;
+    }
+
+    if (!p_ent) {
+        *p_lpos = 999999;
+        *p_ppos = 999999;
+        return 10;
+    }
+
+    if (index_search_from >= 999999) {
+        *p_lpos = 999999;
+        *p_ppos = 999999;
+        return 10;
+    }
+
+    if (!p_pattern) {
+        *p_lpos = 999999;
+        *p_ppos = 999999;
+        return 10;
+    }
+
+    if ((attr_required & attr_unwanted) != 0) {
+        *p_lpos = 999999;
+        *p_ppos = 999999;
+        return 10;
+    }
+
+    *p_lpos = 0;
+    *p_ppos = 0;
+
+    p_ent->num_entry_LFNs = 0;
+    p_ent->ordinal = 0;
+    p_ent->check_sum = 0;
+    p_ent->long_name[0] = 0;
+
+    logical_index = 0;
+
+    if ((lbl_8053B248.setting & 2) == 2) {
+        is_extsfn = VFiPFPATH_GetExtShortNameIndex(p_pattern, &index_search_from);
+    }
+
+    iter.ffd = *p_ffd;
+
+    if (is_extsfn == 1) {
+        err = VFiPFENT_ITER_IteratorInitialize(&iter, index_search_from - 1);
+        if (err != 0) {
+            *p_lpos = 999999;
+            *p_ppos = 999999;
+            return err;
+        }
+
+        err = VFiPFENT_getEntry(p_ent, &iter, p_pattern, attr_required, attr_unwanted, &logical_index);
+
+        if (err == 0) {
+            *p_lpos = 999999;
+            *p_ppos = 999999;
+            return 3;
+        }
+
+        if ((iter.buf[0] & 0x40) != 0) {
+            err = VFiPFENT_ITER_IteratorInitialize(&iter, index_search_from);
+            if (err != 0) {
+                *p_lpos = 999999;
+                *p_ppos = 999999;
+                return err;
+            }
+
+            err = VFiPFENT_getEntry(p_ent, &iter, p_pattern, attr_required, attr_unwanted, &logical_index);
+
+            if (err == 0) {
+                p_ent->p_vol = p_ffd->p_vol;
+                *p_lpos = logical_index;
+                *p_ppos = iter.index;
+                return 0;
+            }
+        }
+
+    } else {
+        err = VFiPFENT_ITER_IteratorInitialize(&iter, index_search_from);
+        while (VFiPFENT_ITER_IsAtLogicalEnd(&iter) == 0) {
+            if (err != 0) {
+                *p_lpos = 999999;
+                *p_ppos = 999999;
+                return err;
+            }
+            if (iter.buf[0] == 0) {
+                break;
+            }
+            if (iter.buf[0] == 0xE5) {
+                p_ent->num_entry_LFNs = 0;
+                p_ent->long_name[0] = 0;
+
+            } else {
+                err = VFiPFENT_getEntry(p_ent, &iter, p_pattern, attr_required, attr_unwanted, &logical_index);
+
+                if (err == 0) {
+                    p_ent->p_vol = p_ffd->p_vol;
+                    *p_lpos = logical_index;
+                    *p_ppos = iter.index;
+                    return 0;
+                }
+            }
+
+            err = VFiPFENT_ITER_Advance(&iter, 0);
+        }
+    }
+
+    *p_lpos = 999999;
+    *p_ppos = 999999;
+    return 3;
+}
+
+// TODO: clean up - body adapted from the ogws pf_entry.c donor; give variables real names
+s32 VFiPFENT_allocateEntryPos(struct PF_DIR_ENT* p_ent, u8 num_entries, struct PF_FFD* p_ffd, u32* p_next_chain, struct PF_STR* p_filename, u32* p_pos) {
+    s32 err;
+    struct PF_VOLUME* p_vol;
+    struct PF_ENT_ITER iter;
+    struct PF_DIR_ENT wk_ent;
+    u32 wk_sector;
+    u16 wk_offset;
+    u32 prev_sector;
+    u32 next_sector1;
+    u32 next_sector2;
+    u32 is_found;
+    u32 sector;
+    u32 count_unused_entries;
+    u32 physical_index;
+    u32 dummy_index;
+
+    if (!p_ffd) {
+        return 10;
+    }
+    if (!p_ffd->p_vol) {
+        return 10;
+    }
+    if (!num_entries) {
+        return 10;
+    }
+    if (num_entries > 21) {
+        return 10;
+    }
+
+    if ((lbl_8053B248.setting & 2) == 2) {
+        if ((u32)VFiPFPATH_CheckExtShortNameSignature(p_filename) == 1) {
+            return 1;
+        }
+    }
+
+    p_vol = p_ffd->p_vol;
+    count_unused_entries = 0;
+    physical_index = 0;
+
+    wk_sector = -1;
+    wk_offset = 0;
+    p_next_chain[1] = -1;
+    p_next_chain[0] = -1;
+    prev_sector = -1;
+    next_sector2 = -1;
+    next_sector1 = -1;
+    is_found = 0;
+
+    iter.sector = 0;
+    iter.index = 0;
+    iter.ffd = *p_ffd;
+    err = VFiPFENT_ITER_IteratorInitialize(&iter, 0);
+
+    while (1) {
+        if (err != 0) {
+            if (err == 16) {
+                break;
+            }
+            return err;
+        }
+
+        if (iter.sector == -1) {
+            break;
+        }
+        if (is_found == 0 && count_unused_entries == 0) {
+            wk_offset = iter.offset;
+            wk_sector = iter.sector;
+            prev_sector = iter.sector;
+        }
+        if (is_found == 0) {
+            if (iter.buf[0] == 0 || iter.buf[0] == 0xE5) {
+                if (prev_sector != iter.sector) {
+                    if (next_sector1 == -1) {
+                        next_sector1 = iter.sector;
+                    } else {
+                        next_sector2 = iter.sector;
+                    }
+                    prev_sector = iter.sector;
+                }
+                count_unused_entries++;
+            } else {
+                count_unused_entries = 0;
+                next_sector1 = -1;
+                next_sector2 = -1;
+            }
+        }
+        if (count_unused_entries >= num_entries) {
+            if (is_found == 0) {
+                physical_index = iter.index;
+                is_found = 1;
+            }
+            if (iter.buf[0] == 0) {
+                break;
+            }
+        }
+        if (iter.buf[0] != 0 && iter.buf[0] != 0xE5) {
+            err = VFiPFENT_getEntry(&wk_ent, &iter, p_filename, 0x7F, 0, &dummy_index);
+            if (err == 0) {
+                *p_ent = wk_ent;
+                p_ent->p_vol = p_ffd->p_vol;
+                return 8;
+            }
+        }
+        if (iter.offset + 32 == p_vol->bpb.bytes_per_sector) {
+            err = VFiPFFAT_GetSectorSpecified(p_ffd, iter.file_sector_index + 1, 0, &sector);
+            if (err != 0) {
+                return err;
+            }
+            if (sector == -1 && is_found == 1) {
+                break;
+            }
+        }
+        err = VFiPFENT_ITER_Advance(&iter, 1);
+    }
+
+    if (is_found == 0) {
+        return 5;
+    }
+
+    p_next_chain[0] = next_sector1;
+    p_next_chain[1] = next_sector2;
+    p_ent->entry_sector = wk_sector;
+    p_ent->entry_offset = wk_offset;
+    *p_pos = physical_index;
+    return 0;
+}
+
+// TODO: clean up - body adapted from the ogws pf_fat12.c donor; give variables real names
+s32 VFiPFFAT12_ReadFATEntryPage(struct PF_VOLUME* p_vol, u16 cluster, u32* p_value, struct PF_CACHE_PAGE** pp_page) {
+    s32 err;
+    u32 offset;
+    u32 sector;
+    u32 current_fat;
+    s32 result;
+
+    if (!p_vol) {
+        return 10;
+    }
+    if (!((cluster >= 2) && (cluster < p_vol->bpb.num_clusters + 2)) && (cluster != 0) && (cluster != 1)) {
+        return 14;
+    }
+
+    offset = (u16)(cluster + (cluster >> 1));
+    sector = p_vol->bpb.active_FAT_sector + (offset >> p_vol->bpb.log2_bytes_per_sector) & 0xFFFF;
+
+    if ((p_vol->bpb.ext_flags & 0x80) == 0) {
+        current_fat = 1;
+    } else {
+        current_fat = (u32)(p_vol->bpb.ext_flags & 7);
+    }
+
+    err = 0;
+    do {
+        if (err == 0x1000 && p_vol->p_callback != 0) {
+            result = ((s32 (*)(s32))p_vol->p_callback)(p_vol->last_driver_error);
+            if (result == 0) {
+                err = 0;
+                continue;
+            }
+            if (result == 1 && p_vol->bpb.num_active_FATs >= 2 && current_fat < (u32)p_vol->bpb.num_active_FATs) {
+                current_fat++;
+                sector += p_vol->bpb.sectors_per_FAT;
+                err = 0;
+                continue;
+            }
+
+        } else {
+            if ((*pp_page)->sector > sector || (*pp_page)->sector + p_vol->cache.fat_buff_size <= sector) {
+                if ((*pp_page)->option == 1) {
+                    err = VFiPFFAT_UpdateFATEntry(p_vol, *pp_page);
+                    if (err != 0) {
+                        return err;
+                    }
+                }
+
+                err = VFiPFCACHE_ReadFATPage(p_vol, sector, pp_page);
+                if (err != 0) {
+                    continue;
+                }
+            } else {
+                if (sector != (*pp_page)->sector + (((*pp_page)->p_buf - (*pp_page)->buffer) >> p_vol->bpb.log2_bytes_per_sector)) {
+                    (*pp_page)->p_buf += p_vol->bpb.bytes_per_sector;
+                }
+            }
+
+            offset &= (p_vol->bpb.bytes_per_sector - 1);
+
+            if (offset == p_vol->bpb.bytes_per_sector - 1) {
+                *p_value = (*pp_page)->p_buf[offset];
+                sector++;
+
+                if ((*pp_page)->sector > sector || (*pp_page)->sector + p_vol->cache.fat_buff_size <= sector) {
+                    if ((*pp_page)->option == 1) {
+                        err = VFiPFFAT_UpdateFATEntry(p_vol, *pp_page);
+                        if (err != 0) {
+                            return err;
+                        }
+                    }
+
+                    err = VFiPFCACHE_ReadFATPage(p_vol, sector, pp_page);
+                    if (err != 0) {
+                        return err;
+                    }
+                } else {
+                    if (sector != (*pp_page)->sector + (((*pp_page)->p_buf - (*pp_page)->buffer) >> p_vol->bpb.log2_bytes_per_sector)) {
+                        (*pp_page)->p_buf += p_vol->bpb.bytes_per_sector;
+                    }
+                }
+
+                *p_value += ((*pp_page)->p_buf[0] << 8);
+            } else {
+                *p_value = ((*pp_page)->p_buf[offset + 1] << 8) + (*pp_page)->p_buf[offset];
+            }
+        }
+        break;
+    } while (1);
+    if (err != 0) {
+        *p_value = -1;
+        return err;
+    }
+
+    if ((cluster & 1) != 0) {
+        *p_value >>= 4;
+    } else {
+        *p_value &= 0xFFF;
+    }
+
+    return 0;
+}
+
+// TODO: clean up - body adapted from the ogws pf_fat12.c donor; give variables real names
+s32 VFiPFFAT12_WriteFATEntryPage(struct PF_VOLUME* p_vol, u16 cluster, u16 value, struct PF_CACHE_PAGE** pp_page) {
+    s32 err;
+    u32 fat_offset;
+    u32 fat_sector;
+    u16 offset_in_sector;
+    u32 current_fat;
+    s32 result;
+
+    err = 0;
+    if (!p_vol) {
+        return 10;
+    }
+
+    if (!((cluster >= 2) && (cluster < p_vol->bpb.num_clusters + 2)) && (cluster != 0) && (cluster != 1)) {
+        return 14;
+    }
+
+    fat_offset = (u16)(cluster + (cluster >> 1));
+    fat_sector = (u16)(p_vol->bpb.active_FAT_sector + (fat_offset >> p_vol->bpb.log2_bytes_per_sector));
+    offset_in_sector = (u16)(fat_offset & (p_vol->bpb.bytes_per_sector - 1));
+
+    if ((*pp_page)->sector > fat_sector || (*pp_page)->sector + p_vol->cache.fat_buff_size <= fat_sector) {
+        err = VFiPFFAT_UpdateFATEntry(p_vol, *pp_page);
+        if (err != 0) {
+            return err;
+        }
+
+        if ((p_vol->bpb.ext_flags & 0x80) == 0) {
+            current_fat = 1;
+        } else {
+            current_fat = (p_vol->bpb.ext_flags) & 7;
+        }
+
+        do {
+            err = VFiPFCACHE_ReadFATPage(p_vol, fat_sector, pp_page);
+            if (err != 0x1000 || p_vol->p_callback == 0) {
+                goto check;
+            }
+
+            result = ((long (*)(long))p_vol->p_callback)(p_vol->last_driver_error);
+            if (result != 0) {
+                if (result == 1 && p_vol->bpb.num_active_FATs >= 2 && current_fat < p_vol->bpb.num_active_FATs) {
+                    current_fat++;
+                    fat_sector += p_vol->bpb.sectors_per_FAT;
+                } else {
+                check:;
+                    if (err != 0) {
+                        return err;
+                    }
+                }
+            }
+        } while (err != 0);
+
+    } else {
+        if (fat_sector != (*pp_page)->sector + (((*pp_page)->p_buf - (*pp_page)->buffer) >> p_vol->bpb.log2_bytes_per_sector)) {
+            (*pp_page)->p_buf += p_vol->bpb.bytes_per_sector;
+        }
+    }
+
+    if ((cluster & 1) != 0) {
+        (*pp_page)->p_buf[offset_in_sector] = (u8)(((*pp_page)->p_buf[offset_in_sector] & 0x0F) | ((value << 4) & 0xF0));
+        VFiPFCACHE_UpdateModifiedSector(*pp_page);
+
+        if (offset_in_sector == (u32)(p_vol->bpb.bytes_per_sector - 1)) {
+            if ((*pp_page)->sector > fat_sector + 1 || (*pp_page)->sector + p_vol->cache.fat_buff_size <= fat_sector + 1) {
+                err = VFiPFFAT_UpdateFATEntry(p_vol, *pp_page);
+                if (err != 0) {
+                    return err;
+                }
+
+                if ((p_vol->bpb.ext_flags & 0x80) == 0) {
+                    current_fat = 1;
+                } else {
+                    current_fat = (p_vol->bpb.ext_flags) & 7;
+                }
+
+                do {
+                    err = VFiPFCACHE_ReadFATPage(p_vol, fat_sector + 1, pp_page);
+                    if (err != 0x1000 || p_vol->p_callback == 0) {
+                        goto check2;
+                    }
+
+                    result = ((long (*)(long))p_vol->p_callback)(p_vol->last_driver_error);
+                    if (result != 0) {
+                        if (result == 1 && p_vol->bpb.num_active_FATs >= 2 && current_fat < p_vol->bpb.num_active_FATs) {
+                            current_fat++;
+                            fat_sector += p_vol->bpb.sectors_per_FAT;
+                        } else {
+                        check2:;
+                            if (err != 0) {
+                                return err;
+                            }
+                        }
+                    }
+                } while (err != 0);
+
+                VFiPFCACHE_UpdateModifiedSector(*pp_page);
+            } else {
+                if (fat_sector + 1 != (*pp_page)->sector + (((*pp_page)->p_buf - (*pp_page)->buffer) >> p_vol->bpb.log2_bytes_per_sector)) {
+                    (*pp_page)->p_buf += p_vol->bpb.bytes_per_sector;
+                    VFiPFCACHE_UpdateModifiedSector(*pp_page);
+                }
+            }
+
+            (*pp_page)->p_buf[0] = (u8)(value >> 4);
+        } else {
+            (*pp_page)->p_buf[offset_in_sector + 1] = (u8)(value >> 4);
+        }
+    } else {
+        (*pp_page)->p_buf[offset_in_sector] = (u8)value;
+        VFiPFCACHE_UpdateModifiedSector(*pp_page);
+
+        if (offset_in_sector == (u32)(p_vol->bpb.bytes_per_sector - 1)) {
+            if ((*pp_page)->sector > fat_sector + 1 || (*pp_page)->sector + p_vol->cache.fat_buff_size <= fat_sector + 1) {
+                err = VFiPFFAT_UpdateFATEntry(p_vol, *pp_page);
+                if (err != 0) {
+                    return err;
+                }
+
+                if ((p_vol->bpb.ext_flags & 0x80) == 0) {
+                    current_fat = 1;
+                } else {
+                    current_fat = (p_vol->bpb.ext_flags) & 7;
+                }
+
+                do {
+                    err = VFiPFCACHE_ReadFATPage(p_vol, fat_sector + 1, pp_page);
+                    if (err != 0x1000 || p_vol->p_callback == 0) {
+                        goto check3;
+                    }
+
+                    result = ((long (*)(long))p_vol->p_callback)(p_vol->last_driver_error);
+                    if (result != 0) {
+                        if (result == 1 && p_vol->bpb.num_active_FATs >= 2 && current_fat < p_vol->bpb.num_active_FATs) {
+                            current_fat++;
+                            fat_sector += p_vol->bpb.sectors_per_FAT;
+                        } else {
+                        check3:;
+                            if (err != 0) {
+                                return err;
+                            }
+                        }
+                    }
+                } while (err != 0);
+
+                VFiPFCACHE_UpdateModifiedSector(*pp_page);
+            } else {
+                if (fat_sector + 1 != (*pp_page)->sector + (((*pp_page)->p_buf - (*pp_page)->buffer) >> p_vol->bpb.log2_bytes_per_sector)) {
+                    (*pp_page)->p_buf += p_vol->bpb.bytes_per_sector;
+                    VFiPFCACHE_UpdateModifiedSector(*pp_page);
+                }
+            }
+
+            (*pp_page)->p_buf[0] = ((*pp_page)->p_buf[0] & 0xF0) | (u8)(value >> 8);
+        } else {
+            (*pp_page)->p_buf[offset_in_sector + 1] = (u8)((value >> 8) | ((*pp_page)->p_buf[offset_in_sector + 1] & 0xF0));
+        }
+    }
+
+    return err;
+}
+
+// TODO: clean up - body adapted from the ogws pf_cache.c donor; give variables real names
+s32 VFiPFCACHE_DoWriteNumSectorAndFreeIfNeeded(struct PF_VOLUME* p_vol, struct PF_CACHE_PAGE** pp_head, const u8* p_buf, u32 sector, u32 num_sector, u32* p_num_success) {
+    struct PF_CACHE_PAGE* p_page;
+    s32 err;
+    u32 num_rest_sector;
+    u8* p_sbuf;
+    u8* p_ebuf;
+
+    p_page = NULL;
+    num_rest_sector = num_sector;
+    *p_num_success = 0;
+
+    do {
+        p_page = VFiPFCACHE_SearchForUsedPage(p_vol, pp_head, p_page);
+
+        if (p_page != NULL && p_page->sector != 0xFFFFFFFF) {
+            if (p_page->sector <= sector && p_page->sector + p_page->size >= sector + num_sector) {
+                VFipf_memcpy(&p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector], (void*)p_buf, num_sector << p_vol->bpb.log2_bytes_per_sector);
+                *p_num_success += num_rest_sector;
+                num_rest_sector = 0;
+                p_page->stat |= 2;
+                p_sbuf = &p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector];
+                p_ebuf = p_sbuf + ((num_sector - 1) << p_vol->bpb.log2_bytes_per_sector);
+                if (!p_page->p_mod_sbuf) {
+                    p_page->p_mod_sbuf = p_sbuf;
+                    p_page->p_mod_ebuf = p_ebuf;
+                } else if (p_sbuf < p_page->p_mod_sbuf) {
+                    p_page->p_mod_sbuf = p_sbuf;
+                } else if (p_page->p_mod_ebuf < p_ebuf) {
+                    p_page->p_mod_ebuf = p_ebuf;
+                }
+            } else if (p_page->sector >= sector && p_page->sector + p_page->size <= sector + num_sector) {
+                VFipf_memcpy(p_page->buffer, (void*)&p_buf[(p_page->sector - sector) << p_vol->bpb.log2_bytes_per_sector], p_page->size << p_vol->bpb.log2_bytes_per_sector);
+                num_rest_sector -= p_page->size;
+                *p_num_success += p_page->size;
+                p_page->stat |= 2;
+                p_page->p_mod_sbuf = p_page->buffer;
+                p_page->p_mod_ebuf = &p_page->buffer[(p_page->size - 1) << p_vol->bpb.log2_bytes_per_sector];
+            } else if (p_page->sector > sector && p_page->sector < sector + num_sector && p_page->sector + p_page->size >= sector + num_sector) {
+                VFipf_memcpy(p_page->buffer, (void*)&p_buf[(p_page->sector - sector) << p_vol->bpb.log2_bytes_per_sector], (p_page->size - ((p_page->sector + p_page->size) - (sector + num_sector))) << p_vol->bpb.log2_bytes_per_sector);
+                num_rest_sector -= p_page->size - ((p_page->sector + p_page->size) - (sector + num_sector));
+                *p_num_success += p_page->size - ((p_page->sector + p_page->size) - (sector + num_sector));
+                p_page->stat |= 2;
+                p_ebuf = &p_page->buffer[(p_page->size - ((p_page->sector + p_page->size) - (sector + num_sector)) - 1) << p_vol->bpb.log2_bytes_per_sector];
+                p_page->p_mod_sbuf = p_page->buffer;
+                if (!p_page->p_mod_ebuf || p_page->p_mod_ebuf < p_ebuf) {
+                    p_page->p_mod_ebuf = p_ebuf;
+                }
+            } else if (p_page->sector < sector && p_page->sector + p_page->size > sector && p_page->sector + p_page->size <= sector + num_sector) {
+                VFipf_memcpy(&p_page->buffer[(sector - p_page->sector) << p_vol->bpb.log2_bytes_per_sector], (void*)p_buf, (p_page->size - (sector - p_page->sector)) << p_vol->bpb.log2_bytes_per_sector);
+                num_rest_sector -= p_page->size - (sector - p_page->sector);
+                *p_num_success += p_page->size - (sector - p_page->sector);
+                p_page->stat |= 2;
+                p_sbuf = &p_page->buffer[(p_page->size - (sector - p_page->sector) - 1) << p_vol->bpb.log2_bytes_per_sector];
+                if (!p_page->p_mod_sbuf || p_sbuf < p_page->p_mod_sbuf) {
+                    p_page->p_mod_sbuf = p_sbuf;
+                }
+                p_page->p_mod_ebuf = &p_page->buffer[(p_page->size - 1) << p_vol->bpb.log2_bytes_per_sector];
+            }
+        }
+    } while (p_page && num_rest_sector);
+
+    if (num_rest_sector != 0 || (p_vol->cache.mode & 1) != 0) {
+        err = VFiPFDRV_lwrite(p_vol, p_buf, sector, num_sector, p_num_success);
+        if (err) {
+            return err;
+        }
+        if (dCommon_FlushFromVol(p_vol, 1)) {
+            return 17;
+        }
+    }
+
+    if ((p_vol->cache.mode & 1) != 0 && num_sector != num_rest_sector) {
+        VFiPFCACHE_ClearModified(p_vol, p_vol->cache.p_current_data);
+    }
+
+    return 0;
+}
+
+// TODO: clean up - body adapted from the ogws pf_file.c donor; give variables real names
+s32 VFiPFFILE_fclose(struct PF_FILE* p_file) {
+    struct PF_VOLUME* p_vol;
+    s32 err;
+
+    if ((u32)&lbl_8053B248 > (u32)p_file || (u32)&lbl_8053B248 + 0x27FB8 < (u32)p_file) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+
+    p_vol = (p_file == NULL) ? NULL : p_file->p_sfd->dir_entry.p_vol;
+    if (p_vol == NULL) {
+        lbl_8053B248.last_error = 10;
+        return 10;
+    }
+
+    err = VFiPFVOL_CheckForRead(p_vol);
+    if (err) {
+        lbl_8053B248.last_error = err;
+        p_vol->last_error = err;
+        return err;
+    }
+
+    if (VFiPFDRV_IsWProtected(p_vol) && p_file->open_mode != 2) {
+        return 11;
+    }
+
+    if (!p_file || !p_file->p_sfd || (p_file->stat & 1) == 0 || (p_file->p_sfd->stat & 1) == 0 || (p_file->p_sfd->stat & 2) == 0) {
+        lbl_8053B248.last_error = 10;
+        p_vol->last_error = 10;
+        return 10;
+    }
+
+    if ((p_file->p_sfd->stat & 1) == 0 || (p_file->p_sfd->stat & 2) == 0) {
+        lbl_8053B248.last_error = 10;
+        p_vol->last_error = 10;
+        return 10;
+    }
+    p_vol->cache.signature = p_file;
+
+    if (p_file->p_sfd->num_handlers - 1 <= 0 && (p_file->p_sfd->dir_entry.attr & 0x19) == 0 && !VFiPFDRV_IsWProtected(p_vol) && ((p_file->p_sfd->stat & 4) || (p_vol->file_config & 1) != 1)) {
+        err = VFiPFENT_updateEntry(&p_file->p_sfd->dir_entry, 1);
+    }
+
+    if (p_file->lock_count > 0) {
+        if (p_file->p_sfd->lock.mode & 1) {
+            p_file->p_sfd->lock.count -= p_file->lock_count;
+            p_file->lock_count = 0;
+            if (p_file->p_sfd->lock.count == 0) {
+                VFiPF_UnLockFile(p_file);
+            }
+            p_file->p_sfd->lock.mode &= ~3;
+        } else if (p_file->p_sfd->lock.owner != p_file) {
+            err = 25;
+        } else {
+            p_file->p_sfd->lock.count = 0;
+            p_file->lock_count = 0;
+            p_file->p_sfd->lock.owner = NULL;
+            VFiPF_UnLockFile(p_file);
+            p_file->p_sfd->lock.mode &= ~3;
+        }
+    }
+
+    if (err) {
+        lbl_8053B248.last_error = err;
+        p_file->p_sfd->ffd.p_vol->last_error = err;
+        p_file->last_error = err;
+    } else {
+        if (p_vol->cache.mode & 2) {
+            err = VFiPFCACHE_FlushFATCache(p_vol);
+            if (err) {
+                lbl_8053B248.last_error = err;
+                p_file->p_sfd->ffd.p_vol->last_error = err;
+                p_file->last_error = err;
+            } else {
+                err = VFiPFCACHE_FlushDataCacheSpecific(p_vol, p_file);
+                if (err) {
+                    lbl_8053B248.last_error = err;
+                    p_file->p_sfd->ffd.p_vol->last_error = err;
+                    p_file->last_error = err;
+                }
+            }
+        }
+        if (err == 0) {
+            VFiPFFILE_ReleaseSFD(p_file->p_sfd);
+            VFiPFFILE_ReleaseUFD(p_file);
+            p_vol->num_opened_files--;
+        }
+    }
+
+    p_vol->cache.signature = NULL;
+    return err;
 }

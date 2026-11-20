@@ -82,11 +82,11 @@ hkBool hkMatrix3::isApproximatelyEqual(float epsilon, const hkMatrix3& other) co
 
 hkResult hkMatrix3::invert(float epsilon) {
     hkVector4 r0;
-    r0.setCross(m_col1, m_col2);
+    r0.setCrossLegacy(m_col1, m_col2);
     hkVector4 r1;
-    r1.setCross(m_col2, m_col0);
+    r1.setCrossLegacy(m_col2, m_col0);
     hkVector4 r2;
-    r2.setCross(m_col0, m_col1);
+    r2.setCrossLegacy(m_col0, m_col1);
 
     const hkReal determinant = m_col0.dot3(r0);
     if ((hkReal)fabs(determinant) > epsilon * epsilon * epsilon) {
@@ -102,11 +102,11 @@ hkResult hkMatrix3::invert(float epsilon) {
 
 void hkMatrix3::invertSymmetric() {
     hkVector4 r0;
-    r0.setCross(m_col1, m_col2);
+    r0.setCrossLegacy(m_col1, m_col2);
     hkVector4 r1;
-    r1.setCross(m_col2, m_col0);
+    r1.setCrossLegacy(m_col2, m_col0);
     hkVector4 r2;
-    r2.setCross(m_col0, m_col1);
+    r2.setCrossLegacy(m_col0, m_col1);
 
     hkReal determinant = m_col0.dot3(r0);
     const hkReal eps = 1.6940659e-21f;

@@ -1721,7 +1721,7 @@ config.libs = [
             Object(NonMatching, "havok/hkConstraintInstance.cpp"),
             Object(NonMatching, "havok/hkConstraintSolverSetup.cpp"),
             Object(NonMatching, "havok/hkEntity.cpp"),
-            Object(NonMatching, "havok/hkFakeRigidBodyDeactivator.cpp"),
+            Object(NonMatching, "havok/hkFakeRigidBodyDeactivator.cpp", extra_cflags=["-sdata 4"]),
             Object(NonMatching, "havok/hkRigidBody.cpp"),
             Object(NonMatching, "havok/hkRigidBodyCinfo.cpp"),
             Object(NonMatching, "havok/hkSpatialRigidBodyDeactivator.cpp"),

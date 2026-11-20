@@ -105,6 +105,9 @@ struct hkBallSocketConstraintAtom : hkConstraintAtom {
 // Size 0x08.
 struct hkStiffSpringConstraintAtom : hkConstraintAtom {
     hkReal m_length; // 0x04
+
+    void buildJacobianFromStiffSpringAtom(const struct hkConstraintQueryIn& in, const hkTransform& baseA,
+                                          const hkTransform& baseB, struct hkConstraintQueryOut& out) const;
 };
 
 // Size 0x04.
@@ -190,6 +193,9 @@ struct hkTwistLimitConstraintAtom : hkConstraintAtom {
     hkReal m_angularLimitsTauFactor; // 0x10
 
     int numSolverResults() const;
+    int bulidJacobianFromTwistLimitAtom(const struct hkConstraintQueryIn& in, const struct hkRotation& baseA,
+                                        const struct hkRotation& baseB, struct hk1dAngularLimitInfo& info,
+                                        struct hkConstraintQueryOut& out) const;
 };
 
 // Size 0x14.
@@ -208,6 +214,9 @@ struct hkConeLimitConstraintAtom : hkConstraintAtom {
     hkReal m_angularLimitsTauFactor; // 0x10
 
     int numSolverResults() const;
+    int buildJacobianFromConeLimitAtom(const struct hkConstraintQueryIn& in, const struct hkRotation& baseA,
+                                       const struct hkRotation& baseB, struct hk1dAngularLimitInfo& info,
+                                       struct hkConstraintQueryOut& out) const;
 };
 
 // Size 0x0C.
