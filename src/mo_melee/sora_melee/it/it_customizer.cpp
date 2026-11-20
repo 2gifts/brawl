@@ -26,6 +26,7 @@
 #include <cm/cm_controller_ai.h>
 #include <gm/gm_global.h>
 #include <mt/mt_trig.h>
+#include <mt/mt_prng.h>
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/so_external_value_accesser.h>
 #include <types.h>
@@ -2060,6 +2061,125 @@ u32 itClackerCustomizer::onShoot(BaseItem* item, u32, float lr, float angle) {
         }
         if (--bullets <= 0) {
             bullets = 0;
+        }
+    }
+    work->setInt(bullets, 0x10000000);
+    return bullets;
+}
+
+// Shoots a fireball (item 0x19) from node 4 with a random speed (params 0x1482-0x1483) and angle (0x1484-0x1485).
+// TODO: clean up - MATCH-ONLY: the literals are read through the unit's pool label (46C8 + 8: pi/180, + 0x14: 0,
+// + 0x30: pi/2).
+u32 itFireFlowerCustomizer::onShoot(BaseItem* item, u32, float lr, float) {
+    const float* pool = lbl_27_rodata_46C8;
+    soWorkManageModule* work = &itWork(item);
+    int bullets = work->getInt(0x10000000);
+    if (bullets <= 0) {
+        return 0;
+    }
+    Vec3f pos = item->m_moduleAccesser->getModelModule().getNodeGlobalPosition(4, false);
+    pos.m_z = pool[0x14 / 4];
+    BaseItem* shot = itManager::getInstance()->createItem(&item->getHavedParentSafePos(), &pos, lr, static_cast<itKind>(0x19), 0, item->m_taskId);
+    if (shot != NULL) {
+        shot->m_moduleAccesser->getGroundModule().setTestCollStop(true, 0);
+        shot->setTeamOwnerTaskId(item);
+        shot->updateOwnerScale(item);
+        float speedMin = shot->getParamFloat(0x1482);
+        float speedMax = shot->getParamFloat(0x1483);
+        float speed = speedMin + (speedMax - speedMin) * randf();
+        float angleMin = shot->getParamFloat(0x1484);
+        float angleMax = shot->getParamFloat(0x1485);
+        float angle = angleMin + (angleMax - angleMin) * randf();
+        Vec3f dir(pool[0x14 / 4], pool[0x14 / 4], pool[0x14 / 4]);
+        mtSinCosf(pool[0x30 / 4] + -(pool[8 / 4] * angle), &dir.m_y, &dir.m_x);
+        dir.m_x *= speed * lr;
+        dir.m_y *= speed;
+        shot->m_moduleAccesser->getKineticModule().addSpeed(&dir, shot->m_moduleAccesser);
+        if (--bullets <= 0) {
+            bullets = 0;
+            item->changeMotion(10, false);
+        }
+    }
+    work->setInt(bullets, 0x10000000);
+    return bullets;
+}
+
+// Swinging the stick launches a shot (item 0x30) from node 2; swing kinds 0 and 1 have their own power and speed params.
+u32 itRipStickCustomizer::onShoot(BaseItem* item, u32 kind, float lr, float) {
+    soWorkManageModule* work = &itWork(item);
+    int bullets = work->getInt(0x10000000);
+    if (bullets <= 0) {
+        return 0;
+    }
+    Vec3f pos = item->m_moduleAccesser->getModelModule().getNodeGlobalPosition(2, false);
+    pos.m_z = lbl_27_rodata_46DC[0];
+    BaseItem* shot = itManager::getInstance()->createItem(&item->getHavedParentSafePos(), &pos, lr, static_cast<itKind>(0x30), 0, item->m_taskId);
+    if (shot != NULL) {
+        shot->m_moduleAccesser->getGroundModule().setTestCollStop(true, 0);
+        shot->setTeamOwnerTaskId(item);
+        shot->updateOwnerScale(item);
+        float power = lbl_27_rodata_46C8[0];
+        Vec3f speed(lr * item->getParamFloat(0x189C), lbl_27_rodata_46DC[0], lbl_27_rodata_46DC[0]);
+        switch (kind) {
+        case 0:
+            power = item->getParamFloat(0x189F);
+            speed.m_x *= item->getParamFloat(0x189D);
+            break;
+        case 1:
+            power = item->getParamFloat(0x18A0);
+            speed.m_x *= item->getParamFloat(0x189E);
+            break;
+        }
+        shot->throwAttack(lr, &speed, power);
+        if (--bullets <= 0) {
+            bullets = 0;
+        }
+        item->changeMotion(7, false);
+    }
+    work->setInt(bullets, 0x10000000);
+    return bullets;
+}
+
+extern "C" const float lbl_27_rodata_46F4[];
+
+// Fires a shot (item 0x3E) whose size, speed and ammunition cost follow the charge level (params 0x69AB-0x69B6 and
+// 0x1B8A-0x1B9D).
+u32 itSuperScopeCustomizer::onShoot(BaseItem* item, u32 charge, float lr, float) {
+    soWorkManageModule* work = &itWork(item);
+    int bullets = work->getInt(0x10000000);
+    if (bullets <= 0) {
+        item->changeMotion(7, false);
+        return 0;
+    }
+    Vec3f pos = item->m_moduleAccesser->getModelModule().getNodeGlobalPosition(1, false);
+    pos.m_x += lbl_27_rodata_46F4[0] * lr * item->getLinkOwnerScale();
+    pos.m_z = lbl_27_rodata_46DC[0];
+    BaseItem* shot = itManager::getInstance()->createItem(&item->getHavedParentSafePos(), &pos, lr, static_cast<itKind>(0x3E), 0, item->m_taskId);
+    if (shot != NULL) {
+        shot->m_moduleAccesser->getGroundModule().setTestCollStop(true, 0);
+        shot->setTeamOwnerTaskId(item);
+        shot->updateOwnerScale(item);
+        int level;
+        if (static_cast<int>(charge) <= item->getParamInt(0x69AB)) {
+            level = 0;
+        } else if (static_cast<int>(charge) <= item->getParamInt(0x69AC) * 8) {
+            level = static_cast<int>(charge) / item->getParamInt(0x69AC) + 1;
+        } else {
+            level = 9;
+        }
+        if (level >= 0 && level <= 9) {
+            int paramIndex = level * 2;
+            double speedParam = item->getParamFloat(0x1B8B + paramIndex);
+            Vec3f speed(speedParam * lr, lbl_27_rodata_46DC[0], lbl_27_rodata_46DC[0]);
+            shot->m_moduleAccesser->getKineticModule().addSpeed(&speed, shot->m_moduleAccesser);
+            shot->m_moduleAccesser->getPostureModule().setScale(item->getParamFloat(0x1B8A + paramIndex));
+            shot->m_moduleAccesser->getGroundModule().setShapeFlag(static_cast<soGroundShapeImpl::ShapeFlagId>(1), true, 0);
+            shot->updateNodeSRT();
+            shot->changeMotion(level, false);
+            bullets -= item->getParamInt(0x69AD + level);
+            if (bullets <= 0) {
+                bullets = 0;
+            }
         }
     }
     work->setInt(bullets, 0x10000000);
