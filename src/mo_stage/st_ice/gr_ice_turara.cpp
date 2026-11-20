@@ -181,31 +181,39 @@ void grIceTurara::updateCallBack(float deltaFrame) {
         if (scnMdl != NULL) {
             if (scnMdl->m_calcWorldCallBack == NULL) {
                 calcWorldCallBack->m_index = 0;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex = m_nodeIndex;
                 scnMdl->m_calcWorldCallBack = calcWorldCallBack;
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             Matrix* mtx = m_mtxWork;
             if (mtx != NULL) {
-                if (m_state == 0x13) {
-                    float speed = m_fallSpeed + 0.2f;
-                    m_fallSpeed = speed;
-                    if (1.0f < speed) {
+                switch (m_state) {
+                case 0x13:
+                    m_fallSpeed += 0.2f;
+                    if (m_fallSpeed > 1.0f) {
                         m_fallSpeed = 1.0f;
                     }
-                    m_pos.m_y = m_pos.m_y - m_fallSpeed;
+                    m_pos.m_y -= m_fallSpeed;
                     if (m_rot.m_z != 0.0f) {
-                        m_rot.m_z = m_rot.m_z * 0.025f;
+                        m_rot.m_z *= 0.025f;
                     }
-                } else {
-                    m_pos.m_x = mtx->m[0][3];
-                    m_pos.m_y = mtx->m[1][3];
-                    m_pos.m_z = mtx->m[2][3];
+                    break;
+                default: {
+                    float z = mtx->m[2][3];
+                    float y = mtx->m[1][3];
+                    float x = mtx->m[0][3];
+                    m_pos.m_x = x;
+                    m_pos.m_y = y;
+                    m_pos.m_z = z;
                     mtx->getRotate(&m_rot);
-                    m_rot.m_x = m_rot.m_x * 57.29578f;
-                    m_rot.m_y = m_rot.m_y * 57.29578f;
-                    m_rot.m_z = m_rot.m_z * 57.29578f;
+                    m_rot.m_x *= 57.29578f;
+                    m_rot.m_y *= 57.29578f;
+                    m_rot.m_z *= 57.29578f;
+                    break;
                 }
+                }
+
                 m_pos.m_z = 0.0f;
                 grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
                 data->m_pos.m_x = m_pos.m_x;

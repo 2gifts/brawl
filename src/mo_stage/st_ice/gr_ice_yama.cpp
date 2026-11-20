@@ -113,12 +113,15 @@ void grIceYama::update(float deltaFrame) {
 
 // The joint of the collision that belongs to the top of the mountain is found once (the avalanche changes its material).
 void grIceYama::updateJoint(float deltaFrame) {
-    if (m_joint == NULL && m_collision != NULL) {
+    grCollision* collision;
+    if (m_joint == NULL && (collision = m_collision) != NULL) {
         u32 node;
         if (getNodeIndex(&node, 0, "M_top_out1")) {
-            u16 count = m_collision->m_jointLen;
-            for (u32 i = 0; i != count; i++) {
-                grCollisionJoint* joint = m_collision->getJoint(i);
+            u32 i;
+            u16 count = collision->m_jointLen;
+            for (i = 0; i != count; i++) {
+                grCollisionJoint* joint = collision->getJoint(i);
+
                 if (joint == NULL) {
                     return;
                 }
@@ -388,6 +391,7 @@ void grIceYama::updateCallBack(float deltaFrame) {
         if (scnMdl != NULL) {
             if (scnMdl->m_calcWorldCallBack == NULL) {
                 calcWorldCallBack->m_index = 0;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex = m_nodeIndex;
                 scnMdl->m_calcWorldCallBack = calcWorldCallBack;
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;

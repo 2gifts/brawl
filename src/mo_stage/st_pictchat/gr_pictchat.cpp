@@ -7,7 +7,6 @@
 #include <st_pictchat/gr_pictchat.h>
 
 // GameGlobal (main, unnamed): the two checks that say which language the font of the names is for
-extern "C" int fn_8004D9E8(GameGlobal*);
 extern "C" int fn_8004D9FC(GameGlobal*);
 
 grPictchat::grPictchat(const char* taskName) : grYakumono(taskName) {
@@ -137,7 +136,7 @@ void grPictchatBg::updateMessage(float deltaFrame) {
     }
     float cursorX = 0.0f;
     float scale = 20.0f;
-    if (fn_8004D9E8(g_GameGlobal) == 1) {
+    if (g_GameGlobal->isLanguageJp() == 1) {
         cursorX = 800.0f;
     } else if (fn_8004D9FC(g_GameGlobal) == 1) {
         cursorX = 1200.0f;

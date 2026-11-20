@@ -5,6 +5,7 @@
 #define SO_COLLISION_GROUP_ALIGNED // soArrayVector<soCollisionGroup, N> places its elements 4-aligned
 #define SO_COLLISION_GROUP_MEMBERWISE // ... and copies it member by member
 
+#include <it/it_gen_archive.h>
 #include <ec/ec_mgr.h>
 #include <gf/gf_camera.h>
 #include <gf/gf_draw.h>
@@ -473,10 +474,8 @@ void grMarioPastBlockPosLite::makeItem(stMarioPastBlockDt* block) {
     if (g_GameGlobal->m_modeMelee->m_meleeInitData.m_itemFrequency == 0) {
         return;
     }
-    Vec3f pos;
-    pos.m_x = block->m_pos.m_x;
-    pos.m_z = block->m_pos.m_z;
-    pos.m_y = block->m_pos.m_y + 10.0f;
+    Vec3f pos = block->m_pos;
+    pos.m_y += 10.0f;
     int lotId;
     switch (block->m_item) {
     case 4:
@@ -488,20 +487,20 @@ void grMarioPastBlockPosLite::makeItem(stMarioPastBlockDt* block) {
     case 6:
         lotId = 3;
         break;
-    case 7:
-        lotId = 5;
-        break;
     case 8:
         lotId = 4;
         break;
+    case 7:
+        lotId = 5;
+        break;
+
     default:
         lotId = 5;
         break;
     }
-    ItemKind kind;
-    kind.m_kind = static_cast<itKind>(*reinterpret_cast<int*>(reinterpret_cast<u8*>(lbl_27_bss_5668) + 0x44));
-    kind.m_variation = 0;
-    itManager::getInstance()->lotCreateItem(reinterpret_cast<itGenSheetKind&>(kind), static_cast<itGenId>(lotId), &pos, -1, -1, static_cast<itKind>(-1));
+    itManager::getInstance()->lotCreateItem(itGenSheetKind(static_cast<Stages::srStageKind>(*reinterpret_cast<int*>(reinterpret_cast<u8*>(lbl_27_bss_5668) + 0x44)), 0), static_cast<itGenId>(lotId), &pos, -1, -1, static_cast<itKind>(-1));
+
+
 }
 
 // A ? block that is hidden has no collision on the lines until it was hit; this switches the lines of the block on or off.

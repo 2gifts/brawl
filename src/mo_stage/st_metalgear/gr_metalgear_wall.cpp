@@ -1,3 +1,4 @@
+#define MT_VEC3F_ADD_NATIVE_ORDER // MATCH-ONLY: register choice of the inline Vec3f add in updateCallBack
 #define YK_STAGE_INLINE // inline members of the shared SO headers that the stage RELs emit themselves
 #define YK_CLTARGET_4_FIRST // the clTarget constructor writes the second member first in this REL
 #define YK_STAGE_FULL // ... and the ones of the hit objects with an attack module and an event observer
@@ -333,15 +334,19 @@ void grMetalgearWall::updateShake(float deltaFrame) {
         m_shakeTimer = 0.0f;
     }
     if (m_shakeTimer > 0.0f) {
-        u32 step = (u32)m_shakeTimer % 3;
-        if ((float)step == 0.0f) {
+        float step = (u32)m_shakeTimer % 3;
+        if (step == 0.0f) {
+
             float sine;
             float cosine;
-            mtSinCosf(metalgearDegToRad(90.0f), &sine, &cosine);
+            float deg = 90.0f;
+            mtSinCosf(deg * 0.017453292f, &sine, &cosine);
+
             float scale = randf() * 0.8f + 0.5f;
             m_shake.m_x = scale * cosine;
-            m_shake.m_z = 0.0f;
             m_shake.m_y = scale * sine;
+            m_shake.m_z = 0.0f;
+
         }
     } else {
         m_shake.m_x = 0.0f;
@@ -463,8 +468,10 @@ void grMetalgearWall::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
+            Vec3f offset;
             grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-            data->m_offsetPos = m_pos + m_shake;
+            data->m_offsetPos = offset = m_pos + m_shake;
+
         }
     }
 }

@@ -45,7 +45,8 @@ stDonkey* stDonkey::create() {
 
 stDonkey::~stDonkey() {
     if (m_ladderData != NULL) {
-        delete[] m_ladderData;
+        delete[] reinterpret_cast<u8*>(m_ladderData);
+
     }
     releaseArchive();
 }
@@ -384,45 +385,49 @@ void stDonkey::createObjNumber(int index) {
     }
 }
 
-// MATCH-ONLY: the ladder entries are set up by hand (the motion path model of the first entry is cleared each time).
-static inline void donkeyInitLadder(grGimmickLadderData* data, grGimmickLadderData* first, u8 mdlIndex, const char* nodeName,
-                                    float height) {
-    MEMINIT(data);
-    data->m_mdlIndex = mdlIndex;
-    data->m_49 = 0;
-    data->m_restrictUpExit = false;
-    data->m_51 = 1;
-    strcpy(data->m_nodeName, nodeName);
-    first->m_motionPathData.m_mdlIndex = -1;
-    data->m_areaData.m_offsetPos.m_x = 0.0f;
-    data->m_areaData.m_offsetPos.m_y = 4.0f;
-    data->m_areaData.m_range.m_x = 10.0f;
-    data->m_areaData.m_range.m_y = height;
-}
+// The ladder entries are set up by hand; the motion path model of the first entry is cleared each time (the list is read
+// again from the stage after the name is copied).
+#define DONKEY_INIT_LADDER(index, mdlIndex, nodeName, offsetY, height)     \
+    {                                                                       \
+        grGimmickLadderData* data = &m_ladderData[index];                   \
+        memset(data, 0, sizeof(grGimmickLadderData));                       \
+        data->m_mdlIndex = mdlIndex;                                        \
+        data->m_49 = 0;                                                     \
+        data->m_restrictUpExit = false;                                     \
+        data->m_51 = 1;                                                     \
+        strcpy(data->m_nodeName, nodeName);                                 \
+        /* TODO: clean up: the model index is written as an unsigned byte */ \
+        *reinterpret_cast<u8*>(&m_ladderData->m_motionPathData.m_mdlIndex) = 0xFF; \
+        data->m_areaData.m_offsetPos.m_x = 0.0f;                            \
+        data->m_areaData.m_offsetPos.m_y = offsetY;                         \
+        data->m_areaData.m_range.m_x = 10.0f;                               \
+        data->m_areaData.m_range.m_y = height;                              \
+    }
 
 // The ten ladders (ids 0x3C to 0x45), each created right after its data.
 void stDonkey::createObjHashigo() {
-    m_ladderData = new (Heaps::StageResource) grGimmickLadderData[10];
+    // TODO: clean up: MATCH-ONLY raw storage (no cookie, no element constructor), see ~stDonkey
+    m_ladderData = reinterpret_cast<grGimmickLadderData*>(new (Heaps::StageResource) u8[sizeof(grGimmickLadderData) * 10]);
     if (m_ladderData != NULL) {
-        donkeyInitLadder(&m_ladderData[0], m_ladderData, 0x3C, "hasigo_09", 40.0f);
+        DONKEY_INIT_LADDER(0, 0x3C, "hasigo_09", 4.0f, 40.0f);
         createObjHashigo1(0x1B);
-        donkeyInitLadder(&m_ladderData[1], m_ladderData, 0x3D, "hasigo_07", 48.0f);
+        DONKEY_INIT_LADDER(1, 0x3D, "hasigo_07", 4.0f, 48.0f);
         createObjHashigo1(0x1C);
-        donkeyInitLadder(&m_ladderData[2], m_ladderData, 0x3E, "hasigo_08", 64.0f);
+        DONKEY_INIT_LADDER(2, 0x3E, "hasigo_08", 4.0f, 64.0f);
         createObjHashigo1(0x1D);
-        donkeyInitLadder(&m_ladderData[3], m_ladderData, 0x3F, "hasigo_06", 64.0f);
+        DONKEY_INIT_LADDER(3, 0x3F, "hasigo_06", 4.0f, 64.0f);
         createObjHashigo1(0x1E);
-        donkeyInitLadder(&m_ladderData[4], m_ladderData, 0x40, "hasigo_02", 32.0f);
+        DONKEY_INIT_LADDER(4, 0x40, "hasigo_02", 4.0f, 32.0f);
         createObjHashigo1(0x1F);
-        donkeyInitLadder(&m_ladderData[5], m_ladderData, 0x41, "hasigo_01", 16.0f);
+        DONKEY_INIT_LADDER(5, 0x41, "hasigo_01", 8.0f, 16.0f);
         createObjHashigo1(0x20);
-        donkeyInitLadder(&m_ladderData[6], m_ladderData, 0x42, "hasigo_05", 32.0f);
+        DONKEY_INIT_LADDER(6, 0x42, "hasigo_05", 4.0f, 32.0f);
         createObjHashigo1(0x21);
-        donkeyInitLadder(&m_ladderData[7], m_ladderData, 0x43, "hasigo_11", 40.0f);
+        DONKEY_INIT_LADDER(7, 0x43, "hasigo_11", 4.0f, 40.0f);
         createObjHashigo1(0x22);
-        donkeyInitLadder(&m_ladderData[8], m_ladderData, 0x44, "hasigo_10", 32.0f);
+        DONKEY_INIT_LADDER(8, 0x44, "hasigo_10", 4.0f, 32.0f);
         createObjHashigo1(0x23);
-        donkeyInitLadder(&m_ladderData[9], m_ladderData, 0x45, "hasigo_04", 24.0f);
+        DONKEY_INIT_LADDER(9, 0x45, "hasigo_04", 4.0f, 24.0f);
         createObjHashigo1(0x24);
     }
 }
@@ -576,8 +581,11 @@ void stDonkey::updateScore(float deltaFrame) {
 
 // Decides when the two Jacks appear. The stage data holds the ranges of the waits (floats at 0x18 to 0x38).
 void stDonkey::updateJack(float deltaFrame) {
+    if (m_stateKong != 3) {
+        return;
+    }
     float* data = static_cast<float*>(m_stageData);
-    if (m_stateKong != 3 || data == NULL) {
+    if (data == NULL) {
         return;
     }
     m_jackTimer1 -= deltaFrame;
@@ -593,8 +601,8 @@ void stDonkey::updateJack(float deltaFrame) {
         m_stateJack[0] = 6;
         m_stateJack[1] = 6;
         if (m_jackFirst == 1) {
-            m_jackFirst = 0;
             m_jackTimer1 = data[6] + (data[7] - data[6]) * randf();
+            m_jackFirst = 0;
         } else {
             m_jackTimer1 = data[8] + (data[9] - data[8]) * randf();
         }
@@ -603,9 +611,9 @@ void stDonkey::updateJack(float deltaFrame) {
     case 1:
         if (m_jackTimer1 == 0.0f) {
             if (randf() < data[10]) {
+                m_jackTimer1 = data[11] + (data[12] - data[11]) * randf();
                 m_jackState = 2;
                 m_jackTimer2 = 0.0f;
-                m_jackTimer1 = data[11] + (data[12] - data[11]) * randf();
             } else {
                 m_jackState = 0;
             }
@@ -614,15 +622,15 @@ void stDonkey::updateJack(float deltaFrame) {
     case 2:
         if (m_jackTimer1 == 0.0f) {
             m_jackState = 3;
-        } else if (m_jackTimer2 == 0.0f) {
+        } else if (m_jackTimer2 == 0.0) {
             if (m_stateJack[0] == 6) {
                 m_stateJack[0] = 3;
-            } else {
-                if (m_stateJack[1] != 6) {
-                    return;
-                }
+            } else if (m_stateJack[1] == 6) {
                 m_stateJack[1] = 3;
+            } else {
+                return;
             }
+
             m_jackTimer2 = data[13] + (data[14] - data[13]) * randf();
         }
         break;

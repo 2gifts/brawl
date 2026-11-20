@@ -721,18 +721,21 @@ void stMetalgear::updateSearch(float deltaFrame) {
 // The camera that lights the stage looks at the search light.
 void stMetalgear::renderOpa() {
     gfTask::renderOpa();
-    if (g_gfSceneRoot != NULL && *reinterpret_cast<nw4r::g3d::ScnRoot**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x40) != NULL) {
+    // TODO: clean up: the scene root's nw4r::g3d::ScnRoot (+0x40) is not named in gfSceneRoot yet.
+    nw4r::g3d::ScnRoot* scnRoot;
+    if (g_gfSceneRoot != NULL && (scnRoot = *reinterpret_cast<nw4r::g3d::ScnRoot**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x40)) != NULL) {
         nw4r::g3d::Camera::PostureInfo info;
         info.tp = nw4r::g3d::Camera::POSTURE_AIM;
-        Vec3f target;
-        target = m_posGimmick[2];
+        Vec3f target(m_posGimmick[2].m_x, m_posGimmick[2].m_y, m_posGimmick[2].m_z);
+
         info.cameraTarget.x = target.m_x;
         info.cameraTarget.y = target.m_y;
         info.cameraTarget.z = target.m_z;
         info.cameraTwist = 0.0f;
-        nw4r::g3d::Camera camera = (*reinterpret_cast<nw4r::g3d::ScnRoot**>(reinterpret_cast<u8*>(g_gfSceneRoot) + 0x40))->GetCamera(1);
+        nw4r::g3d::Camera camera = scnRoot->GetCamera(1);
         camera.SetPosture(info);
     }
+
 }
 
 // The metalgear comes when it is time (in a match by time) or when the one that is behind the others has taken enough

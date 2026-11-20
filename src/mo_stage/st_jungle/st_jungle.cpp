@@ -24,6 +24,16 @@ static inline u32* jungleCameraFlags() {
     return reinterpret_cast<u32*>(reinterpret_cast<u8*>(g_cmAIController) + 8);
 }
 
+// TODO: clean up: bitfield view of the same word of the AI camera controller (its top byte is set as a field).
+struct stJungleCameraFlagBits {
+    u32 m_top : 8;
+    u32 m_rest : 24;
+};
+static inline stJungleCameraFlagBits* jungleCameraFlagBits() {
+    return reinterpret_cast<stJungleCameraFlagBits*>(reinterpret_cast<u8*>(g_cmAIController) + 8);
+}
+
+
 stClassInfoImpl<Stages::Jungle, stJungle> stJungle::bss_loc_14;
 
 stJungle* stJungle::create() {
@@ -41,10 +51,11 @@ stJungle::stJungle() : stMelee("stJungle", Stages::Jungle) {
     memset(m_pos2F8, 0, sizeof(m_pos2F8));
     memset(m_pos328, 0, sizeof(m_pos328));
     memset(m_pos358, 0, sizeof(m_pos358));
-    memset(m_posPrev, 0, sizeof(m_posPrev));
+    // TODO: clean up: one memset clears the last positions and the scroll (HYPOTHESIS: they are one array in the original).
+    memset(m_posPrev, 0, sizeof(m_posPrev) + sizeof(m_scroll));
     memset(m_pos3AC, 0, sizeof(m_pos3AC));
-    m_mtxN[0].setIdentity();
-    m_mtxN[1].setIdentity();
+    getMtxN(0)->setIdentity();
+    getMtxN(1)->setIdentity();
     m_ladderData = NULL;
     memset(m_enable, 0, sizeof(m_enable));
     m_state[0] = 0;
@@ -71,7 +82,7 @@ stJungle::stJungle() : stMelee("stJungle", Stages::Jungle) {
     // HYPOTHESIS: a flag of the stage (the other scrolling stages leave it alone)
     *(reinterpret_cast<u8*>(this) + 0xE8) = 1;
     if (g_cmAIController != NULL) {
-        *jungleCameraFlags() = (*jungleCameraFlags() & 0xFFFFFF) | 0x1000000;
+        jungleCameraFlagBits()->m_top = 1;
     }
 }
 
@@ -365,7 +376,7 @@ void stJungle::createObjAshiba(int index) {
         ground = grJungleAshiba10::create(22, "StgJungle00LV10", "grJungleAshiba10");
         posWork = &m_posGimmick[8];
         posGimmick = m_pos328;
-        mtx = &m_mtxN[0];
+        mtx = getMtxN(0);
         state = &m_stateN[0];
         enable = &m_enable[9];
         posHashigo = NULL;
@@ -476,14 +487,14 @@ void stJungle::createObjN(int index) {
     switch (index) {
     case 26:
         ground = grJungleN::create(1, "StgJungle00NL", "grJungleMainNL");
-        mtx = &m_mtxN[0];
+        mtx = getMtxN(0);
         state = &m_stateN[0];
         enable = &m_enable[9];
         collision = 0x32;
         break;
     case 28:
         ground = grJungleN::create(3, "StgJungle00NR", "grJungleMainNR");
-        mtx = &m_mtxN[1];
+        mtx = getMtxN(1);
         state = &m_stateN[1];
         enable = &m_enable[9];
         collision = 0x33;
@@ -525,12 +536,12 @@ void stJungle::createObjNB(int index) {
     switch (index) {
     case 27:
         ground = grJungleNB::create(2, "gr2_StgJungle00NLB", "grJungleMainNLB");
-        mtx = &m_mtxN[0];
+        mtx = getMtxN(0);
         state = &m_stateN[0];
         break;
     case 29:
         ground = grJungleNB::create(4, "gr2_StgJungle00NRB", "grJungleMainNRB");
-        mtx = &m_mtxN[1];
+        mtx = getMtxN(1);
         state = &m_stateN[1];
         break;
     default:
@@ -671,31 +682,36 @@ void grJungleWater::setEnableWork(u8* enableWork) {
     m_enableWork = enableWork;
 }
 
-// MATCH-ONLY: the ladder entries are set up by hand (the motion path model of the first entry is cleared each time).
-static inline void jungleInitLadder(grGimmickLadderData* data, grGimmickLadderData* first, u8 mdlIndex, const char* nodeName,
-                                    float offsetY, float rangeX, float rangeY) {
-    MEMINIT(data);
-    data->m_mdlIndex = mdlIndex;
-    data->m_49 = 0;
-    data->m_restrictUpExit = false;
-    data->m_51 = 1;
-    strcpy(data->m_nodeName, nodeName);
-    first->m_motionPathData.m_mdlIndex = -1;
-    data->m_areaData.m_offsetPos.m_x = 0.0f;
-    data->m_areaData.m_offsetPos.m_y = offsetY;
-    data->m_areaData.m_range.m_x = rangeX;
-    data->m_areaData.m_range.m_y = rangeY;
-}
+// The ladder entries are set up by hand; the motion path model of the first entry is cleared each time (the list is read
+// again from the stage after the name is copied).
+#define JUNGLE_INIT_LADDER(index, mdlIndex, nodeName, offsetY, rangeX, rangeY) \
+    {                                                                       \
+        grGimmickLadderData* data = &m_ladderData[index];                   \
+        memset(data, 0, sizeof(grGimmickLadderData));                       \
+        data->m_mdlIndex = mdlIndex;                                        \
+        data->m_49 = 0;                                                     \
+        data->m_restrictUpExit = false;                                     \
+        data->m_51 = 1;                                                     \
+        strcpy(data->m_nodeName, nodeName);                                 \
+        /* TODO: clean up: the model index is written as an unsigned byte */ \
+        *reinterpret_cast<u8*>(&m_ladderData->m_motionPathData.m_mdlIndex) = 0xFF; \
+        data->m_areaData.m_offsetPos.m_x = 0.0f;                            \
+        data->m_areaData.m_offsetPos.m_y = offsetY;                         \
+        data->m_areaData.m_range.m_x = rangeX;                              \
+        data->m_areaData.m_range.m_y = rangeY;                              \
+    }
 
 // The three ladders (ids 0x3C to 0x3E), each created right after its data.
 void stJungle::createObjHashigo() {
-    m_ladderData = new (Heaps::StageResource) grGimmickLadderData[3];
+    // TODO: clean up: MATCH-ONLY raw storage (no cookie, no element constructor), as in stDonkey
+    m_ladderData = reinterpret_cast<grGimmickLadderData*>(new (Heaps::StageResource) u8[sizeof(grGimmickLadderData) * 3]);
+
     if (m_ladderData != NULL) {
-        jungleInitLadder(&m_ladderData[0], m_ladderData, 0x3C, "StgJungle00LV05Ladder1", 24.0f, 10.0f, 48.0f);
+        JUNGLE_INIT_LADDER(0, 0x3C, "StgJungle00LV05Ladder1", 24.0f, 10.0f, 48.0f);
         createObjHashigo1(0x22);
-        jungleInitLadder(&m_ladderData[1], m_ladderData, 0x3D, "StgJungle00LV05Ladder2", 24.0f, 10.0f, 48.0f);
+        JUNGLE_INIT_LADDER(1, 0x3D, "StgJungle00LV05Ladder2", 24.0f, 10.0f, 48.0f);
         createObjHashigo1(0x23);
-        jungleInitLadder(&m_ladderData[2], m_ladderData, 0x3C, "StgJungle00LV07Ladder", 41.6f, 10.0f, 83.2f);
+        JUNGLE_INIT_LADDER(2, 0x3C, "StgJungle00LV07Ladder", 41.6f, 10.0f, 83.2f);
         createObjHashigo1(0x24);
     }
 }

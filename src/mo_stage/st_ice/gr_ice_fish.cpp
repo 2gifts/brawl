@@ -1,3 +1,4 @@
+#define YK_DATA_INLINE_CTOR // the ykData constructor is inline in this unit
 #define YK_STAGE_INLINE // inline members of the shared SO headers that the stage RELs emit themselves
 
 #include <ai/ai_mgr.h>
@@ -15,8 +16,6 @@
 #include <st_ice/gr_ice_anim.h>
 
 grIceFish::grIceFish(const char* taskName) : grIce(taskName), m_snd() {
-    m_attackWork = NULL;
-    m_effectHandle = 0;
     m_posWork = NULL;
     m_posXWork = NULL;
     m_limitWork = NULL;
@@ -26,9 +25,12 @@ grIceFish::grIceFish(const char* taskName) : grIce(taskName), m_snd() {
     m_pos.m_x = 0.0f;
     m_pos.m_y = 0.0f;
     m_pos.m_z = 0.0f;
+    m_effectHandle = 0;
     m_started = 0;
     m_attackSet = 0;
+    m_attackWork = NULL;
     m_sePlayed = 0;
+
     m_dangerZone = -1;
     m_eatState = 0;
     m_trigger = NULL;

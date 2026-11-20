@@ -23,7 +23,6 @@
 // grCollision::setJointStatus (unnamed function of main)
 extern "C" void fn_80110B98(grCollision* collision, int status, int unk);
 // sndSystem::setVol / setPitch / setPan / stopSE (unnamed functions of main)
-extern "C" void fn_80075F1C(sndSystem* system, int handle, int fadeFrames);
 // Matrix helpers of main: place a matrix with a translation / scale
 extern "C" void fn_8003F074(float x, float y, float z, Matrix* matrix);
 
@@ -1395,12 +1394,11 @@ void stDolpic::updateCameraCenter(float deltaFrame) {
                     updateStagePositions();
                     m_cameraData = id;
                 }
-                return;
-            default:
-                return;
+                break;
             }
+        } else {
+            m_cameraRate = rate;
         }
-        m_cameraRate = rate;
         return;
     }
     m_cameraRate = rate;
@@ -1432,24 +1430,6 @@ void stDolpic::updateCameraCenter(float deltaFrame) {
         }
     } else {
         switch (m_state) {
-        case 0:
-        case 1:
-        case 3:
-        case 5:
-        case 7:
-        case 9:
-        case 0xB:
-        case 0xD:
-        case 0xF:
-        case 0x11:
-        case 0x13:
-        case 0x15:
-        case 0x17:
-        case 0x19:
-        case 0x1B:
-        case 0x1D:
-        case 0x1F:
-            return;
         case 2:
             id = 0x70;
             break;
@@ -1492,6 +1472,24 @@ void stDolpic::updateCameraCenter(float deltaFrame) {
         case 0x1C:
             id = 0x78;
             break;
+        case 0:
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 9:
+        case 0xB:
+        case 0xD:
+        case 0xF:
+        case 0x11:
+        case 0x13:
+        case 0x15:
+        case 0x17:
+        case 0x19:
+        case 0x1B:
+        case 0x1D:
+        case 0x1F:
+            return;
         case 0x1E:
             return;
         case 0x20:

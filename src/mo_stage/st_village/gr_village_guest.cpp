@@ -157,24 +157,25 @@ void grVillageGuest::updateActive(float deltaFrame) {
             break;
         }
         break;
+    case 8:
+        m_offset.m_y = -2.1f;
+        break;
+    case 4:
+        updateActiveDetails(deltaFrame);
+        break;
     case 2:
         return;
     case 3:
         return;
-    case 4:
-        updateActiveDetails(deltaFrame);
-        break;
     case 5:
         return;
     case 6:
         return;
     case 7:
         return;
-    case 8:
-        m_offset.m_y = -2.1f;
-        break;
     }
 }
+
 
 // Every now and then the guest picks a new motion: it reacts when the fighter it watches has hit someone or was hit.
 void grVillageGuest::updateActiveDetails(float deltaFrame) {

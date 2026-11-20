@@ -116,7 +116,8 @@ static_assert(sizeof(grFamicomBall) == 0x190, "Class is wrong size!");
 // A fighter that stands on a floor and is remembered by it (the ground of the floor keeps a list of them).
 struct grFamicomYukaActor : public nw4r::ut::LinkListNode {
     grCollStatus* m_status;     // 0x08 the collision status of the fighter
-    u8 m_life;                  // 0x0C frames it stays on the list after it left
+    s8 m_life;                  // 0x0C frames it stays on the list after it left
+
     char _0d[3];
 };
 

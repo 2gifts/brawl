@@ -53,13 +53,12 @@ inline int SoraCharacterRoll::ResultInfo::getGameCoinNum() const {
 
 // gfCamera::init(): the default values of a camera
 // gfCamera::calc(): updates the camera from its settings
-extern "C" void fn_80018778(void* camera);
 // gfCamera::getScreenPosition2WorldVector(): the vector from the camera through a place of the screen
 // GameGlobal::getCharaAppFlag() / getAssistAppFlag(): bit sets of the fighters / assist trophies that appeared
 // gmAddCoin(): adds coins to the coins of the player
 extern "C" void fn_80051440(int coins);
 // efScreen::cancelFill(frames, handle)
-extern "C" void fn_8005E3C8(efScreen* screen, float frames, u8* handle);
+// TODO: clean up: the screen fill handles are kept as u8 here (efScreen::cancelFill takes an efScreenHandle*).
 // nw4r::g3d::ResFile::GetResPltt(), ResTex::GetTexObjParam(), ResTex::GetTexObjCIParam()
 extern "C" void* fn_8018D310(const nw4r::g3d::ResFile* resFile, const char* name);
 extern "C" void fn_80192A44(const nw4r::g3d::ResTex* tex, void** data, u16* width, u16* height, int* format, float* minLod,
@@ -249,12 +248,13 @@ void SoraCharacterRoll::TargetCursor::getScreenQuat(nw4r::math::QUAT& quat) {
 
 void SoraCharacterRoll::TargetCursor::on() {
     if ((m_flags & Flag_On) == 0) {
-        if (m_cursor != NULL) {
+        grMadein* cursor = m_cursor;
+        if (cursor != NULL) {
             if (m_motion != 0 || (m_flags & Flag_Motion) == 0) {
                 m_motion = 0;
                 m_flags |= Flag_Motion;
-                m_cursor->setMotion(0);
-                m_cursor->startEntityAutoLoop();
+                cursor->setMotion(0);
+                cursor->startEntityAutoLoop();
             }
         }
         if (m_beamL != NULL && (m_flags & Flag_BeamL) != 0) {
@@ -556,7 +556,7 @@ void SoraCharacterRoll::ResultInfo::reset() {
 void SoraCharacterRoll::ResultInfo::start() {
     if ((m_flags & 2) != 0) {
         u8 id = m_fillId;
-        fn_8005E3C8(g_efScreen, 30.0f, &id);
+        g_efScreen->cancelFill(reinterpret_cast<efScreenHandle*>(&id), 30.0f);
         m_flags &= ~2;
     }
 }
@@ -1617,16 +1617,21 @@ SoraCharacterRoll::NamePanelGen::~NamePanelGen() {
 // Creates the writer that prints the names.
 void SoraCharacterRoll::NamePanelGen::setup() {
     if (m_writer != NULL) {
-        delete static_cast<Message*>(m_writer);
+        // HYPOTHESIS: a delete helper with its own null check (the target tests the pointer twice)
+        Message* writer = static_cast<Message*>(m_writer);
+        if (writer != NULL) {
+            delete writer;
+        }
         m_writer = NULL;
     }
-    Message* writer = new (Heaps::StageInstance) Message(0x400, Heaps::StageInstance);
-    m_writer = writer;
-    SetFontResource(writer, 1);
-    writer->changeMsgBuf(-1);
-    writer->clearMsgBuf();
-    writer->setFixedWidth(-1.0f);
-    writer->setCallProjection(0);
+    m_writer = new
+ (Heaps::StageInstance) Message(0x400, Heaps::StageInstance);
+    SetFontResource(static_cast<Message*>(m_writer), 1);
+    static_cast<Message*>(m_writer)->changeMsgBuf(-1);
+    static_cast<Message*>(m_writer)->clearMsgBuf();
+    static_cast<Message*>(m_writer)->setFixedWidth(-1.0f);
+    static_cast<Message*>(m_writer)->setCallProjection(0);
+
     m_count = 0;
     m_rect[0] = 0.0f;
     m_rect[1] = 0.0f;
@@ -1644,8 +1649,7 @@ void SoraCharacterRoll::NamePanelGen::clearBuffer() {
     }
 }
 
-SoraCharacterRoll::NamePanel::NamePanel() {
-    m_name = NULL;
+SoraCharacterRoll::NamePanel::NamePanel() : m_name(NULL) {
 }
 
 SoraCharacterRoll::NamePanel::~NamePanel() {
@@ -1700,23 +1704,23 @@ bool stCharacterRoll::getResTexName(char* dest, int kind, int index) {
     if (dest == NULL || static_cast<u32>(kind) >= 5 || static_cast<u32>(index) >= static_cast<u32>(sKindCount[kind])) {
         return false;
     }
-    int picture = index;
-    if (kind == 4) {
-        // the trophies are 256 to a picture
-        picture = index / 256;
-    }
-    sprintf(dest, sResTexFormat[kind], picture + 1);
+    // the trophies are 256 to a picture
+    sprintf(dest, sResTexFormat[kind], kind != 4 ? index + 1 : index / 256 + 1);
+
     return true;
 }
 
 // Whether the entry of a list is shown (its bit is set in the bit set of initResTexFlags). HYPOTHESIS: the range check of
 // the original compares the kind with the number of entries (not the index), which is always true.
 bool stCharacterRoll::isResTexEnable(int kind, int index) {
-    if (static_cast<u32>(kind) < 5 && static_cast<u32>(kind) < static_cast<u32>(sKindCount[kind])) {
-        u32 bit = index + sKindFirstBit[kind];
-        return (m_shown[bit / 32] & (1 << (bit & 31))) != 0;
+    // HYPOTHESIS: the second test compares the kind (not the index) with the count, as the original does
+    if (static_cast<u32>(kind) >= 5 || static_cast<u32>(kind) >= static_cast<u32>(sKindCount[kind])) {
+
+        return false;
     }
-    return false;
+    int bit = index + sKindFirstBit[kind];
+    return (m_shown[bit / 32] & (1 << (bit & 31))) != 0;
+
 }
 
 // Sets up the bit set of the entries that are shown: an entry is shown when it has a picture and a name, and when the
@@ -1952,25 +1956,24 @@ static u8 getCRollFighterId(u32 index) {
 // How many fighters share the entry of the roll with the given fighter (Ice Climbers, Zelda / Sheik, the three
 // Pokemon of the trainer); `family` points at their numbers.
 static int getCRollFighter_SelectNum(int fighterId, int** family) {
-    if (fighterId == 0x17) {
+    switch (fighterId) {
+    case 0xD:
+    case 0xE:
+        *family = sFamilyZelda;
+        return 2;
+    case 3:
+    case 0x17:
         *family = sFamilyPopo;
         return 2;
-    }
-    if (fighterId < 0x17) {
-        if (fighterId < 0xD) {
-            if (fighterId == 3) {
-                *family = sFamilyPopo;
-                return 2;
-            }
-        } else if (fighterId < 0xF) {
-            *family = sFamilyZelda;
-            return 2;
-        }
-    } else if (fighterId < 0x1F && fighterId > 0x1A) {
+    case 0x1B:
+    case 0x1C:
+    case 0x1D:
+    case 0x1E:
         *family = sFamilyTrainer;
         return 4;
     }
     return 1;
+
 }
 
 // 1 when the id is not in the list yet.
@@ -2015,6 +2018,15 @@ stCharacterRoll::stCharacterRoll() : stMelee("stCharacterRoll", Stages::Characte
     m_numPanels = 0;
 }
 
+// The fill of the screen that the result requested is taken back when it goes away.
+inline SoraCharacterRoll::ResultInfo::~ResultInfo() {
+    if ((m_flags & 2) != 0) {
+        u8 id = m_fillId;
+        g_efScreen->cancelFill(reinterpret_cast<efScreenHandle*>(&id), 10.0f);
+        m_flags &= ~2;
+    }
+}
+
 stCharacterRoll::~stCharacterRoll() {
     if (m_panels != NULL) {
         delete[] m_panels;
@@ -2033,11 +2045,6 @@ stCharacterRoll::~stCharacterRoll() {
         m_cursor = NULL;
     }
     if (m_result != NULL) {
-        if ((m_result->m_flags & 2) != 0) {
-            u8 id = m_result->m_fillId;
-            fn_8005E3C8(g_efScreen, 10.0f, &id);
-            m_result->m_flags &= ~2;
-        }
         delete m_result;
         m_result = NULL;
     }
@@ -2053,7 +2060,7 @@ stCharacterRoll::~stCharacterRoll() {
     if (m_isSkip != 0) {
         m_isSkip = 0;
         u8 id = m_fillId;
-        fn_8005E3C8(g_efScreen, 10.0f, &id);
+        g_efScreen->cancelFill(reinterpret_cast<efScreenHandle*>(&id), 10.0f);
     }
 }
 
@@ -2074,14 +2081,25 @@ void stCharacterRoll::renderOpa() {
 
 // Fast forward on / off: the roll scrolls four times as fast and the screen is darkened.
 void stCharacterRoll::setSkipMode(bool isSkip) {
-    u32 skip = (isSkip != false);
-    if (static_cast<u32>(m_isSkip) != skip) {
+    // HYPOTHESIS: the flag is normalized to 1 before it is compared
+    if (isSkip) {
+        isSkip = true;
+    }
+    int skip = isSkip;
+    if (m_isSkip != skip) {
         m_isSkip = skip;
         if (skip == 0) {
             u8 id = m_fillId;
-            fn_8005E3C8(g_efScreen, 10.0f, &id);
+            g_efScreen->cancelFill(reinterpret_cast<efScreenHandle*>(&id), 10.0f);
         } else {
-            GXColor dark = {0, 0, 0, 0x80};
+            GXColor tmp;
+            tmp.b = 0;
+            tmp.g = 0;
+            tmp.r = 0;
+
+            tmp.a = 0x80;
+            GXColor dark = tmp;
+
             m_fillId = (u32)g_efScreen->requestFill(10.0f, 4, 0x80, &dark) >> 24;
         }
     }
@@ -2119,7 +2137,7 @@ void stCharacterRoll::setSceneCamera() {
             *reinterpret_cast<float*>(cam + 0xE0) = result.m_far;
             *reinterpret_cast<float*>(cam + 0xD0) = result.m_fovy * 0.017453292f;
             *reinterpret_cast<float*>(cam + 0xD4) = 1.0f;
-            fn_80018778(cam);
+            reinterpret_cast<gfCamera*>(cam)->calc();
         }
     }
 }
@@ -2128,26 +2146,21 @@ void stCharacterRoll::setSceneCamera() {
 #pragma dont_inline on
 void stCharacterRoll::ctrlScroll(float deltaFrame) {
     float pos = m_scroll.y;
-    int list = 5;
-    if (m_scrollKey[5] < pos) {
-        list = 4;
-        if (m_scrollKey[4] < pos) {
-            list = 3;
-            if (m_scrollKey[3] < pos) {
-                list = 2;
-                if (m_scrollKey[2] < pos) {
-                    list = 1;
-                }
-            }
+    int list;
+    for (list = 5; list > 1; list--) {
+        if (pos <= m_scrollKey[list]) {
+            break;
         }
     }
-    float start = m_scrollKey[list];
-    float speed = sScrollSpeed[list] + ((m_scroll.y - start) / (m_scrollKey[list + 1] - start)) *
-                                           (sScrollSpeed[list + 1] - sScrollSpeed[list]);
+
+    float rate = (m_scroll.y - m_scrollKey[list]) / (m_scrollKey[list + 1] - m_scrollKey[list]);
+    float speed = sScrollSpeed[list] + rate * (sScrollSpeed[list + 1] - sScrollSpeed[list]);
+
     m_scrollSpeed = speed;
     float step = deltaFrame * (speed * m_scrollScale);
     if (m_isSkip != 0) {
-        step = step * 4.0f;
+        step *= 4.0f;
+
     }
     m_scroll.y = m_scroll.y + step;
 }

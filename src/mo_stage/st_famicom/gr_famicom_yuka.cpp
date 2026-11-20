@@ -96,18 +96,18 @@ bool grFamicomYuka::setNode() {
     case 0x15:
         strcpy(m_ctrlName, "YukaBlockLoc");
         break;
-    case 0xF:
-        if (m_rotFlg == 0) {
-            strcpy(m_ctrlName, "YukaBlockLocSideB");
-        } else {
-            strcpy(m_ctrlName, "YukaBlockLocSideE");
-        }
-        break;
     case 0x1B:
         if (m_rotFlg == 0) {
             strcpy(m_ctrlName, "YukaBlockLocSideA");
         } else {
             strcpy(m_ctrlName, "YukaBlockLocSideD");
+        }
+        break;
+    case 0xF:
+        if (m_rotFlg == 0) {
+            strcpy(m_ctrlName, "YukaBlockLocSideB");
+        } else {
+            strcpy(m_ctrlName, "YukaBlockLocSideE");
         }
         break;
     case 0x1A:
@@ -118,17 +118,21 @@ bool grFamicomYuka::setNode() {
         }
         break;
     }
+    u32 i;
     u8 ctrl = m_ctrl;
-    for (u32 i = 0; i != ctrl; i++) {
-        char name[0x98];
+    for (i = 0; i != ctrl; i++) {
+        char name[0x80];
+        u32 no = i + 1;
         switch (m_ctrl) {
         case 0x15:
-            sprintf(name, "%s%.02d", m_ctrlName, i + 1);
+            sprintf(name, "%s%.02d", m_ctrlName, no);
             break;
         case 0xF:
         case 0x1A:
         case 0x1B:
-            sprintf(name, "%s%.02d", m_ctrlName, i + 1);
+            sprintf(name, "%s%d", m_ctrlName, no);
+
+
             break;
         default:
             strcpy(name, "");
@@ -214,8 +218,16 @@ void grFamicomYuka::updateYukaData(float deltaFrame) {
             vtx->m_timer = 0.0f;
         }
         switch (vtx->m_active) {
-        case 1: {
-            float rate = famicomClamp(1.0f - vtx->m_timer / 15.0f, 0.0f, 1.0f);
+        case 0:
+            break;        case 1: {
+            float rate = 1.0f - vtx->m_timer / 15.0f;
+            if (rate < 0.0f) {
+                rate = 0.0f;
+            }
+            if (rate > 1.0f) {
+                rate = 1.0f;
+            }
+
             vtx->m_offset.m_y = 5.0f - rate * 5.0f;
             if (vtx->m_offset.m_y < 0.0f) {
                 vtx->m_offset.m_y = 0.0f;
@@ -319,9 +331,9 @@ void grFamicomYuka::updateActor(float deltaFrame) {
     while (index != count) {
         grFamicomYukaActor* actor = getActor1(&m_actors, index);
         if (actor != NULL) {
-            s8 life = actor->m_life - 1;
-            actor->m_life = life;
-            if (life < 0) {
+            actor->m_life--;
+            if (actor->m_life < 0) {
+
                 actor->m_life = 0;
             }
             if (actor->m_life == 0) {
@@ -346,21 +358,20 @@ void grFamicomYuka::clearActor(nw4r::ut::LinkList<grFamicomYukaActor, 0>* list, 
         grFamicomYukaActor* actor = getActor1(&m_actors, index);
         if (actor != NULL) {
             list->Erase(actor);
-            if (actor != NULL) {
-                delete actor;
-            }
+            delete actor;
         }
     }
 }
 
-void grFamicomYuka::clearActorAll(nw4r::ut::LinkList<grFamicomYukaActor, 0>* list) {
+void grFamicomYuka::clearActorAll(
+nw4r::ut::LinkList<grFamicomYukaActor, 0>* list) {
     if (list != NULL) {
-        for (u32 count = list->GetSize(), i = 0; i != count; i++) {
+        u32 i;
+        u32 count = list->GetSize();
+        for (i = 0; i != count; i++) {
             grFamicomYukaActor* actor = &list->GetFront();
-            list->Erase(actor);
-            if (actor != NULL) {
-                delete actor;
-            }
+            list->Erase(list->GetBeginIter());
+            delete actor;
         }
     }
 }
@@ -369,20 +380,16 @@ grFamicomYukaActor* grFamicomYuka::getActor(nw4r::ut::LinkList<grFamicomYukaActo
     if (list == NULL) {
         return NULL;
     }
-    if (status != NULL) {
-        u32 count = list->GetSize();
-        grFamicomYukaActor* actor = &list->GetFront();
-        while (true) {
-            if (count == 0) {
-                return NULL;
-            }
-            if (actor->m_status == status) {
-                break;
-            }
-            actor = static_cast<grFamicomYukaActor*>(actor->GetNext());
-            count--;
+    if (status == NULL) {
+        return NULL;
+    }
+    u32 count = list->GetSize();
+    grFamicomYukaActor* actor = &list->GetFront();
+    for (u32 i = 0; i != count; i++) {
+        if (actor->m_status == status) {
+            return actor;
         }
-        return actor;
+        actor = static_cast<grFamicomYukaActor*>(actor->GetNext());
     }
     return NULL;
 }
@@ -392,20 +399,16 @@ grFamicomYukaActor* grFamicomYuka::getActor1(nw4r::ut::LinkList<grFamicomYukaAct
         return NULL;
     }
     u32 count = list->GetSize();
-    int i = 0;
     grFamicomYukaActor* actor = &list->GetFront();
-    while (true) {
-        if (count == 0) {
-            return NULL;
-        }
+    for (u32 i = 0; i != count; i++) {
         if (i == index) {
-            break;
+
+            return actor;
         }
         actor = static_cast<grFamicomYukaActor*>(actor->GetNext());
-        i++;
-        count--;
     }
-    return actor;
+    return NULL;
+
 }
 
 // A fighter bumps into the floor from below: the nearest corner is pushed up, the fighter is remembered, the stage gets
