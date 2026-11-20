@@ -136,15 +136,15 @@ void ftKirbyStatusUniqProcessSpecialNEat::exitStatus(soModuleAccesser* moduleAcc
 
 // HYPOTHESIS: the jump into the inhale: the horizontal speed follows the current speed and the stick, the vertical one the
 // jump parameters.
-// TODO(match): 99.77%. Left: the original adds and multiplies with the saved float (stick acceleration, rise) as the
-// SECOND operand (`fadds f0, f0, f30`; ours `fadds f0, f30, f0`) and rounds the x sum (`frsp`). Tried: operand order in
-// source, compound assignments, a double cast, separate rise variables (no change or worse).
+// The carried part of the speed is named before the stick or rise is added: in one expression MWCC puts the saved
+// addend first (`fadds f0, f30, f0`), and a compound `*=` rounds the product (`frsp`).
 void ftKirbyStatusUniqProcessSpecialNEat::initInhaleJump(soModuleAccesser* moduleAccesser) {
     Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
     float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa3, 0);
     float accel = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc4, 0);
     accel *= moduleAccesser->getControllerModule().getStickX();
-    speed.m_x = speed.m_x * soValueAccesser::getConstantFloat(moduleAccesser, 0xbc6, 0) + accel;
+    float carried = speed.m_x * soValueAccesser::getConstantFloat(moduleAccesser, 0xbc6, 0);
+    speed.m_x = carried + accel;
     speed.m_x *= scale;
     float speedMax = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc7, 0);
     if (__fabs(speed.m_x) > speedMax) {
@@ -154,15 +154,17 @@ void ftKirbyStatusUniqProcessSpecialNEat::initInhaleJump(soModuleAccesser* modul
         speed.m_x = speedMax;
     }
     if (moduleAccesser->getWorkManageModule().isFlag(0x2200000a)) {
-        float rise = soValueAccesser::getConstantFloat(moduleAccesser, 0xd7e, 0);
-        rise = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc5, 0) * rise;
-        speed.m_y = speed.m_y * soValueAccesser::getConstantFloat(moduleAccesser, 0xc46, 0) + rise;
+        float rise = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc5, 0) * soValueAccesser::getConstantFloat(moduleAccesser, 0xd7e, 0);
+        float carried = speed.m_y * soValueAccesser::getConstantFloat(moduleAccesser, 0xc46, 0);
+        speed.m_y = carried + rise;
     } else if (moduleAccesser->getWorkManageModule().isFlag(0x22000006)) {
         float rise = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc8, 0);
-        speed.m_y = speed.m_y * soValueAccesser::getConstantFloat(moduleAccesser, 0xc46, 0) + rise;
+        float carried = speed.m_y * soValueAccesser::getConstantFloat(moduleAccesser, 0xc46, 0);
+        speed.m_y = carried + rise;
     } else {
         float rise = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc5, 0);
-        speed.m_y = speed.m_y * soValueAccesser::getConstantFloat(moduleAccesser, 0xc46, 0) + rise;
+        float carried = speed.m_y * soValueAccesser::getConstantFloat(moduleAccesser, 0xc46, 0);
+        speed.m_y = carried + rise;
     }
     speed.m_y *= scale;
     ftKineticEnergyController& controller =
