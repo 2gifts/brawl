@@ -16,5 +16,9 @@ public:
 
     soInstanceUnit();
     ~soInstanceUnit();
+#ifdef FT_EVENT_UNIT_INSTANCE_ASSIGN
+    // Opt-in: the Kirby copy ability module owns the out-of-line record assignment.
+    soInstanceUnit& operator=(const soInstanceUnit& other) __attribute__((never_inline));
+#endif
 };
 
