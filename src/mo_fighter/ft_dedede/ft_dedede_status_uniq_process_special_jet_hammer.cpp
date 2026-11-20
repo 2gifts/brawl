@@ -36,9 +36,6 @@ static inline void sendLinkEvent(soModuleAccesser* moduleAccesser, const soLinkE
 }
 
 void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* moduleAccesser) {
-    // MATCH-ONLY: declared at function scope so the saved-register numbering (energy r29, reset mode r28, work module r30)
-    // follows the native allocation.
-    soWorkManageModule* chargeWork;
     int status = moduleAccesser->getStatusModule().getStatusKind();
     switch (status) {
     case 0x115: {
@@ -75,7 +72,7 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
     }
     case 0x137:
         if (!moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
-            chargeWork = &moduleAccesser->getWorkManageModule();
+            soWorkManageModule* chargeWork = &moduleAccesser->getWorkManageModule();
             float powerScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC1, 0);
             float charge = static_cast<float>(chargeWork->getInt(0x20000001));
             float powerAdd = charge * powerScale;
