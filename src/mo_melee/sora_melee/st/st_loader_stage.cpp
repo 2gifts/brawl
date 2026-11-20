@@ -19,10 +19,6 @@
 #include <types.h>
 
 extern "C" {
-bool fn_27_23ABA0(stLoader* loader);
-bool fn_27_23AC10(stLoader* loader);
-void fn_27_23AC24(stLoader* loader);
-void fn_27_23AC30(stLoader* loader);
 Stage* fn_27_221A24(srStageKind stageKind);
 u32 fn_80015530(gfArchive* archive, const char* path, void* buffer, int unk);
 void fn_8005EA4C(ecMgr* mgr, int resourceId, void* data, u32 size, int unk1, int unk2);
@@ -386,7 +382,7 @@ void stLoaderStage::processBegin() {
 }
 
 void stLoaderStage::entryEntity() {
-    if (fn_27_23AC10(this) != true && m_stage == nullptr) {
+    if (isEntity() != true && m_stage == nullptr) {
         g_GameGlobal->m_stageData->m_motionRatio = 1.0f;
         g_GameGlobal->m_stageData->m_motionSubRatio = 1.0f;
         m_stage = fn_27_221A24((srStageKind)getStageKind(m_globalModeMelee));
@@ -399,7 +395,7 @@ void stLoaderStage::entryEntity() {
         static_cast<stCommonGimmick*>(m_stage)->setupItemSheet();
         m_stage->createObj();
         m_stage->unk198 = false;
-        fn_27_23AC24(this);
+        stLoader::entryEntity();
         if (lbl_8049DEC8) {
             lbl_8049DEC8[0x5C] = true;
         }
@@ -416,21 +412,21 @@ void stLoaderStage::entryEntity() {
 }
 
 void stLoaderStage::entryEntitySuddenDeath() {
-    if (fn_27_23AC10(this) != true && m_stage == nullptr) {
+    if (isEntity() != true && m_stage == nullptr) {
         entryEntity();
         m_stage->unk198 = true;
     }
 }
 
 void stLoaderStage::removeEntity() {
-    if (fn_27_23AC10(this) && m_stage) {
+    if (isEntity() && m_stage) {
         disablePause();
         IfSmashAppearTask* appearTask = m_stage->getAppearTask();
         if (appearTask) {
             appearTask->removeInfo();
         }
         m_stage->exit();
-        fn_27_23AC30(this);
+        stLoader::removeEntity();
         m_stage = nullptr;
         g_GameGlobal->m_stageData->m_motionRatio = 1.0f;
         g_GameGlobal->m_stageData->m_motionSubRatio = 1.0f;
@@ -476,5 +472,5 @@ bool stLoaderStage::isLoad() {
     {
         return false;
     }
-    return fn_27_23ABA0(this);
+    return stLoader::isLoad();
 }

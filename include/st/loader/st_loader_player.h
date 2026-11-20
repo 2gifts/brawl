@@ -45,5 +45,9 @@ public:
     virtual void unlockEntity();
     virtual bool isEntry();
     virtual gmPlayerInitData* getWatchPlayerInitData();
+    // TODO: clean up - placeholder names for the non-virtual helpers.
+    void advanceLoadedState();  // sora_melee 0x23E710
+    bool checkPokemonTrainer(); // sora_melee 0x23E728
+    bool isLoading();           // sora_melee 0x23E798
 };
 static_assert(sizeof(stLoaderPlayer) == 0x60, "Class is wrong size!");

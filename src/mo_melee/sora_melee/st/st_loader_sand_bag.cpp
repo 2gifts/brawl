@@ -6,7 +6,6 @@
 
 // HYPOTHESIS: stLoader::isEntity (sora_melee 0x23AC10, map) and IfPlayer::appear/disappear (main.dol, map); their
 // names belong to other units, so they stay stand-ins here.
-extern "C" bool fn_27_23AC10(stLoader* loader);
 extern "C" void fn_800E08A0(IfPlayer* player, stLoaderSandBagAppearInfo* info, u8 unk);
 extern "C" void fn_800E1384(IfPlayer* player);
 
@@ -47,7 +46,7 @@ void stLoaderSandBag::processBegin() {
 }
 
 void stLoaderSandBag::entryEntity() {
-    if (fn_27_23AC10(this) == true) {
+    if (isEntity() == true) {
         return;
     }
     if (isLoad()) {
@@ -93,7 +92,7 @@ void stLoaderSandBag::entryInfo(bool) {
 }
 
 void stLoaderSandBag::removeEntity() {
-    if (itManager::getInstance() != NULL && m_item != NULL && isLoad() && fn_27_23AC10(this)) {
+    if (itManager::getInstance() != NULL && m_item != NULL && isLoad() && isEntity()) {
         if (unk64 == true && g_IfMngr != NULL) {
             fn_800E1384(g_IfMngr->m_ifPlayers[m_playerId]);
         }

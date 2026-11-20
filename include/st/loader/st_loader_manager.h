@@ -34,6 +34,7 @@ public:
     bool sqSetupSync(bool wait);
     stLoaderManager();
     static void create();
+    static stLoader* createLoader(u32 kind);
 };
 static_assert(sizeof(stLoaderManager) == 0x54, "Class is wrong size!");
 

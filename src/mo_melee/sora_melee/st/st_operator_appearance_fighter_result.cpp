@@ -5,7 +5,6 @@
 #include <st/loader/st_loader_player.h>
 
 // stLoader::isEntity (the map name); src/mo_melee/sora_melee/st/st_loader_sand_bag.cpp calls it by this stand-in name.
-extern "C" bool fn_27_23AC10(stLoader* loader);
 
 stOperatorAppearanceFighterResult::stOperatorAppearanceFighterResult() {
     unk1B5 = false;
@@ -44,7 +43,7 @@ void stOperatorAppearanceFighterResult::processBegin() {
         if (!static_cast<stLoaderPlayer*>(unk74[0])->isLoad()) {
             return;
         }
-        if (!fn_27_23AC10(static_cast<stLoaderPlayer*>(unk74[0]))) {
+        if (!static_cast<stLoaderPlayer*>(unk74[0])->isEntity()) {
             static_cast<stLoaderPlayer*>(unk74[0])->entryEntityResult();
         }
     }
@@ -55,7 +54,7 @@ void stOperatorAppearanceFighterResult::processBegin() {
         if (!static_cast<stLoaderPlayer*>(unk74[1])->isLoad()) {
             return;
         }
-        if (!fn_27_23AC10(static_cast<stLoaderPlayer*>(unk74[1]))) {
+        if (!static_cast<stLoaderPlayer*>(unk74[1])->isEntity()) {
             static_cast<stLoaderPlayer*>(unk74[1])->entryEntityResult();
         }
     }
@@ -66,7 +65,7 @@ void stOperatorAppearanceFighterResult::processBegin() {
         if (!static_cast<stLoaderPlayer*>(unk74[2])->isLoad()) {
             return;
         }
-        if (!fn_27_23AC10(static_cast<stLoaderPlayer*>(unk74[2]))) {
+        if (!static_cast<stLoaderPlayer*>(unk74[2])->isEntity()) {
             static_cast<stLoaderPlayer*>(unk74[2])->entryEntityResult();
         }
     }
@@ -77,7 +76,7 @@ void stOperatorAppearanceFighterResult::processBegin() {
         if (!static_cast<stLoaderPlayer*>(unk74[3])->isLoad()) {
             return;
         }
-        if (!fn_27_23AC10(static_cast<stLoaderPlayer*>(unk74[3]))) {
+        if (!static_cast<stLoaderPlayer*>(unk74[3])->isEntity()) {
             static_cast<stLoaderPlayer*>(unk74[3])->entryEntityResult();
         }
     }
