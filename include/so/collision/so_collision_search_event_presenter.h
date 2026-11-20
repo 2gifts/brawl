@@ -33,7 +33,7 @@ public:
 #ifdef WN_EM_SIMPLE_UNIT
     ~soCollisionSearchEventObserver();
 #endif
-#if defined(EM_ENEMY_BUILDER) || defined(SO_COLLISION_SEARCH_OBSERVER_INLINE) || defined(SO_COLLISION_SEARCH_OBSERVER_INLINE_CTOR)
+#if defined(EM_ENEMY_BUILDER) || defined(SO_COLLISION_SEARCH_OBSERVER_INLINE) || defined(SO_COLLISION_SEARCH_OBSERVER_INLINE_CTOR) || defined(FT_FIGHTER_FIELDS)
     // The Enemy constructor and Snake's C4 (opt-in SO_COLLISION_SEARCH_OBSERVER_INLINE) expand it; Snake's mine
     // (SO_COLLISION_SEARCH_OBSERVER_INLINE_CTOR) expands only this constructor, without the weak default check below.
     soCollisionSearchEventObserver(short manageId, s8 p2) : soEventObserver<soCollisionSearchEventObserver>(0x11) { initialize(manageId, p2); }

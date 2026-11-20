@@ -1331,6 +1331,21 @@ public:
         };
     };
 
+#ifdef FT_FIGHTER_FIELDS
+    enum ScalingKind {
+        Scaling_Kind_None = -0x1,
+        Scaling_Kind_Status = 0x0,
+        Scaling_Kind_Kinoko = 0x1,
+        Scaling_Kind_Thunder = 0x2,
+    };
+
+    enum ScalingType {
+        Scaling_Type_None = -0x1,
+        Scaling_Type_Big = 0x0,
+        Scaling_Type_Small = 0x1,
+    };
+#endif
+
     struct Scaling {
         enum Status {
             Status_None = 0x0,
@@ -1383,15 +1398,23 @@ public:
         struct {
 #ifdef FT_FIGHTER_FIELDS
             ftKind m_kind; // Fighter::attachItemHoldAnim reads the fighter kind here.
-            u8 unk114[8];
+            float unk114; // HYPOTHESIS: greatest attack collision power this frame.
+            int unk118; // HYPOTHESIS: greatest attack collision hitstop frame this frame.
             float unk11C; // HYPOTHESIS: accumulated shield damage from this frame's collisions.
             float unk120; // HYPOTHESIS: greatest shield collision power this frame.
             float unk124; // HYPOTHESIS: direction of the greatest shield collision.
-            u8 unk128[0x10];
+            float unk128; // HYPOTHESIS: attack collision rebound power.
+            float unk12C; // HYPOTHESIS: attack collision rebound direction.
+            float unk130; // HYPOTHESIS: shield collision attack power.
+            float unk134; // HYPOTHESIS: shield collision attack direction.
 #else
             u8 unk110[0x28];
 #endif
+#ifdef FT_FIGHTER_FIELDS
+            u8 unk138_0 : 1; // HYPOTHESIS: set when attack collides with a shield that blocks it
+#else
             u8 : 1;
+#endif
             u8 unk138_1 : 1; // HYPOTHESIS: set by the reflector search/collision events
             u8 unk138_2 : 1; // HYPOTHESIS: set by the reflector collision event
             u8 unk138_loupe : 1; // HYPOTHESIS: setLoupe
@@ -1401,7 +1424,8 @@ public:
             u8 unk138_7 : 1;
 #ifdef FT_FIGHTER_FIELDS
             u8 unk139_0 : 1; // HYPOTHESIS: enables the damage rumble notification.
-            u8 : 7;
+            u8 unk139_1 : 1; // HYPOTHESIS: skips ground crush check for one frame in checkDead.
+            u8 : 6;
             u8 unk13A[2];
 #else
             u8 unk139[3];
@@ -1644,10 +1668,18 @@ public:
     void setCurry(bool setStatus, int unk2);
     void setHammer(bool setStatus, int unk2);
     void setSuperStar(bool setStatus, int duration, bool);
+#ifdef FT_FIGHTER_FIELDS
+    void setFlower(bool setStatus, float rate, float size, bool unk4, bool unk5);
+#else
     void setFlower(bool setStatus, float rate, float size, int unk4, bool unk5);
+#endif
     void setSlow(bool setStatus, int slowStrength, int duration, bool useTimerEffect);
     void setHeartSwap(int givingPlayerEntryID, int givingPlayerEntryId, bool setStatus);
+#ifdef FT_FIGHTER_FIELDS
+    void startScaling(ScalingKind, ScalingType);
+#else
     void startScaling(Scaling::Kind, Scaling::Type);
+#endif
     void restoreScaling();
     void warp(Vec3f* pos, float lr, u32 showEffect);
     void setupEquipment();
@@ -1655,6 +1687,8 @@ public:
     void setAvailableFinal(bool isDiscretion);
     // HYPOTHESIS: zoom kind and interpolation argument follow the camera module call.
     void setZoom(bool enable, short kind, float frames);
+    void dropDragoonAll();
+    void createModel(u32 resId, void* unk2);
 #endif
 };
 static_assert(sizeof(Fighter) == 404, "Class is wrong size!");

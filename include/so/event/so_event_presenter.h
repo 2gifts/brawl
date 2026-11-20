@@ -460,7 +460,19 @@ public:
     // original's standalone soAnimCmdInterpreter constructor (it_item.cpp, -O4) and the fighters' copies (-O2): exact.
     // MATCH-ONLY: the tag type selects this variant; the original has one constructor per presenter user.
     soEventPresenter(s16 manageId, s16 unitId, soEventPresenterLocalStoreTag) : m_manageID(manageId), m_unitID(unitId), m_obsrvrList(nullptr) {
-#ifdef FT_POKETRAINER_PRESENTER_CHECK_MANAGE_ID
+#if defined(FT_FIGHTER_FIELDS)
+        if (m_manageID > 0) {
+            if (m_manageID > -1 && checkManageId()) {
+                if (soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 0) {
+                    m_obsrvrList = nullptr;
+                } else {
+                    soInstanceManagerFullProperty<T*>* result = m_obsrvrList;
+                    getObserverListHelper2Local(result);
+                    m_obsrvrList = result;
+                }
+            }
+        }
+#elif defined(FT_POKETRAINER_PRESENTER_CHECK_MANAGE_ID)
         // The Pokemon Trainer unit keeps the older spelling of the lookup: instantiating lookupObserverList there stops
         // MWCC on an internal compiler error (CTemplateTools.c line 256).
         if (m_manageID > 0) getObserverListHelperLocal(m_obsrvrList);

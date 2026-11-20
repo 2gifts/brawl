@@ -81,7 +81,11 @@ public:
     virtual void clearLog() = 0;
     virtual s32 getLogNum() = 0;
     virtual void setLogActive(bool) = 0;
+#ifdef FT_FIGHTER_FIELDS
+    virtual void startClatter(float, float, float, u8, s8, u32 index, bool) = 0;
+#else
     virtual void startClatter(float, float, float, u8, u8, u32 index, bool) = 0;
+#endif
     virtual void setClatterTime(float clatterTime, u32 index) = 0;
     virtual void addClatterTime(float clatterTime, u32 index) = 0;
     virtual float getClatterTime(u32 index) = 0;
@@ -118,7 +122,11 @@ public:
     virtual float getSubStickDir();
     virtual bool isSubStickSide();
 
+#ifdef FT_FIGHTER_FIELDS
+    virtual void startClatter(float, float, float, u8, s8, u32 index, bool);
+#else
     virtual void startClatter(float, float, float, u8, u8, u32 index, bool);
+#endif
     virtual void setClatterTime(float clatterTime, u32 index);
     virtual void addClatterTime(float clatterTime, u32 index);
     virtual float getClatterTime(u32 index);

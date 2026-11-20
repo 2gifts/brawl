@@ -180,7 +180,11 @@ static_assert(sizeof(ftOutsideEventObserver) == 12, "Class is wrong size!");
 
 // The event lookup of the presenter constructor is inlined at every use in the original (list stored through a local).
 inline ftOutsideEventPresenter::ftOutsideEventPresenter(s16 manageId, int entryId) :
+#ifdef FT_FIGHTER_FIELDS
+    soEventPresenter<ftOutsideEventObserver>(manageId, 0, soEventPresenterLocalStoreTag()), m_entryId(entryId) { }
+#else
     soEventPresenter<ftOutsideEventObserver>(manageId, 0, true), m_entryId(entryId) { }
+#endif
 
 class ftManagerAbstract : public soNull, public gfTask, public ftOutsideEventObserver, public soDisposeInstanceEventObserver, public soLogEventObserver {
     // Note: Done so that vtable placement is proper
@@ -226,6 +230,10 @@ public:
     // Inline accessors (the REL tests these flags through the normalizing bool conversion).
     bool isStamina() const { return m_isStamina; }
     bool isGameSet() const { return m_isGameSet; }
+#ifdef FT_FIGHTER_FIELDS
+    bool isUnk6c_80() const { return static_cast<u8>(unk6c_80); }
+    bool isGameStarted() const { return static_cast<u8>(m_isGameStarted); }
+#endif
     int m_finalStatus;
     int m_finalEntryId;
     int m_noDiscretionFinalCount;

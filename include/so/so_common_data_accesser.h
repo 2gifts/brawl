@@ -37,7 +37,13 @@ struct soVisibilityData {
 struct ftVisibilityData : public soVisibilityData { };
 struct wnVisibilityData : public soVisibilityData { };
 
-struct soStatusData { };
+struct soStatusData {
+#ifdef FT_FIGHTER_FIELDS
+    u32 unk0[3];
+    s32 m_situationKind : 4; // HYPOTHESIS: status situation kind read by Fighter::notifyEventChangeStatus
+    u32 unkC_rest : 28;
+#endif
+};
 struct ftStatusData : public soStatusData { };
 struct wnStatusData : public soStatusData { };
 
@@ -704,6 +710,9 @@ public:
     float getParamCommonFloat(u32 p1, u32 p2);
     s32 getParamCommonInt(u32 p1, u32 p2);
     s32* getParamCommonIndefinite(u32 p1, u32 p2);
+#ifdef FT_FIGHTER_FIELDS
+    nw4r::g3d::ResFileData* getResFileTex() const { return resFileTex; }
+#endif
 };
 
 extern soCommonDataAccesser g_soCommonDataAccesser;

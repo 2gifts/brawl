@@ -30,7 +30,11 @@ public:
 
 class soDamageEventObserver : public soEventObserver<soDamageEventObserver> {
 public:
+#ifdef FT_FIGHTER_FIELDS
+    ~soDamageEventObserver() { }
+#else
     ~soDamageEventObserver();
+#endif
     soDamageEventObserver() : soEventObserver<soDamageEventObserver>(0x6) {};
     soDamageEventObserver(short unitID) : soEventObserver<soDamageEventObserver>(unitID) {};
 #ifdef WN_EM_SIMPLE_UNIT

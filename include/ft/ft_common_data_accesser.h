@@ -34,7 +34,8 @@ struct ftData {
     void* subactionSfxScripts;   // 0x38: threads 3 and 7
     void* subactionOtherScripts; // 0x3C: threads 4 and 8
 #ifdef FT_FIGHTER_FIELDS
-    u8 unk40[0xC];
+    u8 unk40[0x8];
+    void* unk48; // HYPOTHESIS: model extra data passed to soModelModule::constructInstance
     // HYPOTHESIS: node sets indexed by item hold kind, used by Fighter::attachItemHoldAnim.
     int* itemHoldNodeSets;
 #else
@@ -51,6 +52,14 @@ struct ftData {
             struct wnSimpleData** unk64;
 #endif
         };
+#ifdef FT_FIGHTER_FIELDS
+        struct {
+            u8 unk58_ft[0x14];
+            void* unk6C; // HYPOTHESIS: physics module setup data
+            void* unk70; // HYPOTHESIS: physics module setup data
+            u32 unk74;   // HYPOTHESIS: model constructInstance flags
+        };
+#endif
     };
     void* extendParam[6];
 #ifdef FT_DATA_SIMPLE_ARTICLE_DATA
@@ -121,8 +130,23 @@ struct ftDataCommon {
     ftEffectCommonData* effectCommonData;
     ftEffectScreenData* effectScreenData;
     ftIkData* ikData;
+#ifdef FT_FIGHTER_FIELDS
+    // HYPOTHESIS: throw-item effect entry and table read by Fighter::notifyThrowItem.
+    struct ThrowEffectEntry {
+        EfID ef1;
+        float yRot;
+        EfID ef2;
+    };
+    struct ThrowEffectTable {
+        ThrowEffectEntry* entries;
+        s32 count;
+    };
+    ThrowEffectTable* throwEffectTable;
+#endif
 };
+#ifndef FT_FIGHTER_FIELDS
 static_assert(sizeof(ftDataCommon) == 0x58, "Class is wrong size!");
+#endif
 
 struct ftCommonData {
     ftDataCommon* dataCommon;
@@ -207,6 +231,42 @@ struct wnCaptainFinalBgData;
 
 // HYPOTHESIS: leading flag word of a common fighter status's data (the bit with mask 0x8 marks statuses that cannot be trodden on).
 struct ftStatusFlagData {
+#ifdef FT_FIGHTER_FIELDS
+    u32 unk0_0 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus initializes attacker clearFrame when set
+    u32 unk0_1 : 2; // HYPOTHESIS: Fighter::isTreadPassive rejects status when == 2
+    u32 : 1;
+    u32 unk0_4 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus passes !unk0_4 to setCheckCatch
+    u32 unk0_5 : 1; // HYPOTHESIS: in these statuses Fighter::processUpdate sets the ground passable-check from the stick
+    u32 : 20;
+    u32 unk0_26 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus resets physics when clear
+    u32 : 1;
+    u32 noTread : 1;
+    u32 : 1;
+    u32 unk0_30 : 1; // HYPOTHESIS: Fighter::isEnableWarp rejects status when set
+    u32 : 1;
+    u32 unk4_0 : 1; // HYPOTHESIS: Fighter::isHeartSwapEnableCondition rejects status when set
+    u32 unk4_1 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus sets work flag 0x12000032
+    u32 unk4_2 : 1; // HYPOTHESIS: Fighter::setSuperStar rejects status when set
+    u32 : 2;
+    u32 unk4_5 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus sets work flag 0x12000031
+    u32 unk4_6 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus sets work flag 0x12000030
+    u32 unk4_7 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus applies stick-LR posture update
+    u32 unk4_8 : 1; // HYPOTHESIS: in these statuses Fighter::processUpdate skips the shield regeneration
+    u32 : 1;
+    u32 unk4_10 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus skips cursor/nameCursor update when set
+    u32 unk4_11 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus passes to soSlopeModule::setTopAngleUnlimit
+    u32 unk4_12 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus skips camera reset when set
+    u32 unk4_13 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus sets nameCursor/flag 0x1200001c
+    u32 unk4_14 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus passes !unk4_14 to setConsiderGroundFriction
+    u32 unk4_15 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus sets work flag 0x12000007
+    u32 unk4_16 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus controls setTransMoveSpeedNoScale
+    u32 unk4_17 : 1; // HYPOTHESIS: Fighter::notifyEventChangeStatus sends link event 0x454 when set
+    u32 unk4_18 : 1; // HYPOTHESIS: in these statuses Fighter::checkTransitionStatus consults the stop module
+    u32 : 13;
+    bool isUnk0_4() const { return unk0_4; }
+    bool isUnk4_13() const { return unk4_13; }
+    bool isUnk4_14() const { return unk4_14; }
+#else
     u32 : 5;
     u32 unk0_5 : 1; // HYPOTHESIS: in these statuses Fighter::processUpdate sets the ground cloud-through from the stick
     u32 : 22;
@@ -217,6 +277,7 @@ struct ftStatusFlagData {
     u32 : 9;
     u32 unk4_18 : 1; // HYPOTHESIS: in these statuses Fighter::checkTransitionStatus consults the stop module
     u32 : 13;
+#endif
 };
 
 class ftCommonDataAccesser {

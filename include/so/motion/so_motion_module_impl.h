@@ -118,7 +118,11 @@ public:
     virtual Vec3f get2ndTransMoveSpeed();
     virtual Vec3f getBlendTransMoveSpeed();
     virtual int getNum();
+#ifdef FT_FIGHTER_FIELDS
+    virtual void setShareAdjustNode(int, float);
+#else
     virtual void setShareAdjustNode(float, void*);
+#endif
     virtual void setPartialCancelNodeData(void*);
     virtual void enablePartialCancelNode(bool);
     virtual Vec3f getNodeRotate(int nodeId);
@@ -298,7 +302,11 @@ public:
     virtual Vec3f get2ndTransMoveSpeed();
     virtual Vec3f getBlendTransMoveSpeed();
     virtual int getNum();
+#ifdef FT_FIGHTER_FIELDS
+    virtual void setShareAdjustNode(int, float);
+#else
     virtual void setShareAdjustNode(float, void*);
+#endif
     virtual void setPartialCancelNodeData(void*);
     virtual void enablePartialCancelNode(bool);
     virtual Vec3f getNodeRotate(int nodeId);

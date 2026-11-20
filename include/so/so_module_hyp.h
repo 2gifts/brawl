@@ -20,7 +20,11 @@ struct soPhysicsModuleHyp {
     virtual void unk0C();
     virtual void unk10();
     virtual void unk14();
+#ifdef FT_FIGHTER_FIELDS
+    virtual void unk18(u32, void*, void*, int, int, void*, u8, int);
+#else
     virtual void unk18();
+#endif
     virtual void unk1C();
     virtual void unk20();
     virtual void unk24();
@@ -61,7 +65,7 @@ struct soPhysicsModuleHyp {
     virtual void unk90();
     // HYPOTHESIS: resets the physics state when a fighter starts (Sonic's onStart).
     virtual void unk94();
-#ifdef SO_LINK_PHYSICS_SLOTS
+#if defined(SO_LINK_PHYSICS_SLOTS) || defined(FT_FIGHTER_FIELDS)
     // Slots 0x98..0xD4 are unnamed here. 0xD8 is the u8 argument of soLinkModuleImpl::setConstraint2ndWind.
     virtual void unk98();
     virtual void unk9C();
@@ -112,9 +116,15 @@ struct soCaptureModuleHyp {
     virtual void unk08();
     virtual void unk0C();
     virtual void unk10();
+#ifdef FT_FIGHTER_FIELDS
+    virtual void unk14(int, int, float);
+    virtual void unk18();
+    virtual bool unk1C();
+#else
     virtual void unk14();
     virtual void unk18();
     virtual void unk1C();
+#endif
     virtual void unk20();
     virtual void unk24();
     virtual void unk28();
@@ -139,7 +149,11 @@ struct soCatchModuleHyp {
     virtual void unk08();
     virtual void activate();
     virtual void deactivate();
+#ifdef FT_FIGHTER_FIELDS
+    virtual void unk14(int, int, float);
+#else
     virtual void unk14();
+#endif
     virtual void initInfo();
     virtual void unk1C();
     virtual void unk20();
@@ -249,6 +263,36 @@ struct soGlowModuleHyp {
     virtual void unk08();
     virtual void unk0C();
     virtual void unk10();
+#ifdef FT_FIGHTER_FIELDS
+    virtual void unk14();
+    virtual void unk18();
+    virtual void unk1C();
+    virtual bool unk20();
+    virtual void unk24();
+    virtual void unk28();
+    virtual void unk2C();
+    virtual void unk30();
+    virtual void unk34();
+    virtual void unk38();
+    virtual void unk3C();
+    virtual void unk40();
+    virtual void unk44();
+    virtual void unk48();
+    virtual void unk4C();
+    virtual void unk50();
+    virtual void unk54(int);
+    virtual void unk58();
+    virtual void unk5C();
+    virtual void unk60();
+    virtual void unk64();
+    virtual void unk68();
+    virtual void unk6C();
+    virtual void unk70();
+    virtual void unk74();
+    virtual void unk78();
+    virtual void unk7C();
+    virtual void unk80(int, int, soStatusData*, soModuleAccesser*);
+#endif
 };
 
 // HYPOTHESIS: the debug module.

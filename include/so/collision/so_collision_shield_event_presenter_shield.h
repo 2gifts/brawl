@@ -14,7 +14,11 @@ class soCollisionShieldEventObserver : public soEventObserver<soCollisionShieldE
 public:
     soCollisionShieldEventObserver() : soEventObserver<soCollisionShieldEventObserver>(0xe) {};
     soCollisionShieldEventObserver(short unitID) : soEventObserver<soCollisionShieldEventObserver>(unitID) {};
+#ifdef FT_FIGHTER_FIELDS
+    soCollisionShieldEventObserver(short manageId, s8 p2) : soEventObserver<soCollisionShieldEventObserver>(0xe) { initialize(manageId, p2); }
+#else
     soCollisionShieldEventObserver(short, s8);
+#endif
 
 #ifdef FT_MODULE_BUILDER
     virtual void addObserver(short param1, s8 param2) { addObserverSub(param1, this, param2); } // BYTES: the owning unit's weak copy; the #else units call the sora_melee instance
