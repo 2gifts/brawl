@@ -112,6 +112,30 @@ extern "C" u64 fn_80052250();
 extern void* lbl_805A02A0;
 extern const muWifiErrorMsg lbl_80408488[];
 
+extern u8 lbl_805A02A8;
+
+// Inlined into create.
+inline muWifiInterfaceTask::muWifiInterfaceTask() : gfTask("muWifiIterface", Category_Menu, 2, 6, true) {
+    unk40 = 1;
+    unk44Data = 0;
+    unk48 = 0;
+    unkFCB_b7 = false;
+    m_appNetworkError[0] = 0;
+    m_appNetworkError[1] = 0;
+    unk1050Data = 70;
+    unk2C_b1 = false;
+    unk1052Data = 0;
+    netReport("muWifiInterfaceTaskのコンストラクタが呼ばれました。\n");
+}
+
+muWifiInterfaceTask* muWifiInterfaceTask::create() {
+    g_muWifiInterfaceTask = new (Heaps::Network) muWifiInterfaceTask();
+    lbl_805A02A0 = g_muWifiInterfaceTask;
+    netReport("muWifiInterfaceTaskを作りました。\n");
+    lbl_805A02A8 = 0;
+    return g_muWifiInterfaceTask;
+}
+
 void muWifiInterfaceTask::destroy() {
     if (g_muWifiInterfaceTask != NULL) {
         fn_80146574(&g_Network);
@@ -1738,7 +1762,6 @@ void muWifiInterfaceTask::sendAIDInfo(bool flag, u8 mask) {
     fn_80145B98(lbl_805A03A8, mask);
 }
 
-extern u8 lbl_805A02A8;
 
 // HYPOTHESIS: updatePreloadCharacterStatus stores its argument in a global status byte; stays under its fn_ name.
 extern "C" void fn_800DA0B4(u8 status) {

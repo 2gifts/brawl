@@ -1,6 +1,7 @@
 // muAdvSavePoint: the menu of a save point of the adventure mode. Not written yet.
 #include <types.h>
 #include <mu/mu_adv_savepoint.h>
+#include <mu/mu_msg_font_mngr.h>
 #include <if/if_adv_radar.h>
 #include <if/if_adv_mngr.h>
 #include <snd/snd_system.h>
@@ -12,11 +13,6 @@
 
 // muMenuController::main (the map name); include/mu/mu_menu_controller.h calls it by this stand-in name.
 extern "C" void fn_800B9984(muMenuController* controller);
-// MuMsgFontMngr::loadFont (the map name); src/sora/if/if_player.cpp calls it by this stand-in name.
-extern "C" u8 fn_800B8648(void* mgr, u32 fontSetting, int p2, int p3);
-// MuMsgFontMngr::unloadFont (the map name); src/sora/if/if_player.cpp calls it by this stand-in name.
-extern "C" void fn_800B881C(void* mgr, u8 fontId);
-extern u8 lbl_8049E01C[];
 
 extern IfAdvRadar* lbl_805A0348;
 
@@ -44,7 +40,7 @@ void muAdvSavePoint::processDefault() {
         unk44 = 203;
         break;
     case 203: {
-        unk1F8 = fn_800B8648(lbl_8049E01C, 1, 43, 0);
+        unk1F8 = g_MuMsgFontMngr.loadFont(1, 43, 0);
         muAdvSaveTaskParam param;
         param.unk0 = unk48;
         unk1FC.reset(muAdvSaveTask::create(&param, Heaps::MenuInstance, 43));
@@ -61,7 +57,7 @@ void muAdvSavePoint::processDefault() {
         lbl_805A0348->show();
         unk224->setFrameNode(0.0f);
         unk1FC.reset(NULL);
-        fn_800B881C(lbl_8049E01C, unk1F8);
+        g_MuMsgFontMngr.unloadFont(unk1F8);
         unk44 = 243;
         break;
     case 243:
