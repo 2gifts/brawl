@@ -49,16 +49,10 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::initStatus(soModuleAccesser
     gravity.enable();
 }
 
-// TODO(W7): 98%. Only the switch head differs: the target tests `cmpwi 0x127; beq end; bge +; b end; cmpwi 0x129; bge end`,
-// the two-entry compare tree of cases 0x127 and 0x128 in which 0x127 is still a case of its own when the tree is built;
-// ours drops the empty cases and tests `cmpwi 0x128` alone. Tried: if/else cascades, `default`, `return` vs `break` cases
-// (a `return` case keeps the entry but duplicates the epilogue), separate breaks, case 0x127 after or under the 0x128
-// body, an empty inline call, extra cases 0x125, 0x126 or 0x129.
+// Case 0x127 returns: an empty `break` case is dropped before the compare tree is built, and the original tree still
+// has 0x127 as its root (`cmpwi 0x127; beq end; bge +; b end`).
 void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser* moduleAccesser) {
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
-    case 0x126: // HYPOTHESIS: the status kinds 0x126 and 0x127 do nothing per frame (0x126 is handled in initStatus)
-    case 0x127:
-        break;
     case 0x128:
         if (moduleAccesser->getWorkManageModule().getFloat(0x2100000b) > 0.0f) {
             moduleAccesser->getWorkManageModule().subFloat(1.0f, 0x2100000b);
@@ -73,6 +67,11 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser
             }
         }
         break;
+    // HYPOTHESIS: nothing to do per frame in the status kinds 0x126 (handled in initStatus) and 0x127.
+    case 0x126:
+        break;
+    case 0x127:
+        return;
     }
 }
 
