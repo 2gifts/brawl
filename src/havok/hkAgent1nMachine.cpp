@@ -112,6 +112,127 @@ finish:;
 }
 } // namespace jj_fn_802FEA60
 
+// hkAgent1nMachine_Destroy (map name): runs every agent's destroy function (dispatcher table entry 0x1698), frees
+// each sector after its last entry and finally the sector directory.
+// TODO: clean up (raw sector/entry views in the style of the WarpTime shape below; 64%: register numbering)
+namespace hkAgent1nMachineDestroy {
+typedef void (*DestroyFunc)(void*, void*, void*);
+
+extern "C" void fn_802FC6AC(hkAgent1nTrack& track, char* dispatcher, void* contactMgr) {
+    unsigned char* blk = (unsigned char*)track.m_sectors[0].m_sector;
+    int idx = 4;
+    unsigned char* entry = blk + 0x10;
+    unsigned char* end = (unsigned char*)((int)blk + *(int*)blk + 0x10);
+
+    for (;;) {
+        unsigned char* e = entry;
+        unsigned char* dat;
+        DestroyFunc fn;
+
+        switch (e[0]) {
+        case 2:
+        case 3:
+        case 6:
+            dat = entry + 0x10;
+            entry += e[3];
+            fn = *(DestroyFunc*)(dispatcher + e[1] * 0x34 + 0x1698);
+            fn(e, dat, contactMgr);
+            break;
+        case 4:
+        case 5:
+            dat = entry + 0x20;
+            entry += e[3];
+            fn = *(DestroyFunc*)(dispatcher + e[1] * 0x34 + 0x1698);
+            fn(e, dat, contactMgr);
+            break;
+        case 1:
+            goto done;
+        case 0:
+            entry += e[3];
+            break;
+        }
+
+        if (entry >= end) {
+            hkThreadMemory::s_instance->deallocateChunk(blk, 0x200, 0x1D);
+            blk = (unsigned char*)*(void**)((char*)track.m_sectors.m_data + idx);
+            idx += 4;
+            entry = blk + 0x10;
+            end = (unsigned char*)((int)blk + *(int*)blk + 0x10);
+        }
+    }
+done:
+    hkThreadMemory::s_instance->deallocateChunk(blk, 0x200, 0x1D);
+    track.m_sectors.clearAndDeallocate();
+}
+} // namespace hkAgent1nMachineDestroy
+
+// hkAgent1nMachine_InvalidateTim (map name): walks the track like WarpTime above; the agents with a TIM entry
+// (commands 4/5) get their TIM distance reset and their linear TIM info cleared before the agent's invalidateTim
+// function (dispatcher table entry 0x16B0) runs.
+// TODO: clean up (raw sector/entry views in the style of the WarpTime shape above; 80%: register numbering)
+namespace hkAgent1nMachineInvalidateTim {
+extern "C" const float lbl_805A4560;
+extern "C" const float lbl_805A4564;
+
+typedef void (*InvalidateTimFunc)(void*, void*, void*);
+
+extern "C" void fn_802FC824(void*** track, void** input) {
+    float zero = lbl_805A4564;
+    float invalidTim = lbl_805A4560;
+    unsigned char* blk = (unsigned char*)**track;
+    unsigned char* entry = blk + 0x10;
+    unsigned char* end = (unsigned char*)((int)blk + *(int*)blk + 0x10);
+    int idx = 4;
+
+    for (;;) {
+        unsigned char* e = entry;
+        unsigned char* dat;
+        InvalidateTimFunc fn;
+
+        switch (e[0]) {
+        case 2:
+        case 3:
+        case 6:
+            dat = entry + 0x10;
+            entry += e[3];
+            fn = *(InvalidateTimFunc*)((char*)*input + e[1] * 0x34 + 0x16b0);
+            if (fn != 0) {
+                fn(e, dat, input);
+            }
+            break;
+        case 4:
+        case 5: {
+            *(float*)(e + 0xc) = invalidTim;
+            dat = entry + 0x20;
+            float* timInfo = (float*)(e + 0x10);
+            timInfo[0] = timInfo[1] = timInfo[2] = timInfo[3] = zero;
+            entry += e[3];
+            fn = *(InvalidateTimFunc*)((char*)*input + e[1] * 0x34 + 0x16b0);
+            if (fn != 0) {
+                fn(e, dat, input);
+            }
+            break;
+        }
+        case 1:
+            goto done;
+        case 0:
+            entry += e[3];
+            break;
+        }
+
+        if (entry >= end) {
+            blk = (unsigned char*)*(void**)((char*)*track + idx);
+            idx += 4;
+            entry = blk + 0x10;
+            blk += *(int*)blk;
+            end = blk + 0x10;
+        }
+    }
+done:
+    return;
+}
+} // namespace hkAgent1nMachineInvalidateTim
+
 // fn_802FC988: body from https://github.com/jj-link/brawl src/havok/fn_802FC988.cpp (namespaced; labels as in our symbols).
 #include <types.h>
 namespace jj_fn_802FC988 {
@@ -204,6 +325,42 @@ extern "C" void fn_802FCB14(char* self) {
     *(int*)p = 0x10;
 }
 } // namespace jj_fn_802FCB14
+
+#include <havok/hkCdBody.h>
+#include <havok/hkMotionState.h>
+#include <havok/hkCollisionInput.h>
+#include <havok/hkSweptTransformUtil.h>
+
+// Bodies and transforms of the pair at the input's time (0xA0 bytes, on the caller's stack). HYPOTHESIS: the name.
+struct hkAgent1nMachineTimTemp {
+    hkCdBody m_bodyA;          // 0x00
+    hkCdBody m_bodyB;          // 0x10
+    hkTransform m_transformA;  // 0x20
+    hkTransform m_transformB;  // 0x60
+};
+
+// hkAgent1nMachine_initInputAtTime (map name): a copy of the process input whose bodies use the transforms
+// interpolated at the step's start time. BYTES: the input is not const: CodeWarrior assumes nothing writes through
+// other pointers into a const-qualified object, so a const input lets it keep in.m_bodyA etc. in registers across
+// the stores into temp/out, which the target does not do.
+// TODO: clean up (key/shape locals give the target's two loads before the two stores)
+extern "C" void fn_802FCBAC(hkAgent3ProcessInput& in, hkAgent1nMachineTimTemp& temp, hkAgent3ProcessInput& out) {
+    hkSweptTransformUtil::lerp2(in.m_bodyA->getMotionState()->m_sweptTransform, in.m_input->m_stepInfo.m_startTime,
+                                temp.m_transformA);
+    hkSweptTransformUtil::lerp2(in.m_bodyB->getMotionState()->m_sweptTransform, in.m_input->m_stepInfo.m_startTime,
+                                temp.m_transformB);
+    out.m_bodyA = &temp.m_bodyA;
+    out.m_bodyB = &temp.m_bodyB;
+    out.m_contactMgr = in.m_contactMgr;
+    out.m_input = in.m_input;
+    u32 key = in.m_bodyA->m_shapeKey;
+    hkShape* shape = in.m_bodyA->m_shape;
+    temp.m_bodyA.m_shape = shape;
+    temp.m_bodyA.m_shapeKey = key;
+    new (&temp.m_bodyA) hkCdBody(in.m_bodyA, &temp.m_transformA);
+    new (&temp.m_bodyB) hkCdBody(in.m_bodyB, &temp.m_transformB);
+    out.m_aTb.setMulInverseMul(temp.m_transformA, temp.m_transformB);
+}
 
 // hkAgentMachineUtil.o (0x802FEA60-0x802FEDA0, carved into this unit): memory statistics of the agent tracks.
 #include <havok/hkAgentNnMachine.h>

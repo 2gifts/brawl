@@ -61,6 +61,42 @@ extern "C" void fn_80292B24(int index, int channel, hkPoweredChainMotorInput_802
     out->values[channel] = value;
 }
 
+// hkPoweredChain_DisableMotorInMatrixRow_ThisConstraint (map name): for every motor axis flagged in the two-bit
+// fields, clears that column of the six rows at 0x60 in the matrix (and in the second matrix when requested) and
+// puts 1 on the diagonal of the first.
+// TODO: clean up (raw float views of the 6x4 blocks; 48%: the target adds the column offset to the matrix bases
+// each iteration where ours strength-reduces them to pointers)
+namespace hkPoweredChainDisableMotorThis {
+extern "C" const float lbl_805A3E00;
+extern "C" const float lbl_805A3E08;
+
+extern "C" void fn_8029211C(unsigned char* flags, signed char* both, float (*a)[4], float (*b)[4]) {
+    if (*flags != 0) {
+        float zero = lbl_805A3E00;
+        float one = lbl_805A3E08;
+        for (int i = 0; i < 3; ++i) {
+            if ((*flags >> (i << 1)) & 3) {
+                a[6][i] = zero;
+                a[7][i] = zero;
+                a[8][i] = zero;
+                a[9][i] = zero;
+                a[10][i] = zero;
+                a[11][i] = zero;
+                a[9 + i][i] = one;
+                if (*both) {
+                    b[6][i] = zero;
+                    b[7][i] = zero;
+                    b[8][i] = zero;
+                    b[9][i] = zero;
+                    b[10][i] = zero;
+                    b[11][i] = zero;
+                }
+            }
+        }
+    }
+}
+} // namespace hkPoweredChainDisableMotorThis
+
 // fn_802921B0: body from https://github.com/jj-link/brawl src/havok/fn_802921B0.cpp (namespaced; labels as in our symbols).
 #include <types.h>
 namespace jj_fn_802921B0 {

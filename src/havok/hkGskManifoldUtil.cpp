@@ -94,6 +94,72 @@ void hkGskManifoldUtil::hkGskManifold_removePoint(hkGskManifold* manifold, int i
     hkGskManifold_garbageCollect(manifold);
 }
 
+#include <havok/hkGskCache.h>
+
+// The vertex id at byte offset (point vertex offset >> 3) of the id list that follows the point list.
+static inline u16 hkGskManifold_vertexId(const hkGskManifold* manifold, int offset) {
+    return *(const u16*)((const u8*)manifold + manifold->m_countC * 8 + 4 + (offset >> 3));
+}
+
+// Looks for the point of the cache's simplex in the manifold. A found point is moved to the front (returns 1).
+// Otherwise a single-vertex point that shares the cache's vertex of a one-vertex body is turned into a zombie
+// (dimensions cleared) and 0 is returned.
+// TODO: clean up: draft (register numbering of the point pointers differs).
+int hkGskManifoldUtil::hkGskManifold_doesPointExistAndResort(hkGskManifold* manifold, const hkGskCache& cache) {
+    hkGskManifoldEntry* points = manifold->m_points;
+    hkGskManifoldEntry* e = points;
+    int i = 0;
+    for (; i < manifold->m_countC; i++, e++) {
+        int dimA = cache.m_dimA;
+        if (dimA != e->unk0) {
+            continue;
+        }
+        int dimB = cache.m_dimB;
+        if (dimB != e->unk1) {
+            continue;
+        }
+        int dim = dimA + dimB;
+        if (cache.m_vertices[0] != hkGskManifold_vertexId(manifold, e->m_vertexOffsets[0])) {
+            continue;
+        }
+        if (cache.m_vertices[1] != hkGskManifold_vertexId(manifold, e->m_vertexOffsets[1])) {
+            continue;
+        }
+        if (dim > 2 && cache.m_vertices[2] != hkGskManifold_vertexId(manifold, e->m_vertexOffsets[2])) {
+            continue;
+        }
+        if (dim <= 3 || cache.m_vertices[3] == hkGskManifold_vertexId(manifold, e->m_vertexOffsets[3])) {
+            goto found;
+        }
+    }
+    if (cache.m_dimA == 1 || cache.m_dimB == 1) {
+        for (i = 0; i < manifold->m_countC; i++, points++) {
+            if (cache.m_dimA == 1 && points->unk0 == 1 &&
+                cache.m_vertices[0] == hkGskManifold_vertexId(manifold, points->m_vertexOffsets[0])) {
+                points->unk0 = 0;
+                points->unk1 = 0;
+                break;
+            }
+            if (cache.m_dimB == 1 && points->unk1 == 1 &&
+                cache.m_vertices[cache.m_dimA] ==
+                    hkGskManifold_vertexId(manifold, points->m_vertexOffsets[points->unk0])) {
+                points->unk0 = 0;
+                points->unk1 = 0;
+                break;
+            }
+        }
+    }
+    return 0;
+
+found:
+    if (i > 0) {
+        hkGskManifoldEntry t = manifold->m_points[i];
+        manifold->m_points[i] = manifold->m_points[0];
+        manifold->m_points[0] = t;
+    }
+    return 1;
+}
+
 #include <havok/hkPredGskAgent3.h>
 
 hkResult hkGskManifoldWork::convertPointPoint(const hkGskManifoldEntry& point, hkGskManifoldPointContact& out) const {

@@ -128,7 +128,7 @@ void hkBoxMotion::applyPointImpulse(const hkVector4& impulse, const hkVector4& p
     hkVector4 relPos;
     relPos.setSub4(point, m_motionState.m_sweptTransform.m_centerOfMass1);
     hkVector4 angImpulse;
-    angImpulse.setCross(relPos, impulse);
+    angImpulse.setCrossLegacy(relPos, impulse);
     hkReal massInv = m_inertiaAndMassInv.w;
     m_linearVelocity.x = massInv * impulse.x + m_linearVelocity.x;
     m_linearVelocity.y = massInv * impulse.y + m_linearVelocity.y;

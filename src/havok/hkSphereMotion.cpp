@@ -98,7 +98,7 @@ void hkSphereMotion::applyPointImpulse(const hkVector4& impulse, const hkVector4
     hkVector4 r;
     r.setSub4(point, m_motionState.m_sweptTransform.m_centerOfMass1);
     hkVector4 torque;
-    torque.setCross(r, impulse);
+    torque.setCrossLegacy(r, impulse);
     m_linearVelocity.x = m_linearVelocity.x + m_inertiaAndMassInv.w * impulse.x;
     m_linearVelocity.y = m_linearVelocity.y + m_inertiaAndMassInv.w * impulse.y;
     m_linearVelocity.z = m_linearVelocity.z + m_inertiaAndMassInv.w * impulse.z;

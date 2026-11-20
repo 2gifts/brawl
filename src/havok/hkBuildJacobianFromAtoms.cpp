@@ -81,6 +81,7 @@
 
 #include <havok/hkSetLocalTransformsConstraintAtom.h>
 #include <havok/hkTransform.h>
+#include <havok/hkMath.h>
 
 // Motor schema (type 5, 0x1C bytes). HYPOTHESIS: member names.
 struct hkJacobianMotorSchemaData {
@@ -385,6 +386,111 @@ extern "C" int fn_8028A52C(void) {
     return 3;
 }
 
+// Keeps the pivots m_length apart: one linear row along the current pivot separation (the first base axis of the
+// identity when the pivots coincide), with the rhs of that row replaced by the length error.
+void hkStiffSpringConstraintAtom::buildJacobianFromStiffSpringAtom(const hkConstraintQueryIn& in,
+                                                                   const hkTransform& baseA, const hkTransform& baseB,
+                                                                   hkConstraintQueryOut& out) const {
+    hk1dLinearBilateralInfo info;
+    info.m_pivotA = baseA.m_translation;
+    info.m_pivotB = baseB.m_translation;
+    hkVector4 separation;
+    separation.setSub4(info.m_pivotA, info.m_pivotB);
+    hkReal length = separation.length3();
+    separation.mul4(1.0f / length);
+    if (length > 0.0f) {
+        info.m_constrainedDofW = separation;
+    } else {
+        info.m_constrainedDofW = hkTransform::getIdentity().getColumn(0);
+        length = 0.0f;
+    }
+    hk1dLinearBilateralConstraintBuildJacobian(info, in, out);
+    hkReal* row = (hkReal*)((char*)(hkJacobianElement*)out.m_jacobians - 0x30);
+    row[3] = (m_length - length) * in.m_builderParam;
+}
+
+// Cone limit: the angle between A's twist axis and B's reference axis, measured from alignment or from
+// perpendicularity depending on the mode, limited around the axis perpendicular to both. Returns 1 (no row) when
+// the axes are (nearly) parallel. 96%: register colouring of the cross product only.
+// The reciprocal square root with the estimate held as a double first (the target keeps frsqrte and frsp in
+// separate registers here, unlike hkVector4_sqrtInverse).
+static inline hkReal coneSqrtInverse(hkReal x) {
+    if (x <= 0.0f) {
+        u32 bits = 0x7f800000;
+        return *(hkReal*)&bits;
+    }
+    double e = __frsqrte(x);
+    hkReal r = (hkReal)e;
+    return (0.5f * r) * -(r * (x * r) - 3.0f);
+}
+static const hkReal s_coneAngleScale[2] = {1.0f, -1.0f};
+static const hkReal s_coneAngleOffset[2] = {0.0f, 1.5707964f};
+
+int hkConeLimitConstraintAtom::buildJacobianFromConeLimitAtom(const hkConstraintQueryIn& in, const hkRotation& baseA,
+                                                               const hkRotation& baseB, hk1dAngularLimitInfo& info,
+                                                               hkConstraintQueryOut& out) const {
+    const hkVector4& twistAxisA = baseA.getColumn(m_twistAxisInA);
+    const hkVector4& refAxisB = baseB.getColumn(m_refAxisInB);
+    hkVector4 perp;
+    perp.setCross(twistAxisA, refAxisB);
+    hkSimdReal sinAngleSq = perp.lengthSquared3();
+    if (sinAngleSq < 1.1920929e-07f) {
+        return 1;
+    }
+    hkReal sinAngle = 1.0f / coneSqrtInverse(sinAngleSq);
+    hkReal cosAngle = twistAxisA.dot3(refAxisB);
+    int mode = (u8)m_angleMeasurementMode;
+    hkReal angle = hkMathTypes::hkMath_atan2fApproximation(sinAngle, cosAngle);
+    hkReal computedAngle = angle * s_coneAngleScale[mode] + s_coneAngleOffset[mode];
+    info.m_tau = m_angularLimitsTauFactor * in.unk38;
+    hkReal sign = s_coneAngleScale[1 - (u8)m_angleMeasurementMode];
+    perp.mul4(coneSqrtInverse(sinAngleSq));
+    info.m_constrainedDofW.setMul4(sign, perp);
+    info.m_computedAngle = computedAngle;
+    info.m_min = m_minAngle;
+    info.m_max = m_maxAngle;
+    return 0;
+}
+
+// Twist limit: the twist angle around the half-way axis of the two twist axes, measured from B's reference axis
+// projected into the plane perpendicular to that axis. The tau is scaled down by the squared cosine of the half
+// angle between the twist axes. HYPOTHESIS: the original name keeps the map's spelling ("bulid").
+// TODO: clean up: draft; the target reloads the axis from the stack after the atan2 call (ours keeps axis.x in
+// f30 across it), which shifts the FPR colouring of the frame products.
+int hkTwistLimitConstraintAtom::bulidJacobianFromTwistLimitAtom(const hkConstraintQueryIn& in, const hkRotation& baseA,
+                                                                const hkRotation& baseB, hk1dAngularLimitInfo& info,
+                                                                hkConstraintQueryOut& out) const {
+    const hkVector4& twistAxisA = baseA.getColumn(m_twistAxis);
+    const hkVector4& twistAxisB = baseB.getColumn(m_twistAxis);
+    info.m_constrainedDofW = twistAxisA;
+    info.m_min = m_minAngle;
+    info.m_max = m_maxAngle;
+    hkVector4 axis;
+    axis.setAdd4(twistAxisB, twistAxisA);
+    hkSimdReal lengthSq = axis.lengthSquared3();
+    const hkVector4& refAxisB = baseB.getColumn(m_refAxis);
+    const hkVector4& refAxisA = baseA.getColumn(m_refAxis);
+    hkReal length = 1.0f / hkVector4_sqrtInverse(lengthSq);
+    double cosHalfAngle;
+    if (length > 1e-16f) {
+        axis.mul4(1.0f / length);
+        cosHalfAngle = 0.5f * length;
+    } else {
+        axis = twistAxisB;
+        cosHalfAngle = 0.0f;
+    }
+    hkRotation frame;
+    frame.m_col0 = axis;
+    frame.m_col1.setCross(axis, refAxisB);
+    frame.m_col2.setCross(frame.m_col1, axis);
+    hkReal angle = hkMathTypes::hkMath_atan2fApproximation(frame.m_col1.dot3(refAxisA), frame.m_col2.dot3(refAxisA));
+    info.m_computedAngle = angle;
+    info.m_constrainedDofW = axis;
+    hkReal c = (hkReal)cosHalfAngle;
+    info.m_tau = c * (c * (m_angularLimitsTauFactor * in.unk38));
+    return 0;
+}
+
 extern "C" int fn_8028A6F0(void) {
     return 1;
 }
@@ -644,7 +750,7 @@ DECLARE_HANDLER(setLocalTransformsFromAtom__34hkSetLocalTransformsConstraintAtom
 DECLARE_HANDLER(setLocalTranslationsFromAtom__36hkSetLocalTranslationsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__36hkSetLocalTranslationsConstraintAtomCFv);
 DECLARE_HANDLER(setLocalRotationsFromAtom__33hkSetLocalRotationsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__33hkSetLocalRotationsConstraintAtomCFv);
 DECLARE_HANDLER(fn_8028A048, fn_8028A52C);
-DECLARE_HANDLER(fn_8028A534, fn_8028A6F0);
+DECLARE_HANDLER(buildJacobianFromStiffSpringAtom__27hkStiffSpringConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, fn_8028A6F0);
 DECLARE_HANDLER(buildJacobianFromLinAtom__19hkLinConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, fn_8028A7A0);
 DECLARE_HANDLER(buildJacobianFromLinSoftAtom__23hkLinSoftConstraintAtomFPvPC9hkVector4PC9hkVector4Pv, numSolverResults__23hkLinSoftConstraintAtomCFv);
 DECLARE_HANDLER(buildJacobianFromLinLimitAtom__24hkLinLimitConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, numSolverResults__24hkLinLimitConstraintAtomCFv);
@@ -663,9 +769,9 @@ DECLARE_HANDLER(fn_8028D5D0, fn_8028D898);
 
 extern int fn_8028AE3C(u32, void *, void *, void *, void *, int);
 extern int numSolverResults__24hkAngLimitConstraintAtomCFv(u32);
-extern int fn_8028B0F0(u32, void *, void *, void *, void *, int);
+extern int buildJacobianFromConeLimitAtom__25hkConeLimitConstraintAtomCFRC19hkConstraintQueryInRC10hkRotationRC10hkRotationR20hk1dAngularLimitInfoR20hkConstraintQueryOut(u32, void *, void *, void *, void *, int);
 extern int numSolverResults__25hkConeLimitConstraintAtomCFv(u32);
-extern int fn_8028B330(u32, void *, void *, void *, void *, int);
+extern int bulidJacobianFromTwistLimitAtom__26hkTwistLimitConstraintAtomCFRC19hkConstraintQueryInRC10hkRotationRC10hkRotationR20hk1dAngularLimitInfoR20hkConstraintQueryOut(u32, void *, void *, void *, void *, int);
 extern int numSolverResults__26hkTwistLimitConstraintAtomCFv(u32);
 
 #define ADVANCE(length, amount) \
@@ -723,7 +829,7 @@ again:
         HANDLE(3, setLocalTranslationsFromAtom__36hkSetLocalTranslationsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__36hkSetLocalTranslationsConstraintAtomCFv, 48);
         HANDLE(4, setLocalRotationsFromAtom__33hkSetLocalRotationsConstraintAtomCFRC19hkConstraintQueryInR11hkTransformR11hkTransform, numSolverResults__33hkSetLocalRotationsConstraintAtomCFv, 112);
         HANDLE(5, fn_8028A048, fn_8028A52C, 2);
-        HANDLE(6, fn_8028A534, fn_8028A6F0, 8);
+        HANDLE(6, buildJacobianFromStiffSpringAtom__27hkStiffSpringConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, fn_8028A6F0, 8);
         HANDLE(7, buildJacobianFromLinAtom__19hkLinConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, fn_8028A7A0, 4);
         HANDLE(8, buildJacobianFromLinSoftAtom__23hkLinSoftConstraintAtomFPvPC9hkVector4PC9hkVector4Pv, numSolverResults__23hkLinSoftConstraintAtomCFv, 12);
         HANDLE(9, buildJacobianFromLinLimitAtom__24hkLinLimitConstraintAtomCFRC19hkConstraintQueryInRC11hkTransformRC11hkTransformR20hkConstraintQueryOut, numSolverResults__24hkLinLimitConstraintAtomCFv, 12);
@@ -732,8 +838,8 @@ again:
         HANDLE(12, fn_8028ABE0, numSolverResults__21hk2dAngConstraintAtomCFv, 4);
         HANDLE(13, fn_8028AD28, numSolverResults__19hkAngConstraintAtomCFv, 4);
         HANDLE_RESULT(14, fn_8028AE3C, numSolverResults__24hkAngLimitConstraintAtomCFv, 16);
-        HANDLE_RESULT(16, fn_8028B0F0, numSolverResults__25hkConeLimitConstraintAtomCFv, 20);
-        HANDLE_RESULT(15, fn_8028B330, numSolverResults__26hkTwistLimitConstraintAtomCFv, 20);
+        HANDLE_RESULT(16, buildJacobianFromConeLimitAtom__25hkConeLimitConstraintAtomCFRC19hkConstraintQueryInRC10hkRotationRC10hkRotationR20hk1dAngularLimitInfoR20hkConstraintQueryOut, numSolverResults__25hkConeLimitConstraintAtomCFv, 20);
+        HANDLE_RESULT(15, bulidJacobianFromTwistLimitAtom__26hkTwistLimitConstraintAtomCFRC19hkConstraintQueryInRC10hkRotationRC10hkRotationR20hk1dAngularLimitInfoR20hkConstraintQueryOut, numSolverResults__26hkTwistLimitConstraintAtomCFv, 20);
         HANDLE(17, buildJacobianFromAngFrictionAtom__27hkAngFrictionConstraintAtomCFRC19hkConstraintQueryInRC10hkRotationRC10hkRotationR20hkConstraintQueryOut, numSolverResults__27hkAngFrictionConstraintAtomCFv, 12);
         HANDLE(18, fn_8028B674, numSolverResults__24hkAngMotorConstraintAtomCFv, 20);
         HANDLE(19, fn_8028BCD0, numSolverResults__28hkRagdollMotorConstraintAtomCFv, 80);

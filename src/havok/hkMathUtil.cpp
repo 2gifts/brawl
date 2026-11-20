@@ -56,7 +56,7 @@ void hkMathUtil::decompose4x4ColTransform(const hkReal* matrixIn, Decomposition&
         c3.normalize3();
 
         hkVector4 r0;
-        r0.setCross(c2, c3);
+        r0.setCrossLegacy(c2, c3);
         hkReal determinant = c1.dot3(r0);
 
         if (determinant < 0.0f) {

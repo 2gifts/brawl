@@ -104,6 +104,41 @@ struct Context {
     char pad2[0xdd0];
     Node* nodes[1];
 };
+extern "C" int fn_80320008(Context* ctx, Node* node, Vec4* point, int* count, Link** output);
+
+// hkWingedEdge::findVisibilityBoundaryEdges: classifies the start triangle against the point of view and walks
+// the visible region (findVisibleTriangles) when the start triangle is visible.
+// TODO: clean up (raw views of the winged-edge context/triangle, shares the jj shapes above; the point loads are
+// interleaved with the stores only to follow the target schedule, 71%: register numbering differs)
+extern "C" int fn_8031FEFC(Context* ctx, Node* node, Vec4* point, int* count, Link** output) {
+    float epsilon = lbl_805A4748;
+    float maxDistance = lbl_805A474C;
+    *output = 0;
+    float py = point->y;
+    *count = 0;
+    float px = point->x;
+    ctx->min = epsilon;
+    float pz = point->z;
+    ctx->max = maxDistance;
+    Vec4 delta;
+    Vec4* p = node->point;
+    delta.x = px - p->x;
+    delta.y = py - p->y;
+    delta.z = pz - p->z;
+    delta.w = point->w - p->w;
+    float d = node->z * delta.z + (node->x * delta.x + node->y * delta.y);
+    int state = 1;
+    if (d > ctx->min) {
+        if (d < ctx->max) ctx->max = d;
+    } else {
+        if (epsilon + d > ctx->min) ctx->min = epsilon + d;
+        state = 2;
+    }
+    if (ctx->min >= ctx->max) state = 4;
+    node->state = state;
+    return (state == 1) ? fn_80320008(ctx, node, point, count, output) : 2;
+}
+
 // TODO: cleanup (shape from jj-link/brawl fn_80320008)
 extern "C" int fn_80320008(Context* ctx, Node* node, Vec4* point, int* count, Link** output) {
     float epsilon = lbl_805A4748;
