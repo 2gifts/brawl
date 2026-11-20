@@ -20,13 +20,6 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int);
 };
 
-// MATCH-ONLY: the vector temporaries go through this helper so that their addresses are formed at the call (the native
-// code does not cache them in saved registers).
-static inline void resetKinetic(soKineticEnergy& energy, int mode, Vec3f* accel, const Vec2f& speed, soModuleAccesser* moduleAccesser) {
-    energy.resetEnergy(mode, const_cast<Vec2f*>(&speed), accel, moduleAccesser);
-}
-
-// MATCH-ONLY: retain reset mode across the sum-speed query and vector construction, as in the native register lifetime.
 void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* moduleAccesser) {
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
     ftKineticEnergyController::ResetType mode = ftKineticEnergyController::ResetType_11;
@@ -34,7 +27,7 @@ void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* mod
     if (sumSpeed.m_x > soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0)) {
         sumSpeed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0);
     }
-    resetKinetic(controller, mode, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(sumSpeed.m_x, 0.0f), moduleAccesser);
+    controller.resetEnergy(mode, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_accelMul = 1.0f;
     controller.m_unk40 = 0.0f;
     controller.enable();
@@ -42,7 +35,7 @@ void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* mod
     ftKineticEnergyGravity& energy = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     float a = -1.0f * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb5, 0);
     float b = -1.0f * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb6, 0);
-    resetKinetic(energy, 0, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(0.0f, a), moduleAccesser);
+    energy.resetEnergy(0, &Vec2f(0.0f, a), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     energy.m_gravity = b;
     if (moduleAccesser->getSituationModule().getKind() == 2) {
         energy.enable();

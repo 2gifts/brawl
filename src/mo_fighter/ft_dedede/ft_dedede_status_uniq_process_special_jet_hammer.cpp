@@ -35,11 +35,6 @@ static inline void sendLinkEvent(soModuleAccesser* moduleAccesser, const soLinkE
     moduleAccesser->getLinkModule().sendEventNodes(1, args, 0);
 }
 
-static inline void resetController(ftKineticEnergyController& controller, int mode, Vec3f* accel, const Vec2f& speed, soModuleAccesser* moduleAccesser) {
-    controller.resetEnergy(mode, const_cast<Vec2f*>(&speed), accel, moduleAccesser);
-}
-
-// MATCH-ONLY: retain the reset mode across the sum-speed query, as in the native register lifetime.
 void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* moduleAccesser) {
     // MATCH-ONLY: declared at function scope so the saved-register numbering (energy r29, reset mode r28, work module r30)
     // follows the native allocation.
@@ -72,7 +67,7 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
             speed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC0, 0);
         }
         Vec3f rotation(0.0f, 0.0f, 0.0f);
-        resetController(energy, resetKind, &rotation, Vec2f(speed.m_x, 0.0f), moduleAccesser);
+        energy.resetEnergy(resetKind, &Vec2f(speed.m_x, 0.0f), &rotation, moduleAccesser);
         energy.m_accelMul = 1.0f;
         energy.m_unk40 = 0.0f;
         energy.enable();

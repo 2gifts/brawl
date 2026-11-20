@@ -49,12 +49,11 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::initStatus(soModuleAccesser
     gravity.enable();
 }
 
-// TODO(W7): 98%. Only the head differs: the target tests `cmpwi 0x127; beq; bge; b end; cmpwi 0x129; bge end` (a
-// compare tree whose low side has no case), we fold it into one `cmpwi 0x128`. Tried: if/else cascades, `default`,
-// `return` vs `break` cases, an extra case 0x126 or 0x129. The remaining stack slots differ too: the target keeps the
-// getSumSpeed result in a hidden slot plus a named copy and the Vec2f below them (we elide the copy).
-// MATCH-ONLY: copy propagation off plus the `zero` local keep the int 0 (resetEnergy mode) in a callee-saved register
-// next to the shared 1 (flag), as the target does; the target's source for that 0 is not known.
+// TODO(W7): 98%. Only the switch head differs: the target tests `cmpwi 0x127; beq end; bge +; b end; cmpwi 0x129; bge end`,
+// the two-entry compare tree of cases 0x127 and 0x128 in which 0x127 is still a case of its own when the tree is built;
+// ours drops the empty cases and tests `cmpwi 0x128` alone. Tried: if/else cascades, `default`, `return` vs `break` cases
+// (a `return` case keeps the entry but duplicates the epilogue), separate breaks, case 0x127 after or under the 0x128
+// body, an empty inline call, extra cases 0x125, 0x126 or 0x129.
 void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser* moduleAccesser) {
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
     case 0x126: // HYPOTHESIS: the status kinds 0x126 and 0x127 do nothing per frame (0x126 is handled in initStatus)
@@ -66,10 +65,9 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser
             if (moduleAccesser->getWorkManageModule().getFloat(0x2100000b) <= 0.0f) {
                 ftKineticEnergyController& controller =
                     dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-                ftKineticEnergyController::ResetType zero = ftKineticEnergyController::ResetType_0;
+                ftKineticEnergyController::ResetType resetType = ftKineticEnergyController::ResetType_0;
                 Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-                Vec2f speed(sumSpeed.m_x, 0.0f);
-                controller.resetEnergy(zero, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                controller.resetEnergy(resetType, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 controller.enable();
                 ftKineticEnergyDisableAndClear(4, moduleAccesser);
             }
