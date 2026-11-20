@@ -224,6 +224,11 @@ public:
     s32 getConstantIntKirby(s32 id);
     void set_special_brake_coefficient(u32 airId, u32 groundId); // HYPOTHESIS: parameter meaning
     void set_visible(unsigned long id, bool visible); // HYPOTHESIS: parameter meaning
+#ifdef WN_PIKACHU_THUNDER_ACCESSER_HELPERS
+    // Pikachu's Thunder bolt effect helpers (map names soModuleAccesser::remove_effect / move_effect); opt-in, default off.
+    void remove_effect(u32 index);
+    void move_effect(u32 index, int node);
+#endif
 #ifdef SO_MODULE_ACCESSER_FALCON_PUNCH_HELPERS
     // Falcon Punch air helpers (map names soModuleAccesser::process_air / dir_decide); opt-in, default off.
     void process_air();
