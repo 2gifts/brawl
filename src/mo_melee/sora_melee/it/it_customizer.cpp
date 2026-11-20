@@ -7,10 +7,15 @@
 #define SO_ARRAY_LIST_EXTERNAL_eraseSub
 #include <so/so_array.h>
 #include <it/item.h>
+#include <st/stage.h>
+#include <cm/cm_camera_controller.h>
+#include <so/event/so_gimmick_event_presenter.h>
+#include <so/so_external_value_accesser.h>
 #include <types.h>
 
-// The item customizers (the per-item hooks of BaseItem): this unit holds their small overrides and destructors; the
-// larger hooks stay in the module blob for now (declared so the vtables have their slots).
+// The item customizers (the per-item hooks of BaseItem): this unit holds their overrides and destructors; the hooks that
+// are not decompiled yet are only declared (so the vtables have their slots). The names of the hooks the module map
+// leaves unnamed come from their vtable slots.
 // TODO: the remaining hooks, the non-virtual helpers and itPhotoCallBack with the static initializer.
 
 class itResetsanCustomizer : public itCustomizer<itResetsanCustomizer> {
@@ -654,3 +659,215 @@ class itFigureArchive;
 
 template s32 soArrayList<itFigureArchive*, 64>::size() const;
 template s32 soArrayList<itFigureArchive*, 64>::capacity() const;
+
+// Hooks that read the item's work variables; the bullet / result counts are int work 0x10000000.
+static inline soWorkManageModule& itWork(BaseItem* item) {
+    return item->m_moduleAccesser->getWorkManageModule();
+}
+
+int itSuperScopeCustomizer::onGetBullet(BaseItem* item) { return itWork(item).getInt(0x10000000); }
+
+int itFireFlowerCustomizer::onGetBullet(BaseItem* item) { return itWork(item).getInt(0x10000000); }
+
+int itRayGunCustomizer::onGetBullet(BaseItem* item) { return itWork(item).getInt(0x10000000); }
+
+int itClackerCustomizer::onGetBullet(BaseItem* item) { return itWork(item).getInt(0x10000000); }
+
+int itRipStickCustomizer::onGetBullet(BaseItem* item) { return itWork(item).getInt(0x10000000); }
+
+int itStarRodCustomizer::onGetBullet(BaseItem* item) { return itWork(item).getInt(0x10000000); }
+
+int itThunderCustomizer::onResult(BaseItem* item) { return itWork(item).getInt(0x10000000); }
+
+int itSlowCustomizer::onResult(BaseItem* item) { return itWork(item).getInt(0x10000000); }
+
+// TODO: clean up - the sync-visibility byte at 0x3D27 of BaseItem is written by hand (it_item.cpp reads it the same way).
+void itSmokeScreenCustomizer::onReset(BaseItem* item) { *(reinterpret_cast<u8*>(item) + 0x3D27) = 0; }
+
+void itSmartBombCustomizer::onReset(BaseItem* item) { *(reinterpret_cast<u8*>(item) + 0x3D27) = 0; }
+
+bool itCBoxCustomizer::isUseThrowRotParam(BaseItem* item) { return !itWork(item).isFlag(0x12000000); }
+
+bool itGreenShellCustomizer::isTreadPassive(BaseItem* item) { return itWork(item).getInt(0x1000000b) == 0; }
+
+bool itMoneyCustomizer::isSafe(BaseItem* item) { return item->isVanishMode(); }
+
+bool itSandbagCustomizer::isUseSpeedDamage(BaseItem* item) { return item->m_kind != 0x4f; }
+
+// The gimmick event (kind 0x34) the spring sends on pickup and removal.
+struct itSpringGimmickEventArgs : public soGimmickEventArgs {
+    itSpringGimmickEventArgs() : soGimmickEventArgs(static_cast<Gimmick::EventKind>(0x34), 0) { }
+};
+
+bool itSpringCustomizer::onHave(BaseItem* item, int) {
+    itSpringGimmickEventArgs args;
+    item->presentEventGimmick(&args, -1);
+    return true;
+}
+
+void itSpringCustomizer::onDestruct(BaseItem* item) {
+    itSpringGimmickEventArgs args;
+    item->presentEventGimmick(&args, -1);
+}
+
+// Shown again when the status changes to 2 (except from statuses 2 and 6).
+void itWarioBikeCustomizer::onNotifyEventChangeStatus(BaseItem* item, int prevStatus, int status, soStatusData*, soModuleAccesser*) {
+    if (prevStatus == 2) {
+        return;
+    }
+    if (prevStatus == 6) {
+        return;
+    }
+    if (status != 2) {
+        return;
+    }
+    item->setVisibilityWhole((u8)1);
+}
+
+void itSmokeScreenCustomizer::onNotifyEventChangeStatus(BaseItem* item, int prevStatus, int status, soStatusData*, soModuleAccesser*) {
+    if (prevStatus == 2) {
+        return;
+    }
+    if (prevStatus == 6) {
+        return;
+    }
+    if (status != 2) {
+        return;
+    }
+    item->setVisibilityWhole((u8)1);
+}
+
+bool itChewingCustomizer::onHave(BaseItem* item, int) { return !itWork(item).isFlag(0x12000009); }
+
+bool itChewingCustomizer::onReflect(BaseItem* item) {
+    itWork(item).setInt(-1, 0x10000000);
+    return false;
+}
+
+bool itSmokeScreenCustomizer::onReflect(BaseItem* item) {
+    itWork(item).setInt(-1, 0x10000000);
+    return false;
+}
+
+// TODO: clean up - MATCH-ONLY: the unit's literal pool is not split, so the touch radius is read through its pool label.
+extern "C" const float lbl_27_rodata_46DC[];
+
+bool itTuchCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8, Vec3f* searchHitPos) {
+    item->sendTouchMessage(searchHitTaskId, searchHitPos, lbl_27_rodata_46DC[0]);
+    return false;
+}
+
+bool itThunderCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8, Vec3f* searchHitPos) {
+    item->sendTouchMessage(searchHitTaskId, searchHitPos, lbl_27_rodata_46DC[0]);
+    return false;
+}
+
+bool itMoneyCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8, Vec3f* searchHitPos) {
+    item->sendTouchMessage(searchHitTaskId, searchHitPos, lbl_27_rodata_46DC[0]);
+    return false;
+}
+
+void itRobotGyroCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    if (action == 0) {
+        itWork(item).setFloat(rate, 0x11000000);
+    }
+}
+
+void itDragoonSetCustomizer::onReset(BaseItem* item) {
+    if (CameraController::getInstance()) {
+        CameraController::getInstance()->setDisableZoomStart();
+    }
+}
+
+void itDragoonSetCustomizer::onDestruct(BaseItem* item) {
+    if (CameraController::getInstance()) {
+        CameraController::getInstance()->setDisableZoomEnd();
+    }
+}
+
+// Lost when the link event 0x3D arrives with argument 7.
+void itDragoonSightCustomizer::onNotifyEventLink(BaseItem* item, void* unk1, soModuleAccesser* moduleAccesser, StageObject*, int unk4) {
+    if (*static_cast<int*>(unk1) == 0x3d && unk4 == 7) {
+        item->requestLost();
+    }
+}
+
+bool itTingleCustomizer::onEnumFighter(BaseItem* item, Fighter* fighter) {
+    return soExternalValueAccesser::getWorkInt(reinterpret_cast<StageObject*>(fighter), 0x12000023) == 0;
+}
+
+void itCBoxCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    soWorkManageModule& work = itWork(item);
+    switch ((int)action) {
+    case 0:
+        work.onFlag(0x12000000);
+        break;
+    case 1:
+        item->setPickUpAreaRequest(true);
+        break;
+    }
+}
+
+void itDiddyPeanutsCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    if (action == 0) {
+        itWork(item).onFlag(0x12000000);
+    }
+}
+
+// Firing without a shot uses up one bullet (int work 0x10000000) and returns what is left.
+u32 itRayGunCustomizer::onShootBlanks(BaseItem* item, u32) {
+    soWorkManageModule& work = itWork(item);
+    int bullets = work.getInt(0x10000000);
+    if (bullets > 0) {
+        bullets--;
+        work.setInt(bullets, 0x10000000);
+    }
+    return bullets;
+}
+
+u32 itClackerCustomizer::onShootBlanks(BaseItem* item, u32) {
+    soWorkManageModule& work = itWork(item);
+    int bullets = work.getInt(0x10000000);
+    if (bullets > 0) {
+        bullets--;
+        work.setInt(bullets, 0x10000000);
+    }
+    return bullets;
+}
+
+u32 itRipStickCustomizer::onShootBlanks(BaseItem* item, u32) {
+    soWorkManageModule& work = itWork(item);
+    int bullets = work.getInt(0x10000000);
+    if (bullets > 0) {
+        bullets--;
+        work.setInt(bullets, 0x10000000);
+    }
+    return bullets;
+}
+
+void itUsagiHatCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    if (action == 0) {
+        soWorkManageModule& work = itWork(item);
+        work.onFlag(0x12000000);
+        work.setInt(-1, 0x1000000b);
+    }
+}
+
+void itBadgeCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    if (action == 0) {
+        soWorkManageModule& work = itWork(item);
+        work.onFlag(0x12000000);
+        work.setInt(-1, 0x1000000b);
+    }
+}
+
+void itDevilCustomizer::onConstruct(BaseItem* item) {
+    g_Stage->enableDevil();
+}
+
+void itDevilCustomizer::onDestruct(BaseItem* item) {
+    if (g_Stage) {
+        g_Stage->setDevilScrool(lbl_27_rodata_46DC[0], lbl_27_rodata_46DC[0]);
+        g_Stage->disableDevil();
+    }
+}
