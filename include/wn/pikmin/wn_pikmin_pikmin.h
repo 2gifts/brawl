@@ -515,7 +515,7 @@ public:
     void unRefLogGroup();
     int getCatchKind();
     void setJostlePriority(int priority);
-    void setVisible(bool visible);
+    void setVisible(u8 visible);
     void setOwnerInfo(wnPikminPikminOwnerInfo* owner, wnPikminPikminOwnerInfo* follow);
     void updateBloomState();
     void updateAutonomy();

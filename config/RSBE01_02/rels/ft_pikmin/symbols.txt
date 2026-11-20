@@ -780,7 +780,7 @@ notifyEventChangeSituation__14wnPikminPikminF13SituationKind13SituationKindP16so
 getCatchKind__14wnPikminPikminFv = .text:0x0001B104; // type:function size:0x98
 changeStatus__14wnPikminPikminFi = .text:0x0001B19C; // type:function size:0x80
 setJostlePriority__14wnPikminPikminFi = .text:0x0001B21C; // type:function size:0x1C
-setVisible__14wnPikminPikminFb = .text:0x0001B238; // type:function size:0x1C
+setVisible__14wnPikminPikminFUc = .text:0x0001B238; // type:function size:0x1C
 linkOwner__14wnPikminPikminFii = .text:0x0001B254; // type:function size:0xB8
 setOwnerInfo__14wnPikminPikminFP23wnPikminPikminOwnerInfoP23wnPikminPikminOwnerInfo = .text:0x0001B30C; // type:function size:0xA8
 processFixPosition__14wnPikminPikminFv = .text:0x0001B3B4; // type:function size:0x1D8
