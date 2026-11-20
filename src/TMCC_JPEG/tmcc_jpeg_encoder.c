@@ -27,10 +27,10 @@ typedef int (*TMCC_CvtFn)(TMCC_McuBuf*, TMCC_UsrParam*, int, int);
 // HYPOTHESIS: huffman bit-count / encoding table for a component
 typedef struct TMCC_CompHuff {
     int dcMax;
-    int unk4;
+    int* dcCode;
     int* dcBits;
     int acMax;
-    int unk10;
+    int* acCode;
     int* acBits;
 } TMCC_CompHuff;
 
@@ -44,10 +44,10 @@ typedef struct TMCC_CompInfo {
     int* unk14;
     int* unk18;
     TMCC_Bitstream* unk1C;
-    u8 pad20[0x2C - 0x20];
+    TMCC_PutFn putFn; u8 pad24[4]; u16 nextW; u16 nextH;
     u8 unk2C;
     u8 unk2D;
-    u8 pad2E[0x34 - 0x2E];
+    u8 nextBlocks; u8 nextEdgeW; u8 nextEdgeH; u8 nextFmt; u8 pad32[2];
 } TMCC_CompInfo;
 
 // HYPOTHESIS: image conversion info at offset 0x1580 of TMCC_Encoder
@@ -58,16 +58,16 @@ struct TMCC_ImageInfo {
     u16 unk6;
     u8 unk8;
     u8 unk9;
-    u8 padA[0x14 - 0xA];
+    u8 padA[6]; u16 yW; u16 yH;
     u8 unk14;
     u8 unk15;
-    u8 pad16[0x1C - 0x16];
+    u8 yBlocks; u8 yEdgeW; u8 yEdgeH; u8 yFmt; u8 pad1A[2];
     TMCC_CompInfo compY;
     TMCC_CompInfo compCb;
     int crUnk0;
     int crStride;
     int crDcPred;
-    u8 padCr[0xA8 - 0x90];
+    int crUnkC; TMCC_CompHuff* crUnk10; int* crUnk14; const int* crUnk18; TMCC_Bitstream* crUnk1C; TMCC_PutFn crPutFn;
     TMCC_UsrParam* usr;
     TMCC_CvtFn cvtFn;
     TMCC_CvtFn cvtEdgeFn;
@@ -105,7 +105,7 @@ struct TMCC_Encoder {
         void* unk4;
         void* unk8;
     } huffTbl[4];
-    u8 pad117C[0x1580 - 0x117C];
+    int qLum[64]; int qLumRecip[64]; int qChr[64]; int qChrRecip[64]; const int* zigzag;
     TMCC_ImageInfo img;
     TMCC_Bitstream outStream;
 };
@@ -127,8 +127,8 @@ struct TMCC_UsrParam {
     u8 unk21;
     u8 unk22;
     u8 unk23;
-    int unk24;
-    int unk28;
+    u32 unk24;
+    u32 unk28;
     u8 unk2C;
     u8 pad2D;
     u8 unk2E;
@@ -141,7 +141,7 @@ struct TMCC_UsrParam {
     int unk3C;
     int unk40;
     int unk44;
-    int unk48;
+    u32 unk48;
     int unk4C;
     int unk50;
     int unk54;
@@ -164,7 +164,7 @@ typedef struct TMCC_InitParam {
     u8 unk10;
     u8 pad11[3];
     int unk14;
-    u8 pad18[0x9C - 0x18];
+    u32 unk18; u8 pad1C[0x9C - 0x1C];
     int bufSize;
 } TMCC_InitParam;
 
@@ -1690,4 +1690,1798 @@ int fn_8026D53C(TMCC_Encoder* enc, TMCC_UsrParam* usr, int count, int limit) {
     enc->unk14 = rst;
     fn_8026D514(&enc->outStream, &usr->unk10);
     return total - x - y * img->width;
+}
+
+int fn_8026DBF8(TMCC_ImageInfo* img, TMCC_UsrParam* usr) {
+    switch (usr->unk2E) {
+    case 0:
+        img->cvtFn = fn_8026DCEC;
+        img->cvtEdgeFn = fn_8026E2B4;
+        break;
+    case 1:
+        img->cvtFn = fn_8026DF60;
+        img->cvtEdgeFn = fn_8026E4AC;
+        break;
+    case 2:
+        img->cvtFn = fn_8026E104;
+        img->cvtEdgeFn = fn_8026E6A8;
+        break;
+    default:
+        return -0x70;
+    }
+    usr->unk48 = (((u32)usr->unk30 >> 2) + ((usr->unk30 % 4) != 0)) << 2;
+    usr->unk4C = (((u32)usr->unk32 >> 2) + ((usr->unk32 % 4) != 0)) << 2;
+    return 0;
+}
+
+int fn_8026E8C0(TMCC_ImageInfo* img, TMCC_UsrParam* usr) {
+    switch (usr->unk2E) {
+    case 0:
+        img->cvtFn = fn_8026E9B4;
+        img->cvtEdgeFn = fn_8026EEF8;
+        break;
+    case 1:
+        img->cvtFn = fn_8026EBE4;
+        img->cvtEdgeFn = fn_8026F0E0;
+        break;
+    case 2:
+        img->cvtFn = fn_8026ED68;
+        img->cvtEdgeFn = fn_8026F2CC;
+        break;
+    default:
+        return -0x70;
+    }
+    usr->unk48 = (((u32)usr->unk30 >> 2) + ((usr->unk30 % 4) != 0)) << 2;
+    usr->unk4C = (((u32)usr->unk32 >> 2) + ((usr->unk32 % 4) != 0)) << 2;
+    return 0;
+}
+
+int fn_8026EBE4(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u16 pix;
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    u16* src;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int ySkip, cSkip;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x80;
+    pCr = (u8*)mcu->data + 0xC0;
+    w = 16 / usr->unk2C;
+    h = 8 / usr->unk2C;
+    ySkip = 16 - w;
+    cSkip = ySkip >> 1;
+    xEnd = x + w;
+    yEnd = y + h;
+    src = usr->unk64;
+    tileStride = usr->unk48 >> 2;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i += 2) {
+            pix = row[(i & 3) + (((i >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            pY[0] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            *pCb++ = ((b - pY[0]) * 0x90 + 0x80) >> 8;
+            *pCr++ = ((r - pY[0]) * 0xB7 + 0x80) >> 8;
+
+            pix = row[((i + 1) & 3) + ((((i + 1) >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            pY[1] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            pY += 2;
+        }
+        pY += ySkip;
+        pCb += cSkip;
+        pCr += cSkip;
+    }
+    return 0;
+}
+
+int fn_8026ED68(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u16 pix;
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    u16* src;
+    int i, j;
+    int w, xEnd, yEnd;
+    int ySkip, cSkip;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x100;
+    pCr = (u8*)mcu->data + 0x140;
+    w = 16 / usr->unk2C;
+    ySkip = 16 - w;
+    cSkip = ySkip >> 1;
+    xEnd = x + w;
+    yEnd = y + w;
+    src = usr->unk64;
+    tileStride = usr->unk48 >> 2;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i += 2) {
+            pix = row[(i & 3) + (((i >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            pY[0] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            if ((j & 1) == 0) {
+                *pCb++ = ((b - pY[0]) * 0x90 + 0x80) >> 8;
+                *pCr++ = ((r - pY[0]) * 0xB7 + 0x80) >> 8;
+            }
+
+            pix = row[((i + 1) & 3) + ((((i + 1) >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            pY[1] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            pY += 2;
+        }
+        pY += ySkip;
+        if ((j & 1) == 0) {
+            pCb += cSkip;
+            pCr += cSkip;
+        }
+    }
+    return 0;
+}
+
+int fn_8026E9B4(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u16 pix;
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    u16* src;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int ySkip, cSkip;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x100;
+    pCr = (u8*)mcu->data + 0x140;
+    w = 32 / usr->unk2C;
+    h = 8 / usr->unk2C;
+    ySkip = 32 - w;
+    cSkip = ySkip >> 2;
+    xEnd = x + w;
+    yEnd = y + h;
+    src = usr->unk64;
+    tileStride = usr->unk48 >> 2;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i += 4) {
+            pix = row[(i & 3) + (((i >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            pY[0] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            *pCb++ = ((b - pY[0]) * 0x90 + 0x80) >> 8;
+            *pCr++ = ((r - pY[0]) * 0xB7 + 0x80) >> 8;
+
+            pix = row[((i + 1) & 3) + ((((i + 1) >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            pY[1] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+
+            pix = row[((i + 2) & 3) + ((((i + 2) >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            pY[2] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+
+            pix = row[((i + 3) & 3) + ((((i + 3) >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            pY[3] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            pY += 4;
+        }
+        pY += ySkip;
+        pCb += cSkip;
+        pCr += cSkip;
+    }
+    return 0;
+}
+
+int fn_8026EEF8(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u16 pix;
+    u16* src;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x100;
+    pCr = (u8*)mcu->data + 0x140;
+    src = usr->unk64;
+    tileStride = usr->unk48 >> 2;
+
+    if (usr->unk24 == x) {
+        w = usr->unk22;
+    } else {
+        w = 32 / usr->unk2C;
+    }
+    if (usr->unk28 == y) {
+        h = usr->unk23;
+    } else {
+        h = 8 / usr->unk2C;
+    }
+    xEnd = x + w;
+    yEnd = y + h;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i++) {
+            pix = row[(i & 3) + (((i >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            *pY = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            if ((i & 3) == 0) {
+                *pCb++ = ((b - *pY) * 0x90 + 0x80) >> 8;
+                *pCr++ = ((r - *pY) * 0xB7 + 0x80) >> 8;
+            }
+            pY++;
+        }
+        for (i = w; i < 32; i++) {
+            *pY = pY[-1];
+            pY++;
+            if ((i & 3) == 0) {
+                *pCb = pCb[-1];
+                pCb++;
+                *pCr = pCr[-1];
+                pCr++;
+            }
+        }
+    }
+    for (; h < 8; h++) {
+        memcpy(pY, pY - 32, 32);
+        pY += 32;
+        memcpy(pCb, pCb - 8, 8);
+        memcpy(pCr, pCr - 8, 8);
+        pCb += 8;
+        pCr += 8;
+    }
+    return 0;
+}
+
+int fn_8026F0E0(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u16 pix;
+    u16* src;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x80;
+    pCr = (u8*)mcu->data + 0xC0;
+    src = usr->unk64;
+    tileStride = usr->unk48 >> 2;
+
+    if (usr->unk24 == x) {
+        w = usr->unk22;
+    } else {
+        w = 16 / usr->unk2C;
+    }
+    if (usr->unk28 == y) {
+        h = usr->unk23;
+    } else {
+        h = 8 / usr->unk2C;
+    }
+    xEnd = x + w;
+    yEnd = y + h;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i++) {
+            pix = row[(i & 3) + (((i >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            *pY = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            if ((i & 1) == 0) {
+                *pCb++ = ((b - *pY) * 0x90 + 0x80) >> 8;
+                *pCr++ = ((r - *pY) * 0xB7 + 0x80) >> 8;
+            }
+            pY++;
+        }
+        for (i = w; i < 16; i++) {
+            *pY = pY[-1];
+            pY++;
+            if ((i & 1) == 0) {
+                *pCb = pCb[-1];
+                pCb++;
+                *pCr = pCr[-1];
+                pCr++;
+            }
+        }
+    }
+    for (; h < 8; h++) {
+        memcpy(pY, pY - 16, 16);
+        pY += 16;
+        memcpy(pCb, pCb - 8, 8);
+        memcpy(pCr, pCr - 8, 8);
+        pCb += 8;
+        pCr += 8;
+    }
+    return 0;
+}
+
+int fn_8026F2CC(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    int rowTile;
+    u16* row;
+    int yOdd;
+    u16* src;
+    int r, g, b;
+    u16 pix;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x100;
+    pCr = (u8*)mcu->data + 0x140;
+    src = usr->unk64;
+    tileStride = usr->unk48 >> 2;
+
+    if (usr->unk24 == x) {
+        w = usr->unk22;
+    } else {
+        w = 16 / usr->unk2C;
+    }
+    if (usr->unk28 == y) {
+        h = usr->unk23;
+    } else {
+        h = 16 / usr->unk2C;
+    }
+    xEnd = x + w;
+    yEnd = y + h;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        yOdd = j & 1;
+        for (i = x; i < xEnd; i++) {
+            pix = row[(i & 3) + (((i >> 2) + rowTile) << 4)];
+            r = (s8)(pix >> 8) & 0xF8;
+            g = (s8)(pix >> 3) & 0xFC;
+            b = (s8)(pix << 3) & 0xF8;
+            *pY = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            if ((i & 1) == 0 && yOdd == 0) {
+                *pCb++ = ((b - *pY) * 0x90 + 0x80) >> 8;
+                *pCr++ = ((r - *pY) * 0xB7 + 0x80) >> 8;
+            }
+            pY++;
+        }
+        for (i = w; i < 16; i++) {
+            *pY = pY[-1];
+            pY++;
+            if ((i & 1) == 0 && yOdd == 0) {
+                *pCb = pCb[-1];
+                pCb++;
+                *pCr = pCr[-1];
+                pCr++;
+            }
+        }
+    }
+    for (; h < 16; h++) {
+        memcpy(pY, pY - 16, 16);
+        pY += 16;
+        if ((h & 1) == 0) {
+            memcpy(pCb, pCb - 8, 8);
+            memcpy(pCr, pCr - 8, 8);
+            pCb += 8;
+            pCr += 8;
+        }
+    }
+    return 0;
+}
+
+int fn_8026DF60(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    u16* src;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int ySkip, cSkip;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x80;
+    pCr = (u8*)mcu->data + 0xC0;
+    w = 16 / usr->unk2C;
+    h = 8 / usr->unk2C;
+    ySkip = 16 - w;
+    cSkip = ySkip >> 1;
+    xEnd = x + w;
+    yEnd = y + h;
+    src = usr->unk64;
+    tileStride = (usr->unk48 >> 2) << 1;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i += 2) {
+            g = row[(i & 3) + (((((i >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[(i & 3) + ((((i >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            pY[0] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            *pCb++ = ((b - pY[0]) * 0x90 + 0x80) >> 8;
+            *pCr++ = ((r - pY[0]) * 0xB7 + 0x80) >> 8;
+
+            g = row[((i + 1) & 3) + ((((((i + 1) >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[((i + 1) & 3) + (((((i + 1) >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            pY[1] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            pY += 2;
+        }
+        pY += ySkip;
+        pCb += cSkip;
+        pCr += cSkip;
+    }
+    return 0;
+}
+
+int fn_8026E104(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    u16* src;
+    int i, j;
+    int w, xEnd, yEnd;
+    int ySkip, cSkip;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x100;
+    pCr = (u8*)mcu->data + 0x140;
+    w = 16 / usr->unk2C;
+    ySkip = 16 - w;
+    cSkip = ySkip >> 1;
+    xEnd = x + w;
+    yEnd = y + w;
+    src = usr->unk64;
+    tileStride = (usr->unk48 >> 2) << 1;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i += 2) {
+            g = row[(i & 3) + (((((i >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[(i & 3) + ((((i >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            pY[0] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            if ((j & 1) == 0) {
+                *pCb++ = ((b - pY[0]) * 0x90 + 0x80) >> 8;
+                *pCr++ = ((r - pY[0]) * 0xB7 + 0x80) >> 8;
+            }
+
+            g = row[((i + 1) & 3) + ((((((i + 1) >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[((i + 1) & 3) + (((((i + 1) >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            pY[1] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            pY += 2;
+        }
+        pY += ySkip;
+        if ((j & 1) == 0) {
+            pCb += cSkip;
+            pCr += cSkip;
+        }
+    }
+    return 0;
+}
+
+int fn_8026DCEC(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    u16* src;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int ySkip, cSkip;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x100;
+    pCr = (u8*)mcu->data + 0x140;
+    w = 32 / usr->unk2C;
+    h = 8 / usr->unk2C;
+    ySkip = 32 - w;
+    cSkip = ySkip >> 2;
+    xEnd = x + w;
+    yEnd = y + h;
+    src = usr->unk64;
+    tileStride = (usr->unk48 >> 2) << 1;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i += 4) {
+            g = row[(i & 3) + (((((i >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[(i & 3) + ((((i >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            pY[0] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            *pCb++ = ((b - pY[0]) * 0x90 + 0x80) >> 8;
+            *pCr++ = ((r - pY[0]) * 0xB7 + 0x80) >> 8;
+
+            g = row[((i + 1) & 3) + ((((((i + 1) >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[((i + 1) & 3) + (((((i + 1) >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            pY[1] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+
+            g = row[((i + 2) & 3) + ((((((i + 2) >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[((i + 2) & 3) + (((((i + 2) >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            pY[2] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+
+            g = row[((i + 3) & 3) + ((((((i + 3) >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[((i + 3) & 3) + (((((i + 3) >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            pY[3] = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            pY += 4;
+        }
+        pY += ySkip;
+        pCb += cSkip;
+        pCr += cSkip;
+    }
+    return 0;
+}
+
+int fn_8026E2B4(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u16* src;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x100;
+    pCr = (u8*)mcu->data + 0x140;
+    src = usr->unk64;
+    tileStride = (usr->unk48 >> 2) << 1;
+
+    if (usr->unk24 == x) {
+        w = usr->unk22;
+    } else {
+        w = 32 / usr->unk2C;
+    }
+    if (usr->unk28 == y) {
+        h = usr->unk23;
+    } else {
+        h = 8 / usr->unk2C;
+    }
+    xEnd = x + w;
+    yEnd = y + h;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i++) {
+            g = row[(i & 3) + (((((i >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[(i & 3) + ((((i >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            *pY = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            if ((i & 3) == 0) {
+                *pCb++ = ((b - *pY) * 0x90 + 0x80) >> 8;
+                *pCr++ = ((r - *pY) * 0xB7 + 0x80) >> 8;
+            }
+            pY++;
+        }
+        for (i = w; i < 32; i++) {
+            *pY = pY[-1];
+            pY++;
+            if ((i & 3) == 0) {
+                *pCb = pCb[-1];
+                pCb++;
+                *pCr = pCr[-1];
+                pCr++;
+            }
+        }
+    }
+    for (; h < 8; h++) {
+        memcpy(pY, pY - 32, 32);
+        pY += 32;
+        memcpy(pCb, pCb - 8, 8);
+        memcpy(pCr, pCr - 8, 8);
+        pCb += 8;
+        pCr += 8;
+    }
+    return 0;
+}
+
+int fn_8026E4AC(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    int rowTile;
+    u16* row;
+    int r, g, b;
+    u16* src;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x80;
+    pCr = (u8*)mcu->data + 0xC0;
+    src = usr->unk64;
+    tileStride = (usr->unk48 >> 2) << 1;
+
+    if (usr->unk24 == x) {
+        w = usr->unk22;
+    } else {
+        w = 16 / usr->unk2C;
+    }
+    if (usr->unk28 == y) {
+        h = usr->unk23;
+    } else {
+        h = 8 / usr->unk2C;
+    }
+    xEnd = x + w;
+    yEnd = y + h;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        for (i = x; i < xEnd; i++) {
+            g = row[(i & 3) + (((((i >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[(i & 3) + ((((i >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            *pY = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            if ((i & 1) == 0) {
+                *pCb++ = ((b - *pY) * 0x90 + 0x80) >> 8;
+                *pCr++ = ((r - *pY) * 0xB7 + 0x80) >> 8;
+            }
+            pY++;
+        }
+        for (i = w; i < 16; i++) {
+            *pY = pY[-1];
+            pY++;
+            if ((i & 1) == 0) {
+                *pCb = pCb[-1];
+                pCb++;
+                *pCr = pCr[-1];
+                pCr++;
+            }
+        }
+    }
+    for (; h < 8; h++) {
+        memcpy(pY, pY - 16, 16);
+        pY += 16;
+        memcpy(pCb, pCb - 8, 8);
+        memcpy(pCr, pCr - 8, 8);
+        pCb += 8;
+        pCr += 8;
+    }
+    return 0;
+}
+
+int fn_8026E6A8(TMCC_McuBuf* mcu, TMCC_UsrParam* usr, int x, int y) {
+    u8* pY;
+    u8* pCb;
+    u8* pCr;
+    int rowTile;
+    u16* row;
+    int yOdd;
+    u16* src;
+    int r, g, b;
+    int i, j;
+    int w, h, xEnd, yEnd;
+    int tileStride;
+
+    pY = (u8*)mcu->data;
+    pCb = (u8*)mcu->data + 0x100;
+    pCr = (u8*)mcu->data + 0x140;
+    src = usr->unk64;
+    tileStride = (usr->unk48 >> 2) << 1;
+
+    if (usr->unk24 == x) {
+        w = usr->unk22;
+    } else {
+        w = 16 / usr->unk2C;
+    }
+    if (usr->unk28 == y) {
+        h = usr->unk23;
+    } else {
+        h = 16 / usr->unk2C;
+    }
+    xEnd = x + w;
+    yEnd = y + h;
+
+    for (j = y; j < yEnd; j++) {
+        rowTile = (j >> 2) * tileStride;
+        row = src + ((j & 3) << 2);
+        yOdd = j & 1;
+        for (i = x; i < xEnd; i++) {
+            g = row[(i & 3) + (((((i >> 2) << 1) + rowTile) + 1) << 4)];
+            r = row[(i & 3) + ((((i >> 2) << 1) + rowTile) << 4)] & 0xFF;
+            b = g & 0xFF;
+            g >>= 8;
+            *pY = (r * 0x4D + g * 0x96 + b * 0x1D + 0x80) >> 8;
+            if ((i & 1) == 0 && yOdd == 0) {
+                *pCb++ = ((b - *pY) * 0x90 + 0x80) >> 8;
+                *pCr++ = ((r - *pY) * 0xB7 + 0x80) >> 8;
+            }
+            pY++;
+        }
+        for (i = w; i < 16; i++) {
+            *pY = pY[-1];
+            pY++;
+            if ((i & 1) == 0 && yOdd == 0) {
+                *pCb = pCb[-1];
+                pCb++;
+                *pCr = pCr[-1];
+                pCr++;
+            }
+        }
+    }
+    for (; h < 16; h++) {
+        memcpy(pY, pY - 16, 16);
+        pY += 16;
+        if ((h & 1) == 0) {
+            memcpy(pCb, pCb - 8, 8);
+            memcpy(pCr, pCr - 8, 8);
+            pCb += 8;
+            pCr += 8;
+        }
+    }
+    return 0;
+}
+
+void fn_8026BBF0(s8* src, int* dst, int stride) {
+    int tmp[64];
+    u8* in = (u8*)src;
+    int* out = tmp;
+    int i;
+    int t0, t1, t2, t3, t4, t5, t6, t7;
+    int t10, t11, t12, t13;
+    int s0, s1, s2;
+    int z1, z2, z3, z4, z5, z11, z13;
+    int* s;
+    int* d;
+
+    for (i = 0; i < 8; i++) {
+        t0 = in[0] + in[7];
+        t7 = in[0] - in[7];
+        t1 = in[1] + in[6];
+        t6 = in[1] - in[6];
+        t2 = in[2] + in[5];
+        t5 = in[2] - in[5];
+        t3 = in[3] + in[4];
+        t4 = in[3] - in[4];
+
+        s2 = t6 + t7;
+        s0 = t4 + t5;
+        s1 = t5 + t6;
+
+        t10 = t0 + t3;
+        t11 = t1 + t2;
+        t12 = t1 - t2;
+        t13 = t0 - t3;
+
+        z1 = ((t13 + t12) * 0x2D41) >> 14;
+        out[0] = t10 + t11 - 1024;
+        out[32] = t10 - t11;
+        out[16] = t13 + z1;
+        out[48] = t13 - z1;
+
+        z2 = (s0 * 0x3B21 - s2 * 0x187E) >> 14;
+        z4 = (s2 * 0x3B21 + s0 * 0x187E) >> 14;
+        z3 = (s1 * 0x2D41) >> 14;
+
+        z11 = t7 + z3;
+        z13 = t7 - z3;
+
+        out[8] = z11 + z4;
+        out[56] = z11 - z4;
+        out[24] = z13 - z2;
+        out[40] = z13 + z2;
+
+        in += stride;
+        out++;
+    }
+
+    s = tmp;
+    d = dst;
+    for (i = 0; i < 8; i++) {
+        t0 = s[0] + s[7];
+        t7 = s[0] - s[7];
+        t1 = s[1] + s[6];
+        t6 = s[1] - s[6];
+        t2 = s[2] + s[5];
+        t5 = s[2] - s[5];
+        t3 = s[3] + s[4];
+        t4 = s[3] - s[4];
+
+        s2 = t6 + t7;
+        s0 = t4 + t5;
+        s1 = t5 + t6;
+
+        t13 = t0 - t3;
+        t12 = t1 - t2;
+        t10 = t0 + t3;
+        t11 = t1 + t2;
+
+        z1 = ((t13 + t12) * 0x2D41) >> 14;
+        d[0] = t10 + t11;
+        d[32] = t10 - t11;
+        d[16] = t13 + z1;
+        d[48] = t13 - z1;
+
+        z5 = (s0 - s2) * 0x187E;
+        z2 = (s0 * 0x22A3 + z5) >> 14;
+        z4 = (s2 * 0x539F + z5) >> 14;
+        z3 = (s1 * 0x2D41) >> 14;
+
+        z13 = t7 - z3;
+        z11 = t7 + z3;
+
+        d[40] = z13 + z2;
+        d[24] = z13 - z2;
+        d[8] = z11 + z4;
+        d[56] = z11 - z4;
+
+        s += 8;
+        d++;
+    }
+}
+
+void fn_8026BDE8(s8* src, int* dst, int stride) {
+    int tmp[64];
+    int t0, t1, t2, t3, t4, t5, t6, t7;
+    int t10, t11, t12, t13;
+    int s0, s1, s2;
+    int z1, z2, z3, z4, z5, z11, z13;
+    s8* in = src;
+    int* out = tmp;
+    int i;
+    int* s;
+    int* d;
+
+    for (i = 0; i < 8; i++) {
+        t0 = in[0] + in[7];
+        t7 = in[0] - in[7];
+        t3 = in[3] + in[4];
+        t4 = in[3] - in[4];
+        t2 = in[2] + in[5];
+        t5 = in[2] - in[5];
+        t1 = in[1] + in[6];
+        t6 = in[1] - in[6];
+
+        s0 = t4 + t5;
+        t13 = t0 - t3;
+        t12 = t1 - t2;
+        s2 = t6 + t7;
+        t10 = t0 + t3;
+        s1 = t5 + t6;
+        t11 = t1 + t2;
+
+        z1 = ((t13 + t12) * 0x2D41) >> 14;
+        out[0] = t10 + t11;
+        out[32] = t10 - t11;
+        out[16] = t13 + z1;
+        out[48] = t13 - z1;
+
+        z2 = (s0 * 0x3B21 - s2 * 0x187E) >> 14;
+        z4 = (s2 * 0x3B21 + s0 * 0x187E) >> 14;
+        z3 = (s1 * 0x2D41) >> 14;
+
+        z11 = t7 + z3;
+        z13 = t7 - z3;
+
+        out[8] = z11 + z4;
+        out[56] = z11 - z4;
+        out[24] = z13 - z2;
+        out[40] = z13 + z2;
+
+        in += stride;
+        out++;
+    }
+
+    s = tmp;
+    d = dst;
+    for (i = 0; i < 8; i++) {
+        t0 = s[0] + s[7];
+        t7 = s[0] - s[7];
+        t1 = s[1] + s[6];
+        t6 = s[1] - s[6];
+        t2 = s[2] + s[5];
+        t5 = s[2] - s[5];
+        t3 = s[3] + s[4];
+        t4 = s[3] - s[4];
+
+        s2 = t6 + t7;
+        s0 = t4 + t5;
+        s1 = t5 + t6;
+
+        t13 = t0 - t3;
+        t12 = t1 - t2;
+        t10 = t0 + t3;
+        t11 = t1 + t2;
+
+        z1 = ((t13 + t12) * 0x2D41) >> 14;
+        d[0] = t10 + t11;
+        d[32] = t10 - t11;
+        d[16] = t13 + z1;
+        d[48] = t13 - z1;
+
+        z5 = (s0 - s2) * 0x187E;
+        z2 = (s0 * 0x22A3 + z5) >> 14;
+        z4 = (s2 * 0x539F + z5) >> 14;
+        z3 = (s1 * 0x2D41) >> 14;
+
+        z13 = t7 - z3;
+        z11 = t7 + z3;
+
+        d[40] = z13 + z2;
+        d[24] = z13 - z2;
+        d[8] = z11 + z4;
+        d[56] = z11 - z4;
+
+        s += 8;
+        d++;
+    }
+}
+
+int fn_8026CE80(int* block, TMCC_CompInfo* comp) {
+    TMCC_CompHuff* huff;
+    int i, run;
+    int* qtbl;
+    int* zz;
+    int dc, val, diff, temp, nbits, totalBits;
+
+    dc = block[0];
+    zz = comp->unk18 + 1;
+    qtbl = comp->unk14;
+    huff = comp->unk10;
+    if (dc < 0) {
+        dc = -dc;
+        val = -((qtbl[0] * dc + 0x8000) >> 16);
+    } else {
+        val = (qtbl[0] * dc + 0x8000) >> 16;
+    }
+
+    diff = val - comp->dcPred;
+    comp->dcPred = val;
+    if (diff < 0) {
+        diff = -diff;
+    }
+    nbits = 0;
+    while (diff > 0) {
+        diff >>= 1;
+        nbits++;
+    }
+    if (nbits >= huff->dcMax) {
+        return -2;
+    }
+    totalBits = huff->dcBits[nbits];
+    totalBits += nbits;
+
+    run = 0;
+    for (i = 1; i < 64; i++) {
+        int idx = *zz++;
+        int ac = block[idx];
+        int q = qtbl[idx];
+        if (ac <= 0) {
+            val = -((-ac * q + 0x8000) >> 16);
+        } else {
+            val = (ac * q + 0x8000) >> 16;
+        }
+        if (val == 0) {
+            run++;
+        } else {
+            while (run > 15) {
+                totalBits += huff->acBits[0xF0];
+                run -= 16;
+            }
+            temp = val;
+            if (val < 0) {
+                temp = -val;
+            }
+            nbits = 0;
+            do {
+                nbits++;
+            } while ((temp >> nbits) != 0);
+            if (nbits >= huff->acMax) {
+                return -2;
+            }
+            totalBits += huff->acBits[(run << 4) + nbits] + nbits;
+            run = 0;
+        }
+    }
+
+    if (run > 0) {
+        totalBits += huff->acBits[0];
+    }
+    comp->unk1C->total += totalBits;
+    return 0;
+}
+
+int fn_8026A3B8(TMCC_Encoder* enc) {
+    TMCC_Bitstream* bs = &enc->outStream;
+    int* qChr = enc->qChr;
+    const int* zz = enc->zigzag;
+    int* qLum;
+    int i;
+
+    TMCC_JPEGENC_PutWord(bs, 0xFFD8);
+    TMCC_JPEGENC_PutWord(bs, 0xFFDB);
+    TMCC_JPEGENC_PutWord(bs, 0x43);
+    fn_802692BC(bs, 0);
+    qLum = enc->qLum;
+    for (i = 0; i < 64; i++) {
+        fn_802692BC(bs, qLum[zz[i]]);
+    }
+
+    TMCC_JPEGENC_PutWord(bs, 0xFFDB);
+    TMCC_JPEGENC_PutWord(bs, 0x43);
+    fn_802692BC(bs, 1);
+    for (i = 0; i < 64; i++) {
+        fn_802692BC(bs, qChr[zz[i]]);
+    }
+
+    TMCC_JPEGENC_PutWord(bs, 0xFFC4);
+    TMCC_JPEGENC_PutWord(bs, 0x1F);
+    fn_802692BC(bs, 0);
+    TMCC_JPEGENC_PutString(bs, enc->huffSrc[0], 16);
+    TMCC_JPEGENC_PutString(bs, enc->huffSrc[1], 12);
+
+    TMCC_JPEGENC_PutWord(bs, 0xFFC4);
+    TMCC_JPEGENC_PutWord(bs, 0x1F);
+    fn_802692BC(bs, 1);
+    TMCC_JPEGENC_PutString(bs, enc->huffSrc[2], 16);
+    TMCC_JPEGENC_PutString(bs, enc->huffSrc[3], 12);
+
+    TMCC_JPEGENC_PutWord(bs, 0xFFC4);
+    TMCC_JPEGENC_PutWord(bs, 0xB5);
+    fn_802692BC(bs, 0x10);
+    TMCC_JPEGENC_PutString(bs, enc->huffSrc[4], 16);
+    TMCC_JPEGENC_PutString(bs, enc->huffSrc[5], 0xA2);
+
+    TMCC_JPEGENC_PutWord(bs, 0xFFC4);
+    TMCC_JPEGENC_PutWord(bs, 0xB5);
+    fn_802692BC(bs, 0x11);
+    TMCC_JPEGENC_PutString(bs, enc->huffSrc[6], 16);
+    TMCC_JPEGENC_PutString(bs, enc->huffSrc[7], 0xA2);
+
+    if (enc->unk10 != 0) {
+        TMCC_JPEGENC_PutWord(bs, 0xFFDD);
+        TMCC_JPEGENC_PutWord(bs, 4);
+        TMCC_JPEGENC_PutWord(bs, enc->unk10);
+    }
+
+    if (fn_8026A28C(enc) < 0) {
+        return -2;
+    }
+    return 0;
+}
+
+int fn_802698AC(int* block, TMCC_CompInfo* comp) {
+    TMCC_CompHuff* huff;
+    int val, nbits, i, run;
+    int* qtbl;
+    TMCC_Bitstream* bs;
+    int* zz;
+    TMCC_PutFn putFn;
+    u16 masks[17] = {
+        0x0000, 0x0001, 0x0003, 0x0007, 0x000F, 0x001F, 0x003F, 0x007F,
+        0x00FF, 0x01FF, 0x03FF, 0x07FF, 0x0FFF, 0x1FFF, 0x3FFF, 0x7FFF,
+        0xFFFF
+    };
+    int dcVal, diff, temp, dcBits;
+    int freeBits, buf;
+
+    zz = comp->unk18 + 1;
+    bs = comp->unk1C;
+    TMCC_JPEGENC_CheckPutStream((TMCC_Encoder*)comp);
+    putFn = comp->putFn;
+    qtbl = comp->unk14;
+    huff = comp->unk10;
+
+    dcVal = block[0];
+    if (dcVal < 0) {
+        dcVal = -dcVal;
+        dcVal = -((qtbl[0] * dcVal + 0x8000) >> 16);
+    } else {
+        dcVal = (qtbl[0] * dcVal + 0x8000) >> 16;
+    }
+
+    diff = dcVal - comp->dcPred;
+    comp->dcPred = dcVal;
+    temp = diff;
+    if (diff < 0) {
+        temp = -diff;
+        diff--;
+    }
+    dcBits = 0;
+    while (temp > 0) {
+        temp >>= 1;
+        dcBits++;
+    }
+    if (dcBits >= huff->dcMax) {
+        return -2;
+    }
+    freeBits = 32;
+    buf = huff->dcCode[dcBits];
+    freeBits -= huff->dcBits[dcBits];
+    buf <<= dcBits;
+    freeBits -= dcBits;
+    buf |= diff & masks[dcBits];
+    if (freeBits < 16) {
+        putFn(bs, buf, 32 - freeBits);
+        buf = 0;
+        freeBits = 32;
+    }
+
+    run = 0;
+    for (i = 1; i < 64; i++) {
+        int idx = *zz++;
+        int ac = block[idx];
+        int q = qtbl[idx];
+        if (ac <= 0) {
+            val = -((-ac * q + 0x8000) >> 16);
+        } else {
+            val = (ac * q + 0x8000) >> 16;
+        }
+        if (val == 0) {
+            run++;
+        } else {
+            while (run > 15) {
+                run -= 16;
+                freeBits -= huff->acBits[0xF0];
+                buf <<= huff->acBits[0xF0];
+                buf += huff->acCode[0xF0];
+                if (freeBits < 16) {
+                    putFn(bs, buf, 32 - freeBits);
+                    buf = 0;
+                    freeBits = 32;
+                }
+            }
+            temp = val;
+            if (val < 0) {
+                temp = -val;
+                val--;
+            }
+            nbits = 0;
+            do {
+                nbits++;
+            } while ((temp >> nbits) != 0);
+            if (nbits >= huff->acMax) {
+                return -2;
+            }
+            {
+                int codeIdx = (run << 4) + nbits;
+                run = 0;
+                freeBits -= huff->acBits[codeIdx];
+                buf <<= huff->acBits[codeIdx];
+                buf += huff->acCode[codeIdx];
+                if (freeBits < 16) {
+                    putFn(bs, buf, 32 - freeBits);
+                    buf = 0;
+                    freeBits = 32;
+                }
+            }
+            freeBits -= nbits;
+            buf = (buf << nbits) | (val & masks[nbits]);
+            if (freeBits < 16) {
+                putFn(bs, buf, 32 - freeBits);
+                buf = 0;
+                freeBits = 32;
+            }
+        }
+    }
+
+    if (run > 0) {
+        buf <<= huff->acBits[0];
+        buf += huff->acCode[0];
+        freeBits -= huff->acBits[0];
+        putFn(bs, buf, 32 - freeBits);
+    } else if (freeBits != 32) {
+        putFn(bs, buf, 32 - freeBits);
+    }
+    return 0;
+}
+
+int fn_8026CAE0(TMCC_UsrParam* usr, u8* pixels, TMCC_InitParam* param) {
+    u32 target = (u32)(0.9 * (double)param->unk18);
+    u32 size200, size50, size100, size1, size500;
+    int mcuCount;
+    u32 q;
+
+    param->unk14 = 100;
+    mcuCount = fn_8026C7D4(usr, (int)pixels, param);
+    if (mcuCount >= 0) {
+        if (fn_8026C930(usr, mcuCount, pixels, 5) < 0) {
+            return -2;
+        }
+        size100 = usr->unk10 * 5;
+    } else {
+        return -2;
+    }
+
+    if (size100 > target) {
+        param->unk14 = 50;
+        mcuCount = fn_8026C7D4(usr, (int)pixels, param);
+        if (mcuCount >= 0) {
+            if (fn_8026C930(usr, mcuCount, pixels, 5) < 0) {
+                return -2;
+            }
+            size50 = usr->unk10 * 5;
+        } else {
+            return -2;
+        }
+
+        if (size50 > target) {
+            param->unk14 = 1;
+            mcuCount = fn_8026C7D4(usr, (int)pixels, param);
+            if (mcuCount >= 0) {
+                if (fn_8026C930(usr, mcuCount, pixels, 5) < 0) {
+                    return -2;
+                }
+                size1 = usr->unk10 * 5;
+            } else {
+                return -2;
+            }
+
+            if (size1 >= target) {
+                param->unk14 = 1;
+            } else {
+                q = (target - size1) / ((size50 - size1 + 49) / 50U);
+                param->unk14 = q;
+                if (q > 49) {
+                    param->unk14 = 49;
+                }
+            }
+        } else if (size50 == target) {
+            param->unk14 = 50;
+        } else {
+            q = (target - size50) / ((size100 - size50 + 49) / 50U) + 50;
+            param->unk14 = q;
+            if (q > 99) {
+                param->unk14 = 99;
+            }
+        }
+    } else {
+        param->unk14 = 200;
+        mcuCount = fn_8026C7D4(usr, (int)pixels, param);
+        if (mcuCount >= 0) {
+            if (fn_8026C930(usr, mcuCount, pixels, 5) < 0) {
+                return -2;
+            }
+            size200 = usr->unk10 * 5;
+        } else {
+            return -2;
+        }
+
+        if (size100 == target) {
+            param->unk14 = 100;
+        } else if (size200 > target) {
+            q = (target - size100) / ((size200 - size100 + 99) / 100U) + 100;
+            param->unk14 = q;
+            if (q > 199) {
+                param->unk14 = 199;
+            }
+        } else {
+            param->unk14 = 500;
+            mcuCount = fn_8026C7D4(usr, (int)pixels, param);
+            if (mcuCount >= 0) {
+                if (fn_8026C930(usr, mcuCount, pixels, 5) < 0) {
+                    return -2;
+                }
+                size500 = usr->unk10 * 5;
+            } else {
+                return -2;
+            }
+
+            if (size200 == target) {
+                param->unk14 = 200;
+            } else if (size500 > target) {
+                q = (target - size200) / ((size500 - size200 + 299) / 300U) + 200;
+                param->unk14 = q;
+                if (q > 499) {
+                    param->unk14 = 499;
+                }
+            } else {
+                param->unk14 = 500;
+            }
+        }
+    }
+
+    if ((u32)param->unk14 < 1) {
+        param->unk14 = 1;
+    } else if ((u32)param->unk14 > 500) {
+        param->unk14 = 500;
+    }
+    return param->unk14;
+}
+
+static const int sZigZag[64] = {
+    0, 1, 8, 16, 9, 2, 3, 10,
+    17, 24, 32, 25, 18, 11, 4, 5,
+    12, 19, 26, 33, 40, 48, 41, 34,
+    27, 20, 13, 6, 7, 14, 21, 28,
+    35, 42, 49, 56, 57, 50, 43, 36,
+    29, 22, 15, 23, 30, 37, 44, 51,
+    58, 59, 52, 45, 38, 31, 39, 46,
+    53, 60, 61, 54, 47, 55, 62, 63
+};
+static const int sScaleTbl1[64] = {
+    16384, 11812, 12540, 13933, 16384, 20853, 30274, 59384,
+    11812, 8516, 9041, 10045, 11812, 15034, 21826, 42813,
+    12540, 9041, 9598, 10664, 12540, 15960, 23170, 45451,
+    13933, 10045, 10664, 11849, 13933, 17734, 25746, 50502,
+    16384, 11812, 12540, 13933, 16384, 20853, 30274, 59384,
+    20853, 15034, 15960, 17734, 20853, 26541, 38531, 75581,
+    30274, 21826, 23170, 25746, 30274, 38531, 55938, 109727,
+    59384, 42813, 45451, 50502, 59384, 75581, 109727, 215238
+};
+static const int sScaleTbl2[64] = {
+    8192, 5906, 6270, 6967, 8192, 10426, 15137, 29692,
+    5906, 4258, 4520, 5023, 5906, 7517, 10913, 21407,
+    6270, 4520, 4799, 5332, 6270, 7980, 11585, 22725,
+    6967, 5023, 5332, 5925, 6967, 8867, 12873, 25251,
+    8192, 5906, 6270, 6967, 8192, 10426, 15137, 29692,
+    10426, 7517, 7980, 8867, 10426, 13270, 19266, 37791,
+    15137, 10913, 11585, 12873, 15137, 19266, 27969, 54864,
+    29692, 21407, 22725, 25251, 29692, 37791, 54864, 107619
+};
+static const int sDefaultLumRecip[64] = {
+    512, 536, 627, 435, 341, 260, 296, 486,
+    492, 354, 322, 264, 227, 129, 181, 389,
+    447, 347, 299, 222, 156, 140, 167, 405,
+    497, 295, 242, 204, 136, 101, 160, 407,
+    455, 268, 169, 124, 120, 95, 146, 385,
+    434, 214, 145, 138, 128, 127, 170, 410,
+    308, 170, 148, 147, 146, 159, 233, 542,
+    412, 232, 239, 257, 265, 377, 532, 1087
+};
+static const int sDefaultLumQuant[64] = {
+    16, 11, 10, 16, 24, 40, 51, 61,
+    12, 12, 14, 19, 26, 58, 60, 55,
+    14, 13, 16, 24, 40, 57, 69, 56,
+    14, 17, 22, 29, 51, 87, 80, 62,
+    18, 22, 37, 56, 68, 109, 103, 77,
+    24, 35, 55, 64, 81, 104, 113, 92,
+    49, 64, 78, 87, 103, 121, 120, 101,
+    72, 92, 95, 98, 112, 100, 103, 99
+};
+static const int sDefaultChrRecip[64] = {
+    481, 328, 261, 148, 82, 105, 152, 299,
+    328, 202, 173, 76, 59, 75, 110, 216,
+    261, 173, 85, 53, 63, 80, 117, 229,
+    148, 76, 53, 59, 70, 89, 130, 255,
+    82, 59, 63, 70, 82, 105, 152, 299,
+    105, 75, 80, 89, 105, 134, 194, 381,
+    152, 110, 117, 130, 152, 194, 282, 554,
+    299, 216, 229, 255, 299, 381, 554, 1087
+};
+static const int sDefaultChrQuant[64] = {
+    17, 18, 24, 47, 99, 99, 99, 99,
+    18, 21, 26, 66, 99, 99, 99, 99,
+    24, 26, 56, 99, 99, 99, 99, 99,
+    47, 66, 99, 99, 99, 99, 99, 99,
+    99, 99, 99, 99, 99, 99, 99, 99,
+    99, 99, 99, 99, 99, 99, 99, 99,
+    99, 99, 99, 99, 99, 99, 99, 99,
+    99, 99, 99, 99, 99, 99, 99, 99
+};
+
+void fn_8026C45C(TMCC_Encoder* enc) {
+    int i;
+    int* qLum = enc->qLum;
+    int* qChr = enc->qChr;
+    int* qLumRecip = enc->qLumRecip;
+    int* qChrRecip = enc->qChrRecip;
+    u8 mode = enc->u1C.unk1C;
+
+    enc->zigzag = sZigZag;
+    if (mode < 2) {
+        const int* lumTbl = sDefaultLumQuant;
+        const int* chrTbl = sDefaultChrQuant;
+        const int* scaleTbl = sScaleTbl2;
+        u32 scale = enc->u20.unk20;
+        for (i = 0; i < 64; i++) {
+            int q1 = (lumTbl[i] * 50) / scale;
+            int q2 = (chrTbl[i] * 50) / scale;
+            qLum[i] = ((q1 < 256 && q1 > 0) != 0) ? q1 : ((q1 > 0) ? 255 : 1);
+            qChr[i] = ((q2 < 256 && q2 > 0) != 0) ? q2 : ((q2 > 0) ? 255 : 1);
+            qLumRecip[i] = scaleTbl[i] / qLum[i];
+            qChrRecip[i] = scaleTbl[i] / qChr[i];
+        }
+    } else if (mode == 2) {
+        const int* scaleTbl = sScaleTbl2;
+        for (i = 0; i < 64; i++) {
+            qLumRecip[i] = scaleTbl[i] / qLum[i];
+            qChrRecip[i] = scaleTbl[i] / qChr[i];
+        }
+    } else {
+        const int* lumTbl = sDefaultLumQuant;
+        const int* chrTbl = sDefaultChrQuant;
+        const int* lumRecipTbl = sDefaultLumRecip;
+        const int* chrRecipTbl = sDefaultChrRecip;
+        for (i = 0; i < 64; i++) {
+            qLum[i] = lumTbl[i];
+            qChr[i] = chrTbl[i];
+            qLumRecip[i] = lumRecipTbl[i];
+            qChrRecip[i] = chrRecipTbl[i];
+        }
+    }
+}
+
+void fn_8026C0AC(TMCC_Encoder* enc) {
+    int huffSize[256];
+    int huffCode[256];
+    const u8* bits;
+    const u8* vals;
+    struct {
+        int unk0;
+        void* unk4;
+        void* unk8;
+    }* tbl;
+    int tblIdx;
+    int i, j, k;
+    u8 lastK;
+    u16 code;
+    u8 si;
+
+    for (tblIdx = 0; tblIdx < 4; tblIdx++) {
+        switch (tblIdx) {
+        case 0:
+            bits = sDefaultDcLumBits;
+            vals = sDefaultDcLumVals;
+            tbl = (void*)&enc->huffTbl[0];
+            break;
+        case 1:
+            bits = sDefaultDcChrBits;
+            vals = sDefaultDcChrVals;
+            tbl = (void*)&enc->huffTbl[2];
+            break;
+        case 2:
+            bits = sDefaultAcLumBits;
+            vals = sDefaultAcLumVals;
+            tbl = (void*)&enc->huffTbl[1];
+            break;
+        case 3:
+            bits = sDefaultAcChrBits;
+            vals = sDefaultAcChrVals;
+            tbl = (void*)&enc->huffTbl[3];
+            break;
+        }
+
+        k = 0;
+        i = 1;
+        j = 1;
+        while (1) {
+            if (j > bits[i]) {
+                i++;
+                j = 1;
+                if (i > 16) {
+                    huffSize[k] = 0;
+                    lastK = (u8)k;
+                    break;
+                }
+            } else {
+                huffSize[k] = i + 1;
+                k++;
+                j++;
+            }
+        }
+
+        code = 0;
+        si = (u8)huffSize[0];
+        k = 0;
+        while (1) {
+            do {
+                huffCode[k] = code;
+                code++;
+                k++;
+            } while (huffSize[k] == si);
+            if (huffSize[k] == 0) {
+                break;
+            }
+            do {
+                code <<= 1;
+                si++;
+            } while (huffSize[k] != si);
+        }
+
+        for (k = 0; k < lastK; k++) {
+            ((int*)tbl->unk4)[vals[k]] = huffCode[k];
+            ((int*)tbl->unk8)[vals[k]] = huffSize[k];
+        }
+        tbl->unk0 = lastK;
+    }
+}
+
+void fn_8026A7D0(TMCC_Encoder* enc) {
+    TMCC_Bitstream* bs;
+    u16 wY, hY, wCb, hCb, wCr, hCr;
+    int* qLum;
+    int* qChr;
+    const int* zz;
+    int minQ, i, q;
+    int remW, remH;
+
+    bs = &enc->outStream;
+    qLum = enc->qLumRecip;
+    qChr = enc->qChrRecip;
+    enc->restartCount = 0;
+    zz = enc->zigzag;
+    enc->unk14 = enc->unk10;
+    wY = enc->unk2;
+    hY = enc->unk4;
+    wCb = enc->unk6;
+    hCb = enc->unk8;
+    wCr = enc->unkA;
+    hCr = enc->unkC;
+
+    switch (enc->format) {
+    case 0:
+        enc->img.width = (wY + 31) >> 5;
+        enc->img.height = (hY + 7) >> 3;
+        enc->img.unk4 = 0;
+        enc->img.unk6 = 0;
+        remW = wY % 32;
+        remH = hY % 8;
+        enc->img.unk8 = remW;
+        enc->img.unk9 = remH;
+        enc->img.yW = wY;
+        enc->img.yH = hY;
+        enc->img.yEdgeW = remW ? remW : 32;
+        enc->img.yEdgeH = remH ? remH : 8;
+        enc->img.unk14 = 32;
+        enc->img.unk15 = 8;
+        enc->img.yBlocks = 4;
+        enc->img.yFmt = 0;
+        enc->img.compY.stride = 32;
+        enc->img.compY.dcPred = 0;
+        minQ = 0x10000;
+        for (i = 0; i < 64; i++) {
+            q = 0x10000 / qLum[i];
+            if (minQ > q) minQ = q;
+        }
+        enc->img.compY.unkC = minQ;
+        enc->img.compY.unk10 = (TMCC_CompHuff*)&enc->huffTbl[0];
+        enc->img.compY.unk14 = qLum;
+        enc->img.compY.unk18 = (int*)zz;
+        enc->img.compY.unk1C = bs;
+
+        enc->img.compY.nextW = wCb;
+        enc->img.compY.nextH = hCb;
+        enc->img.compY.nextEdgeW = (wCb % 8) ? (wCb % 8) : 8;
+        enc->img.compY.nextEdgeH = (hCb % 8) ? (hCb % 8) : 8;
+        enc->img.compY.unk2C = 8;
+        enc->img.compY.unk2D = 8;
+        enc->img.compY.nextBlocks = 1;
+        enc->img.compY.nextFmt = 0;
+        enc->img.compCb.stride = 8;
+        enc->img.compCb.dcPred = 0;
+        minQ = 0x10000;
+        for (i = 0; i < 64; i++) {
+            q = 0x10000 / qChr[i];
+            if (minQ > q) minQ = q;
+        }
+        enc->img.compCb.unkC = minQ;
+        enc->img.compCb.unk10 = (TMCC_CompHuff*)&enc->huffTbl[2];
+        enc->img.compCb.unk14 = qChr;
+        enc->img.compCb.unk18 = (int*)zz;
+        enc->img.compCb.unk1C = bs;
+
+        enc->img.compCb.nextW = wCr;
+        enc->img.compCb.nextH = hCr;
+        enc->img.compCb.nextEdgeW = (wCr % 8) ? (wCr % 8) : 8;
+        enc->img.compCb.nextEdgeH = (hCr % 8) ? (hCr % 8) : 8;
+        enc->img.compCb.unk2C = 8;
+        enc->img.compCb.unk2D = 8;
+        enc->img.compCb.nextBlocks = 1;
+        enc->img.compCb.nextFmt = 0;
+        enc->img.crStride = 8;
+        enc->img.crDcPred = 0;
+        enc->img.crUnkC = enc->img.compCb.unkC;
+        enc->img.crUnk10 = (TMCC_CompHuff*)&enc->huffTbl[2];
+        enc->img.crUnk14 = qChr;
+        enc->img.crUnk18 = zz;
+        enc->img.crUnk1C = bs;
+        break;
+    case 2:
+        enc->img.width = (wY + 15) >> 4;
+        enc->img.height = (hY + 15) >> 4;
+        enc->img.unk4 = 0;
+        enc->img.unk6 = 0;
+        remW = wY % 16;
+        remH = hY % 16;
+        enc->img.unk8 = remW;
+        enc->img.unk9 = remH;
+        enc->img.yW = wY;
+        enc->img.yH = hY;
+        enc->img.yEdgeW = remW ? remW : 16;
+        enc->img.yEdgeH = remH ? remH : 16;
+        enc->img.unk14 = 16;
+        enc->img.unk15 = 16;
+        enc->img.yBlocks = 4;
+        enc->img.yFmt = 2;
+        enc->img.compY.stride = 16;
+        enc->img.compY.dcPred = 0;
+        minQ = 0x10000;
+        for (i = 0; i < 64; i++) {
+            q = 0x10000 / qLum[i];
+            if (minQ > q) minQ = q;
+        }
+        enc->img.compY.unkC = minQ;
+        enc->img.compY.unk10 = (TMCC_CompHuff*)&enc->huffTbl[0];
+        enc->img.compY.unk14 = qLum;
+        enc->img.compY.unk18 = (int*)zz;
+        enc->img.compY.unk1C = bs;
+
+        enc->img.compY.nextW = wCb;
+        enc->img.compY.nextH = hCb;
+        enc->img.compY.nextEdgeW = (wCb % 8) ? (wCb % 8) : 8;
+        enc->img.compY.nextEdgeH = (hCb % 8) ? (hCb % 8) : 8;
+        enc->img.compY.unk2C = 8;
+        enc->img.compY.unk2D = 8;
+        enc->img.compY.nextBlocks = 1;
+        enc->img.compY.nextFmt = 2;
+        enc->img.compCb.stride = 8;
+        enc->img.compCb.dcPred = 0;
+        minQ = 0x10000;
+        for (i = 0; i < 64; i++) {
+            q = 0x10000 / qChr[i];
+            if (minQ > q) minQ = q;
+        }
+        enc->img.compCb.unkC = minQ;
+        enc->img.compCb.unk10 = (TMCC_CompHuff*)&enc->huffTbl[2];
+        enc->img.compCb.unk14 = qChr;
+        enc->img.compCb.unk18 = (int*)zz;
+        enc->img.compCb.unk1C = bs;
+
+        enc->img.compCb.nextW = wCr;
+        enc->img.compCb.nextH = hCr;
+        enc->img.compCb.nextEdgeW = (wCr % 8) ? (wCr % 8) : 8;
+        enc->img.compCb.nextEdgeH = (hCr % 8) ? (hCr % 8) : 8;
+        enc->img.compCb.unk2C = 8;
+        enc->img.compCb.unk2D = 8;
+        enc->img.compCb.nextBlocks = 1;
+        enc->img.compCb.nextFmt = 2;
+        enc->img.crStride = 8;
+        enc->img.crDcPred = 0;
+        enc->img.crUnkC = enc->img.compCb.unkC;
+        enc->img.crUnk10 = (TMCC_CompHuff*)&enc->huffTbl[2];
+        enc->img.crUnk14 = qChr;
+        enc->img.crUnk18 = zz;
+        enc->img.crUnk1C = bs;
+        break;
+    case 1:
+        enc->img.width = (wY + 15) >> 4;
+        enc->img.height = (hY + 7) >> 3;
+        enc->img.unk4 = 0;
+        enc->img.unk6 = 0;
+        remW = wY % 16;
+        remH = hY % 8;
+        enc->img.unk8 = remW;
+        enc->img.unk9 = remH;
+        enc->img.yW = wY;
+        enc->img.yH = hY;
+        enc->img.yEdgeW = remW ? remW : 16;
+        enc->img.yEdgeH = remH ? remH : 8;
+        enc->img.unk14 = 16;
+        enc->img.unk15 = 8;
+        enc->img.yBlocks = 2;
+        enc->img.yFmt = 1;
+        enc->img.compY.stride = 16;
+        enc->img.compY.dcPred = 0;
+        minQ = 0x10000;
+        for (i = 0; i < 64; i++) {
+            q = 0x10000 / qLum[i];
+            if (minQ > q) minQ = q;
+        }
+        enc->img.compY.unkC = minQ;
+        enc->img.compY.unk10 = (TMCC_CompHuff*)&enc->huffTbl[0];
+        enc->img.compY.unk14 = qLum;
+        enc->img.compY.unk18 = (int*)zz;
+        enc->img.compY.unk1C = bs;
+
+        enc->img.compY.nextW = wCb;
+        enc->img.compY.nextH = hCb;
+        enc->img.compY.nextEdgeW = (wCb % 8) ? (wCb % 8) : 8;
+        enc->img.compY.nextEdgeH = (hCb % 8) ? (hCb % 8) : 8;
+        enc->img.compY.unk2C = 8;
+        enc->img.compY.unk2D = 8;
+        enc->img.compY.nextBlocks = 1;
+        enc->img.compY.nextFmt = 1;
+        enc->img.compCb.stride = 8;
+        enc->img.compCb.dcPred = 0;
+        minQ = 0x10000;
+        for (i = 0; i < 64; i++) {
+            q = 0x10000 / qChr[i];
+            if (minQ > q) minQ = q;
+        }
+        enc->img.compCb.unkC = minQ;
+        enc->img.compCb.unk10 = (TMCC_CompHuff*)&enc->huffTbl[2];
+        enc->img.compCb.unk14 = qChr;
+        enc->img.compCb.unk18 = (int*)zz;
+        enc->img.compCb.unk1C = bs;
+
+        enc->img.compCb.nextW = wCr;
+        enc->img.compCb.nextH = hCr;
+        enc->img.compCb.nextEdgeW = (wCr % 8) ? (wCr % 8) : 8;
+        enc->img.compCb.nextEdgeH = (hCr % 8) ? (hCr % 8) : 8;
+        enc->img.compCb.unk2C = 8;
+        enc->img.compCb.unk2D = 8;
+        enc->img.compCb.nextBlocks = 1;
+        enc->img.compCb.nextFmt = 1;
+        enc->img.crStride = 8;
+        enc->img.crDcPred = 0;
+        enc->img.crUnkC = enc->img.compCb.unkC;
+        enc->img.crUnk10 = (TMCC_CompHuff*)&enc->huffTbl[2];
+        enc->img.crUnk14 = qChr;
+        enc->img.crUnk18 = zz;
+        enc->img.crUnk1C = bs;
+        break;
+    }
 }
