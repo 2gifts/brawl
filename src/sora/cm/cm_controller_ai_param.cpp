@@ -27,7 +27,7 @@ void cmCameraParam::updateFovyNormal(float fovy, float rate) {
 // TODO: clean up, give variables real names
 namespace jj_800A323C {
 
-extern "C" double fn_80400AB8(double);
+extern "C" double tan(double);
 extern "C" const float lbl_805A1F3C;
 extern "C" const float lbl_805A1F40;
 extern "C" const float lbl_805A1F50;
@@ -57,9 +57,9 @@ struct Dst {
 // TODO: clean up, give variables real names
 extern "C" void fn_800A323C(Dst* dst, Src* src, float farg0) {
     float prod = lbl_805A1F40 * (lbl_805A1F3C * dst->fov);
-    float tanf = (float)fn_80400AB8(prod);
+    float tanf = (float)tan(prod);
     float a = (src->unkC - src->unk4) / (lbl_805A1F50 * tanf);
-    float tanf2 = (float)fn_80400AB8(prod);
+    float tanf2 = (float)tan(prod);
     float b = (src->unk8 - src->unk0) / (farg0 * (lbl_805A1F50 * tanf2));
     float m = b > a ? b : a;
     Cam* cam = getInstance__16CameraControllerFv();

@@ -300,7 +300,7 @@ extern "C" int fn_8014615C(char *base, int idx, char *data, int len) {
 namespace jj_80145B98 {
 
 extern "C" void netReport__FPCce(const char*, ...);
-extern "C" void* fn_800D9CB0(void* arg0);
+extern "C" void* getSafeParentAIDInfo__19muWifiInterfaceTaskFv(void* arg0);
 extern "C" unsigned char lbl_8059E742;
 extern "C" unsigned char lbl_8059E745;
 extern "C" char lbl_8045EE64[];
@@ -355,7 +355,7 @@ extern "C" int fn_80145B98(NtRecv* self, unsigned int arg1) {
             if ((unsigned char)i >= 4) {
                 valid = 0;
             } else {
-                valid = !(((unsigned char*)fn_800D9CB0((void*)task))[(unsigned char)i + 0x68] - 1);
+                valid = !(((unsigned char*)getSafeParentAIDInfo__19muWifiInterfaceTaskFv((void*)task))[(unsigned char)i + 0x68] - 1);
             }
             if (valid) {
                 self->mask |= (1u << (unsigned char)i);
@@ -375,9 +375,9 @@ extern "C" int fn_80145B98(NtRecv* self, unsigned int arg1) {
 // TODO: clean up, give variables real names
 namespace jj_80143D80 {
 
-extern "C" int fn_80145828(void* self, int idx, void** out, int a, int b, int c);
-extern "C" void fn_8014BC24(int* p);
-extern "C" void fn_800D2894(char* base, int idx);
+extern "C" int refSendCmd__4NtTrFUcPPvUsPUsUc(void* self, int idx, void** out, int a, int b, int c);
+extern "C" void watchResetNodeMissMatch__10NtMatchingFv(int* p);
+extern "C" void clearShortComment__19muWifiInterfaceTaskFi(char* base, int idx);
 
 extern "C" const float lbl_805A2B50;
 extern "C" unsigned int g_NtAIDBitmap;
@@ -434,7 +434,7 @@ extern "C" void fn_80143D80(unsigned char* self, int idx) {
     mask <<= idx;
 
     if (g_NtAIDBitmap & mask) {
-        if (fn_80145828(self, idx, &out1, 0, 0, 6) != 0) {
+        if (refSendCmd__4NtTrFUcPPvUsPUsUc(self, idx, &out1, 0, 0, 6) != 0) {
             if (3 - ((e->w18 + 4 - e->w14) % 4) < 1) {
                 entry = NULL;
             } else {
@@ -447,7 +447,7 @@ extern "C" void fn_80143D80(unsigned char* self, int idx) {
     }
 
     if (g_NtAIDBitmap & mask) {
-        if (fn_80145828(self, idx, &out2, 0, 0, 6) != 0) {
+        if (refSendCmd__4NtTrFUcPPvUsPUsUc(self, idx, &out2, 0, 0, 6) != 0) {
             unsigned char* p;
             if (3 - ((e->w18 + 4 - e->w14) % 4) < 1) {
                 p = NULL;
@@ -460,8 +460,8 @@ extern "C" void fn_80143D80(unsigned char* self, int idx) {
         }
     }
 
-    fn_8014BC24(lbl_805A0434);
-    fn_800D2894(g_muWifiInterfaceTask, idx);
+    watchResetNodeMissMatch__10NtMatchingFv(lbl_805A0434);
+    clearShortComment__19muWifiInterfaceTaskFi(g_muWifiInterfaceTask, idx);
 }
 }
 
@@ -473,13 +473,13 @@ extern "C" {
 void OSLockMutex(void*);
 void OSUnlockMutex(void*);
 void netReport__FPCce(const char*, ...);
-void fn_800C8F68(const char*, ...);
+void netMinReport__FPCce(const char*, ...);
 void fn_800D0E58(void*, u8, int, int);
-u8 fn_800C8548();
-int fn_800C8524();
+u8 getParentAID__7NetworkFv();
+int isParent__6NtBaseFv();
 void fn_800D1314(void*, u8);
 void fn_800D55E8(void*);
-void fn_80146878(void*, int);
+void disconnectAll__7NetworkFb(void*, int);
 extern "C" char* lbl_805A03A8;
 extern "C" char* lbl_805A0434;
 extern "C" char* g_muWifiInterfaceTask;
@@ -503,7 +503,7 @@ extern "C" void fn_801454A4(u8 arg0, int arg1, int arg2) {
     int expected = *(int*)(lbl_805A03A8 + 0x28);
     if (len != expected) {
         netReport__FPCce(base + 0x3D8, arg0, expected, len);
-        fn_800C8F68(base + 0x414, arg0, expected, arg2 - 0x10);
+        netMinReport__FPCce(base + 0x414, arg0, expected, arg2 - 0x10);
         return;
     }
     expected = (int)g_muWifiInterfaceTask;
@@ -522,10 +522,10 @@ extern "C" void fn_801454A4(u8 arg0, int arg1, int arg2) {
     if (((TopBit*)(task + 0xFC9))->f && *(long long*)(e + 0x248) == 0) {
         netReport__FPCce(base + 0x478);
     }
-    if (arg0 == fn_800C8548()) {
+    if (arg0 == getParentAID__7NetworkFv()) {
         netReport__FPCce(base + 0x49C);
         task[0xFD3] = arg0;
-        u8 j = fn_800C8548();
+        u8 j = getParentAID__7NetworkFv();
         char* q;
         if (j == 0xFF) {
             q = 0;
@@ -540,18 +540,18 @@ extern "C" void fn_801454A4(u8 arg0, int arg1, int arg2) {
         }
         if (flag != 0) {
             netReport__FPCce(base + 0x4C4);
-            fn_800C8F68(base + 0x510);
+            netMinReport__FPCce(base + 0x510);
             if (((TopBit*)(task + 0xFC9))->f) {
                 if (((StateWord*)(task + 0xFCC))->st < 4) {
                     ((StateWord*)(task + 0xFCC))->st = 5;
                 }
             } else {
-                fn_80146878(g_Network, 1);
+                disconnectAll__7NetworkFb(g_Network, 1);
             }
             return;
         }
     } else {
-        if (fn_800C8524() != 0) {
+        if (isParent__6NtBaseFv() != 0) {
             netReport__FPCce(base + 0x52C);
             fn_800D1314(task, arg0);
         } else {
@@ -570,7 +570,7 @@ extern "C" void fn_801454A4(u8 arg0, int arg1, int arg2) {
 
 namespace jj_80145D38 {
 
-extern "C" int fn_80145828(void* self, int idx, void** out, int size, int a, int b);
+extern "C" int refSendCmd__4NtTrFUcPPvUsPUsUc(void* self, int idx, void** out, int size, int a, int b);
 extern "C" void netReport__FPCce(const char*, ...);
 extern "C" unsigned int g_NtAIDBitmap;
 extern "C" unsigned char lbl_8059E742;
@@ -619,7 +619,7 @@ static inline int sendTo(Object* self, unsigned char aid, void* src, int size) {
     int ret;
     if (!(g_NtAIDBitmap & (1 << aid)))
         return 0;
-    ret = fn_80145828(self, aid, &out, size, 0, 0xE);
+    ret = refSendCmd__4NtTrFUcPPvUsPUsUc(self, aid, &out, size, 0, 0xE);
     if (ret == 0)
         return ret;
     if (size != 0)

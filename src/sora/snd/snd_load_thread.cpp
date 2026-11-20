@@ -131,7 +131,7 @@ bool sndLoadThread::isFinishFree() {
 namespace jj_80079AA4 {
 extern "C" void OSLockMutex(void*);
 extern "C" void OSUnlockMutex(void*);
-extern "C" void fn_801DEF60(void*);
+extern "C" void OSSignalCond(void*);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80079AA4(unsigned char* self, s32 a, s32 b, s32 c) {
@@ -144,7 +144,7 @@ extern "C" void fn_80079AA4(unsigned char* self, s32 a, s32 b, s32 c) {
         *(u32*)(self + 0xcc8) = *(u32*)(self + 0xcc8) + 1;
     }
     OSUnlockMutex(self + 0x340);
-    fn_801DEF60(self + 0x358);
+    OSSignalCond(self + 0x358);
 }
 }
 

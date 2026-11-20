@@ -240,8 +240,8 @@ namespace jj_800EFC8C {
 extern "C" {
 
 void exit__6gfTaskFv(void*);
-void fn_800B8EDC(void*, void*);
-void fn_800B8A0C(void*, int);
+void detachMuObject__5MuMsgFP8MuObject(void*, void*);
+void __dt__5MuMsgFv(void*, int);
 void __dl__FPv(void*);
 extern "C" char lbl_8045B824[];
 
@@ -260,7 +260,7 @@ void* fn_800EFC8C(void* arg0, int arg1) {
             exit__6gfTaskFv(task);
             *(void**)(base + 0x5C) = 0;
         }
-        fn_800B8EDC(*(void**)(base + 0x30), *(void**)(base + 0x4));
+        detachMuObject__5MuMsgFP8MuObject(*(void**)(base + 0x30), *(void**)(base + 0x4));
         int i = 0;
         Part** cur = (Part**)arg0;
         do {
@@ -275,7 +275,7 @@ void* fn_800EFC8C(void* arg0, int arg1) {
             cur++;
         } while (i < 11);
         if (*(void**)(base + 0x30) != 0) {
-            fn_800B8A0C(*(void**)(base + 0x30), 1);
+            __dt__5MuMsgFv(*(void**)(base + 0x30), 1);
             *(void**)(base + 0x30) = 0;
         }
         if (arg1 > 0) {
@@ -295,7 +295,7 @@ void* getTask__15gfTaskSchedulerFPCc(void*, const char*);
 void* getCameraController__16CameraControllerFQ216CameraController4Kind(void*, int);
 void changeInput__16CameraControllerFQ216CameraController4Kind(void*, int);
 void* __dynamic_cast(void*, long, const void*, const void*, long);
-void fn_800A9620(void*, s32);
+void setSeamless__17cmPhotoControllerFb(void*, s32);
 void fn_800A8DA8(void*, s32);
 void fn_800A709C(void*, s32);
 void fn_800F1014(void*);
@@ -313,7 +313,7 @@ void fn_800F00D4(void* arg0, s8 arg1, s32 arg2, s32 arg3, s32 arg4) {
     char* cam = (char*)__dynamic_cast(getCameraController__16CameraControllerFQ216CameraController4Kind(task, 7), 4, &lbl_8059DEC0, &__RTTI__18gfCameraController, 0);
     if (*(s32*)(cam + 0x60) <= 0) {
         changeInput__16CameraControllerFQ216CameraController4Kind(task, 7);
-        fn_800A9620(cam, arg4);
+        setSeamless__17cmPhotoControllerFb(cam, arg4);
         fn_800A8DA8(cam, 0);
         if (arg3 >= 0) {
             *(s32*)(cam + 0x40) = arg3;
@@ -344,50 +344,50 @@ struct Self {
     int state;
 };
 extern "C" {
-void* fn_800F00AC();
-void fn_800F0250(Raw*, void*);
-void fn_800F09D0(void*, int*, int);
-int fn_800F09AC(void*);
+void* getCameraController__7IfPhotoFv();
+void getPadStatus__7IfPhotoFv(Raw*, void*);
+void getMediaState__7IfPhotoFP15IfSnapSaveMediai(void*, int*, int);
+int haveSnapHelp__7IfPhotoFv(void*);
 int fn_800F01B8(void*);
 void* fn_800F1750(void*);
 void* __dynamic_cast(void*, int, void*, void*, int);
-void fn_800A8BB0(void*, Raw*, int);
-int fn_800F09C4(void*);
+void updateControl__17cmPhotoControllerFPC11gfPadStatusb(void*, Raw*, int);
+int haveResetHelp__7IfPhotoFv(void*);
 int fn_800F0A2C(void*);
-int fn_800F09B8(void*);
+int haveRetryHelp__7IfPhotoFv(void*);
 int fn_800F0CD8(void*);
 int fn_800F1758(Raw*);
 int fn_800F0308(void*, int);
 void fn_800F05CC(void*, bool);
-int fn_800F0A08(void*, int*, int);
-void fn_800F1764(void*);
+int getSaveEnable__7IfPhotoFP15IfSnapSaveMediaUl(void*, int*, int);
+void clearControl__17cmPhotoControllerFv(void*);
 sndSystem* fn_800F1774();
-void fn_800F0954(void*);
+void removeAllObj__7IfPhotoFv(void*);
 extern "C" char lbl_8059DEC0, __RTTI__18gfCameraController;
 extern "C" char lbl_8045B7E8[];
 }
 // TODO: clean up, give variables real names
 inline Raw getPad(Self* self) {
     Raw r;
-    fn_800F0250(&r, self);
+    getPadStatus__7IfPhotoFv(&r, self);
     return r;
 }
 // TODO: clean up, give variables real names
 extern "C" int fn_800F14C0(Self* self) {
-    void* obj = fn_800F00AC();
+    void* obj = getCameraController__7IfPhotoFv();
     void* camera = 0;
     Raw pad = getPad(self);
-    fn_800F09D0(self, self->b, 1);
-    if (fn_800F09AC(self) && fn_800F01B8(obj) == 7) {
+    getMediaState__7IfPhotoFP15IfSnapSaveMediai(self, self->b, 1);
+    if (haveSnapHelp__7IfPhotoFv(self) && fn_800F01B8(obj) == 7) {
         camera = __dynamic_cast(fn_800F1750(obj), 4, &lbl_8059DEC0, &__RTTI__18gfCameraController, 0);
-        fn_800A8BB0(camera, &pad, 0);
+        updateControl__17cmPhotoControllerFPC11gfPadStatusb(camera, &pad, 0);
     }
     if (--self->delay < 0) {
-        if (fn_800F09C4(self) && fn_800F0A2C(self)) {
+        if (haveResetHelp__7IfPhotoFv(self) && fn_800F0A2C(self)) {
             self->state = 3;
             return self->result;
         }
-        if (fn_800F09B8(self) && fn_800F0CD8(self)) {
+        if (haveRetryHelp__7IfPhotoFv(self) && fn_800F0CD8(self)) {
             self->state = 4;
             return self->result;
         }
@@ -395,16 +395,16 @@ extern "C" int fn_800F14C0(Self* self) {
             self->state = 2;
             return self->result;
         }
-        if (fn_800F09AC(self)) {
+        if (haveSnapHelp__7IfPhotoFv(self)) {
             if (fn_800F0308(self, 1)) {
                 self->toggle = !self->toggle;
                 fn_800F05CC(self, self->toggle);
             }
-            if ((fn_800F0A08(self, self->a, 1) || fn_800F0A08(self, self->b, 1)) && fn_800F0308(self, 0)) {
-                if (camera) fn_800F1764(camera);
+            if ((getSaveEnable__7IfPhotoFP15IfSnapSaveMediaUl(self, self->a, 1) || getSaveEnable__7IfPhotoFP15IfSnapSaveMediaUl(self, self->b, 1)) && fn_800F0308(self, 0)) {
+                if (camera) clearControl__17cmPhotoControllerFv(camera);
                 fn_800F1774()->playSE((SndID)4, -1, 0, 0, -1);
                 OSReport(lbl_8045B7E8);
-                fn_800F0954(self);
+                removeAllObj__7IfPhotoFv(self);
                 return 2;
             }
         }

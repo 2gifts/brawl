@@ -127,8 +127,8 @@ void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 void* __ct__9IfStgeditFv(void*);
 void createModel__9IfStgeditFPQ34nw4r3g3d7ResFile(void*, void*);
 void* GetResAnmScn__Q34nw4r3g3d7ResFileFi(void*, int);
-void fn_801971D0(void*, void*);
-void fn_8000D6DC(void*, void*);
+void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(void*, void*);
+void setInfoCamResAnm__11gfSceneRootFPQ34nw4r3g3d9ResAnmScn(void*, void*);
 extern void* g_gfSceneRoot;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -147,8 +147,8 @@ void fn_8010F7EC(void* self) {
     createModel__9IfStgeditFPQ34nw4r3g3d7ResFile(stgedit, p + 0x8);
     spC = GetResAnmScn__Q34nw4r3g3d7ResFileFi(p + 0xc, 0);
     sp8 = spC;
-    fn_801971D0(&spC, &sp8);
-    fn_8000D6DC(g_gfSceneRoot, &spC);
+    Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(&spC, &sp8);
+    setInfoCamResAnm__11gfSceneRootFPQ34nw4r3g3d9ResAnmScn(g_gfSceneRoot, &spC);
 }
 }
 }
@@ -171,7 +171,7 @@ struct Flags8 {
 
 extern "C" {
 void Destroy__Q34nw4r3g3d6G3dObjFv(void*);
-void fn_8000D7B8(void*);
+void removeInfoCamResAnm__11gfSceneRootFv(void*);
 void cancelRequest__14gfFileIOHandleFv(void*);
 void free__13gfHeapManagerFPv(void*);
 void __destroy_arr(void*, void (*)(void*, int), unsigned long, unsigned long);
@@ -201,7 +201,7 @@ struct Self {
             Destroy__Q34nw4r3g3d6G3dObjFv(g3d);
             g3d = 0;
         }
-        fn_8000D7B8(g_gfSceneRoot);
+        removeInfoCamResAnm__11gfSceneRootFv(g_gfSceneRoot);
         if (buf8 != 0) {
             free__13gfHeapManagerFPv(buf8);
             buf8 = 0;

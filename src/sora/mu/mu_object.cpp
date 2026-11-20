@@ -43,16 +43,16 @@ gfModelAnimation* __ct1__16gfModelAnimationFd(void* self, nw4r::g3d::ResFile* fi
 nw4r::g3d::ScnMdl* ScnMdl_Construct(MEMAllocator* allocator, u32* size, nw4r::g3d::ResMdl mdl, u32 bufferOption, int nView, void (*callback)());
 
 extern "C" {
-bool fn_80192B00(nw4r::g3d::ResTex* tex, void** image, u16* w, u16* h, GXTexFmt* fmt, f32* minLod, f32* maxLod, GXBool* mipmap);
-bool fn_80192A44(nw4r::g3d::ResTex* tex, void** image, u16* w, u16* h, GXTexFmt* fmt, f32* minLod, f32* maxLod, GXBool* mipmap);
-void* fn_801AFF94(nw4r::g3d::ScnMdl::CopiedMatAccess* access, bool sync);
-GXTlutObj* fn_80190DC8(void** tlutObj, int id);
+bool GetTexObjCIParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP11_GXCITexFmtPfPfPUc(nw4r::g3d::ResTex* tex, void** image, u16* w, u16* h, GXTexFmt* fmt, f32* minLod, f32* maxLod, GXBool* mipmap);
+bool GetTexObjParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP9_GXTexFmtPfPfPUc(nw4r::g3d::ResTex* tex, void** image, u16* w, u16* h, GXTexFmt* fmt, f32* minLod, f32* maxLod, GXBool* mipmap);
+void* GetResTlutObj__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(nw4r::g3d::ScnMdl::CopiedMatAccess* access, bool sync);
+GXTlutObj* GetTlut__Q34nw4r3g3d10ResTlutObjF7_GXTlut(void** tlutObj, int id);
 }
 
 struct ResPlttRef {
     u8* m_data;
 };
-extern "C" u8* fn_8018D310(nw4r::g3d::ResFile* file, const char* name);
+extern "C" u8* GetResPltt__Q34nw4r3g3d7ResFileCFPCc(nw4r::g3d::ResFile* file, const char* name);
 
 void ScnMdl_SetNodeMtx(nw4r::g3d::ScnMdl* mdl, u32 nodeId, const Matrix* mtx);
 
@@ -1311,9 +1311,9 @@ void MuObject::changeMaterialTex(u32 matId, const char* texName, nw4r::g3d::ResF
     }
     tex = texFile->GetResTex(texName);
     if (tex->m_flags & 1) {
-        u8* pltt = fn_8018D310(texFile, texName);
-        void* tlutObjPtr = fn_801AFF94(&access, false);
-        GXTlutObj* tlut = fn_80190DC8(&tlutObjPtr, 0);
+        u8* pltt = GetResPltt__Q34nw4r3g3d7ResFileCFPCc(texFile, texName);
+        void* tlutObjPtr = GetResTlutObj__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(&access, false);
+        GXTlutObj* tlut = GetTlut__Q34nw4r3g3d10ResTlutObjF7_GXTlut(&tlutObjPtr, 0);
         GXBool mipmap;
         f32 maxLod;
         f32 minLod;
@@ -1321,7 +1321,7 @@ void MuObject::changeMaterialTex(u32 matId, const char* texName, nw4r::g3d::ResF
         u16 height;
         u16 width;
         void* image;
-        fn_80192B00(&tex, &image, &width, &height, &fmt, &minLod, &maxLod, &mipmap);
+        GetTexObjCIParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP11_GXCITexFmtPfPfPUc(&tex, &image, &width, &height, &fmt, &minLod, &maxLod, &mipmap);
         s32 plttOff = *(s32*)(pltt + 0x10);
         s32 mask = (-plttOff | plttOff) >> 31;
         void* plttData = (void*)((u32)(pltt + plttOff) & mask);
@@ -1329,7 +1329,7 @@ void MuObject::changeMaterialTex(u32 matId, const char* texName, nw4r::g3d::ResF
         GXLoadTlut(tlut, GX_TLUT0);
         GXInitTexObjCI(obj, image, width, height, fmt, GX_CLAMP, GX_CLAMP, mipmap, 0);
         GXLoadTexObj(obj, GX_TEXMAP0);
-        fn_801AFF94(&access, false);
+        GetResTlutObj__Q44nw4r3g3d6ScnMdl15CopiedMatAccessFb(&access, false);
         CopiedMatAccess_GetResTexObj(&access, false);
     } else {
         GXBool mipmap;
@@ -1339,7 +1339,7 @@ void MuObject::changeMaterialTex(u32 matId, const char* texName, nw4r::g3d::ResF
         u16 height;
         u16 width;
         void* image;
-        fn_80192A44(&tex, &image, &width, &height, &fmt, &minLod, &maxLod, &mipmap);
+        GetTexObjParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP9_GXTexFmtPfPfPUc(&tex, &image, &width, &height, &fmt, &minLod, &maxLod, &mipmap);
         GXTexWrapMode wrapS = GXGetTexObjWrapS(obj);
         GXTexWrapMode wrapT = GXGetTexObjWrapT(obj);
         GXInitTexObj(obj, image, width, height, fmt, wrapS, wrapT, mipmap);
@@ -1712,10 +1712,10 @@ extern "C" void* fn_800B85B0(void* p, int n) {
 }
 
 namespace jj_800B881C {
-extern "C" int fn_8006CA64();
-extern "C" int fn_8006C90C();
-extern "C" int fn_8006C9EC();
-extern "C" int fn_8006C790();
+extern "C" int removeHiraganaFont__8FontDataFv();
+extern "C" int removeNormalFont__8FontDataFv();
+extern "C" int removeNormal12Font__8FontDataFv();
+extern "C" int removeMeleeFont__8FontDataFv();
 // TODO: clean up, give variables real names
 extern "C" void fn_800B881C(unsigned char* p, int index) {
     int flags = 0;
@@ -1723,18 +1723,18 @@ extern "C" void fn_800B881C(unsigned char* p, int index) {
         unsigned char old = p[index];
         p[index] = 0;
         for (int i = 0; i < 16; i++) flags |= p[i];
-        if ((old & 2) && !(flags & 2U)) fn_8006CA64();
-        if ((old & 1) && !(flags & 1)) fn_8006C90C();
-        if ((old & 4) && !(flags & 4)) fn_8006C9EC();
-        if ((old & 8) && !(flags & 8)) fn_8006C790();
+        if ((old & 2) && !(flags & 2U)) removeHiraganaFont__8FontDataFv();
+        if ((old & 1) && !(flags & 1)) removeNormalFont__8FontDataFv();
+        if ((old & 4) && !(flags & 4)) removeNormal12Font__8FontDataFv();
+        if ((old & 8) && !(flags & 8)) removeMeleeFont__8FontDataFv();
     }
 }
 }
 
 namespace jj_800B8648 {
-extern "C" s32 fn_8006C7D4(s32);
-extern "C" s32 fn_8006C870(s32);
-extern "C" s32 fn_8006C950(s32);
+extern "C" s32 loadNormalFont__8FontDataFQ25Heaps8HeapType(s32);
+extern "C" s32 loadNormalFontWatch__8FontDataFQ25Heaps8HeapType(s32);
+extern "C" s32 loadNormal12Font__8FontDataFQ25Heaps8HeapType(s32);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u8 fn_800B8648(u8* arg0, s32 arg1, s32 arg2, s32 arg3) {
     if ((u32)((*(u8*)(arg0 + 0x10) >> 7) & 1) == 1U) return 0;
@@ -1747,13 +1747,13 @@ extern "C" u8 fn_800B8648(u8* arg0, s32 arg1, s32 arg2, s32 arg3) {
     if ((flag & 1) && !(orval & 1)) {
         s32 val = arg2;
         if (arg2 == 0xFF) val = 0x2F;
-        if (arg3 == 0) fn_8006C7D4(val);
-        else fn_8006C870(val);
+        if (arg3 == 0) loadNormalFont__8FontDataFQ25Heaps8HeapType(val);
+        else loadNormalFontWatch__8FontDataFQ25Heaps8HeapType(val);
     }
     if ((flag & 4) && !(orval & 4)) {
         s32 val2 = arg2;
         if (arg2 == 0xFF) val2 = 0x31;
-        fn_8006C950(val2);
+        loadNormal12Font__8FontDataFQ25Heaps8HeapType(val2);
     }
     s32 idx;
     for (idx = 0; idx < 16; idx++) {

@@ -305,7 +305,7 @@ typedef float f32;
 typedef int s32;
 
 extern "C" {
-s32 fn_80041DCC(s32, f32 *, f32, f32, f32, f32);
+s32 checkIntersect2__10clAABBox2DCFRC10clCircle2D(s32, f32 *, f32, f32, f32, f32);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 s32 fn_800113C0(s32 arg0, s32 arg1)
@@ -331,7 +331,7 @@ s32 fn_800113C0(s32 arg0, s32 arg1)
         vec[2] = temp_f2;
         vec[0] = temp_f1;
         vec[1] = temp_f3 + temp_f0;
-        var_r5 = fn_80041DCC(arg0 + 0x2C, vec, temp_f1, temp_f2, temp_f3, temp_f4);
+        var_r5 = checkIntersect2__10clAABBox2DCFRC10clCircle2D(arg0 + 0x2C, vec, temp_f1, temp_f2, temp_f3, temp_f4);
         break;
     }
     return var_r5;

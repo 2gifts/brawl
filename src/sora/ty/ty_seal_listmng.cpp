@@ -164,8 +164,8 @@ extern "C" void* fn_800AD87C(char* self, int flag) {
 namespace jj_800AEC70 {
 struct GG { char pad[0x30]; char* p30; };
 extern GG* g_GameGlobal;
-extern "C" void fn_80052BCC(unsigned short, unsigned short);
-extern "C" void fn_80052C24(unsigned short, int);
+extern "C" void gmSetFlagCountSeal__FiUl(unsigned short, unsigned short);
+extern "C" void gmSetFlagReferSeal__FiUl(unsigned short, int);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800AEC70(char* self) {
@@ -173,8 +173,8 @@ extern "C" void fn_800AEC70(char* self) {
     int off = 0;
     unsigned i = 0;
     for (; i < *(unsigned*)(self + 0x2ef4); i++) {
-        fn_80052BCC(*(unsigned*)(*(char**)self + off), *(unsigned short*)(p + 0x14));
-        fn_80052C24(*(unsigned*)(*(char**)self + off), (unsigned char)(self + i)[0x2724] == 0);
+        gmSetFlagCountSeal__FiUl(*(unsigned*)(*(char**)self + off), *(unsigned short*)(p + 0x14));
+        gmSetFlagReferSeal__FiUl(*(unsigned*)(*(char**)self + off), (unsigned char)(self + i)[0x2724] == 0);
         p += 2;
         off += 0x64;
     }
@@ -185,7 +185,7 @@ extern "C" void fn_800AEC70(char* self) {
 
 // TODO: clean up, give variables real names
 namespace jj_800AE200 {
-extern "C" u8 fn_8004EAC8(u8**);
+extern "C" u8 getDistributionType__10GameGlobalFv(u8**);
 
 struct Entry {
     u8 pad0[0x29];
@@ -271,7 +271,7 @@ extern "C" u32 fn_800AE200(Context* self, int mode, int skip) {
     }
     }
     if (skip == 0) {
-        if (fn_8004EAC8((u8**)g_GameGlobal) == 0)
+        if (getDistributionType__10GameGlobalFv((u8**)g_GameGlobal) == 0)
             self->mask = 1;
         else
             self->mask = 2;

@@ -8,7 +8,7 @@ extern "C" void fn_80052704(int id, int num);
 // gmAddSeal (the map name); src/sora/gm/gm_common.cpp calls it by this stand-in name.
 extern "C" void fn_80052AC0(int id, int num);
 // gmSetBGMIDUseEnable (the map name); src/sora/ad/ad_keep_manager.cpp calls it by this stand-in name.
-extern "C" void fn_8004FB48(u32 id);
+extern "C" void gmSetBGMIDUseEnable__FUl(u32 id);
 
 extern const struct {
     struct {
@@ -43,7 +43,7 @@ void gmActionOpenClearGet(int condition, int kind, int reward) {
         break;
     }
     case 2:
-        fn_8004FB48(reward);
+        gmSetBGMIDUseEnable__FUl(reward);
         break;
     case 4:
         gmSetStageUseEnable((srStageKind)reward);
@@ -308,7 +308,7 @@ extern "C" void fn_800569F8(void) {}
 
 // TODO: clean up, give variables real names
 namespace jj_80056DB0 {
-extern "C" unsigned int* fn_8004E5F8(void*);
+extern "C" unsigned int* getInfoAppFlag__10GameGlobalFv(void*);
 inline bool testBit(unsigned int* bits, int idx) {
     int n = idx * 2;
     return bits[n / 32] & (1 << (n % 32));
@@ -325,8 +325,8 @@ extern "C" void fn_80056DB0(int arg0) {
     case 1: idx = 31; break;
     case 2: idx = 32; break;
     }
-    if (!testBit(fn_8004E5F8(g_GameGlobal), idx)) {
-        setBit(fn_8004E5F8(g_GameGlobal), idx);
+    if (!testBit(getInfoAppFlag__10GameGlobalFv(g_GameGlobal), idx)) {
+        setBit(getInfoAppFlag__10GameGlobalFv(g_GameGlobal), idx);
     }
 }
 }
@@ -335,7 +335,7 @@ extern "C" void fn_80056DB0(int arg0) {
 namespace jj_80059F94 {
 typedef unsigned int u32;
 
-extern "C" void* fn_8004E5B8(char*);
+extern "C" void* getHideEtcAppFlag__10GameGlobalFv(char*);
 extern "C" char* g_GameGlobal;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -343,40 +343,40 @@ extern "C" int fn_80059F94(int arg0) {
     int ret = 0;
     switch (arg0) {
     case 0x7C:
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x10000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x10000) {
             ret = 1;
         }
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x40000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x40000) {
             ret = 1;
         }
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x100000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x100000) {
             ret = 1;
         }
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x400000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x400000) {
             ret = 1;
         }
         break;
     case 0x7D:
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x40000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x40000) {
             ret = 1;
         }
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x100000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x100000) {
             ret = 1;
         }
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x400000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x400000) {
             ret = 1;
         }
         break;
     case 0x7E:
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x100000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x100000) {
             ret = 1;
         }
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x400000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x400000) {
             ret = 1;
         }
         break;
     case 0x7F:
-        if (*(u32*)fn_8004E5B8(g_GameGlobal) & 0x400000) {
+        if (*(u32*)getHideEtcAppFlag__10GameGlobalFv(g_GameGlobal) & 0x400000) {
             ret = 1;
         }
         break;
@@ -386,27 +386,27 @@ extern "C" int fn_80059F94(int arg0) {
 }
 
 namespace jj_80056E68 {
-extern "C" u32* fn_8004E580(void*);
-extern "C" u32* fn_8004E634(void*);
-extern "C" u8* fn_8004E7B8(void*, int);
-extern "C" u32 fn_8005297C();
+extern "C" u32* getCharaAppFlag__10GameGlobalFv(void*);
+extern "C" u32* getGlobalRecordVsMeleeTimeTotalDatap__10GameGlobalFv(void*);
+extern "C" u8* getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(void*, int);
+extern "C" u32 gmGetKindCountFigureExist__Fv();
 extern "C" void* g_GameGlobal;
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80056E68() {
-    if (!(*fn_8004E580(g_GameGlobal) & 0x80000000) && *fn_8004E634(g_GameGlobal) / 60 / 60 >= 10) {
-        *fn_8004E580(g_GameGlobal) |= 0x40000000;
-    } else if (!(*fn_8004E580(g_GameGlobal) & 0x400000) && fn_8005297C() >= 250) {
-        *fn_8004E580(g_GameGlobal) |= 0x200000;
-    } else if (!(*fn_8004E580(g_GameGlobal) & 0x80000) && (int)*fn_8004E7B8(g_GameGlobal, 0x22) >= 15) {
-        *fn_8004E580(g_GameGlobal) |= 0x40000;
-    } else if (!(*fn_8004E580(g_GameGlobal) & 2)) {
+    if (!(*getCharaAppFlag__10GameGlobalFv(g_GameGlobal) & 0x80000000) && *getGlobalRecordVsMeleeTimeTotalDatap__10GameGlobalFv(g_GameGlobal) / 60 / 60 >= 10) {
+        *getCharaAppFlag__10GameGlobalFv(g_GameGlobal) |= 0x40000000;
+    } else if (!(*getCharaAppFlag__10GameGlobalFv(g_GameGlobal) & 0x400000) && gmGetKindCountFigureExist__Fv() >= 250) {
+        *getCharaAppFlag__10GameGlobalFv(g_GameGlobal) |= 0x200000;
+    } else if (!(*getCharaAppFlag__10GameGlobalFv(g_GameGlobal) & 0x80000) && (int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0x22) >= 15) {
+        *getCharaAppFlag__10GameGlobalFv(g_GameGlobal) |= 0x40000;
+    } else if (!(*getCharaAppFlag__10GameGlobalFv(g_GameGlobal) & 2)) {
         u8* p = *(u8**)((u8*)g_GameGlobal + 0x18);
         u32 total = 0;
         if (!p[0x25]) total = *(u32*)(p + 0x254);
         if (!p[0x2d1]) total += *(u32*)(p + 0x500);
         if (!p[0x57d]) total += *(u32*)(p + 0x7ac);
         if (!p[0x829]) total += *(u32*)(p + 0xa58);
-        if (total >= 10) *fn_8004E580(g_GameGlobal) |= 1;
+        if (total >= 10) *getCharaAppFlag__10GameGlobalFv(g_GameGlobal) |= 1;
     }
 }
 }
@@ -517,7 +517,7 @@ extern "C" int fn_80058320(int arg0) {
 namespace jj_80059890 {
 extern "C" {
 extern "C" void* g_GameGlobal;
-void* fn_8004E5D8(void*, void*);
+void* getGlobalRecordCharaNumDatap__10GameGlobalFi(void*, void*);
 int fn_80055888(int, int);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -531,41 +531,41 @@ extern "C" s32 fn_80059890(s32 arg0) {
     switch (arg0) {
     case 0x4B:
         for (first = 0; first < 0x23; first++) {
-            u16 v = *(u16*)((char*)fn_8004E5D8(g_GameGlobal, (void*)first) + 0x9c);
+            u16 v = *(u16*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)first) + 0x9c);
             if ((v >> 8) & 7) { result = 1; break; }
         }
         break;
     case 0x4C:
         result = 1;
         for (second = 0; second < 0x23; second++) {
-            u16 v = *(u16*)((char*)fn_8004E5D8(g_GameGlobal, (void*)second) + 0x9c);
+            u16 v = *(u16*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)second) + 0x9c);
             if (!((v >> 8) & 7)) { result = 0; break; }
         }
         break;
     case 0x59:
         for (third = 0; third < 0x23; third++) {
-            u16 v = *(u16*)((char*)fn_8004E5D8(g_GameGlobal, (void*)third) + 0x9c);
+            u16 v = *(u16*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)third) + 0x9c);
             if (((u32)(v >> 8) & 7) >= 5) { result = 1; break; }
         }
         break;
     case 0x4F:
         result = 1;
         for (fourth = 0; fourth < 0x23; fourth++) {
-            u16 v = *(u16*)((char*)fn_8004E5D8(g_GameGlobal, (void*)fourth) + 0x9c);
+            u16 v = *(u16*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)fourth) + 0x9c);
             if (!((v >> 5) & 7)) { result = 0; break; }
         }
         break;
     case 0x51:
         result = 1;
         for (fourth = 0; fourth < 0x23; fourth++) {
-            u16 v = *(u16*)((char*)fn_8004E5D8(g_GameGlobal, (void*)fourth) + 0x9c);
+            u16 v = *(u16*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)fourth) + 0x9c);
             if (!((v >> 2) & 7)) { result = 0; break; }
         }
         break;
     case 0x54: case 0x55: case 0x56: case 0x57: case 0x58:
         result = 1;
         for (last = 0; last < 0x23; last++) {
-            u32 v = *(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)last) + 0xcc + (arg0 - 0x54) * 4);
+            u32 v = *(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)last) + 0xcc + (arg0 - 0x54) * 4);
             if (((v >> 30) & 1) != 1) { result = 0; break; }
         }
         break;
@@ -587,7 +587,7 @@ extern "C" s32 fn_80059890(s32 arg0) {
 }
 
 namespace jj_80058F64 {
-extern "C" u8* fn_8004E5D8(void*, int);
+extern "C" u8* getGlobalRecordCharaNumDatap__10GameGlobalFi(void*, int);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_80058F64(int arg0) {
     int off;
@@ -604,9 +604,9 @@ extern "C" int fn_80058F64(int arg0) {
     u32 count = 0;
     u32 minv = -1;
     for (int i = 0; i < 0x23; i++) {
-        if (((*(u32*)(fn_8004E5D8(g_GameGlobal, i) + off + 0xcc) >> 30) & 1) == 1) {
+        if (((*(u32*)(getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i) + off + 0xcc) >> 30) & 1) == 1) {
             count++;
-            u32 value = *(u32*)(fn_8004E5D8(g_GameGlobal, i) + off + 0xcc) & 0x3fffffff;
+            u32 value = *(u32*)(getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i) + off + 0xcc) & 0x3fffffff;
             if (value < minv) minv = value;
         }
     }
@@ -670,7 +670,7 @@ struct GG {
     Sub* sub;
 };
 
-extern "C" Rec* fn_8004E5D8(GG*, int);
+extern "C" Rec* getGlobalRecordCharaNumDatap__10GameGlobalFi(GG*, int);
 extern "C" GG* g_GameGlobal;
 
 // TODO: clean up, give variables real names
@@ -679,9 +679,9 @@ extern "C" int fn_800589C8(int arg0) {
     u32 count = 0;
     u32 minv = 0x4650;
     for (int i = 0; i < 0x23; i++) {
-        if (fn_8004E5D8(g_GameGlobal, i)->b13 == 1) {
+        if (getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i)->b13 == 1) {
             count++;
-            u32 v = fn_8004E5D8(g_GameGlobal, i)->unkB4;
+            u32 v = getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i)->unkB4;
             if (v < minv) {
                 minv = v;
             }
@@ -716,7 +716,7 @@ extern "C" int fn_800589C8(int arg0) {
             result = 1;
         } else {
             for (int i = 0; i < 0x23; i++) {
-                if (fn_8004E5D8(g_GameGlobal, i)->b11 == 1) {
+                if (getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i)->b11 == 1) {
                     result = 1;
                     break;
                 }
@@ -725,7 +725,7 @@ extern "C" int fn_800589C8(int arg0) {
         break;
     case 0x3F:
         for (int i = 0; i < 0x23; i++) {
-            if (fn_8004E5D8(g_GameGlobal, i)->unkC4 >= 10) {
+            if (getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i)->unkC4 >= 10) {
                 result = 1;
                 break;
             }
@@ -733,7 +733,7 @@ extern "C" int fn_800589C8(int arg0) {
         break;
     case 0x44:
         for (int i = 0; i < 0x23; i++) {
-            if (fn_8004E5D8(g_GameGlobal, i)->unkC4 >= 5) {
+            if (getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i)->unkC4 >= 5) {
                 result = 1;
                 break;
             }
@@ -741,7 +741,7 @@ extern "C" int fn_800589C8(int arg0) {
         break;
     case 0x74:
         for (int i = 0; i < 0x23; i++) {
-            if (fn_8004E5D8(g_GameGlobal, i)->unkC0 >= 100) {
+            if (getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i)->unkC0 >= 100) {
                 result = 1;
                 break;
             }
@@ -749,7 +749,7 @@ extern "C" int fn_800589C8(int arg0) {
         break;
     case 0x79:
         for (int i = 0; i < 0x23; i++) {
-            if (fn_8004E5D8(g_GameGlobal, i)->unkC0 >= 50) {
+            if (getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, i)->unkC0 >= 50) {
                 result = 1;
                 break;
             }
@@ -763,7 +763,7 @@ extern "C" int fn_800589C8(int arg0) {
 namespace jj_80058544 {
 extern "C" {
 extern "C" void* g_GameGlobal;
-void* fn_8004E5D8(void*, void*);
+void* getGlobalRecordCharaNumDatap__10GameGlobalFi(void*, void*);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_80058544(s32 arg0) {
@@ -772,7 +772,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
     case 0x26:
         result = 1;
         for (s32 i = 0; i < 0x23; i++) {
-            if (*(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac) == 0) {
+            if (*(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac) == 0) {
                 result = 0;
                 break;
             }
@@ -780,7 +780,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
         break;
     case 0xd:
         for (s32 i = 0; i < 0x23; i++) {
-            if (*(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac) >= 0x2328U) {
+            if (*(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac) >= 0x2328U) {
                 result = 1;
                 break;
             }
@@ -788,7 +788,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
         break;
     case 0xc:
         for (s32 i = 0; i < 0x23; i++) {
-            if (*(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac) >= 0x2ee0U) {
+            if (*(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac) >= 0x2ee0U) {
                 result = 1;
                 break;
             }
@@ -796,7 +796,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
         break;
     case 0x69:
         for (s32 i = 0; i < 0x23; i++) {
-            if (*(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac) >= 0x3a98U) {
+            if (*(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac) >= 0x3a98U) {
                 result = 1;
                 break;
             }
@@ -806,7 +806,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
         u32 sum = 0;
         s32 i = 0;
         do {
-            sum += *(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac);
+            sum += *(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac);
             i++;
         } while (i < 0x23);
         if (sum >= 0x493e0U) result = 1;
@@ -816,7 +816,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
         u32 sum = 0;
         s32 i = 0;
         do {
-            sum += *(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac);
+            sum += *(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac);
             i++;
         } while (i < 0x23);
         if (sum >= 0x5b8d8U) result = 1;
@@ -826,7 +826,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
         u32 sum = 0;
         s32 i = 0;
         do {
-            sum += *(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac);
+            sum += *(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac);
             i++;
         } while (i < 0x23);
         if (sum >= 0x6ddd0U) result = 1;
@@ -836,7 +836,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
         u32 sum = 0;
         s32 i = 0;
         do {
-            sum += *(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac);
+            sum += *(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac);
             i++;
         } while (i < 0x23);
         if (sum >= 0x249f0U) result = 1;
@@ -846,7 +846,7 @@ extern "C" s32 fn_80058544(s32 arg0) {
         u32 sum = 0;
         s32 i = 0;
         do {
-            sum += *(u32*)((char*)fn_8004E5D8(g_GameGlobal, (void*)i) + 0xac);
+            sum += *(u32*)((char*)getGlobalRecordCharaNumDatap__10GameGlobalFi(g_GameGlobal, (void*)i) + 0xac);
             i++;
         } while (i < 0x23);
         if (sum >= 0x3a980U) result = 1;
@@ -862,18 +862,18 @@ extern "C" {
 struct OriginalIds { int values[10]; };
 extern "C" const OriginalIds lbl_80406EA8;
 extern "C" void* g_GameGlobal;
-void* fn_8004E5C4(void*);
-u8* fn_8004E7B8(void*, int);
+void* getGlobalRecordGameDatap__10GameGlobalFv(void*);
+u8* getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(void*, int);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_80058C48(s32 arg0) {
     s32 result = 0;
     switch (arg0) {
     case 0xA:
-        if (*(u8*)((char*)fn_8004E5C4(g_GameGlobal) + 0x32A) >= 15U) result = 1;
+        if (*(u8*)((char*)getGlobalRecordGameDatap__10GameGlobalFv(g_GameGlobal) + 0x32A) >= 15U) result = 1;
         break;
     case 0x6F:
-        if (*(u8*)((char*)fn_8004E5C4(g_GameGlobal) + 0x32A) >= 5U) result = 1;
+        if (*(u8*)((char*)getGlobalRecordGameDatap__10GameGlobalFv(g_GameGlobal) + 0x32A) >= 5U) result = 1;
         break;
     case 0x49: {
         OriginalIds ids = lbl_80406EA8;
@@ -881,7 +881,7 @@ extern "C" s32 fn_80058C48(s32 arg0) {
         u32 total = 0;
         int i = 0;
         do {
-            total += *fn_8004E7B8(g_GameGlobal, *p);
+            total += *getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, *p);
             if (total >= 10U) {
                 result = 1;
                 break;
@@ -892,37 +892,37 @@ extern "C" s32 fn_80058C48(s32 arg0) {
         break;
     }
     case 0x13:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0x2A) >= 3) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0x2A) >= 3) result = 1;
         break;
     case 0x15:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0x35) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0x35) >= 10) result = 1;
         break;
     case 0x37:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0x19) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0x19) >= 10) result = 1;
         break;
     case 0x70:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0x16) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0x16) >= 10) result = 1;
         break;
     case 0x1C:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0x23) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0x23) >= 10) result = 1;
         break;
     case 0x6E:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0xE) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0xE) >= 10) result = 1;
         break;
     case 0x4E:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 5) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 5) >= 10) result = 1;
         break;
     case 0x32:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0xB) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0xB) >= 10) result = 1;
         break;
     case 0x11:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0xC) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0xC) >= 10) result = 1;
         break;
     case 0x31:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0x14) >= 10) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0x14) >= 10) result = 1;
         break;
     case 0x71:
-        if ((int)*fn_8004E7B8(g_GameGlobal, 0x22) >= 15) result = 1;
+        if ((int)*getGlobalRecordGetStagePlayCountDatap__10GameGlobalFi(g_GameGlobal, 0x22) >= 15) result = 1;
         break;
     }
     return result;
@@ -932,14 +932,14 @@ extern "C" s32 fn_80058C48(s32 arg0) {
 namespace jj_80059C00 {
 extern "C" {
 extern "C" void* g_GameGlobal;
-unsigned char* fn_8004E790(void*, int);
+unsigned char* getGlobalRecordGetOpenedEventDatap__10GameGlobalFi(void*, int);
 int fn_80055888(int, int);
-unsigned int fn_8004F4A0(int);
+unsigned int gmCheckChKindUseEnable__F15gmCharacterKind(int);
 // TODO: clean up, give variables real names
 int fn_80059C00(int arg) {
     int result = 0;
-    unsigned char* a = fn_8004E790(g_GameGlobal, 0);
-    unsigned char* b = fn_8004E790(g_GameGlobal, 1);
+    unsigned char* a = getGlobalRecordGetOpenedEventDatap__10GameGlobalFi(g_GameGlobal, 0);
+    unsigned char* b = getGlobalRecordGetOpenedEventDatap__10GameGlobalFi(g_GameGlobal, 1);
     switch (arg) {
     case 0x75:
         if (*a < 0x14 && fn_80055888(1, 0) >= 7) {
@@ -949,19 +949,19 @@ int fn_80059C00(int arg) {
         break;
     case 0x76:
         if (*a >= 0x14 && *a < 0x1c && fn_80055888(1, 0) >= 0x12 &&
-            fn_8004F4A0(0xb) == 1U && fn_8004F4A0(0x13) == 1U &&
-            fn_8004F4A0(9) == 1U && fn_8004F4A0(0xa) == 1U &&
-            fn_8004F4A0(0x24) == 1U && fn_8004F4A0(0x26) == 1U) {
+            gmCheckChKindUseEnable__F15gmCharacterKind(0xb) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x13) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(9) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0xa) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x24) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x26) == 1U) {
             result = 1;
             *a = 0x1c;
         }
         break;
     case 0x77:
         if (*a >= 0x1c && *a < 0x28 && fn_80055888(1, 0) >= 0x14 &&
-            fn_8004F4A0(0x15) == 1U && fn_8004F4A0(0x2a) == 1U &&
-            fn_8004F4A0(0x16) == 1U && fn_8004F4A0(0x14) == 1U &&
-            fn_8004F4A0(0x2b) == 1U && fn_8004F4A0(0x27) == 1U &&
-            fn_8004F4A0(0x28) == 1U && fn_8004F4A0(0x29) == 1U) {
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x15) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x2a) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x16) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x14) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x2b) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x27) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x28) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x29) == 1U) {
             result = 1;
             *a = 0x28;
         }
@@ -973,20 +973,20 @@ int fn_80059C00(int arg) {
         }
         break;
     case 0x79:
-        if (*b < 0xd && fn_8004F4A0(0xb) == 1U &&
-            fn_8004F4A0(0x13) == 1U && fn_8004F4A0(9) == 1U &&
-            fn_8004F4A0(0xa) == 1U && fn_8004F4A0(0x24) == 1U &&
-            fn_8004F4A0(0x26) == 1U) {
+        if (*b < 0xd && gmCheckChKindUseEnable__F15gmCharacterKind(0xb) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x13) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(9) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0xa) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x24) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x26) == 1U) {
             result = 1;
             *b = 0xd;
         }
         break;
     case 0x7a:
         if (*b >= 0xd && *b < 0x14 && fn_80055888(2, 0) >= 0xa &&
-            fn_8004F4A0(0x15) == 1U && fn_8004F4A0(0x2a) == 1U &&
-            fn_8004F4A0(0x16) == 1U && fn_8004F4A0(0x14) == 1U &&
-            fn_8004F4A0(0x2b) == 1U && fn_8004F4A0(0x27) == 1U &&
-            fn_8004F4A0(0x28) == 1U && fn_8004F4A0(0x29) == 1U) {
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x15) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x2a) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x16) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x14) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x2b) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x27) == 1U &&
+            gmCheckChKindUseEnable__F15gmCharacterKind(0x28) == 1U && gmCheckChKindUseEnable__F15gmCharacterKind(0x29) == 1U) {
             result = 1;
             *b = 0x14;
         }

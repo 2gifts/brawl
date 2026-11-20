@@ -18,13 +18,13 @@ int fn_80355454(int *arg0) {
 }
 
 extern char lbl_8048DC08[];
-extern void fn_803360BC(int);
+extern void DWC_CancelGHTTPRequest(int);
 
 // TODO: clean up, give variables real names
 void fn_80355388(void) {
     int val = *(int *)(lbl_8048DC08 + 8);
     if (val >= 0) {
-        fn_803360BC(val);
+        DWC_CancelGHTTPRequest(val);
     }
     *(int *)lbl_8048DC08 = 0;
 }

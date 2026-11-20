@@ -259,7 +259,7 @@ extern "C" void fn_801416CC(Object* obj) {
 namespace jj_8013F9B8 {
 
 extern "C" {
-int fn_800D278C(void* self, int idx);
+int getFriendAIDIndexAID__19muWifiInterfaceTaskFi(void* self, int idx);
 void fn_800D2164(void* self, int idx, u8 value);
 extern "C" void* lbl_805A0390;
 extern "C" u8 lbl_8059E742;
@@ -278,7 +278,7 @@ extern "C" void fn_8013F9B8(char* arg0) {
         }
         u32 off = (u8)i << 5;
         if (*(s8*)(arg0 + off + 0xB0) != 0) {
-            int r = fn_800D278C(task, (u8)i);
+            int r = getFriendAIDIndexAID__19muWifiInterfaceTaskFi(task, (u8)i);
             if (r < 0) {
                 continue;
             }
@@ -427,7 +427,7 @@ namespace jj_80140604 {
 extern "C" {
 void fn_8013E470(void* self, u16 a, s32 b);
 void fn_8013FDD4(void* self);
-void fn_80146F88(u8 a, s32 b);
+void setSIDPlayer__6NtBaseFUcUc(u8 a, s32 b);
 void netReport__FPCce(const char*, ...);
 }
 
@@ -490,7 +490,7 @@ extern "C" u32 fn_80140604(u8 arg0, u32 arg1, Arg* arg2) {
         lbl_805A0390->unk146 = lbl_805A0390->unk144;
         i = 0;
         do {
-            fn_80146F88((u8)i, arg2->unkA[(u8)i]);
+            setSIDPlayer__6NtBaseFUcUc((u8)i, arg2->unkA[(u8)i]);
             i++;
         } while (i < 4);
         lbl_805A0390->unk50 = lbl_805A0390->unk54 * lbl_805A0418[lbl_8059E742].b;
@@ -546,8 +546,8 @@ struct Obj {
 extern "C" {
 void fn_8014BF68(char* p, int x);
 u32 OSGetTick(void);
-f32 fn_8014B130(int x);
-u64 fn_800C8F68(const char* fmt, ...);
+f32 setErrorStatus__10NtMatchingFl(int x);
+u64 netMinReport__FPCce(const char* fmt, ...);
 void netReport__FPCce(const char* fmt, ...);
 }
 
@@ -592,9 +592,9 @@ extern "C" void fn_8014044C(Obj* obj) {
         for (int i = 0; i < 0x40; i++, e++) {
             if (e->flag != 0 && (u32)(tick - e->tick) >= ((*(u32*)0x800000F8 >> 2) * 10)) {
                 netReport__FPCce(lbl_8045E188, 0xA, e->id, e->flag);
-                u64 ret = fn_800C8F68(lbl_8045E188, 0xA, e->id, e->flag);
+                u64 ret = netMinReport__FPCce(lbl_8045E188, 0xA, e->id, e->flag);
                 lbl_8045E1C0.report((const char*)(u32)ret);
-                fn_8014B130(0xA);
+                setErrorStatus__10NtMatchingFl(0xA);
             }
         }
     }
@@ -604,10 +604,10 @@ extern "C" void fn_8014044C(Obj* obj) {
 namespace jj_80141814 {
 extern "C" {
 void netReport__FPCce(const char*, ...);
-void fn_800C8F68(const char*, ...);
+void netMinReport__FPCce(const char*, ...);
 void fn_80140EBC(void*, int);
-void fn_80143F7C(int, int);
-void fn_8014B130(int);
+void closeAID__4NtTrFUc(int, int);
+void setErrorStatus__10NtMatchingFl(int);
 extern "C" unsigned char lbl_8059E742;
 extern "C" int lbl_805A03A8;
 extern "C" char lbl_8045E380[];
@@ -647,11 +647,11 @@ extern "C" int fn_80141814(void* arg0) {
                 *(unsigned short*)(entry + 4) = counter;
                 if (counter >= 0x1F4) {
                     netReport__FPCce(lbl_8045E380, i, stored);
-                    fn_800C8F68(lbl_8045E3A8);
+                    netMinReport__FPCce(lbl_8045E3A8);
                     self[i * 0x20 + 0xB0] = 0;
                     update(self);
-                    fn_80143F7C(lbl_805A03A8, i);
-                    fn_8014B130(0xA);
+                    closeAID__4NtTrFUc(lbl_805A03A8, i);
+                    setErrorStatus__10NtMatchingFl(0xA);
                     *(unsigned short*)(entry + 4) = 0;
                 }
                 *(unsigned int*)(entry + 0x14) = tick;
@@ -756,8 +756,8 @@ void OSInitMutex(void*);
 void __construct_array(void*, void (*)(void*), void (*)(void*), u32, s32);
 void __dt__8NtBufferFv(void*);
 void fn_8013DB48(void*);
-void fn_8014B964(s32, s32, s32);
-void fn_8014B96C(s32, s32, s32);
+void putPacketDelay__10NtMatchingFiUs(s32, s32, s32);
+void putPacketLost__10NtMatchingFiUc(s32, s32, s32);
 extern "C" unsigned char __vt__8NtBuffer[];
 extern "C" unsigned char lbl_8045E794[];
 extern "C" unsigned char lbl_8045E7AC[];
@@ -903,8 +903,8 @@ extern "C" void* fn_8013D8A8(void* arg0) {
 
     i = 0;
     do {
-        fn_8014B964(lbl_805A0434, i, 0);
-        fn_8014B96C(lbl_805A0434, i, 0);
+        putPacketDelay__10NtMatchingFiUs(lbl_805A0434, i, 0);
+        putPacketLost__10NtMatchingFiUc(lbl_805A0434, i, 0);
         i++;
     } while (i < 6);
 
@@ -1112,8 +1112,8 @@ extern "C" unsigned char* lbl_805A0434;
 extern "C" const float lbl_805A2B10;
 extern "C" const float lbl_805A2AC8;
 unsigned char fn_800CB194(muWifiInterfaceTask*, int);
-int fn_800CB0D8(muWifiInterfaceTask*, int);
-int fn_800CB354(muWifiInterfaceTask*, int);
+int getAssignedPlayerKind__19muWifiInterfaceTaskFi(muWifiInterfaceTask*, int);
+int getLocalPlayerContNum__19muWifiInterfaceTaskFi(muWifiInterfaceTask*, int);
 }
 
 struct Entry {
@@ -1183,9 +1183,9 @@ extern "C" int fn_8013FDD4(State* self) {
     memset(self->ids, 0, 3);
     memset(self->ranks, 0xff, 4);
     for (int i = 0; i < 4; i++) {
-        if (lbl_8059E742 == fn_800CB194(wifi, i) && fn_800CB0D8(wifi, i) == 0) {
+        if (lbl_8059E742 == fn_800CB194(wifi, i) && getAssignedPlayerKind__19muWifiInterfaceTaskFi(wifi, i) == 0) {
             self->ids[self->n] = i;
-            self->ranks[self->n] = fn_800CB354(wifi, i) - 1;
+            self->ranks[self->n] = getLocalPlayerContNum__19muWifiInterfaceTaskFi(wifi, i) - 1;
             self->n++;
         }
     }
@@ -1353,8 +1353,8 @@ struct Mgr {
 };
 extern "C" Mgr* lbl_805A0390;
 extern "C" int g_muWifiInterfaceTask;
-extern "C" void fn_800D1A9C(int);
-extern "C" void fn_8004A914(void*, int);
+extern "C" void clearPrepareLoadStage__19muWifiInterfaceTaskFv(int);
+extern "C" void setSource__8ipSwitchFi(void*, int);
 extern "C" void* lbl_805A0428;
 static inline void resetMgr(Mgr* g) {
  int i;
@@ -1378,12 +1378,12 @@ static inline void resetMgr(Mgr* g) {
 }
 // TODO: clean up, give variables real names
 extern "C" void fn_8013F658() {
- fn_800D1A9C(g_muWifiInterfaceTask);
+ clearPrepareLoadStage__19muWifiInterfaceTaskFv(g_muWifiInterfaceTask);
  lbl_805A0390->unkA8 = 0;
  resetMgr(lbl_805A0390);
  ipSwitch* sw = ipSwitch::getInstance();
  if (*(int*)sw == 1) {
-  fn_8004A914(sw, 0);
+  setSource__8ipSwitchFi(sw, 0);
   if (lbl_805A0428 != 0) {
    ((u8*)lbl_805A0428)[8] = 0;
    gfCallBack* cb = (gfCallBack*)lbl_805A0428;
@@ -1508,10 +1508,10 @@ struct NetEntry {
 extern "C" {
 void netReport__FPCce(const char*, ...);
 u32 OSGetTick(void);
-void fn_80022DD0(s32, u16);
-void fn_800C8F68(const char*, ...);
-void fn_8014B130(int);
-void fn_80143F7C(s32, int);
+void syncCallback__15gfFileIOManagerFUcUs(s32, u16);
+void netMinReport__FPCce(const char*, ...);
+void setErrorStatus__10NtMatchingFl(int);
+void closeAID__4NtTrFUc(s32, int);
 void* fn_801410CC(void*, int);
 extern "C" char lbl_8045E018[];
 extern "C" u8 lbl_8059E742;
@@ -1573,7 +1573,7 @@ extern "C" s32 fn_80141EBC(void* arg0) {
             *(u8*)(self + (u8)i * 0x20 + 0xB0) = 0;
             update(self);
 
-            fn_80143F7C(lbl_805A03A8, i);
+            closeAID__4NtTrFUc(lbl_805A03A8, i);
 
             s32 j;
             u8* p;
@@ -1589,7 +1589,7 @@ extern "C" s32 fn_80141EBC(void* arg0) {
                     if (r18m == (r18m & p[0])) {
                         netReport__FPCce(
                             base + 0x4A0, *(u16*)(p + 2), p[1], 0x22B8, i);
-                        fn_80022DD0(0, *(u16*)(p + 2));
+                        syncCallback__15gfFileIOManagerFUcUs(0, *(u16*)(p + 2));
                         p[0] = 0;
                         p[1] = 0;
                         *(u16*)(p + 2) = 0;
@@ -1598,8 +1598,8 @@ extern "C" s32 fn_80141EBC(void* arg0) {
                 }
             }
 
-            fn_800C8F68(base + 0x4D8);
-            fn_8014B130(10);
+            netMinReport__FPCce(base + 0x4D8);
+            setErrorStatus__10NtMatchingFl(10);
         } else {
             *(u32*)(self + 0x170) = 0;
             u8* r19 = *(u8**)(self + 0x178);
@@ -1784,11 +1784,11 @@ extern void (*lbl_805A039C)(u16,u8);
 extern void (*lbl_805A03A0)(u8,u16,u8);
 extern "C" {
 void netReport__FPCce(const char*, ...);
-void fn_800C8F68(const char*, ...);
+void netMinReport__FPCce(const char*, ...);
 void fn_8013E470(State*, u16, int);
 void fn_80140EBC(State*, int);
 int fn_80141814(State*);
-void fn_800D90CC(void*);
+void initPlayerLive__19muWifiInterfaceTaskFv(void*);
 void fn_800CEDDC(void*);
 void fn_801416CC(State*);
 void fn_801424F8(State*);
@@ -1796,9 +1796,9 @@ int fn_80141474(State*, Elem*);
 void fn_801419FC(State*);
 void fn_80141EBC(State*);
 void fn_8013E0B4(State*);
-void fn_800D1A9C(void*);
-void fn_8004A914(void*, int);
-void fn_80146878(void*, int);
+void clearPrepareLoadStage__19muWifiInterfaceTaskFv(void*);
+void setSource__8ipSwitchFi(void*, int);
+void disconnectAll__7NetworkFb(void*, int);
 void fn_80142A80(State*);
 void fn_8014044C(State*);
 }
@@ -1843,12 +1843,12 @@ static inline void notifyCamera(int v) {
 }
 // TODO: clean up, give variables real names
 static inline void clearMgr() {
-    fn_800D1A9C(g_muWifiInterfaceTask);
+    clearPrepareLoadStage__19muWifiInterfaceTaskFv(g_muWifiInterfaceTask);
     lbl_805A0390->state = 0;
     resetMgr(lbl_805A0390);
     ipSwitch* s = ipSwitch::getInstance();
     if (*(int*)s == 1) {
-        fn_8004A914(s, 0);
+        setSource__8ipSwitchFi(s, 0);
         notifyCamera(0);
     }
 }
@@ -1881,7 +1881,7 @@ extern "C" void fn_80142EB0(State* self) {
             fn_8013E470(self, self->port2, 0);
             notifyCamera(1);
             void* p = g_muWifiInterfaceTask;
-            fn_800D90CC(p);
+            initPlayerLive__19muWifiInterfaceTaskFv(p);
             fn_800CEDDC(p);
             netReport__FPCce(base + 0x710);
             self->state = 6;
@@ -1925,8 +1925,8 @@ extern "C" void fn_80142EB0(State* self) {
                     disconnect:
                         if (lbl_805A03A0) lbl_805A03A0(lbl_8059E742, self->code, self->reason);
                         clearMgr();
-                        fn_80146878(g_Network, 0);
-                        if (self->error) fn_800C8F68(base + 0x768, self->error);
+                        disconnectAll__7NetworkFb(g_Network, 0);
+                        if (self->error) netMinReport__FPCce(base + 0x768, self->error);
                     }
                 }
             }

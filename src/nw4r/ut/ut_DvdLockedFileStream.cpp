@@ -56,9 +56,9 @@ s32 DvdLockedFileStream::Peek(void* pDst, u32 size) {
 // TODO: clean up, give variables real names
 namespace jj_8015D4CC {
 #pragma peephole off
-extern "C" void fn_8015D00C(void*);
+extern "C" void Close__Q34nw4r2ut13DvdFileStreamFv(void*);
 extern "C" void fn_8015D4CC(void* self) {
- fn_8015D00C(self);
+ Close__Q34nw4r2ut13DvdFileStreamFv(self);
  *((signed char*)self + 111) = 0;
 }
 }
@@ -66,17 +66,17 @@ extern "C" void fn_8015D4CC(void* self) {
 namespace jj_8015D6A8 {
 extern "C" unsigned int OSDisableInterrupts(void);
 extern "C" void OSRestoreInterrupts(unsigned int status);
-extern "C" void fn_801E187C(void* p);
-extern "C" void fn_8015D29C(void* arg);
+extern "C" void OSWakeupThread(void* p);
+extern "C" void Cancel__Q34nw4r2ut13DvdFileStreamFv(void* arg);
 extern int lbl_805A0498;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8015D6A8(void* arg0) {
     unsigned int status = OSDisableInterrupts();
     *(unsigned char*)((char*)arg0 + 0x6F) = 1;
-    fn_801E187C(&lbl_805A0498);
+    OSWakeupThread(&lbl_805A0498);
     OSRestoreInterrupts(status);
-    fn_8015D29C(arg0);
+    Cancel__Q34nw4r2ut13DvdFileStreamFv(arg0);
 }
 }
 

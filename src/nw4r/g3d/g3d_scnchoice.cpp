@@ -174,8 +174,8 @@ unsigned char *fn_801B3C74(void) {
 
 // TODO: clean up, give variables real names
 namespace jj_801B3440 {
-extern "C" void* fn_80204E5C(void*, unsigned int);
-extern "C" void fn_801AC13C(void*, int, int, int);
+extern "C" void* MEMAllocFromAllocator(void*, unsigned int);
+extern "C" void __ct__Q34nw4r3g3d8ScnGroupFP12MEMAllocatorPPQ34nw4r3g3d6ScnObjUl(void*, int, int, int);
 extern "C" int lbl_80466410[];
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -187,12 +187,12 @@ extern "C" void* fn_801B3440(void* arg0, int* arg1, int arg2) {
         *arg1 = (int)size;
     }
     if (arg0 != 0) {
-        result = fn_80204E5C(arg0, size);
+        result = MEMAllocFromAllocator(arg0, size);
         if (result == 0) {
             return 0;
         }
         if (result != 0) {
-            fn_801AC13C(result, (int)arg0, (int)((char*)result + 0xEC), arg2);
+            __ct__Q34nw4r3g3d8ScnGroupFP12MEMAllocatorPPQ34nw4r3g3d6ScnObjUl(result, (int)arg0, (int)((char*)result + 0xEC), arg2);
             *(int*)result = (int)lbl_80466410;
             *(int*)((char*)result + 0xE8) = 0;
         }
@@ -217,17 +217,17 @@ public:
 };
 class Class_80466418 {
 public:
- virtual void fn_801B3BDC();
+ virtual void IsDerivedFrom__Q34nw4r3g3d9ScnChoiceCFQ44nw4r3g3d6G3dObj7TypeObj();
  virtual int fn_801B35D0(void*, int, int);
- virtual void fn_801B3C80();
+ virtual void __dt__Q34nw4r3g3d9ScnChoiceFv();
  virtual void fn_801B3C74();
- virtual void fn_801B3C44();
- virtual void fn_801AB788();
- virtual void fn_801AAC9C();
- virtual void fn_801AAE34();
- virtual void fn_801AAFDC();
- virtual void fn_801AAFE8();
- virtual void fn_801AAA70(void*, int*);
+ virtual void GetTypeName__Q34nw4r3g3d9ScnChoiceCFv();
+ virtual void ForEach__Q34nw4r3g3d8ScnGroupFPFPQ34nw4r3g3d6ScnObjPv_Q44nw4r3g3d6ScnObj13ForEachResultPvb();
+ virtual void SetScnObjOption__Q34nw4r3g3d6ScnObjFUlUl();
+ virtual void GetScnObjOption__Q34nw4r3g3d6ScnObjCFUlPUl();
+ virtual void GetValueForSortOpa__Q34nw4r3g3d6ScnObjCFv();
+ virtual void GetValueForSortXlu__Q34nw4r3g3d6ScnObjCFv();
+ virtual void CalcWorldMtx__Q34nw4r3g3d6ScnObjFPCQ34nw4r4math5MTX34PUl(void*, int*);
  char pad04[0xCC - 4];
  unsigned int unkCC;
  char padD0[4];
@@ -246,8 +246,8 @@ inline Sub** findSub(Sub** p, Sub** end, Sub* const& target) {
 }
 extern "C" {
 extern int lbl_805A0558;
-void fn_801AAB18(void*, void*);
-void fn_801ABA14(void*, int, int, void*);
+void CalcViewMtx__Q34nw4r3g3d6ScnObjFPCQ34nw4r4math5MTX34(void*, void*);
+void DefG3dProcScnGroup__Q34nw4r3g3d8ScnGroupFUlUlPv(void*, int, int, void*);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_801B35D0(Class_80466418* self, int arg1, int arg2, Class_80466418* arg3) {
  int sp8 = arg2;
@@ -261,7 +261,7 @@ void fn_801B35D0(Class_80466418* self, int arg1, int arg2, Class_80466418* arg3)
   case 1:
    if (self->unkD4 && (self->unkDA & 1) && (self->unkD8 & 1))
     self->unkD4->vf0c(1, self, arg2, arg3);
-   self->fn_801AAA70(arg3, &sp8);
+   self->CalcWorldMtx__Q34nw4r3g3d6ScnObjFPCQ34nw4r4math5MTX34PUl(arg3, &sp8);
    {
     int updated = sp8;
     if (self->unkD4 && (self->unkDA & 1) && (self->unkD8 & 2))
@@ -303,7 +303,7 @@ void fn_801B35D0(Class_80466418* self, int arg1, int arg2, Class_80466418* arg3)
   case 4:
    if (self->unkD4 && (self->unkDA & 4) && (self->unkD8 & 1))
     self->unkD4->vf14(1, self, arg2, arg3);
-   fn_801AAB18(self, arg3);
+   CalcViewMtx__Q34nw4r3g3d6ScnObjFPCQ34nw4r4math5MTX34(self, arg3);
    {
     int updated = sp8;
     if (self->unkD4 && (self->unkDA & 4) && (self->unkD8 & 2))
@@ -329,7 +329,7 @@ void fn_801B35D0(Class_80466418* self, int arg1, int arg2, Class_80466418* arg3)
   case 0x10001:
   case 0x10002:
   case 0x10003:
-   fn_801ABA14(self, arg1, arg2, arg3);
+   DefG3dProcScnGroup__Q34nw4r3g3d8ScnGroupFUlUlPv(self, arg1, arg2, arg3);
    break;
   case 5:
    if (self->unkE8) {

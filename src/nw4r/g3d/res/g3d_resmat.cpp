@@ -3,12 +3,12 @@
 #include <cstring>
 
 // Stand-ins for ResTex::GetTexObjParam / GetTexObjCIParam (g3d_restex.cpp).
-// symbols.txt still names these addresses fn_80192A44 / fn_80192B00, and the
+// symbols.txt still names these addresses GetTexObjParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP9_GXTexFmtPfPfPUc / GetTexObjCIParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP11_GXCITexFmtPfPfPUc, and the
 // matched call sites reference those names. HYPOTHESIS: same functions.
-extern "C" bool fn_80192A44(const nw4r::g3d::ResTex* pTex, void** ppTexData,
+extern "C" bool GetTexObjParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP9_GXTexFmtPfPfPUc(const nw4r::g3d::ResTex* pTex, void** ppTexData,
                             u16* pWidth, u16* pHeight, GXTexFmt* pFormat,
                             f32* pMinLod, f32* pMaxLod, GXBool* pMipMap);
-extern "C" bool fn_80192B00(const nw4r::g3d::ResTex* pTex, void** ppTexData,
+extern "C" bool GetTexObjCIParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP11_GXCITexFmtPfPfPUc(const nw4r::g3d::ResTex* pTex, void** ppTexData,
                             u16* pWidth, u16* pHeight, GXCITexFmt* pFormatCI,
                             f32* pMinLod, f32* pMaxLod, GXBool* pMipMap);
 
@@ -1595,7 +1595,7 @@ inline void ResTexPlttInfo::BindTex_(const ResTex tex, ResTexObj texObj) {
 
     if (IsCIFmt()) {
         GXCITexFmt fmtCi;
-        fn_80192B00(&tex, &pTexData, &width, &height, &fmtCi, &minLod,
+        GetTexObjCIParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP11_GXCITexFmtPfPfPUc(&tex, &pTexData, &width, &height, &fmtCi, &minLod,
                     &maxLod, &mipmap);
 
         GXInitTexObjCI(pGXObj, pTexData, width, height,
@@ -1603,7 +1603,7 @@ inline void ResTexPlttInfo::BindTex_(const ResTex tex, ResTexObj texObj) {
                        r.tlutID);
     } else {
         GXTexFmt fmt;
-        fn_80192A44(&tex, &pTexData, &width, &height, &fmt, &minLod, &maxLod,
+        GetTexObjParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP9_GXTexFmtPfPfPUc(&tex, &pTexData, &width, &height, &fmt, &minLod, &maxLod,
                     &mipmap);
 
         GXInitTexObj(pGXObj, pTexData, width, height, fmt, r.wrap_s, r.wrap_t,

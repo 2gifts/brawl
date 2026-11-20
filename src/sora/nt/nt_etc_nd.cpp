@@ -98,8 +98,8 @@ typedef long long s64;
 
 extern "C" {
 int fn_80355EFC();
-int fn_8035638C();
-int fn_80356424(int*, int*);
+int DWC_NdCancelAsync();
+int DWC_NdGetProgress(int*, int*);
 void OSSleepTicks(s64);
 }
 
@@ -129,10 +129,10 @@ extern "C" int fn_80151904(Context* self) {
         case 2:
             if (self->state == 3) {
                 if (self->flag34C) {
-                    if (fn_8035638C() == 0)
+                    if (DWC_NdCancelAsync() == 0)
                         return 0;
                 } else {
-                    if (fn_80356424(&a, &b)) {
+                    if (DWC_NdGetProgress(&a, &b)) {
                         self->value1 = a;
                         self->value2 = b;
                     }

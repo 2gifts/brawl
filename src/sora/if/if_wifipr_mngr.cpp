@@ -284,10 +284,10 @@ unsigned char lbl_805A02F8[0x8] __attribute__((aligned(4))) = { 0 };
 unsigned char g_IfWifiprMngr[0x8] __attribute__((aligned(4))) = { 0 };
 
 // TODO: clean up, give variables real names
-extern "C" void fn_800FD470(void*);
+extern "C" void dispMsg__14IfWifiprCenterFi(void*);
 
 extern "C" void fn_800FCC7C(void* self) {
-    fn_800FD470(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
+    dispMsg__14IfWifiprCenterFi(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
 }
 
 extern "C" void fn_800DA9CC(void*);
@@ -297,11 +297,11 @@ extern "C" void fn_800FCDF8(void* self) {
     fn_800DA9CC(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x40));
 }
 
-extern "C" void fn_800FD4F0(void*);
+extern "C" void startBeginMeleeAnim__14IfWifiprCenterFv(void*);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FCE00(void* self) {
-    fn_800FD4F0(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
+    startBeginMeleeAnim__14IfWifiprCenterFv(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
 }
 
 extern "C" void fn_800FD508(void*);
@@ -311,11 +311,11 @@ extern "C" void fn_800FCE08(void* self) {
     fn_800FD508(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x18));
 }
 
-extern "C" void fn_800FBF90(void*);
+extern "C" void endMenu__14IfWifiIntrMenuFv(void*);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FD108(void* self) {
-    fn_800FBF90(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x38));
+    endMenu__14IfWifiIntrMenuFv(*reinterpret_cast<void**>(reinterpret_cast<u8*>(self) + 0x38));
 }
 
 // TODO: clean up, give variables real names
@@ -352,11 +352,11 @@ extern "C" int fn_800FCC84(Outer* o) {
 }
 
 namespace jj_800FD0F0 {
-extern "C" void fn_800FBDF4(void*, void*, int);
+extern "C" void startMenu__14IfWifiIntrMenuFii(void*, void*, int);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800FD0F0(void* self, void* other) {
-    fn_800FBDF4(*(void**)((char*)self + 0x38), other, 0);
+    startMenu__14IfWifiIntrMenuFii(*(void**)((char*)self + 0x38), other, 0);
 }
 }
 

@@ -1690,7 +1690,7 @@ extern "C" void fn_800D1ADC(muWifiInterfaceTask* self, bool next) {
 }
 
 extern const char lbl_8045726C[0x14];
-extern "C" void fn_800C8F68(const char* fmt, ...);
+extern "C" void netMinReport__FPCce(const char* fmt, ...);
 
 // HYPOTHESIS: the top five bits of the word at 0x7C of the AID info hold the wifi status.
 struct WifiStatusWord {
@@ -1703,7 +1703,7 @@ extern "C" void fn_800D221C(muWifiInterfaceTask* self, u8 status) {
     ntFriendInfo::getInstance()->unk0->unk450[0x127] = status;
     g_Network.m_userData->unk0[0x33F4] = 1;
     netReport(lbl_8045726C, status);
-    fn_800C8F68(lbl_8045726C, status);
+    netMinReport__FPCce(lbl_8045726C, status);
     if (NtBase::isParent()) {
         muWifiAIDInfo* info;
         u8 aid = Network::getParentAID();
@@ -2092,7 +2092,7 @@ extern "C" void fn_800CC440(muWifiInterfaceTask* self) {
     ntFriendInfo::getInstance()->unk0->unk450[0x127] = 7;
     g_Network.m_userData->unk0[0x33F4] = 1;
     netReport(lbl_8045726C, 7);
-    fn_800C8F68(lbl_8045726C, 7);
+    netMinReport__FPCce(lbl_8045726C, 7);
     if (NtBase::isParent()) {
         muWifiAIDInfo* info;
         u8 aid = Network::getParentAID();
@@ -2934,8 +2934,8 @@ extern "C" void fn_800C9430(muWifiInterfaceTask* self, int arg1) {
 namespace jj_800D2AD0 {
 struct FriendInfo;
 extern "C" FriendInfo* getInstance__12ntFriendInfoFv();
-extern "C" void fn_8014CB1C(void*, int);
-extern "C" u8 fn_800C851C();
+extern "C" void setDirtyFlag__12ntFriendInfoFb(void*, int);
+extern "C" u8 getMyAID__7NetworkFv();
 struct Copy160 { u8 bytes[160]; };
 struct FriendData { u8 pad[0x450]; u8 names[4][40]; };
 struct FriendInfo { FriendData* data; };
@@ -2950,8 +2950,8 @@ extern "C" void fn_800D2AD0(u8* self, const u8* src, int index) {
         dst += 2;
         if (value == 0) break;
     }
-    fn_8014CB1C(getInstance__12ntFriendInfoFv(), 1);
-    u8 slot = fn_800C851C();
+    setDirtyFlag__12ntFriendInfoFb(getInstance__12ntFriendInfoFv(), 1);
+    u8 slot = getMyAID__7NetworkFv();
     if (slot == 255) slot = 4;
     *(Copy160*)(self + slot * 0x218 + 0x1A8) = *(Copy160*)(getInstance__12ntFriendInfoFv()->data->names);
 }
@@ -2959,10 +2959,10 @@ extern "C" void fn_800D2AD0(u8* self, const u8* src, int index) {
 
 // TODO: clean up, give variables real names
 namespace jj_800D5A7C {
-extern "C" u8 fn_800C851C();
-extern "C" int fn_800C8524();
-extern "C" u8 fn_800C8548();
-extern "C" void fn_80146878(void*, int);
+extern "C" u8 getMyAID__7NetworkFv();
+extern "C" int isParent__6NtBaseFv();
+extern "C" u8 getParentAID__7NetworkFv();
+extern "C" void disconnectAll__7NetworkFb(void*, int);
 extern "C" void netReport__FPCce(const char*, ...);
 extern "C" char g_Network[];
 extern "C" char lbl_80457158[];
@@ -2983,8 +2983,8 @@ extern "C" void fn_800D5A7C(char* self) {
     u8 raw;
     s32 st;
     if ((*(s32*)(self + 0xFCC) >> 24) != 1) return;
-    if (fn_800C8524() != 0) return;
-    idx = fn_800C8548();
+    if (isParent__6NtBaseFv() != 0) return;
+    idx = getParentAID__7NetworkFv();
     if (idx == 0xFF) ent = 0;
     else ent = (char*)&((Parent*)self)->entries[idx];
     if (ent == 0) return;
@@ -2993,20 +2993,20 @@ extern "C" void fn_800D5A7C(char* self) {
     if (id != *(s32*)(self + 0x6C)) {
         netReport__FPCce(base + 0x1BE0);
         netReport__FPCce(base + 0x1C24, getId(ent), *(s32*)(self + 0x6C));
-        fn_80146878(g_Network, 1);
+        disconnectAll__7NetworkFb(g_Network, 1);
         return;
     }
-    local = fn_800C851C();
+    local = getMyAID__7NetworkFv();
     if (local == 0xFF) local = 4;
-    idx = fn_800C8548();
+    idx = getParentAID__7NetworkFv();
     if (idx == 0xFF) {
-        u8 alt = fn_800C851C();
+        u8 alt = getMyAID__7NetworkFv();
         if (alt == 0xFF) alt = 4;
         ent = self + alt * 0x218 + 0x70;
     } else {
         ent = (char*)&((Parent*)self)->entries[idx];
         if (!(((u8)ent[0x78] >> 7) & 1)) {
-            u8 alt = fn_800C851C();
+            u8 alt = getMyAID__7NetworkFv();
             if (alt == 0xFF) alt = 4;
             ent = self + alt * 0x218 + 0x70;
         }
@@ -3020,7 +3020,7 @@ extern "C" void fn_800D5A7C(char* self) {
     }
     if (st == 4) {
         netReport__FPCce(base + 0x1DC0, st);
-        fn_80146878(g_Network, 1);
+        disconnectAll__7NetworkFb(g_Network, 1);
         return;
     }
     netReport__FPCce(base + 0x1DF8, st);
@@ -3028,8 +3028,8 @@ extern "C" void fn_800D5A7C(char* self) {
 }
 
 namespace jj_800D7C0C {
-extern "C" u8 fn_800C8548();
-extern "C" u8 fn_800C851C();
+extern "C" u8 getParentAID__7NetworkFv();
+extern "C" u8 getMyAID__7NetworkFv();
 
 struct Entry {
     u8 pad0[0x68];
@@ -3048,7 +3048,7 @@ struct Parent {
 
 // TODO: clean up, give variables real names
 inline u8 localIdx() {
-    u8 l = fn_800C851C();
+    u8 l = getMyAID__7NetworkFv();
     if (l == 0xFF)
         l = 4;
     return l;
@@ -3063,7 +3063,7 @@ extern "C" s32 fn_800D7C0C(void* self, s32 slot, s32 flag) {
     u8 player;
 
     if (cond == 0) {
-        u8 idx = fn_800C8548();
+        u8 idx = getParentAID__7NetworkFv();
         if (idx == 0xFF)
             e = 0;
         else
@@ -3077,7 +3077,7 @@ extern "C" s32 fn_800D7C0C(void* self, s32 slot, s32 flag) {
         if (player >= 4)
             v = 0;
         else {
-            u8 s = fn_800C8548();
+            u8 s = getParentAID__7NetworkFv();
             Entry* t;
             if (s == 0xFF)
                 t = &parent->entries[localIdx()];
@@ -3132,8 +3132,8 @@ namespace jj_800CA18C {
 typedef unsigned char u8;
 typedef signed int s32;
 
-extern "C" u8 fn_800C8548();
-extern "C" u8 fn_800C851C();
+extern "C" u8 getParentAID__7NetworkFv();
+extern "C" u8 getMyAID__7NetworkFv();
 
 struct Entry {
     u8 pad0[0x68];
@@ -3161,7 +3161,7 @@ struct EntryView {
 
 // TODO: clean up, give variables real names
 inline u8 localIdx() {
-    u8 l = fn_800C851C();
+    u8 l = getMyAID__7NetworkFv();
     if (l == 0xFF)
         l = 4;
     return l;
@@ -3173,7 +3173,7 @@ inline Entry* getLocal(void* self) {
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline u8* getSelectedOrNull(u8* self) {
-    unsigned int idx = fn_800C8548();
+    unsigned int idx = getParentAID__7NetworkFv();
     if (idx == 0xFF)
         return 0;
     return (u8*)((unsigned int)self + idx * 0x218 + 0x70);
@@ -3181,7 +3181,7 @@ inline u8* getSelectedOrNull(u8* self) {
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline Entry* getSelectedA(u8* self) {
-    u8 index = fn_800C8548();
+    u8 index = getParentAID__7NetworkFv();
     if (index == 0xFF)
         return getLocal(self);
 
@@ -3194,7 +3194,7 @@ inline Entry* getSelectedA(u8* self) {
 
 // TODO: clean up, give variables real names
 inline u8* getSelected(u8* self) {
-    u8 idx = fn_800C8548();
+    u8 idx = getParentAID__7NetworkFv();
     if (idx == 0xFF)
         return (u8*)getLocal(self);
 
@@ -3326,14 +3326,14 @@ struct Entry {
     u8 pad2[0x218 - 0xC8];
 };
 
-extern "C" u8 fn_800C851C(void);
-extern "C" u8 fn_800C8548(void);
+extern "C" u8 getMyAID__7NetworkFv(void);
+extern "C" u8 getParentAID__7NetworkFv(void);
 extern "C" void netReport__FPCce(const char*, ...);
-extern "C" void fn_800C8F68(const char*, ...);
-extern "C" void fn_8014B130(int);
+extern "C" void netMinReport__FPCce(const char*, ...);
+extern "C" void setErrorStatus__10NtMatchingFl(int);
 extern "C" void fn_800CF770(void*, u8);
 extern "C" void** getInstance__12ntFriendInfoFv(void);
-extern "C" int fn_8014FD6C(void);
+extern "C" int isPermitWatching__9nteGlobalFv(void);
 extern "C" void fn_800D0398(void*);
 extern "C" void fn_800D0AE0(void*, void*);
 extern "C" void fn_80145B98(int, int);
@@ -3350,36 +3350,36 @@ extern "C" void fn_800CFEB8(u8* self) {
     char* base = lbl_80457158;
 
     if (self[0xFD4] != 4) {
-        u8 a = fn_800C851C();
+        u8 a = getMyAID__7NetworkFv();
         if (a == 0xFF)
             a = 4;
         if (self[0xFD4] != a) {
-            u8 b = fn_800C851C();
+            u8 b = getMyAID__7NetworkFv();
             if (b == 0xFF)
                 b = 4;
             if (b == 4) {
-                u8 c = fn_800C851C();
+                u8 c = getMyAID__7NetworkFv();
                 u8 d = c;
                 if (c == 0xFF)
                     d = 4;
                 netReport__FPCce(base + 0x10E4, self[0xFD4], d);
             } else {
-                u8 c = fn_800C851C();
+                u8 c = getMyAID__7NetworkFv();
                 u8 d = c;
                 if (c == 0xFF)
                     d = 4;
                 netReport__FPCce(base + 0x111C, self[0xFD4], d);
             }
-            u8 e = fn_800C851C();
+            u8 e = getMyAID__7NetworkFv();
             u8 f = e;
             if (e == 0xFF)
                 f = 4;
-            fn_800C8F68(base + 0x1150, self[0xFD4], f);
-            fn_8014B130(0xD);
+            netMinReport__FPCce(base + 0x1150, self[0xFD4], f);
+            setErrorStatus__10NtMatchingFl(0xD);
         }
     } else {
         src = self + self[0xFD4] * 0x218;
-        u8 loc = fn_800C851C();
+        u8 loc = getMyAID__7NetworkFv();
         if (loc == 0xFF)
             loc = 4;
         dst = self + loc * 0x218;
@@ -3394,7 +3394,7 @@ extern "C" void fn_800CFEB8(u8* self) {
         Slot* slot = (Slot*)self;
         for (s32 i = 0; i < 4; i++) {
             if (self[0xFD4] == slot->player) {
-                u8 l = fn_800C851C();
+                u8 l = getMyAID__7NetworkFv();
                 if (l == 0xFF)
                     l = 4;
                 slot->player = l;
@@ -3402,7 +3402,7 @@ extern "C" void fn_800CFEB8(u8* self) {
             slot = (Slot*)((u8*)slot + 8);
         }
 
-        u8 sel = fn_800C851C();
+        u8 sel = getMyAID__7NetworkFv();
         if (sel == 0xFF)
             sel = 4;
         char* fr = *(char**)getInstance__12ntFriendInfoFv();
@@ -3417,10 +3417,10 @@ extern "C" void fn_800CFEB8(u8* self) {
         }
         *(u64*)(dst + 0x80) = value;
 
-        s32 ret = fn_8014FD6C();
+        s32 ret = isPermitWatching__9nteGlobalFv();
         ((Entry*)dst)->bit80 = ret;
 
-        u8 t = fn_800C851C();
+        u8 t = getMyAID__7NetworkFv();
         if (t == 0xFF)
             t = 4;
 
@@ -3437,9 +3437,9 @@ extern "C" void fn_800CFEB8(u8* self) {
             off = 0;
             do {
                 u8* e;
-                u8 g = fn_800C8548();
+                u8 g = getParentAID__7NetworkFv();
                 if (g == 0xFF) {
-                    u8 l = fn_800C851C();
+                    u8 l = getMyAID__7NetworkFv();
                     if (l == 0xFF)
                         l = 4;
                     e = (u8*)((u32)self + l * 0x218 + 0x70);
@@ -3447,7 +3447,7 @@ extern "C" void fn_800CFEB8(u8* self) {
                     u8* p = self + g * 0x218;
                     e = p + 0x70;
                     if (!((p[0xE8] >> 7) & 1)) {
-                        u8 l = fn_800C851C();
+                        u8 l = getMyAID__7NetworkFv();
                         if (l == 0xFF)
                             l = 4;
                         e = (u8*)((u32)self + l * 0x218 + 0x70);
@@ -3476,7 +3476,7 @@ extern "C" void fn_800CFEB8(u8* self) {
             } while (k < 3);
         }
 
-        u8 n = fn_800C851C();
+        u8 n = getMyAID__7NetworkFv();
         if (n == 0xFF)
             n = 4;
         Entry* rec = (Entry*)(self + n * 0x218);
@@ -3484,7 +3484,7 @@ extern "C" void fn_800CFEB8(u8* self) {
         u32 enabled = *(s32*)((char*)lbl_805A0434 + 0x3408) < 0x40;
         rec->bit40 = enabled;
         if (old != enabled) {
-            u8 m = fn_800C851C();
+            u8 m = getMyAID__7NetworkFv();
             if (m == 0xFF)
                 m = 4;
             u8* rec2 = self + m * 0x218;
@@ -3498,7 +3498,7 @@ extern "C" void fn_800CFEB8(u8* self) {
         *(s16*)(self + 0xFDA) = (s16)(v1050 * 0x3C);
         netReport__FPCce(base + 0x1050, v1050);
 
-        u8 z = fn_800C851C();
+        u8 z = getMyAID__7NetworkFv();
         if (z == 0xFF)
             z = 4;
         self[0xFD4] = z;
@@ -3508,13 +3508,13 @@ extern "C" void fn_800CFEB8(u8* self) {
 
 namespace jj_800CAA60 {
 
-extern "C" int fn_800C8524(void);
-extern "C" u8 fn_800C8548(void);
-extern "C" u8 fn_800C851C(void);
+extern "C" int isParent__6NtBaseFv(void);
+extern "C" u8 getParentAID__7NetworkFv(void);
+extern "C" u8 getMyAID__7NetworkFv(void);
 extern "C" int fn_8014592C(int);
 extern "C" void fn_800D0AE0(void*, void*);
 extern "C" void fn_80145B98(int, int);
-extern "C" void fn_8014BF30(int, int, int);
+extern "C" void setSequenceWatch__10NtMatchingFii(int, int, int);
 
 extern "C" int lbl_805A03A8;
 extern "C" int lbl_805A0434;
@@ -3538,7 +3538,7 @@ struct Parent {
 
 // TODO: clean up, give variables real names
 inline u8* getInitial(u8* self) {
-    u8 idx = fn_800C8548();
+    u8 idx = getParentAID__7NetworkFv();
     if (idx == 0xFF)
         return 0;
     return (u8*)&((Parent*)self)->entries[idx];
@@ -3546,15 +3546,15 @@ inline u8* getInitial(u8* self) {
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline u8* getSelectedForState(u8* self) {
-    u8 idx = fn_800C8548();
+    u8 idx = getParentAID__7NetworkFv();
     if (idx == 0xFF) {
-        u8 local = fn_800C851C();
+        u8 local = getMyAID__7NetworkFv();
         if (local == 0xFF) local = 4;
         return self + local * 0x218 + 0x70;
     }
     u8* p = (u8*)((unsigned int)self + idx * 0x218 + 0x70);
     if (!((Entry*)p)->active) {
-        u8 local = fn_800C851C();
+        u8 local = getMyAID__7NetworkFv();
         if (local == 0xFF) local = 4;
         return self + local * 0x218 + 0x70;
     }
@@ -3563,7 +3563,7 @@ inline u8* getSelectedForState(u8* self) {
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 inline int countPlayers(u8* self) {
-    u8 idx = fn_800C8548();
+    u8 idx = getParentAID__7NetworkFv();
     s8* p;
     if (idx == 0xFF)
         p = 0;
@@ -3605,8 +3605,8 @@ extern "C" int fn_800CAA60(u8* self) {
     int matches;
     int row;
 
-    if (fn_800C8524() != 0) {
-        fn_800C8548();
+    if (isParent__6NtBaseFv() != 0) {
+        getParentAID__7NetworkFv();
         initial = getInitial(self);
         u8 idx;
 
@@ -3622,7 +3622,7 @@ extern "C" int fn_800CAA60(u8* self) {
             } while (i < 4);
         }
 
-        u8 countIdx = fn_800C8548();
+        u8 countIdx = getParentAID__7NetworkFv();
         s8* countEntry;
         if (countIdx == 0xFF)
             countEntry = 0;
@@ -3650,13 +3650,13 @@ extern "C" int fn_800CAA60(u8* self) {
             sub = record[0x4D];
             int cond = (self[0xFCA] >> 5) & 1;
             if (!cond) {
-                idx = fn_800C8548();
+                idx = getParentAID__7NetworkFv();
                 if (idx == 0xFF)
                     owner = 0;
                 else
                     owner = (u8*)((unsigned int)self + idx * 0x218 + 0x70);
                 if (owner == 0) {
-                    u8 local = fn_800C851C();
+                    u8 local = getMyAID__7NetworkFv();
                     if (local == 0xFF) local = 4;
                     owner = (u8*)((unsigned int)self + local * 0x218 + 0x70);
                 }
@@ -3666,15 +3666,15 @@ extern "C" int fn_800CAA60(u8* self) {
                     valid = 0;
                 } else {
                     u8* target;
-                    idx = fn_800C8548();
+                    idx = getParentAID__7NetworkFv();
                     if (idx == 0xFF) {
-                        u8 local = fn_800C851C();
+                        u8 local = getMyAID__7NetworkFv();
                         if (local == 0xFF) local = 4;
                         target = (u8*)((unsigned int)self + local * 0x218 + 0x70);
                     } else {
                         target = (u8*)((unsigned int)self + idx * 0x218 + 0x70);
                         if (!((target[0x78] >> 7) & 1)) {
-                            u8 local = fn_800C851C();
+                            u8 local = getMyAID__7NetworkFv();
                             if (local == 0xFF) local = 4;
                             target = (u8*)((unsigned int)self + local * 0x218 + 0x70);
                         }
@@ -3682,7 +3682,7 @@ extern "C" int fn_800CAA60(u8* self) {
                     valid = (target[slot + 0x68] == 1);
                 }
                 u8 pick = valid ? owner[0x79] : 0xFF;
-                u8 local = fn_800C851C();
+                u8 local = getMyAID__7NetworkFv();
                 if (local == 0xFF) local = 4;
                 cond = (pick == local);
             }
@@ -3696,16 +3696,16 @@ extern "C" int fn_800CAA60(u8* self) {
                 value = 0;
             } else {
                 u8* target;
-                idx = fn_800C8548();
+                idx = getParentAID__7NetworkFv();
                 if (idx == 0xFF) {
-                    u8 local = fn_800C851C();
+                    u8 local = getMyAID__7NetworkFv();
                     if (local == 0xFF) local = 4;
                     target = (u8*)((unsigned int)self + local * 0x218 + 0x70);
                 } else {
                     u8* base = self + idx * 0x218;
                     target = base + 0x70;
                     if (!((base[0xE8] >> 7) & 1)) {
-                        u8 local = fn_800C851C();
+                        u8 local = getMyAID__7NetworkFv();
                         if (local == 0xFF) local = 4;
                         target = (u8*)((unsigned int)self + local * 0x218 + 0x70);
                     }
@@ -3741,14 +3741,14 @@ extern "C" int fn_800CAA60(u8* self) {
 
         if (!((initial[0x78] >> 6) & 1)) {
             initial[0x78] |= 0x40;
-            idx = fn_800C851C();
+            idx = getMyAID__7NetworkFv();
             if (idx == 0xFF) idx = 4;
             u8* q = self + idx * 0x218;
             ((Entry*)(q + 0x70))->lowFlag = 0;
             fn_800D0AE0(self, q);
             fn_80145B98(lbl_805A03A8, 0xFE);
             netReport(lbl_804579AC, matches);
-            fn_8014BF30(lbl_805A0434, 1, 0x3C);
+            setSequenceWatch__10NtMatchingFii(lbl_805A0434, 1, 0x3C);
         }
         return 1;
     }
@@ -3759,7 +3759,7 @@ extern "C" int fn_800CAA60(u8* self) {
     if (!((self[0xFC9] >> 5) & 1) && value != 0) {
         self[0xFC9] |= 0x20;
         netReport(lbl_804579E8);
-        fn_8014BF30(lbl_805A0434, 1, 0x3C);
+        setSequenceWatch__10NtMatchingFii(lbl_805A0434, 1, 0x3C);
     }
     return value;
 }
@@ -3775,14 +3775,14 @@ extern "C" int gUnk805a03d8;
 extern "C" int lbl_805A03A8;
 extern "C" char lbl_8045726C[];
 
-extern "C" u8 fn_800C851C();
-extern "C" int fn_800C8524();
-extern "C" u8 fn_800C8548();
+extern "C" u8 getMyAID__7NetworkFv();
+extern "C" int isParent__6NtBaseFv();
+extern "C" u8 getParentAID__7NetworkFv();
 extern "C" void netReport__FPCce(const char*, ...);
-extern "C" void fn_800C8F68(const char*, ...);
+extern "C" void netMinReport__FPCce(const char*, ...);
 extern "C" void fn_800D0AE0(void*, void*);
 extern "C" void fn_80145B98(int, int);
-extern "C" void fn_8014CB1C(void*, int);
+extern "C" void setDirtyFlag__12ntFriendInfoFb(void*, int);
 
 struct NetworkData {
     char pad[0x33F4];
@@ -3821,7 +3821,7 @@ struct Parent {
 
 // TODO: clean up, give variables real names
 inline u8 localIdx() {
-    u8 index = fn_800C851C();
+    u8 index = getMyAID__7NetworkFv();
     if (index == 0xFF)
         index = 4;
     return index;
@@ -3833,7 +3833,7 @@ inline Entry* getLocal(void* self) {
 
 // TODO: clean up, give variables real names
 inline Entry* getSelectedA(u8* self) {
-    u8 index = fn_800C8548();
+    u8 index = getParentAID__7NetworkFv();
     if (index == 0xFF)
         return getLocal(self);
     Entry* entry = &((Parent*)self)->entries[index];
@@ -3844,7 +3844,7 @@ inline Entry* getSelectedA(u8* self) {
 
 // TODO: clean up, give variables real names
 inline u8* getSelected(u8* self) {
-    u8 index = fn_800C8548();
+    u8 index = getParentAID__7NetworkFv();
     if (index == 0xFF)
         return (u8*)getLocal(self);
     u8* p = self + index * 0x218;
@@ -3860,9 +3860,9 @@ inline u8* getSelected(u8* self) {
         (*(u8**)info)[0x577] = (value);                                      \
         g_Network.data->flag = 1;                                            \
         netReport__FPCce(lbl_8045726C, (value));                            \
-        fn_800C8F68(lbl_8045726C, (value));                                 \
-        if (fn_800C8524() != 0) {                                           \
-            u8 index = fn_800C8548();                                       \
+        netMinReport__FPCce(lbl_8045726C, (value));                                 \
+        if (isParent__6NtBaseFv() != 0) {                                           \
+            u8 index = getParentAID__7NetworkFv();                                       \
             Entry* entry;                                                    \
             if (index == 0xFF)                                              \
                 entry = 0;                                                   \
@@ -3870,7 +3870,7 @@ inline u8* getSelected(u8* self) {
                 entry = &((Parent*)self)->entries[index];                    \
             if (entry != 0) {                                               \
                 entry->state = (value);                                     \
-                u8 local = fn_800C851C();                                   \
+                u8 local = getMyAID__7NetworkFv();                                   \
                 if (local == 0xFF)                                          \
                     local = 4;                                               \
                 u8* p = base + local * 0x218;                               \
@@ -3896,7 +3896,7 @@ extern "C" void fn_800CD934(void* self, u8 count) {
         int cond = (base[0xFCA] >> 5) & 1;
 
         if (cond == 0) {
-            u8 index = fn_800C8548();
+            u8 index = getParentAID__7NetworkFv();
             if (index == 0xFF)
                 entry = 0;
             else
@@ -3952,7 +3952,7 @@ extern "C" void fn_800CD934(void* self, u8 count) {
                 count = 4;
             info[0x578] = count;
 
-            if (fn_800C8524() != 0) {
+            if (isParent__6NtBaseFv() != 0) {
                 switch (*(unsigned int*)(base + 0x6C)) {
                 case 0:
                     if (base[0xFD6] >= 4) {
@@ -4002,7 +4002,7 @@ extern "C" void fn_800CD934(void* self, u8 count) {
             }
 
             g_Network.data->flag = 1;
-            fn_8014CB1C(ntFriendInfo::getInstance(), 1);
+            setDirtyFlag__12ntFriendInfoFb(ntFriendInfo::getInstance(), 1);
         }
     }
 }

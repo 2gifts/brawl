@@ -357,7 +357,7 @@ struct Self {
     float values[8];
 };
 
-extern "C" void fn_80018778(Camera*);
+extern "C" void calc__8gfCameraFv(Camera*);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_800A6BF0(Self* self) {
@@ -374,7 +374,7 @@ extern "C" void fn_800A6BF0(Self* self) {
     camera->c = self->values[7];
     camera->flags |= 0x40;
     camera->mode = 0xE1;
-    fn_80018778(camera);
+    calc__8gfCameraFv(camera);
 
     u8 state = self->state;
     Callback callback = lbl_80454F10;
@@ -389,7 +389,7 @@ extern "C" void fn_800A6BF0(Self* self) {
 namespace jj_800A8C18 {
 extern "C" {
 extern void* memset(void*, int, unsigned long);
-extern void fn_800A8DB4(void*, void*, void*, int);
+extern void getControl__17cmPhotoControllerFPC11gfPadStatusb(void*, void*, void*, int);
 extern "C" float lbl_805A20C4;
 extern "C" float lbl_805A208C;
 union FloatInt { float f; unsigned int i; };
@@ -415,7 +415,7 @@ void fn_800A8C18(void* arg0, int arg1) {
     for (int i = 0; i < 8; i++) {
         g_gfPadSystem->getSysPadStatus(i, &padStatus);
         if (padStatus.m_error != 0) continue;
-        fn_800A8DB4(&loc.r_a, arg0, &padStatus, arg1);
+        getControl__17cmPhotoControllerFPC11gfPadStatusb(&loc.r_a, arg0, &padStatus, arg1);
         loc.r_a2 = loc.r_a;
         loc.t_x1.i = loc.r_x1;
         loc.t_y1.i = loc.r_y1;

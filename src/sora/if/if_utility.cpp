@@ -138,8 +138,8 @@ extern "C" void fn_800FB554(unsigned char* self)
 namespace jj_800FB3B4 {
 extern "C" {
 void* GetResAnmScn__Q34nw4r3g3d7ResFileFi(void*, int);
-void fn_801971D0(void*, void*);
-void fn_8000D6DC(void*, void*);
+void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(void*, void*);
+void setInfoCamResAnm__11gfSceneRootFPQ34nw4r3g3d9ResAnmScn(void*, void*);
 extern void* g_gfSceneRoot;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -150,8 +150,8 @@ void fn_800FB3B4(void* self) {
         void* sp8;
         spC = GetResAnmScn__Q34nw4r3g3d7ResFileFi(p + 0x48, 0);
         sp8 = spC;
-        fn_801971D0(&spC, &sp8);
-        fn_8000D6DC(g_gfSceneRoot, &spC);
+        Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(&spC, &sp8);
+        setInfoCamResAnm__11gfSceneRootFPQ34nw4r3g3d9ResAnmScn(g_gfSceneRoot, &spC);
     }
 }
 }
@@ -161,7 +161,7 @@ void fn_800FB3B4(void* self) {
 namespace jj_800FB834 {
 extern "C" void __dt__6gfTaskFv(void*, int);
 extern "C" void __dl__FPv(void*);
-extern "C" void fn_8005E3C8(void*, const unsigned char*, float);
+extern "C" void cancelFill__8efScreenFP14efScreenHandlef(void*, const unsigned char*, float);
 extern "C" void* g_efScreen;
 extern "C" char lbl_8045C278[];
 extern "C" const float lbl_805A26D0;
@@ -182,7 +182,7 @@ extern "C" void* fn_800FB834(Task* self, int flags) {
         self->vtable = lbl_8045C278;
         float f = lbl_805A26D0;
         effect = b;
-        fn_8005E3C8(g_efScreen, &effect, f);
+        cancelFill__8efScreenFP14efScreenHandlef(g_efScreen, &effect, f);
 
         if (self != 0) {
             __dt__6gfTaskFv(self, 0);
@@ -203,7 +203,7 @@ namespace jj_800FB8BC {
 extern "C" {
 
 void startKeepScreen__17gfKeepFrameBufferFv(void*);
-void fn_8000D7B8(void*);
+void removeInfoCamResAnm__11gfSceneRootFv(void*);
 int isReady__14gfFileIOHandleCFv(const void*);
 void* getBuffer__14gfFileIOHandleCFv(const void*);
 void free__13gfHeapManagerFPv(void*);
@@ -232,7 +232,7 @@ void* fn_800FB8BC(void* self, int arg1) {
                 startKeepScreen__17gfKeepFrameBufferFv(g_gfApplication + 0xD0);
             }
 
-            fn_8000D7B8(g_gfSceneRoot);
+            removeInfoCamResAnm__11gfSceneRootFv(g_gfSceneRoot);
 
             if ((void*)(s + 0x48) != 0) {
                 *(void**)(s + 0x78) = lbl_8045C4BC;

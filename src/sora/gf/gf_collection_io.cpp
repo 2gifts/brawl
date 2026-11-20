@@ -760,10 +760,10 @@ extern "C" int fn_800390C8(Obj* __restrict self) {
 namespace jj_8003B420 {
 
 extern "C" {
-u8 fn_8004EAD4(void* a);
-u64 fn_8014FC84(void);
-u8 fn_8014F9A8(void);
-int fn_800305FC(char* buf);
+u8 getEnableSaveLoad__10GameGlobalFv(void* a);
+u64 getTimeStampFileDeliv__9nteGlobalFv(void);
+u8 getCollectionLifetime__9nteGlobalFv(void);
+int getCollectionVFName__14gfSysRecorder2FPc(char* buf);
 }
 extern "C" void* g_GameGlobal;
 extern "C" OSMutex* lbl_8059C6D4;
@@ -785,13 +785,13 @@ extern "C" s32 fn_8003B420(u8* self, Args* arg) {
     char buf[0x40];
     int ok;
 
-    if (!((fn_8004EAD4(g_GameGlobal) >> 3) & 1)) {
+    if (!((getEnableSaveLoad__10GameGlobalFv(g_GameGlobal) >> 3) & 1)) {
         return 0;
     }
     int result = 0;
-    s64 t0 = (s64)fn_8014FC84();
+    s64 t0 = (s64)getTimeStampFileDeliv__9nteGlobalFv();
     s64 t1 = OSGetTime();
-    u64 h = fn_8014F9A8();
+    u64 h = getCollectionLifetime__9nteGlobalFv();
     u64 freq = *(u32*)0x800000F8 / 4;
     if (t0 + (s64)((s64)h * 3600LL * freq) < t1) {
         int idx = arg->index;
@@ -800,7 +800,7 @@ extern "C" s32 fn_8003B420(u8* self, Args* arg) {
         strcat(path, lbl_8059C708);
         strcat(path, lbl_804235B8[arg->index]);
         OSLockMutex(lbl_8059C6D4);
-        if (lbl_805A00A8 == 0 && (fn_800305FC(buf), ((gfFileIOHandle*)(self + 0x4C))->mountVF(0, buf))) {
+        if (lbl_805A00A8 == 0 && (getCollectionVFName__14gfSysRecorder2FPc(buf), ((gfFileIOHandle*)(self + 0x4C))->mountVF(0, buf))) {
             while (!((gfFileIOHandle*)(self + 0x4C))->isReady()) {
                 OSSleepTicks((*(u32*)0x800000F8 / 4) / 1000);
             }
@@ -853,19 +853,19 @@ vf_inc:
 
 // TODO: clean up, give variables real names
 namespace jj_8003CFC0 {
-extern "C" void fn_80038AC8(void*);
+extern "C" void __dt__14gfCollectionIOFv(void*);
 
 extern "C" void fn_8003CFC0(void* self) {
-    fn_80038AC8(reinterpret_cast<u8*>(self) - 0x4);
+    __dt__14gfCollectionIOFv(reinterpret_cast<u8*>(self) - 0x4);
 }
 }
 
 namespace jj_8003CFC8 {
-extern "C" void fn_80038F6C(void*);
+extern "C" void processDefault__14gfCollectionIOFv(void*);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_8003CFC8(void* self) {
-    fn_80038F6C(reinterpret_cast<u8*>(self) - 0x4);
+    processDefault__14gfCollectionIOFv(reinterpret_cast<u8*>(self) - 0x4);
 }
 }
 

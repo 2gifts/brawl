@@ -1903,7 +1903,7 @@ void gmMeleeDest(bool isStamina, bool isOnline) {
 // Cluster E of the temporary gm_common split (0x80053F4C-0x800568C8): last-place and diagram bookkeeping of the
 // melee result, the stage choice rule, event clear queries, the item switch tables and the figure and sticker lotteries.
 
-// Saturating add as the game inlines it (the out-of-line copy is fn_8004F258 in the previous unit): the sum is
+// Saturating add as the game inlines it (the out-of-line copy is addMaxCheck__FPUlUlUl in the previous unit): the sum is
 // clamped to max, and an addend above max clamps too.
 static inline void addMaxCheck(u16* value, u16 add, u16 max) {
     bool overflow = add > max || *value > max - add;
@@ -3044,7 +3044,7 @@ bool gmItSwitch::gmCheckItemSwitch(itKind kind) {
 
 // TODO: clean up, give variables real names
 namespace jj_800557F8 {
-extern "C" void* fn_8004E5C4(void*);
+extern "C" void* getGlobalRecordGameDatap__10GameGlobalFv(void*);
 extern void* g_GameGlobal;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -3054,7 +3054,7 @@ extern "C" s32 fn_800557F8(s32 arg0, s32 arg1, s32 arg2) {
     s32 sh = arg1 * 4;
     s32 i;
     for (i = arg2; i < 3; i++) {
-        u32 t = (u32)fn_8004E5C4(g_GameGlobal);
+        u32 t = (u32)getGlobalRecordGameDatap__10GameGlobalFv(g_GameGlobal);
         t = t + base;
         t = t + off;
         u32 v = *(u32*)(t + sh + 0x32C);
@@ -3068,13 +3068,13 @@ extern "C" s32 fn_800557F8(s32 arg0, s32 arg1, s32 arg2) {
 }
 
 namespace jj_80055888 {
-extern "C" void* fn_8004E5C4(void*);
+extern "C" void* getGlobalRecordGameDatap__10GameGlobalFv(void*);
 extern "C" void* g_GameGlobal;
 
 // TODO: clean up, give variables real names
 inline u32 findEntry(s32 a, s32 b, s32 i) {
     for (s32 j = b; j < 3; j++) {
-        u32* p = (u32*)((u8*)fn_8004E5C4(g_GameGlobal) + 0x32c + (a - 1) * 0x264 + j * 0xcc + i * 4);
+        u32* p = (u32*)((u8*)getGlobalRecordGameDatap__10GameGlobalFv(g_GameGlobal) + 0x32c + (a - 1) * 0x264 + j * 0xcc + i * 4);
         if (*p >> 30) return 1;
     }
     return 0;
@@ -3096,7 +3096,7 @@ struct ItemFlags { int unk0, unk4, unk8, unkC; };
 extern "C" {
 extern ItemFlags lbl_8042D098;
 extern ItemFlags lbl_804977E0;
-extern u32 fn_8004F3BC(u8);
+extern u32 gmCheckAssistKindUseEnable__Fi(u8);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 ItemFlags* fn_80056184(void) {
     int* src = (int*)&lbl_8042D098;
@@ -3107,12 +3107,12 @@ ItemFlags* fn_80056184(void) {
     dst[2] = src[2];
     ItemFlags* p = &lbl_804977E0;
     if (*(u8*)((char*)g_GameGlobal->m_modeMelee + 0x13) != 1) p->unk0 &= 0xFFFFBFFF;
-    if (fn_8004F3BC(0) == 0) p->unkC &= 0xFFFFFFF7;
-    if (fn_8004F3BC(1) == 0) p->unkC &= 0xFFF7FFFF;
-    if (fn_8004F3BC(2) == 0) p->unkC &= 0xFF7FFFFF;
-    if (fn_8004F3BC(3) == 0) p->unkC &= 0xFFFFFFFD;
-    if (fn_8004F3BC(4) == 0) p->unkC &= 0xFFFFFFFB;
-    if (fn_8004F3BC(5) == 0) p->unkC &= 0xFFDFFFFF;
+    if (gmCheckAssistKindUseEnable__Fi(0) == 0) p->unkC &= 0xFFFFFFF7;
+    if (gmCheckAssistKindUseEnable__Fi(1) == 0) p->unkC &= 0xFFF7FFFF;
+    if (gmCheckAssistKindUseEnable__Fi(2) == 0) p->unkC &= 0xFF7FFFFF;
+    if (gmCheckAssistKindUseEnable__Fi(3) == 0) p->unkC &= 0xFFFFFFFD;
+    if (gmCheckAssistKindUseEnable__Fi(4) == 0) p->unkC &= 0xFFFFFFFB;
+    if (gmCheckAssistKindUseEnable__Fi(5) == 0) p->unkC &= 0xFFDFFFFF;
     return p;
 }
 }
@@ -3125,7 +3125,7 @@ struct ItemFlags { int unk0, unk4, unk8, unkC; };
 extern "C" {
 extern ItemFlags lbl_8042C828[];
 extern ItemFlags lbl_804977E0;
-extern u32 fn_8004F3BC(u8);
+extern u32 gmCheckAssistKindUseEnable__Fi(u8);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 ItemFlags* fn_80055DD4(int arg0) {
@@ -3138,12 +3138,12 @@ ItemFlags* fn_80055DD4(int arg0) {
     ItemFlags* p = &lbl_804977E0;
     if (*(u8*)((char*)g_GameGlobal->m_modeMelee + 0x13) != 1)
         p->unk0 &= 0xFFFFBFFF;
-    if (fn_8004F3BC(0) == 0) p->unkC &= 0xFFFFFFF7;
-    if (fn_8004F3BC(1) == 0) p->unkC &= 0xFFF7FFFF;
-    if (fn_8004F3BC(2) == 0) p->unkC &= 0xFF7FFFFF;
-    if (fn_8004F3BC(3) == 0) p->unkC &= 0xFFFFFFFD;
-    if (fn_8004F3BC(4) == 0) p->unkC &= 0xFFFFFFFB;
-    if (fn_8004F3BC(5) == 0) p->unkC &= 0xFFDFFFFF;
+    if (gmCheckAssistKindUseEnable__Fi(0) == 0) p->unkC &= 0xFFFFFFF7;
+    if (gmCheckAssistKindUseEnable__Fi(1) == 0) p->unkC &= 0xFFF7FFFF;
+    if (gmCheckAssistKindUseEnable__Fi(2) == 0) p->unkC &= 0xFF7FFFFF;
+    if (gmCheckAssistKindUseEnable__Fi(3) == 0) p->unkC &= 0xFFFFFFFD;
+    if (gmCheckAssistKindUseEnable__Fi(4) == 0) p->unkC &= 0xFFFFFFFB;
+    if (gmCheckAssistKindUseEnable__Fi(5) == 0) p->unkC &= 0xFFDFFFFF;
     return p;
 }
 }
@@ -3156,7 +3156,7 @@ struct ItemFlags { int unk0, unk4, unk8, unkC; };
 extern "C" {
 extern ItemFlags lbl_8042CFB8[];
 extern ItemFlags lbl_804977E0;
-extern u32 fn_8004F3BC(u8);
+extern u32 gmCheckAssistKindUseEnable__Fi(u8);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 ItemFlags* fn_80056064(int arg0) {
@@ -3169,12 +3169,12 @@ ItemFlags* fn_80056064(int arg0) {
     ItemFlags* p = &lbl_804977E0;
     if (*(u8*)((char*)g_GameGlobal->m_modeMelee + 0x13) != 1)
         p->unk0 &= 0xFFFFBFFF;
-    if (fn_8004F3BC(0) == 0) p->unkC &= 0xFFFFFFF7;
-    if (fn_8004F3BC(1) == 0) p->unkC &= 0xFFF7FFFF;
-    if (fn_8004F3BC(2) == 0) p->unkC &= 0xFF7FFFFF;
-    if (fn_8004F3BC(3) == 0) p->unkC &= 0xFFFFFFFD;
-    if (fn_8004F3BC(4) == 0) p->unkC &= 0xFFFFFFFB;
-    if (fn_8004F3BC(5) == 0) p->unkC &= 0xFFDFFFFF;
+    if (gmCheckAssistKindUseEnable__Fi(0) == 0) p->unkC &= 0xFFFFFFF7;
+    if (gmCheckAssistKindUseEnable__Fi(1) == 0) p->unkC &= 0xFFF7FFFF;
+    if (gmCheckAssistKindUseEnable__Fi(2) == 0) p->unkC &= 0xFF7FFFFF;
+    if (gmCheckAssistKindUseEnable__Fi(3) == 0) p->unkC &= 0xFFFFFFFD;
+    if (gmCheckAssistKindUseEnable__Fi(4) == 0) p->unkC &= 0xFFFFFFFB;
+    if (gmCheckAssistKindUseEnable__Fi(5) == 0) p->unkC &= 0xFFDFFFFF;
     return p;
 }
 }
@@ -3183,35 +3183,35 @@ ItemFlags* fn_80056064(int arg0) {
 namespace jj_80053078 {
 extern "C" {
 extern void* g_GameGlobal;
-unsigned int* fn_8004E640(void*);
-unsigned int* fn_8004E64C(void*);
-unsigned int* fn_8004E658(void*);
-unsigned int* fn_8004E664(void*);
-unsigned int* fn_8004E670(void*);
-unsigned int* fn_8004E67C(void*);
-unsigned int* fn_8004E688(void*);
-unsigned int* fn_8004E694(void*);
+unsigned int* getGlobalRecordVsTimeMeleeCountDatap__10GameGlobalFv(void*);
+unsigned int* getGlobalRecordVsStockMeleeCountDatap__10GameGlobalFv(void*);
+unsigned int* getGlobalRecordVsCoinMeleeCountDatap__10GameGlobalFv(void*);
+unsigned int* getGlobalRecordVsHpMeleeCountDatap__10GameGlobalFv(void*);
+unsigned int* getGlobalRecordOnlineVsTimeMeleeCountDatap__10GameGlobalFv(void*);
+unsigned int* getGlobalRecordOnlineVsStockMeleeCountDatap__10GameGlobalFv(void*);
+unsigned int* getGlobalRecordOnlineVsCoinMeleeCountDatap__10GameGlobalFv(void*);
+unsigned int* getGlobalRecordVsResetMeleeCountDatap__10GameGlobalFv(void*);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80053078(int a, int b, int c, int d, unsigned int* p) {
     p = 0;
     if ((unsigned char)(b + 0xF7) <= 1U) {
-        if (d == 0) p = fn_8004E694(g_GameGlobal);
+        if (d == 0) p = getGlobalRecordVsResetMeleeCountDatap__10GameGlobalFv(g_GameGlobal);
     } else if (c != 0) {
-        p = fn_8004E664(g_GameGlobal);
+        p = getGlobalRecordVsHpMeleeCountDatap__10GameGlobalFv(g_GameGlobal);
     } else if (d != 0) {
         switch (a) {
         case 0:
-        default: p = fn_8004E670(g_GameGlobal); break;
-        case 1: p = fn_8004E67C(g_GameGlobal); break;
-        case 2: p = fn_8004E688(g_GameGlobal); break;
+        default: p = getGlobalRecordOnlineVsTimeMeleeCountDatap__10GameGlobalFv(g_GameGlobal); break;
+        case 1: p = getGlobalRecordOnlineVsStockMeleeCountDatap__10GameGlobalFv(g_GameGlobal); break;
+        case 2: p = getGlobalRecordOnlineVsCoinMeleeCountDatap__10GameGlobalFv(g_GameGlobal); break;
         }
     } else {
         switch (a) {
         case 0:
-        default: p = fn_8004E640(g_GameGlobal); break;
-        case 1: p = fn_8004E64C(g_GameGlobal); break;
-        case 2: p = fn_8004E658(g_GameGlobal); break;
+        default: p = getGlobalRecordVsTimeMeleeCountDatap__10GameGlobalFv(g_GameGlobal); break;
+        case 1: p = getGlobalRecordVsStockMeleeCountDatap__10GameGlobalFv(g_GameGlobal); break;
+        case 2: p = getGlobalRecordVsCoinMeleeCountDatap__10GameGlobalFv(g_GameGlobal); break;
         }
     }
     if (p != 0) {
@@ -3231,7 +3231,7 @@ extern "C" {
 extern ItemFlags lbl_8042C958[];
 extern ItemFlags lbl_8042CC88[];
 extern ItemFlags lbl_804977E0;
-extern u32 fn_8004F3BC(u8);
+extern u32 gmCheckAssistKindUseEnable__Fi(u8);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 ItemFlags* fn_80055EF4(int arg0, int arg1) {
@@ -3254,12 +3254,12 @@ ItemFlags* fn_80055EF4(int arg0, int arg1) {
     ItemFlags* p = &lbl_804977E0;
     if (*(u8*)((char*)g_GameGlobal->m_modeMelee + 0x13) != 1)
         p->unk0 &= 0xFFFFBFFF;
-    if (fn_8004F3BC(0) == 0) p->unkC &= 0xFFFFFFF7;
-    if (fn_8004F3BC(1) == 0) p->unkC &= 0xFFF7FFFF;
-    if (fn_8004F3BC(2) == 0) p->unkC &= 0xFF7FFFFF;
-    if (fn_8004F3BC(3) == 0) p->unkC &= 0xFFFFFFFD;
-    if (fn_8004F3BC(4) == 0) p->unkC &= 0xFFFFFFFB;
-    if (fn_8004F3BC(5) == 0) p->unkC &= 0xFFDFFFFF;
+    if (gmCheckAssistKindUseEnable__Fi(0) == 0) p->unkC &= 0xFFFFFFF7;
+    if (gmCheckAssistKindUseEnable__Fi(1) == 0) p->unkC &= 0xFFF7FFFF;
+    if (gmCheckAssistKindUseEnable__Fi(2) == 0) p->unkC &= 0xFF7FFFFF;
+    if (gmCheckAssistKindUseEnable__Fi(3) == 0) p->unkC &= 0xFFFFFFFD;
+    if (gmCheckAssistKindUseEnable__Fi(4) == 0) p->unkC &= 0xFFFFFFFB;
+    if (gmCheckAssistKindUseEnable__Fi(5) == 0) p->unkC &= 0xFFDFFFFF;
     return p;
 }
 }
@@ -3335,7 +3335,7 @@ struct Player { char pad[0x25]; u8 type; char pad26[3]; u8 value; char pad2a[9];
 struct Mode { char pad[5]; u8 mode; };
 struct Global { char pad[0x18]; Player* players; Mode* mode; };
 extern "C" Global* g_GameGlobal;
-extern "C" u16* fn_8004DA14(void*, int, int);
+extern "C" u16* getVsModeAutoHandiPlayerVal__10GameGlobalFii(void*, int, int);
 // TODO: clean up, give variables real names
 extern "C" void fn_80053C34() {
     Player* players = g_GameGlobal->players;
@@ -3349,7 +3349,7 @@ extern "C" void fn_80053C34() {
         for (int i = 0; i < 4; i++, p++, score++) {
             if (p->type != 3) {
                 count++;
-                *score = fn_8004DA14(g_GameGlobal, i, p->value);
+                *score = getVsModeAutoHandiPlayerVal__10GameGlobalFii(g_GameGlobal, i, p->value);
                 if (p->rank != 0) *out++ = i;
             }
         }
@@ -3392,10 +3392,10 @@ extern "C" void fn_80053C34() {
 
 // TODO: clean up, give variables real names
 namespace jj_80054034 {
-extern "C" int fn_80053F4C(void*);
+extern "C" int gmRetKetsuRankFromResult__FP12gmResultInfo(void*);
 extern "C" int fn_80054034(void* p) {
     unsigned char* base = (unsigned char*)p;
-    int val = fn_80053F4C(p);
+    int val = gmRetKetsuRankFromResult__FP12gmResultInfo(p);
     unsigned char* e;
     bool matched[4];
     unsigned char* bp;

@@ -107,7 +107,7 @@ void cmQuake::reqQuake(Amplitude amplitude, Vec3f* offset) {
 // TODO: clean up, give variables real names
 namespace jj_8009D2DC {
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-extern "C" void fn_8009D468(void*);
+extern "C" void init__7cmQuakeFv(void*);
 extern "C" void* lbl_805A0280;
 extern "C" const float lbl_805A1DC8;
 inline void clear(int* begin, int* end) {
@@ -121,7 +121,7 @@ extern "C" void* fn_8009D2DC() {
         if (p != 0) {
             *(int*)(p + 0x22C) = 0;
             clear((int*)(p + 0x230), (int*)(p + 0x244));
-            fn_8009D468(p);
+            init__7cmQuakeFv(p);
             *(float*)(p + 0x244) = lbl_805A1DC8;
             *(float*)(p + 0x248) = lbl_805A1DC8;
             *(float*)(p + 0x24C) = lbl_805A1DC8;
@@ -138,7 +138,7 @@ extern "C" void* fn_8009D2DC() {
 namespace jj_8009DEE8 {
 
 extern "C" {
-void fn_8009D468(void*);
+void init__7cmQuakeFv(void*);
 extern void* lbl_805A0280;
 extern const float lbl_805A1DC8;
 }
@@ -154,7 +154,7 @@ extern "C" void fn_8009DEE8() {
         if (p != 0) {
             *reinterpret_cast<int*>(p + 0x22C) = 0;
             clear(reinterpret_cast<int*>(p + 0x230), reinterpret_cast<int*>(p + 0x244));
-            fn_8009D468(p);
+            init__7cmQuakeFv(p);
             float* f = reinterpret_cast<float*>(p + 0x244);
             f[0] = lbl_805A1DC8;
             f[1] = lbl_805A1DC8;
@@ -185,7 +185,7 @@ struct Obj {
 };
 
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-extern "C" void fn_8009D468(Obj* p);
+extern "C" void init__7cmQuakeFv(Obj* p);
 extern "C" Obj* lbl_805A0280;
 extern "C" const float lbl_805A1DC8;
 
@@ -201,7 +201,7 @@ extern "C" void fn_8009E090(float farg0) {
         if (obj != 0) {
             obj->unk22C = 0;
             zeroRange((int*)&obj->unk230, (int*)obj->unk244);
-            fn_8009D468(obj);
+            init__7cmQuakeFv(obj);
             obj->unk244[0] = lbl_805A1DC8;
             obj->unk244[1] = lbl_805A1DC8;
             obj->unk244[2] = lbl_805A1DC8;

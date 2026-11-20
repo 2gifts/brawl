@@ -141,11 +141,11 @@ namespace jj_8005E438 {
 
 extern "C" {
 
-void fn_801F52E4(int);
-void fn_801F51DC(Matrix*, unsigned int);
-void fn_801EFB10(void);
-void fn_801EF280(int, int);
-void fn_801EFB44(int, int, int, int, int);
+void GXSetCurrentMtx(int);
+void GXLoadPosMtxImm(Matrix*, unsigned int);
+void GXClearVtxDesc(void);
+void GXSetVtxDesc(int, int);
+void GXSetVtxAttrFmt(int, int, int, int, int);
 void GXSetZMode(int, int, int);
 void GXSetBlendMode(int, int, int, int);
 void GXBegin(int, int, int);
@@ -177,13 +177,13 @@ extern "C" void fn_8005E438(int unused, u32* arg1) {
         hy = hy * k;
     }
 
-    fn_801F52E4(0);
-    fn_801F51DC(&sp8, 0);
-    fn_801EFB10();
-    fn_801EF280(9, 1);
-    fn_801EF280(0xB, 1);
-    fn_801EFB44(1, 9, 1, 4, 0);
-    fn_801EFB44(1, 0xB, 1, 5, 0);
+    GXSetCurrentMtx(0);
+    GXLoadPosMtxImm(&sp8, 0);
+    GXClearVtxDesc();
+    GXSetVtxDesc(9, 1);
+    GXSetVtxDesc(0xB, 1);
+    GXSetVtxAttrFmt(1, 9, 1, 4, 0);
+    GXSetVtxAttrFmt(1, 0xB, 1, 5, 0);
     GXSetZMode(0, 7, 0);
     u32 color = *arg1;
     GXSetBlendMode(1, 4, 5, 0);

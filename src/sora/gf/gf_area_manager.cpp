@@ -267,8 +267,8 @@ struct Obj {
     Obj* unk2C;     // 0x2C
 };
 
-extern "C" void fn_800110CC(void* ctx, Obj* node);
-extern "C" Obj* fn_800121A8(Obj* node);
+extern "C" void testIntersect__6gfAreaFP6gfArea(void* ctx, Obj* node);
+extern "C" Obj* getArea__Q213gfAreaManager8QuadTreeFv(Obj* node);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_80012094(void* arg0, void* arg1, Obj* arg2) {
@@ -276,22 +276,22 @@ extern "C" void fn_80012094(void* arg0, void* arg1, Obj* arg2) {
     Obj* it;
 
     for (it = arg2->unk2C; it != NULL; it = it->next) {
-        fn_800110CC(arg1, it);
+        testIntersect__6gfAreaFP6gfArea(arg1, it);
     }
     node = arg2->unk14;
     if (node != NULL) {
         for (it = node->unk2C; it != NULL; it = it->next) {
-            fn_800110CC(arg1, it);
+            testIntersect__6gfAreaFP6gfArea(arg1, it);
         }
         node = node->unk14;
         if (node != NULL) {
-            for (it = fn_800121A8(node); it != NULL; it = it->next) {
-                fn_800110CC(arg1, it);
+            for (it = getArea__Q213gfAreaManager8QuadTreeFv(node); it != NULL; it = it->next) {
+                testIntersect__6gfAreaFP6gfArea(arg1, it);
             }
             node = node->unk14;
             if (node != NULL) {
-                for (it = fn_800121A8(node); it != NULL; it = it->next) {
-                    fn_800110CC(arg1, it);
+                for (it = getArea__Q213gfAreaManager8QuadTreeFv(node); it != NULL; it = it->next) {
+                    testIntersect__6gfAreaFP6gfArea(arg1, it);
                 }
                 node = node->unk14;
                 if (node != NULL) {
@@ -305,8 +305,8 @@ extern "C" void fn_80012094(void* arg0, void* arg1, Obj* arg2) {
 
 namespace jj_800121B0 {
 extern "C" {
-void fn_800132E8(void*);
-void fn_80012E18(void*);
+void releaseChild__Q213gfAreaManager8QuadTreeFv(void*);
+void construct__Q213gfAreaManager8QuadTreeFv(void*);
 extern const float lbl_805A13B0;
 }
 
@@ -330,7 +330,7 @@ extern "C" void fn_800121B0(char* self, float f0, float f1) {
                             c = *(void**)(r + 0x18);
                             k = 0;
                             do {
-                                fn_800132E8(*(void**)(r + 0x18));
+                                releaseChild__Q213gfAreaManager8QuadTreeFv(*(void**)(r + 0x18));
                                 ++k;
                                 *(void**)(r + 0x18) = 0;
                                 r += 4;
@@ -356,7 +356,7 @@ extern "C" void fn_800121B0(char* self, float f0, float f1) {
     *(float*)(self + 0x48) = lbl_805A13B0 * f0;
     *(float*)(self + 0x4c) = lbl_805A13B0 * f1;
     *(s32*)(self + 0x54) = 0;
-    fn_80012E18((void*)(self + 0x40));
+    construct__Q213gfAreaManager8QuadTreeFv((void*)(self + 0x40));
 }
 }
 
@@ -404,8 +404,8 @@ struct Object {
     Rect rect;
 };
 
-extern "C" int fn_80041920(float*, float*);
-extern "C" unsigned int fn_800130A8(void*, void*);
+extern "C" int checkInclude__10clAABBox2DCFRC10clAABBox2D(float*, float*);
+extern "C" unsigned int checkChildNode__Q213gfAreaManager8QuadTreeFRC10clAABBox2D(void*, void*);
 
 // TODO: clean up, give variables real names
 extern "C" void fn_80012C6C(Node* self, LinkListNode* obj) {
@@ -443,7 +443,7 @@ extern "C" void fn_80012C6C(Node* self, LinkListNode* obj) {
     }
 
     for (;;) {
-        if (cur->parent == 0 || fn_80041920(&bounds.left, &keyp->left)) {
+        if (cur->parent == 0 || checkInclude__10clAABBox2DCFRC10clAABBox2D(&bounds.left, &keyp->left)) {
             break;
         }
 
@@ -475,7 +475,7 @@ extern "C" void fn_80012C6C(Node* self, LinkListNode* obj) {
             break;
         }
 
-        unsigned int idx = fn_800130A8(cur, &key);
+        unsigned int idx = checkChildNode__Q213gfAreaManager8QuadTreeFRC10clAABBox2D(cur, &key);
         if (idx == 0xff || !cur->child[idx]) {
             break;
         }
@@ -506,10 +506,10 @@ struct Class_804207E4_base {
 };
 class Class_804207E4 : public Class_804207E4_base {
 public:
-    virtual void fn_80011148();
-    virtual void fn_80011170();
-    virtual void fn_80011150();
-    virtual void fn_80011C2C();
+    virtual void testIntersectShape__6gfAreaFP6gfArea();
+    virtual void debugDrawImp__6gfAreaFv();
+    virtual void notifyIntersect__6gfAreaFP6gfArea();
+    virtual void update__6gfAreaFv();
 };
 struct Tree {
     f32 rect[4];
@@ -529,11 +529,11 @@ public:
     using nw4r::ut::detail::LinkListImpl::Insert;
 };
 extern "C" {
-int fn_80041920(Rect*, Bounds*);
-u32 fn_800130A8(Tree*, Bounds*);
+int checkInclude__10clAABBox2DCFRC10clAABBox2D(Rect*, Bounds*);
+u32 checkChildNode__Q213gfAreaManager8QuadTreeFRC10clAABBox2D(Tree*, Bounds*);
 void fn_80012C6C(Tree*, Class_804207E4*);
 void fn_800129FC(Tree*);
-void fn_80011F0C(char*, Tree*);
+void testIntersectSub__13gfAreaManagerFPQ213gfAreaManager8QuadTree(char*, Tree*);
 }
 inline void bounds(Rect* out, f32* e) {
     {
@@ -560,7 +560,7 @@ inline void process(Tree* c) {
     Class_804207E4* end = (Class_804207E4*)&c->head;
     Class_804207E4* m = c->head;
     while (m != end) {
-        m->fn_80011C2C();
+        m->update__6gfAreaFv();
         if (m->dirty) {
             fn_80012C6C(c, m);
             m->dirty = 0;
@@ -585,7 +585,7 @@ extern "C" void fn_80012660(char* arg) {
         Bounds b;
         bp = &b;
         while (n != (Class_804207E4*)&root->head) {
-            n->fn_80011C2C();
+            n->update__6gfAreaFv();
             if (n->dirty) {
                 t = root;
                 Rect tmp;
@@ -593,7 +593,7 @@ extern "C" void fn_80012660(char* arg) {
                 b = n->bounds;
                 bounds(&r, root->rect);
             loop_parent:
-                if (t->parent != 0 && fn_80041920(&r, bp) == 0) {
+                if (t->parent != 0 && checkInclude__10clAABBox2DCFRC10clAABBox2D(&r, bp) == 0) {
                     t = t->parent;
                     bounds(&tmp, t->rect);
                     r = tmp;
@@ -601,7 +601,7 @@ extern "C" void fn_80012660(char* arg) {
                 }
             loop_child:
                 if (!t->leaf) {
-                    u32 idx = fn_800130A8(t, &b);
+                    u32 idx = checkChildNode__Q213gfAreaManager8QuadTreeFRC10clAABBox2D(t, &b);
                     if (idx != 0xFF) {
                         Tree* c = t->children[idx];
                         if (c != 0) {
@@ -623,7 +623,7 @@ extern "C" void fn_80012660(char* arg) {
             if (c != 0) process(c);
             root = (Tree*)((char*)root + 4);
         }
-        fn_80011F0C(self, (Tree*)(self + 0x40));
+        testIntersectSub__13gfAreaManagerFPQ213gfAreaManager8QuadTree(self, (Tree*)(self + 0x40));
     }
 }
 }

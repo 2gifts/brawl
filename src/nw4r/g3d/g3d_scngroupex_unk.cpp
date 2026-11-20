@@ -134,12 +134,12 @@ extern "C" void fn_801B4564(u8* self, u32* arg1) {
 
 namespace jj_801B4918 {
 extern "C" {
-void fn_801AC1AC(void* a, int b);
+void __dt__Q34nw4r3g3d8ScnGroupFv(void* a, int b);
 
 // TODO: clean up, give variables real names
 void* fn_801B4918(void* arg0) {
     if (arg0 != 0) {
-        fn_801AC1AC(arg0, 0);
+        __dt__Q34nw4r3g3d8ScnGroupFv(arg0, 0);
     }
     return arg0;
 }
@@ -234,32 +234,32 @@ public:
     virtual void fn_801B4918();
     virtual void fn_801B4AE8();
     virtual void fn_801B4AB8();
-    virtual void fn_801AB788();
-    virtual void fn_801AAC9C();
-    virtual void fn_801AAE34();
-    virtual void fn_801AAFDC();
-    virtual void fn_801AAFE8();
-    virtual void fn_801AAA70();
-    virtual void fn_801ABE70();
-    virtual void fn_801ABFFC();
+    virtual void ForEach__Q34nw4r3g3d8ScnGroupFPFPQ34nw4r3g3d6ScnObjPv_Q44nw4r3g3d6ScnObj13ForEachResultPvb();
+    virtual void SetScnObjOption__Q34nw4r3g3d6ScnObjFUlUl();
+    virtual void GetScnObjOption__Q34nw4r3g3d6ScnObjCFUlPUl();
+    virtual void GetValueForSortOpa__Q34nw4r3g3d6ScnObjCFv();
+    virtual void GetValueForSortXlu__Q34nw4r3g3d6ScnObjCFv();
+    virtual void CalcWorldMtx__Q34nw4r3g3d6ScnObjFPCQ34nw4r4math5MTX34PUl();
+    virtual void Insert__Q34nw4r3g3d8ScnGroupFUlPQ34nw4r3g3d6ScnObj();
+    virtual void Remove__Q34nw4r3g3d8ScnGroupFUl();
     char pad[0xe4];
     int value;
 };
 class Class_80466418 {
 public:
-    virtual void fn_801B3BDC();
+    virtual void IsDerivedFrom__Q34nw4r3g3d9ScnChoiceCFQ44nw4r3g3d6G3dObj7TypeObj();
     virtual int fn_801B35D0(Class_804664C0*, int, int);
-    virtual void fn_801B3C80();
+    virtual void __dt__Q34nw4r3g3d9ScnChoiceFv();
     virtual void fn_801B3C74();
-    virtual void fn_801B3C44();
-    virtual void fn_801AB788();
-    virtual void fn_801AAC9C();
-    virtual void fn_801AAE34();
-    virtual int fn_801AAFDC();
-    virtual void fn_801AAFE8();
-    virtual void fn_801AAA70();
-    virtual void fn_801ABE70();
-    virtual int fn_801ABFFC(int);
+    virtual void GetTypeName__Q34nw4r3g3d9ScnChoiceCFv();
+    virtual void ForEach__Q34nw4r3g3d8ScnGroupFPFPQ34nw4r3g3d6ScnObjPv_Q44nw4r3g3d6ScnObj13ForEachResultPvb();
+    virtual void SetScnObjOption__Q34nw4r3g3d6ScnObjFUlUl();
+    virtual void GetScnObjOption__Q34nw4r3g3d6ScnObjCFUlPUl();
+    virtual int GetValueForSortOpa__Q34nw4r3g3d6ScnObjCFv();
+    virtual void GetValueForSortXlu__Q34nw4r3g3d6ScnObjCFv();
+    virtual void CalcWorldMtx__Q34nw4r3g3d6ScnObjFPCQ34nw4r4math5MTX34PUl();
+    virtual void Insert__Q34nw4r3g3d8ScnGroupFUlPQ34nw4r3g3d6ScnObj();
+    virtual int Remove__Q34nw4r3g3d8ScnGroupFUl(int);
 };
 struct Self {
     void* vtable;
@@ -268,7 +268,7 @@ struct Self {
 };
 // TODO: clean up, give variables real names
 extern "C" int fn_801B3CC4(Self* self, Class_804664C0* arg, int a, int b) {
-    if (!self->second->fn_801AAFDC())
+    if (!self->second->GetValueForSortOpa__Q34nw4r3g3d6ScnObjCFv())
         return self->second->fn_801B35D0(arg, a, b);
     Class_80466418* inner = self->second;
     bool matches = false;
@@ -279,7 +279,7 @@ extern "C" int fn_801B3CC4(Self* self, Class_804664C0* arg, int a, int b) {
     }
     Class_804664C0* cast = matches ? arg : 0;
     bool found = false;
-    if (cast && inner->fn_801ABFFC(cast->value))
+    if (cast && inner->Remove__Q34nw4r3g3d8ScnGroupFUl(cast->value))
         found = true;
     if (found)
         return 0;

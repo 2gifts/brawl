@@ -306,7 +306,7 @@ void phInterface::processDefault() {
 
 // TODO: clean up, give variables real names
 namespace jj_8009A1E0 {
-extern "C" void fn_8027EABC(void*, void*, unsigned int, int);
+extern "C" void deallocateChunk__14hkThreadMemoryFPvii(void*, void*, unsigned int, int);
 extern "C" void __dt__6gfTaskFv(void*, int);
 extern "C" void __dl__FPv(void*);
 
@@ -333,10 +333,10 @@ struct Object {
 extern "C" Object* fn_8009A1E0(Object* self, int flag) {
     if (self) {
         if ((unsigned int)self + 0x6c != 0 && !(self->b.raw & 0x80000000)) {
-            fn_8027EABC(lbl_805A0EC8, self->b.data, self->b.rawValue() << 2, 0x15);
+            deallocateChunk__14hkThreadMemoryFPvii(lbl_805A0EC8, self->b.data, self->b.rawValue() << 2, 0x15);
         }
         if ((unsigned int)self + 0x60 != 0 && !(self->a.raw & 0x80000000)) {
-            fn_8027EABC(lbl_805A0EC8, self->a.data, self->a.rawValue() << 2, 0x15);
+            deallocateChunk__14hkThreadMemoryFPvii(lbl_805A0EC8, self->a.data, self->a.rawValue() << 2, 0x15);
         }
         if ((unsigned int)self + 0x40 != 0) {
             lbl_8049DEC8[0] = 0;
@@ -369,11 +369,11 @@ struct Manager {
 extern "C" Manager* lbl_8049DEC8[];
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 extern "C" void* fn_800966EC(void*, void*);
-extern "C" void fn_8027CE3C(Vec*, int);
+extern "C" void _reserveMore__11hkArrayUtilFP11hkArrayBasei(Vec*, int);
 // TODO: clean up, give variables real names
 inline void Vec::push(void* value) {
     if (size == (int)(capacity & 0x3FFFFFFF))
-        fn_8027CE3C(this, 4);
+        _reserveMore__11hkArrayUtilFP11hkArrayBasei(this, 4);
     data[size++] = value;
 }
 // TODO: clean up, give variables real names
@@ -432,13 +432,13 @@ struct State {
     u8 value;
 };
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-extern "C" Object_vptr_0* fn_8027ED0C(void*);
-extern "C" Object_vptr_0* fn_8027E5A8(void*, Object_vptr_0*, int);
-extern "C" void fn_8027B8D8(Object_vptr_0*, Object_vptr_0*, void (*)(int), int);
-extern "C" void fn_8027B89C(Object_vptr_0*);
-extern "C" void* fn_8009A4EC(int, int);
-extern "C" void fn_8009A4FC();
-extern "C" void fn_8009BA2C(int);
+extern "C" Object_vptr_0* __ct__12hkPoolMemoryFv(void*);
+extern "C" Object_vptr_0* __ct__14hkThreadMemoryFP8hkMemoryi(void*, Object_vptr_0*, int);
+extern "C" void init__12hkBaseSystemFP8hkMemoryP14hkThreadMemoryPFPCcPv_vPv(Object_vptr_0*, Object_vptr_0*, void (*)(int), int);
+extern "C" void initThread__12hkBaseSystemFP14hkThreadMemory(Object_vptr_0*);
+extern "C" void* sysAlloc__11phInterfaceFUlUl(int, int);
+extern "C" void gfMemFree__11phInterfaceFPv();
+extern "C" void errorReport__11phInterfaceFPCc(int);
 extern void* (*lbl_8059EF40)(int, int);
 extern void (*lbl_8059EF44)();
 extern Object_vptr_0* lbl_805A0EB8;
@@ -449,18 +449,18 @@ extern u8 lbl_805A0270;
 extern "C" void fn_8009A38C(Self* self) {
     if (!self->flag) {
         self->flag = 1;
-        lbl_8059EF40 = fn_8009A4EC;
-        lbl_8059EF44 = fn_8009A4FC;
+        lbl_8059EF40 = sysAlloc__11phInterfaceFUlUl;
+        lbl_8059EF44 = gfMemFree__11phInterfaceFPv;
         Object_vptr_0* p = (Object_vptr_0*)__nw__FUlQ25Heaps8HeapType(0xD34, 0xD);
-        if (p) p = fn_8027ED0C(p);
+        if (p) p = __ct__12hkPoolMemoryFv(p);
         Object_vptr_0* q = (Object_vptr_0*)__nw__FUlQ25Heaps8HeapType(0x320, 0xD);
-        if (q) q = fn_8027E5A8(q, p, 0x10);
+        if (q) q = __ct__14hkThreadMemoryFP8hkMemoryi(q, p, 0x10);
         self->obj = q;
-        fn_8027B8D8(p, q, fn_8009BA2C, 0);
+        init__12hkBaseSystemFP8hkMemoryP14hkThreadMemoryPFPCcPv_vPv(p, q, errorReport__11phInterfaceFPCc, 0);
         if (--p->count == 0 && p) p->slot18(1);
         self->value = lbl_805A0EB8->slot0(lbl_8059DC18, 1);
         self->obj->slot0(self->value, (int)lbl_8059DC18);
-        fn_8027B89C(self->obj);
+        initThread__12hkBaseSystemFP14hkThreadMemory(self->obj);
     }
     if (self->flag) {
         lbl_805A0270 = lbl_8049DEC8[0]->flag ? lbl_8049DEC8[0]->value : 0;

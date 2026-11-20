@@ -7,11 +7,11 @@ typedef unsigned short u16;
 typedef unsigned int u32;
 typedef signed int s32;
 
-extern "C" void fn_80192B00(const void *, u32 *, u16 *, u16 *, u32 *, float *, float *, u8 *);
-extern "C" void fn_80192A44(const void *, u32 *, u16 *, u16 *, u32 *, float *, float *, u8 *);
-extern "C" void fn_801F2AFC(void *, u32, u16, u16, u32, u32, u32, u8, u32);
-extern "C" void fn_801F28F0(void *, u32, u16, u16, u32, u32, u32, u8);
-extern "C" void fn_801F2B44(void *, s32, s32, s32, s32, s32, float, float, float);
+extern "C" void GetTexObjCIParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP11_GXCITexFmtPfPfPUc(const void *, u32 *, u16 *, u16 *, u32 *, float *, float *, u8 *);
+extern "C" void GetTexObjParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP9_GXTexFmtPfPfPUc(const void *, u32 *, u16 *, u16 *, u32 *, float *, float *, u8 *);
+extern "C" void GXInitTexObjCI(void *, u32, u16, u16, u32, u32, u32, u8, u32);
+extern "C" void GXInitTexObj(void *, u32, u16, u16, u32, u32, u32, u8);
+extern "C" void GXInitTexObjLOD(void *, s32, s32, s32, s32, s32, float, float, float);
 extern "C" float lbl_805A1460;
 
 struct Resource {
@@ -41,7 +41,7 @@ extern "C" void fn_8001AA88(void *arg0, const Resource **source) {
     ParseLocals locals;
 
     if ((resource->value & 1) != 0) {
-        fn_80192B00(
+        GetTexObjCIParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP11_GXCITexFmtPfPfPUc(
             source,
             &locals.file,
             &locals.width,
@@ -52,7 +52,7 @@ extern "C" void fn_8001AA88(void *arg0, const Resource **source) {
             &locals.special
         );
         s32 unused = 0;
-        fn_801F2AFC(
+        GXInitTexObjCI(
             arg0,
             locals.file,
             locals.width,
@@ -64,7 +64,7 @@ extern "C" void fn_8001AA88(void *arg0, const Resource **source) {
             unused
         );
     } else {
-        fn_80192A44(
+        GetTexObjParam__Q34nw4r3g3d6ResTexCFPPvPUsPUsP9_GXTexFmtPfPfPUc(
             source,
             &locals.file,
             &locals.width,
@@ -74,7 +74,7 @@ extern "C" void fn_8001AA88(void *arg0, const Resource **source) {
             &locals.y,
             &locals.special
         );
-        fn_801F28F0(
+        GXInitTexObj(
             arg0,
             locals.file,
             locals.width,
@@ -86,12 +86,12 @@ extern "C" void fn_8001AA88(void *arg0, const Resource **source) {
         );
     }
     if (locals.special) {
-        fn_801F2B44(
+        GXInitTexObjLOD(
             arg0, 3, 1, 0, 0, 0,
             locals.x, locals.y, lbl_805A1460
         );
     } else {
-        fn_801F2B44(
+        GXInitTexObjLOD(
             arg0, 1, 1, 0, 0, 0,
             locals.x, locals.y, lbl_805A1460
         );
@@ -185,9 +185,9 @@ typedef struct Manager {
     Entry *unk8;
 } Manager;
 
-unsigned char *fn_8016E4E8(void);
-void *fn_8016E950(void *, void *);
-void *fn_8016EB38(void *, void *);
+unsigned char *GetInstance__Q34nw4r2ef8ResourceFv(void);
+void *Add__Q34nw4r2ef8ResourceFPUc(void *, void *);
+void *AddTexture__Q34nw4r2ef8ResourceFPUc(void *, void *);
 void fn_8016EDA8(void *, void *, void *, void *, void *);
 int strncmp(const char *, const char *, unsigned long);
 char *strncpy(char *, const char *, unsigned long);
@@ -223,12 +223,12 @@ void fn_8001ACC4(Manager *mgr, const char *name, int a2, int a3, int a4) {
         if (a4 != 0) {
             mgr->unk8 = p1;
         }
-        unsigned char *base = fn_8016E4E8();
+        unsigned char *base = GetInstance__Q34nw4r2ef8ResourceFv();
         if (p1->f20 != 0) {
-            p1->f28 = (int)fn_8016E950(base, (void *)p1->f20);
+            p1->f28 = (int)Add__Q34nw4r2ef8ResourceFPUc(base, (void *)p1->f20);
         }
         if (p1->f24 != 0) {
-            p1->f2C = (int)fn_8016EB38(base, (void *)p1->f24);
+            p1->f2C = (int)AddTexture__Q34nw4r2ef8ResourceFPUc(base, (void *)p1->f24);
         }
         if (a4 != 0) {
             fn_8016EDA8(base, 0, 0, (void *)mgr->unk8->f28,

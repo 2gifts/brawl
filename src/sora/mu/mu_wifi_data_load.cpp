@@ -187,12 +187,12 @@ int muWifiDataLoadTask::mainStepDoneMain(muWifiDataLoadTask* task) {
 // TODO: clean up, give variables real names
 namespace jj_800DACB0 {
 extern "C" {
-void fn_80030F98(void* a, int b);
+void loadWifi__14gfSysRecorder2FQ25Heaps8HeapType(void* a, int b);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800DACB0(void* p)
 {
-    fn_80030F98(*(void**)((char*)p + 0x60), 0x2b);
+    loadWifi__14gfSysRecorder2FQ25Heaps8HeapType(*(void**)((char*)p + 0x60), 0x2b);
 }
 }
 }

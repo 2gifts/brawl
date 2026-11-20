@@ -339,7 +339,7 @@ struct CameraController {
     f32 unk190;
 };
 
-extern "C" void fn_8009F78C(void*);
+extern "C" void reset__14cmAIControllerFv(void*);
 extern "C" void changeInput__16CameraControllerFQ216CameraController4Kind(CameraController*, int);
 extern "C" const f32 lbl_805A1DA0;
 extern "C" const f32 lbl_805A1DB8;
@@ -353,7 +353,7 @@ extern "C" void fn_8009C61C(CameraController* self) {
     self->unk190 = lbl_805A1DB8;
     self->unk18C = lbl_805A1DA0;
     if (controller != 0) {
-        fn_8009F78C(controller);
+        reset__14cmAIControllerFv(controller);
         u8* p = (u8*)self->unk58;
         p[0x94] |= 8;
     }
@@ -448,9 +448,9 @@ struct CameraSelf {
     char pad3[0x20]; void* ptr7C; char pad4[0x104]; f32 f184; s32 cnt188;
 };
 extern "C" {
-float fn_8004E94C(void*);
+float getGameFrameDelta__10GameGlobalCFv(void*);
 void fn_8009D744(void*, float);
-void fn_8009EC5C(float);
+void update__13cmSubjectListFf(float);
 void* fn_8009E3F4(void*, float);
 void fn_8009EA18(void*, void*);
 }
@@ -458,8 +458,8 @@ void fn_8009EA18(void*, void*);
 extern "C" void fn_8009CA88(CameraSelf* self) {
     s32 r30 = (*(u32*)((char*)g_gfApplication + 0xEC) >> 27) != 0;
     if ((self->flags44 >> 7) & 1) {
-        f32 f31 = fn_8004E94C(g_GameGlobal);
-        if (r30 == 0) fn_8009EC5C(f31);
+        f32 f31 = getGameFrameDelta__10GameGlobalCFv(g_GameGlobal);
+        if (r30 == 0) update__13cmSubjectListFf(f31);
         if (self->ptr7C != 0) fn_8009D744(self->ptr7C, f31);
         if (self->mode40 == 7) self->ctrl48->slot0(f31);
         else if (r30 == 0) self->ctrl48->slot0(f31);
@@ -507,9 +507,9 @@ extern "C" void* lbl_805A0278;
 void __dl__FPv(void*);
 void __dt__6gfTaskFv(void*, int);
 void __dt__22cmMeleeFixedControllerFv(void*, int);
-void* fn_800A9E0C(void*, int);
-void* fn_800AAA98(void*, int);
-void fn_8015C304(void*);
+void* __dt__16cmTechControllerFv(void*, int);
+void* __dt__16cmDemoControllerFv(void*, int);
+void Clear__Q44nw4r2ut6detail12LinkListImplFv(void*);
 }
 
 struct gfTaskObj {
@@ -591,7 +591,7 @@ extern "C" gfTaskObj* fn_8009C38C(gfTaskObj* self, int flag) {
             self->unk74 = 0;
         }
         if (self->unk78 != 0) {
-            fn_800A9E0C(self->unk78, 1);
+            __dt__16cmTechControllerFv(self->unk78, 1);
             self->unk78 = 0;
         }
         if (self->unk5C != 0) {
@@ -599,10 +599,10 @@ extern "C" gfTaskObj* fn_8009C38C(gfTaskObj* self, int flag) {
             self->unk5C = 0;
         }
         if (self->unk80 != 0) {
-            fn_800AAA98(self->unk80, 1);
+            __dt__16cmDemoControllerFv(self->unk80, 1);
             self->unk80 = 0;
         }
-        fn_8015C304(lbl_8049DEDC);
+        Clear__Q44nw4r2ut6detail12LinkListImplFv(lbl_8049DEDC);
         lbl_805A0278 = 0;
         __dt__6gfTaskFv(self, 0);
         if (flag > 0) {

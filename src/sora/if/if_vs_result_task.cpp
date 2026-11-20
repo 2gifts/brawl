@@ -2743,8 +2743,8 @@ void ifVsResultTask::subPlayerControl(int player) {
 
 // TODO: clean up, give variables real names
 namespace jj_800E60E4 {
-extern "C" void fn_800E636C(u8*, u32, u32, s32);
-extern "C" void fn_800E6608(u8*, u32, s32, s32);
+extern "C" void printHitNum__14ifVsResultTaskFiUlb(u8*, u32, u32, s32);
+extern "C" void printTime__14ifVsResultTaskFiUlb(u8*, u32, s32, s32);
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800E60E4(u8* self, s32 index) {
@@ -2755,44 +2755,44 @@ extern "C" void fn_800E60E4(u8* self, s32 index) {
     if (*(s32*)(self + 0xA8 + line) == 3) return;
     player = result + index * 0x2AC;
     if (self[0xD4]) {
-        fn_800E636C(self, line + 3, *(u32*)(player + 0x34), 1);
-        fn_800E636C(self, line + 4, *(u32*)(player + 0x38), 0);
+        printHitNum__14ifVsResultTaskFiUlb(self, line + 3, *(u32*)(player + 0x34), 1);
+        printHitNum__14ifVsResultTaskFiUlb(self, line + 4, *(u32*)(player + 0x38), 0);
         u32 deaths = *(u32*)(player + 0x38);
         kills = *(u32*)(player + 0x34);
         if (kills < deaths) {
             (*(MuMsg**)(self + 0x650))->setFontColor(line + 6, 0xD2, 0x9F, 0x9F, 0xFF);
-            fn_800E636C(self, line + 6, deaths - kills, 0);
+            printHitNum__14ifVsResultTaskFiUlb(self, line + 6, deaths - kills, 0);
         } else {
             (*(MuMsg**)(self + 0x650))->setFontColor(line + 6, 0x90, 0xC9, 0xEB, 0xFF);
-            fn_800E636C(self, line + 6, kills - deaths, 1);
+            printHitNum__14ifVsResultTaskFiUlb(self, line + 6, kills - deaths, 1);
         }
     } else if (result[1] == 2) {
-        fn_800E636C(self, line + 3, *(u32*)(player + 0x50), 1);
-        fn_800E636C(self, line + 4, *(u32*)(player + 0x50) - *(u32*)(player + 0x4C), 0);
+        printHitNum__14ifVsResultTaskFiUlb(self, line + 3, *(u32*)(player + 0x50), 1);
+        printHitNum__14ifVsResultTaskFiUlb(self, line + 4, *(u32*)(player + 0x50) - *(u32*)(player + 0x4C), 0);
         (*(MuMsg**)(self + 0x650))->setFontColor(line + 6, 0x90, 0xC9, 0xEB, 0xFF);
-        fn_800E636C(self, line + 6, *(u32*)(player + 0x4C), 1);
+        printHitNum__14ifVsResultTaskFiUlb(self, line + 6, *(u32*)(player + 0x4C), 1);
     } else {
         u16 suicides = *(u16*)(player + 0x3C);
         u32 total;
         s32 penalty = -(suicides * (s8)result[3]);
         u32 deaths = *(u32*)(player + 0x38) - suicides;
-        fn_800E636C(self, line + 3, *(u32*)(player + 0x34), 1);
-        fn_800E636C(self, line + 4, deaths, 0);
-        fn_800E636C(self, line + 5, penalty, 0);
+        printHitNum__14ifVsResultTaskFiUlb(self, line + 3, *(u32*)(player + 0x34), 1);
+        printHitNum__14ifVsResultTaskFiUlb(self, line + 4, deaths, 0);
+        printHitNum__14ifVsResultTaskFiUlb(self, line + 5, penalty, 0);
         if (result[1] == 0) {
             u32 kills = *(u32*)(player + 0x34);
             total = deaths + penalty;
             if (kills < total) {
                 (*(MuMsg**)(self + 0x650))->setFontColor(line + 6, 0xD2, 0x9F, 0x9F, 0xFF);
-                fn_800E636C(self, line + 6, total - kills, 0);
+                printHitNum__14ifVsResultTaskFiUlb(self, line + 6, total - kills, 0);
             } else {
                 (*(MuMsg**)(self + 0x650))->setFontColor(line + 6, 0x90, 0xC9, 0xEB, 0xFF);
-                fn_800E636C(self, line + 6, kills - deaths - penalty, 1);
+                printHitNum__14ifVsResultTaskFiUlb(self, line + 6, kills - deaths - penalty, 1);
             }
         } else if ((s8)player[0x2E] > 0 || result[0x1378] == 9) {
-            fn_800E6608(self, line + 6, 0, 0);
+            printTime__14ifVsResultTaskFiUlb(self, line + 6, 0, 0);
         } else {
-            fn_800E6608(self, line + 6, *(s32*)(player + 0x278), 1);
+            printTime__14ifVsResultTaskFiUlb(self, line + 6, *(s32*)(player + 0x278), 1);
         }
     }
 }
@@ -2800,12 +2800,12 @@ extern "C" void fn_800E60E4(u8* self, s32 index) {
 
 namespace jj_800E7CA8 {
 extern "C" {
-void fn_8000D7B8(void*);
-void fn_8000E590(void*, int, unsigned int);
-void fn_800B8A0C(void*, int);
+void removeInfoCamResAnm__11gfSceneRootFv(void*);
+void setClearDepthBufferState__11gfSceneRootFQ211gfSceneRoot9LayerTypeb(void*, int, unsigned int);
+void __dt__5MuMsgFv(void*, int);
 void __destroy_arr(void*, void (*)(void*, int), unsigned long, unsigned long);
 void __dt__14gfFileIOHandleFv(void*, int);
-void fn_800726A8(void*, int);
+void __dt__8msTexObjFv(void*, int);
 void __dt__6gfTaskFv(void*, int);
 void __dl__FPv(void*);
 extern char lbl_8045AF08[];
@@ -2815,24 +2815,24 @@ class Class_8042B6D0 {
 public:
 virtual void fn_8004805C();
 virtual void fn_8004781C();
-virtual void fn_80046A28();
+virtual void __dt__9ScnMdlModFv();
 virtual void fn_8004810C();
 virtual void fn_800480DC();
-virtual void fn_801AB1C4();
-virtual void fn_801B269C();
-virtual void fn_801B26E4();
-virtual void fn_801AAFDC();
-virtual void fn_801AAFE8();
-virtual void fn_801AB290();
-virtual void fn_801B2EEC();
-virtual void fn_801B3050(int);
+virtual void ForEach__Q34nw4r3g3d7ScnLeafFPFPQ34nw4r3g3d6ScnObjPv_Q44nw4r3g3d6ScnObj13ForEachResultPvb();
+virtual void SetScnObjOption__Q34nw4r3g3d6ScnMdlFUlUl();
+virtual void GetScnObjOption__Q34nw4r3g3d6ScnMdlCFUlPUl();
+virtual void GetValueForSortOpa__Q34nw4r3g3d6ScnObjCFv();
+virtual void GetValueForSortXlu__Q34nw4r3g3d6ScnObjCFv();
+virtual void CalcWorldMtx__Q34nw4r3g3d7ScnLeafFPCQ34nw4r4math5MTX34PUl();
+virtual void SetAnmObj__Q34nw4r3g3d6ScnMdlFPQ34nw4r3g3d6AnmObjQ44nw4r3g3d12ScnMdlSimple10AnmObjType();
+virtual void RemoveAnmObj__Q34nw4r3g3d6ScnMdlFPQ34nw4r3g3d6AnmObj(int);
 char pad[0xE0];
 int count;
 };
 struct Class_80454F64_base { char pad[8]; };
 class Class_80454F64 : public Class_80454F64_base {
 public:
-virtual void fn_800A6A94(int);
+virtual void __dt__15cmPhotoCallBackFv(int);
 };
 struct ModelBase { char pad[0x5C]; };
 class Model : public ModelBase {
@@ -2844,14 +2844,14 @@ extern "C" void* fn_800E7CA8(void* self, int arg1) {
 char* s = (char*)self;
 if (self != 0) {
 *(void**)(s + 0x3C) = lbl_8045AF08;
-fn_8000D7B8(g_gfSceneRoot);
+removeInfoCamResAnm__11gfSceneRootFv(g_gfSceneRoot);
 {
 Class_8042B6D0* o = *(Class_8042B6D0**)((char*)g_gfSceneRoot + 0x450);
 while (o->count != 0) {
-if (o->count != 0) o->fn_801B3050(o->count - 1);
+if (o->count != 0) o->RemoveAnmObj__Q34nw4r3g3d6ScnMdlFPQ34nw4r3g3d6AnmObj(o->count - 1);
 }
 }
-fn_8000E590(g_gfSceneRoot, 8, 0);
+setClearDepthBufferState__11gfSceneRootFQ211gfSceneRoot9LayerTypeb(g_gfSceneRoot, 8, 0);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (*(nw4r::g3d::G3dObj**)(s + 0x658) != 0) {
 (*(nw4r::g3d::G3dObj**)(s + 0x658))->Destroy();
@@ -2861,7 +2861,7 @@ if (*(nw4r::g3d::G3dObj**)(s + 0x658) != 0) {
 Class_80454F64* o = *(Class_80454F64**)(s + 0x4458);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 if (o != 0) {
-if (o != 0) o->fn_800A6A94(1);
+if (o != 0) o->__dt__15cmPhotoCallBackFv(1);
 *(void**)(s + 0x4458) = 0;
 }
 }
@@ -2966,8 +2966,8 @@ i++;
 p += 4;
 } while (i < 4);
 }
-fn_800B8A0C(*(void**)(s + 0x650), 1);
-fn_800B8A0C(*(void**)(s + 0x654), 1);
+__dt__5MuMsgFv(*(void**)(s + 0x650), 1);
+__dt__5MuMsgFv(*(void**)(s + 0x654), 1);
 (*(gfTask**)(s + 0x64C))->exit();
 {
 gfTask* t = *(gfTask**)(s + 0x660);
@@ -2979,7 +2979,7 @@ t->exit();
 }
 }
 __destroy_arr(s + 0x4468, __dt__14gfFileIOHandleFv, 4, 0xC);
-__destroy_arr(s + 0x698, fn_800726A8, 0x44, 0xE8);
+__destroy_arr(s + 0x698, __dt__8msTexObjFv, 0x44, 0xE8);
 __dt__6gfTaskFv(s, 0);
 if (arg1 > 0) __dl__FPv(s);
 }
