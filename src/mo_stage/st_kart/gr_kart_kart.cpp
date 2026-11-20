@@ -104,12 +104,18 @@ grKartKart::grKartKart(const char* taskName) : grKart(taskName) {
     callback->m_nodeCallbackDatas[0].m_flags |= 8;
 }
 
+// TODO: clean up: ScnObj::SetScnObjCallback is missing from the nw4r headers (the callback pointer is at 0xD4).
+static inline void grKartSetScnObjCallback(nw4r::g3d::ScnObj* object, nw4r::g3d::IScnObjCallback* callback) {
+    *reinterpret_cast<nw4r::g3d::IScnObjCallback**>(reinterpret_cast<u8*>(object) + 0xD4) = callback;
+}
+
 grKartKart::~grKartKart() {
     nw4r::g3d::ScnMdl* scnMdl = m_sceneModels[m_unk1];
     if (scnMdl != NULL) {
-        *reinterpret_cast<void**>(reinterpret_cast<u8*>(scnMdl) + 0xD4) = NULL;
+        grKartSetScnObjCallback(scnMdl, NULL);
     }
 }
+
 
 void grKartKart::update(float deltaFrame) {
     grGimmick::update(deltaFrame);
@@ -628,9 +634,10 @@ void grKartKart::updateCallBack(float deltaFrame) {
                 *reinterpret_cast<void**>(reinterpret_cast<u8*>(scnMdl) + 0xD4) = &m_scnObjCallback;
             }
             Matrix mtx;
-            mtx.setIdentity();
             fn_8003F074(&mtx, m_kart[m_team].m_pos.m_x, m_kart[m_team].m_pos.m_y, m_kart[m_team].m_pos.m_z);
-            mtx.rotY(m_kart[m_team].m_rotY * 0.017453292f);
+            mtx.rotY(m_kart[m_team].m_rotY * (3.1415927f / 180.0f));
+
+
             calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = mtx;
             m_scnObjCallback.setPos(m_kart[m_team].m_pos.m_x, m_kart[m_team].m_pos.m_y, m_kart[m_team].m_pos.m_z);
             m_scnObjCallback.setRot(m_kart[m_team].m_rotX, 0.0f, m_kart[m_team].m_rotZ);
@@ -857,11 +864,13 @@ void grKartAttack::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            if (m_kart != NULL) {
+            stKartState* kart = m_kart;
+            if (kart != NULL) {
                 Vec3f* nodePos = &calcWorldCallBack->m_nodeCallbackDatas[0].m_pos;
-                nodePos->m_x = m_kart->m_pos.m_x;
-                nodePos->m_y = m_kart->m_pos.m_y;
-                nodePos->m_z = m_kart->m_pos.m_z;
+                nodePos->m_x = kart->m_pos.m_x;
+                nodePos->m_y = kart->m_pos.m_y;
+                nodePos->m_z = kart->m_pos.m_z;
+
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_pos.m_y += 6.5f;
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_pos.m_z += 3.0f;
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_rot.m_y = m_kart->m_rotY;

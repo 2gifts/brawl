@@ -45,7 +45,8 @@ stDonkey* stDonkey::create() {
 
 stDonkey::~stDonkey() {
     if (m_ladderData != NULL) {
-        delete[] m_ladderData;
+        delete[] reinterpret_cast<u8*>(m_ladderData);
+
     }
     releaseArchive();
 }
@@ -387,7 +388,7 @@ void stDonkey::createObjNumber(int index) {
 // MATCH-ONLY: the ladder entries are set up by hand (the motion path model of the first entry is cleared each time).
 static inline void donkeyInitLadder(grGimmickLadderData* data, grGimmickLadderData* first, u8 mdlIndex, const char* nodeName,
                                     float height) {
-    MEMINIT(data);
+    memset(data, 0, sizeof(grGimmickLadderData));
     data->m_mdlIndex = mdlIndex;
     data->m_49 = 0;
     data->m_restrictUpExit = false;
@@ -402,7 +403,8 @@ static inline void donkeyInitLadder(grGimmickLadderData* data, grGimmickLadderDa
 
 // The ten ladders (ids 0x3C to 0x45), each created right after its data.
 void stDonkey::createObjHashigo() {
-    m_ladderData = new (Heaps::StageResource) grGimmickLadderData[10];
+    // TODO: clean up: MATCH-ONLY raw storage (no cookie, no element constructor), see ~stDonkey
+    m_ladderData = reinterpret_cast<grGimmickLadderData*>(new (Heaps::StageResource) u8[sizeof(grGimmickLadderData) * 10]);
     if (m_ladderData != NULL) {
         donkeyInitLadder(&m_ladderData[0], m_ladderData, 0x3C, "hasigo_09", 40.0f);
         createObjHashigo1(0x1B);

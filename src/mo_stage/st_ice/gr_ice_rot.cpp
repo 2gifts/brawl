@@ -156,12 +156,14 @@ void grIceRot::updateCallBack(float deltaFrame) {
             }
             if (m_mtxWork != NULL) {
                 Matrix matrix = *m_mtxWork;
-                fn_8003EBF4(&matrix, m_angle * 0.017453292f);
+                float angle = m_angle;
+                fn_8003EBF4(&matrix, angle * 0.017453292f);
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = matrix;
-                Vec3f pos;
-                pos.m_x = matrix.m[0][3];
-                pos.m_y = matrix.m[1][3];
-                pos.m_z = matrix.m[2][3];
+                float z = matrix.m[2][3];
+                float y = matrix.m[1][3];
+                float x = matrix.m[0][3];
+                Vec3f pos(x, y, z);
+
                 m_snd.setPos(&pos);
             }
         }
