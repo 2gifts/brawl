@@ -6929,6 +6929,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_falco_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_diddy_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_wolf_transactor.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/ft/ft_poke_trainer_wandering_module.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/it/it_resource_id_accesser_impl_2BCDD0.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_array_base_soArrayFixed_ItemInfo_2AF4E8.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_ike_transactor.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/ft/ft_poke_trainer_kinetic_mediator_384EEC.cpp"),

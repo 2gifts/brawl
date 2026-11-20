@@ -13018,6 +13018,9 @@ mo_melee/sora_melee/so/so_instance_manager_thunks_UniqImpl_soKineticEnergy_11.cp
 mo_melee/sora_melee/it/it_item_resource_module_ref_dtor_2BC714.cpp:
 	.text       start:0x002BC714 end:0x002BC770
 
+mo_melee/sora_melee/it/it_resource_id_accesser_impl_2BCDD0.cpp:
+	.text       start:0x002BCDD0 end:0x002BCE1C
+
 mo_melee/sora_melee/it/it_switch_decide_module_impl.cpp:
 	.text       start:0x002BDF40 end:0x002BDFE4
 	.ctors      start:0x0000033C end:0x00000340
@@ -13876,6 +13879,9 @@ mo_melee/sora_melee/ft/ft_poke_trainer_status_uniq_process_move.cpp:
 mo_melee/sora_melee/ft/ft_poke_trainer_general_term_decide_module_impl.cpp:
 	.text       start:0x00387034 end:0x00387594
 	.ctors      start:0x000004AC end:0x000004B0
+
+mo_melee/sora_melee/ft/ft_poke_trainer_wandering_module.cpp:
+	.text       start:0x00387594 end:0x00389D54
 
 mo_melee/sora_melee/so/so_array_vector_destructor_s32_4.cpp:
 	.text       start:0x00389D54 end:0x00389D94
