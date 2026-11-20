@@ -110,25 +110,21 @@ void grHalberdStage::updateJoint(float deltaFrame) {
         if (collision != NULL) {
             u32 node;
             if (getNodeIndex(&node, 0, "PLAY_CATWARK_BIG")) {
-                u32 jointNum = (u16)collision->m_jointLen;
-                u32 i = 0;
-                grCollisionJoint* joint;
-                while (true) {
-                    if (i == jointNum) {
-                        return;
-                    }
-                    joint = collision->getJoint(i);
+                u32 i;
+                u16 jointNum = collision->m_jointLen;
+                for (i = 0; i != jointNum; i++) {
+                    grCollisionJoint* joint = collision->getJoint(i);
                     if (joint == NULL) {
                         return;
                     }
                     if (joint->m_ground == this && joint->_0x4E == 0 && node == joint->m_nodeIndex) {
-                        break;
+                        m_joint = joint;
+                        joint->m_0x56_7 = true;
+                        return;
                     }
-                    i++;
                 }
-                m_joint = joint;
-                joint->m_0x56_7 = true;
             }
+
         }
     }
 }
