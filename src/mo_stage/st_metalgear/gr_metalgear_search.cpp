@@ -15,7 +15,6 @@
 extern "C" int enumIncludeEntryId__9ftManagerCFi(ftManager* manager, Rect2D* area, int* entryIds, int unk, int count);
 
 // sndSystem::stopSE (main, unnamed): stops a sound over the given frames
-extern "C" void fn_80075F1C(sndSystem* sndSystem, int handle, int frames);
 
 // stMelee: the position of a player, his hip (D0) or his cursor (D8) (sora_melee, unnamed)
 

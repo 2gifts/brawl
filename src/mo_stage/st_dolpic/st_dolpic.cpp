@@ -23,7 +23,6 @@
 // grCollision::setJointStatus (unnamed function of main)
 extern "C" void fn_80110B98(grCollision* collision, int status, int unk);
 // sndSystem::setVol / setPitch / setPan / stopSE (unnamed functions of main)
-extern "C" void fn_80075F1C(sndSystem* system, int handle, int fadeFrames);
 // Matrix helpers of main: place a matrix with a translation / scale
 extern "C" void fn_8003F074(float x, float y, float z, Matrix* matrix);
 

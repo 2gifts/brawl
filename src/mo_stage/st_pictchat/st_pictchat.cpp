@@ -19,7 +19,6 @@
 // sndSystem::setSeqSpeed (main, unnamed): it changes how fast a sequence plays (the sound of the picture follows the speed
 // of the game)
 // sndSystem::isPlay (main, unnamed)
-extern "C" bool fn_80077DA0(sndSystem* sndSystem, s32 handle);
 
 stClassInfoImpl<Stages::PictChat, stPictchat> stPictchat::bss_loc_14;
 
@@ -990,7 +989,7 @@ void stPictchat::updatePict(float deltaFrame) {
             break;
         case 2:
             if (m_seHandle != -1) {
-                if (fn_80077DA0(g_sndSystem, m_seHandle) == 1) {
+                if (g_sndSystem->isPlay(m_seHandle) == 1) {
                     float rate = static_cast<float>(g_gfApplication->m_frameRate) / 60.0f;
                     float speed = deltaFrame;
                     if (rate > 1.0f) {
