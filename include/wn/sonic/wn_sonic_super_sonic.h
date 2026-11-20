@@ -12,7 +12,9 @@
 #include <wn/sonic/wn_sonic_super_sonic_kinetic_transactor.h>
 #include <so/controller/so_controller_module_link_ref.h>
 
+#ifndef WN_STATUS_PROC_VECTOR_4_DECLARED // the fighter unit declares it before the spring
 WN_STATUS_PROC_VECTOR_DEFAULT_CTOR(4);
+#endif
 
 // HYPOTHESIS: parameter names; ten floats and two ints, ids 4000.. and 24000..
 struct wnSonicSuperSonicParam {
@@ -138,11 +140,15 @@ protected:
     wnModuleAccesserBuilder<wnSonicSuperSonicModuleAccesserBuildConfig> m_modules;
     u32 unk2CD0; // HYPOTHESIS: unread tail word of the builder (the article starts at 0x2CD4)
 public:
+#ifdef WN_WEAPON_BUILDER_CTOR_EXTERN // the article unit defines the constructor
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd);
+#else
     wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd)
         __attribute__((never_inline)) :
         Weapon(name, bd.m_kind, bd.m_data, articleId, &info, m_modules.getModuleAccesser(), true), m_modules(this, bd) {
         Weapon::initialize();
     }
+#endif
     virtual ~wnWeaponBuilder() { }
     virtual void deactivateDescendantForce() {
         soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();

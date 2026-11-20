@@ -56,8 +56,14 @@ FT_DOL_ARRAY_VECTOR(soInstanceUnitFullProperty<soKineticEnergy*>, 8);
 
 // An article whose status unique process vector is built by the sora_melee constructor without a size argument: declares the
 // vector of N entries and the status holder that default-constructs it (the singleton null-array flavour).
+// WN_STATUS_PROC_VECTOR_BOTH_CTORS (opt-in): a fighter unit whose own status vector of the same size is built with a size word.
+#ifdef WN_STATUS_PROC_VECTOR_BOTH_CTORS
+#define WN_STATUS_PROC_VECTOR_CTOR_LIST() ; soArrayVector(s32)
+#else
+#define WN_STATUS_PROC_VECTOR_CTOR_LIST()
+#endif
 #define WN_STATUS_PROC_VECTOR_DEFAULT_CTOR(N)                                                                              \
-    SO_DECLARE_STATUS_PROC_VECTOR(N, ()) \
+    SO_DECLARE_STATUS_PROC_VECTOR(N, () WN_STATUS_PROC_VECTOR_CTOR_LIST()) \
     template <>                                                                                                            \
     class soArraySelectHolder<1, soArrayVector<soStatusUniqProcess*, N>, soSingletonHolder<soArrayNull<soStatusUniqProcess*> > > { \
     public:                                                                                                                \
@@ -1438,7 +1444,10 @@ protected:
     soKineticEnergyRotNormal m_energyRotNormal; // the rotation energy (index 1)
 #endif
 public:
-#ifdef WN_EM_SIMPLE_UNIT
+#ifdef WN_WEAPON_BUILDER_CTOR_EXTERN // the article unit defines the constructor (the fighter unit only calls it)
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd,
+                    bool weaponFlag = true);
+#elif defined(WN_EM_SIMPLE_UNIT)
     wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd)
         __attribute__((never_inline))
         :

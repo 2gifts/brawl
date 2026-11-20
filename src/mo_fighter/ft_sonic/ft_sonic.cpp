@@ -6,6 +6,9 @@
 #define FT_SOUND_GENERATOR_DTOR_NOINLINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_SONIC_ARTICLE_POOLS
+#define FT_SONIC_FULL_ARTICLES
+#define WN_KINETIC_GENERIC_IN_FIGHTER_TU
+#define WN_KINETIC_GENERIC_BUILDER
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_NOINLINE_SEARCH_BUILDER
 #define MT_VEC2F_FROM_VEC3_CTOR_NOINLINE
@@ -34,6 +37,7 @@
 #include <ft/ft_resource_id_accesser_impl.h>
 #include <so/so_kinetic_energy_normal.h>
 
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftSonicBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
