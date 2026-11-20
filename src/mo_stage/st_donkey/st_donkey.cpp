@@ -578,8 +578,11 @@ void stDonkey::updateScore(float deltaFrame) {
 
 // Decides when the two Jacks appear. The stage data holds the ranges of the waits (floats at 0x18 to 0x38).
 void stDonkey::updateJack(float deltaFrame) {
+    if (m_stateKong != 3) {
+        return;
+    }
     float* data = static_cast<float*>(m_stageData);
-    if (m_stateKong != 3 || data == NULL) {
+    if (data == NULL) {
         return;
     }
     m_jackTimer1 -= deltaFrame;
@@ -595,8 +598,8 @@ void stDonkey::updateJack(float deltaFrame) {
         m_stateJack[0] = 6;
         m_stateJack[1] = 6;
         if (m_jackFirst == 1) {
-            m_jackFirst = 0;
             m_jackTimer1 = data[6] + (data[7] - data[6]) * randf();
+            m_jackFirst = 0;
         } else {
             m_jackTimer1 = data[8] + (data[9] - data[8]) * randf();
         }
@@ -605,9 +608,9 @@ void stDonkey::updateJack(float deltaFrame) {
     case 1:
         if (m_jackTimer1 == 0.0f) {
             if (randf() < data[10]) {
+                m_jackTimer1 = data[11] + (data[12] - data[11]) * randf();
                 m_jackState = 2;
                 m_jackTimer2 = 0.0f;
-                m_jackTimer1 = data[11] + (data[12] - data[11]) * randf();
             } else {
                 m_jackState = 0;
             }
@@ -616,15 +619,15 @@ void stDonkey::updateJack(float deltaFrame) {
     case 2:
         if (m_jackTimer1 == 0.0f) {
             m_jackState = 3;
-        } else if (m_jackTimer2 == 0.0f) {
+        } else if (m_jackTimer2 == 0.0) {
             if (m_stateJack[0] == 6) {
                 m_stateJack[0] = 3;
-            } else {
-                if (m_stateJack[1] != 6) {
-                    return;
-                }
+            } else if (m_stateJack[1] == 6) {
                 m_stateJack[1] = 3;
+            } else {
+                return;
             }
+
             m_jackTimer2 = data[13] + (data[14] - data[13]) * randf();
         }
         break;

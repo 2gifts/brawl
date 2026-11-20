@@ -306,17 +306,14 @@ void grMarioPastBgLocator::processAnim() {
 }
 
 void grMarioPastBgLocator::update(float deltaFrame) {
-    if (m_state != 1) {
-        if (m_state != 0) {
-            return;
-        }
+    switch (m_state) {
+    case 0: {
         float* data = static_cast<float*>(getStageData());
         if (data == NULL) {
             return;
         }
-        if (m_stage == 1) {
-            m_motionRatio = data[2];
-        } else if (m_stage == 0) {
+        switch (m_stage) {
+        case 0: {
             m_motionRatio = data[1];
             g_ecMgr->setDrawPrio(1);
             u32 effect = g_ecMgr->setEffect(static_cast<EfID>(0x360001));
@@ -324,10 +321,21 @@ void grMarioPastBgLocator::update(float deltaFrame) {
             g_ecMgr->setParent(effect, m_sceneModels[0], "X_Move", 0);
             Vec3f scale(0.85f, 0.85f, 0.85f);
             g_ecMgr->setScl(effect, &scale);
+            break;
+        }
+        case 1:
+            m_motionRatio = data[2];
+            break;
         }
         m_state = 1;
+        // fall through
     }
-    *m_frameLocator = getMotionFrame(0);
+    case 1:
+        *m_frameLocator = getMotionFrame(0);
+
+        break;
+    }
+
 }
 
 bool grMarioPastBgLocator::setNode() {
