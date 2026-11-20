@@ -2,11 +2,13 @@
 #define MU_WIFI_INTERFACE_TASK_INTERNAL
 #include <mu/wifi/mu_wifi_interface.h>
 #include <nt/network.h>
+#include <ip/ip_switch.h>
+#include <st/operator/st_operator_rule_melee.h>
 #include <revolution/OS.h>
 #include <types.h>
 
-// The Wi-Fi melee info operator (sora_melee 0x2585D8..0x258FBC; processBegin, the constructor and the network error check
-// are not decompiled yet).
+// The Wi-Fi melee info operator (sora_melee 0x2585D8..0x258FBC; processBegin and the constructor are not decompiled
+// yet).
 class stOperatorInfoWifiMelee : public stOperatorInfo {
 public:
     bool m_isEnableOperation; // 0x11B
@@ -26,10 +28,19 @@ public:
     virtual u32 getEndType();
     virtual u32 getErrorLevel();
     virtual bool isError();
+
+    bool checkNetworkError();
 };
 
-// TODO: clean up - the report format of the unit, referenced by its label until the unit's data is split.
-extern "C" const char lbl_27_data_5356C[];
+// TODO: clean up - the report formats of the unit, referenced by their labels until the unit's data is split; the melee
+// rule operator instance and the Wi-Fi task method at 0x800CCEC4 by placeholder names.
+extern "C" {
+extern const char lbl_27_data_5356C[];
+extern const char lbl_27_data_534F0[];
+extern const char lbl_27_data_53530[];
+extern stOperatorRuleMelee* lbl_27_bss_59A8;
+void fn_800CCEC4(muWifiInterfaceTask* task, int);
+}
 
 // TODO: clean up - MATCH-ONLY: the original inlines the (empty) stOperatorInfo destructor into the derived one, which
 // then calls ~stOperator directly; the header declares it out of line, so this unit redeclares it inline.
@@ -70,6 +81,42 @@ void stOperatorInfoWifiMelee::startOperator() {
         task->sendAIDInfo(false, 0xfe);
     }
     m_isEnableOperation = true;
+}
+
+// The network error check of a running match: an error level from the Wi-Fi task, or (team or free-for-all) fewer than two
+// players or teams left, ends the match with error level 2.
+bool stOperatorInfoWifiMelee::checkNetworkError() {
+    if (m_errorLevel != 0) {
+        return true;
+    }
+    muWifiInterfaceTask* task = g_muWifiInterfaceTask;
+    m_errorLevel = task->getNetworkErrorLevel();
+    if (m_errorLevel == 0 && m_isEnableOperation && m_124) {
+        bool lost = false;
+        int numPlayers = task->unkFD5;
+        if (numPlayers <= 1) {
+            OSReport(lbl_27_data_534F0, numPlayers);
+            lost = true;
+        }
+        gmGlobalModeMelee* melee = m_condition;
+        // TODO: clean up - the rule operator byte at 0xD5 (_147[2]) is read by hand; name it in st_operator_rule_melee.h.
+        if (melee->m_meleeInitData.m_corpsKind == 0 && melee->m_meleeInitData.m_isTeams == true && lbl_27_bss_59A8 != NULL &&
+            *reinterpret_cast<u8*>(&lbl_27_bss_59A8->_147[2])) {
+            int numTeams;
+            lbl_27_bss_59A8->getExistTeam(&numTeams);
+            if (numTeams <= 1) {
+                OSReport(lbl_27_data_53530, numTeams);
+                lost = true;
+            }
+        }
+        if (lost) {
+            fn_800CCEC4(task, 0);
+            ipSwitch::getInstance()->setSource(0);
+            m_errorLevel = 2;
+            task->setAppNetworkError(0xe, 2);
+        }
+    }
+    return m_errorLevel != 0;
 }
 
 bool stOperatorInfoWifiMelee::isError() {
