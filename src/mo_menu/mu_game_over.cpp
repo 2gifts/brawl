@@ -8,6 +8,7 @@
 #include <nw4r/g3d/g3d_anmclr.h>
 #include <nw4r/g3d/g3d_anmvis.h>
 #include <nw4r/g3d/g3d_scngroup.h>
+#include <sc/sc_gameover.h>
 #include <snd/snd_system.h>
 #include <stdio.h>
 #include <string.h>

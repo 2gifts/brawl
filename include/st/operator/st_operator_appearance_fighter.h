@@ -33,7 +33,6 @@ public:
     u8 unk1B4;
     bool unk1B5;
     u8 unk1B6;
-    void* unk1B8;
 
     stOperatorAppearanceFighter();
     // HYPOTHESIS: the player index is an int, used to select unk74.
@@ -43,4 +42,4 @@ public:
     virtual bool isEnd();
     virtual void startAppearance();
 };
-static_assert(sizeof(stOperatorAppearanceFighter) == 0x1BC, "Class is wrong size!");
+static_assert(sizeof(stOperatorAppearanceFighter) == 0x1B8, "Class is wrong size!");

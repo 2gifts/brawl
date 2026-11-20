@@ -9,6 +9,7 @@
 
 class stOperatorNetwork : public stOperator {
 public:
+    stOperatorNetwork(const char* name) : stOperator(name) { }
     virtual void processBegin() { }
     virtual ~stOperatorNetwork();
     virtual void setPrepareLoadStageComplete() { }

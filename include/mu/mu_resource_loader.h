@@ -18,8 +18,10 @@ public:
     u32 m_unk10;
     u32 m_unk14;
     u32 m_unk18;
-    u8 m_flagA : 3;                     // 0x1C
-    u8 m_flagB : 5;
+    u8 m_flagA : 1;                     // 0x1C
+    u8 m_flagB : 1;
+    u8 m_flagC : 1;
+    u8 m_flagD : 5;
     u8 m_unk1D[3];
     scResourceLoader() {
         m_unk04 = 0;
@@ -28,7 +30,9 @@ public:
         m_unk10 = 0;
         m_flagA = 0;
         m_unk18 = 0;
+        m_flagB = 0;
         m_unk14 = 0xFF;
+        m_flagC = 0;
     }
     ~scResourceLoader() { fn_1_406C(this); }
 };

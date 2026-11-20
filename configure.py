@@ -7573,6 +7573,7 @@ config.libs = [
         "cflags": cflags_rel,
         "host": False,
         "objects": [
+            Object(NonMatching, "mo_scene/sora_scene/sc_scene_init.cpp"),
             Object(Matching, "mo_scene/sora_scene/sc_boot.cpp"),
             Object(Matching, "mo_scene/sora_scene/sc_demo.cpp"),
             Object(Matching, "mo_scene/sora_scene/sc_tutorial.cpp"),
@@ -7625,7 +7626,9 @@ config.libs = [
             Object(NonMatching, "mo_scene/sora_scene/sq_challenger.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sc_memory_change.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sc_intro.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_ending.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sc_gameover.cpp"),
+            Object(NonMatching, "mo_scene/sora_scene/sc_ty_fig_list.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sc_ty_fig_disp.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sc_ty_fig_disp2.cpp"),
             Object(NonMatching, "mo_scene/sora_scene/sc_clear_getter.cpp"),
