@@ -1,4 +1,5 @@
 #define IF_PLAYER_TYPED_MEMBERS
+#include <mu/mu_msg_font_mngr.h>
 #include <ms/ms_tex_obj.h>
 #include <gf/gf_heap_manager.h>
 #include <gf/gf_loupe.h>
@@ -35,13 +36,9 @@ public:
 };
 }}
 
-// HYPOTHESIS: untyped placeholders for the zero-initialized .bss of this unit, sizes and order from the original layout.
-nw4r::ut::LinkList<cmSubject, 0> lbl_8049DEDC;
-unsigned char lbl_8049DEE8[0x128] __attribute__((aligned(8))) = { 0 };
-unsigned char lbl_8049E010[0xc] __attribute__((aligned(8))) = { 0 };
-unsigned char lbl_8049E01C[0x14] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_8049E030[0x30] __attribute__((aligned(8))) = { 0 };
-unsigned char lbl_8049E060[0x40] __attribute__((aligned(8))) = { 0 };
+// The cmSubject list (bss of cm_subject.cpp).
+extern nw4r::ut::LinkList<cmSubject, 0> lbl_8049DEDC;
+// HYPOTHESIS: untyped placeholder for the zero-initialized .bss of this unit, size from the original layout.
 unsigned char lbl_8049E0A0[0x30] __attribute__((aligned(8))) = { 0 };
 // HYPOTHESIS: .sbss of this unit: the locator model, the player locator group, the HUD scene group of the melee and
 // the flag that restarts the fast stage-to-HUD position conversion.
@@ -579,9 +576,6 @@ void IfPlayer::createModel(int scoreMode, int teamBattle, nw4r::g3d::ResFile* re
 // HYPOTHESIS: data that lives in the first unit of the split (if_player.cpp / cluster A) or in a unit before it.
 extern const char* lbl_80459CC0[8];           // "pos00" .. "pos07", the locator node names
 
-extern u8 lbl_8049E01C[]; // the font manager (see mu_msg.cpp)
-extern "C" u8 fn_800B8648(void* mgr, u32 fontSetting, int p2, int p3);
-extern "C" void fn_800B881C(void* mgr, u8 fontId);
 
 // HYPOTHESIS: map names muMenu::exchangeStockchkind2Something
 extern "C" int fn_800AF6F0(int stock);
@@ -820,7 +814,7 @@ int IfPlayer::makeStringTex(void* texObj, const wchar_t* text, GXColor textColor
     camera.m_scissorHeight = 480;
     camera.setGX();
     Message::drawBoxLine(*reinterpret_cast<s32*>(&boxColor), 0, 1, 0.0f, 0.0f, (float)width, (float)height, 0.0f);
-    u8 font = fn_800B8648(lbl_8049E01C, 2, 0xFF, 0);
+    u8 font = g_MuMsgFontMngr.loadFont(2, 0xFF, 0);
     const wchar_t* p = text;
     int length = 0;
     for (; *p != 0; p++) {
@@ -849,7 +843,7 @@ int IfPlayer::makeStringTex(void* texObj, const wchar_t* text, GXColor textColor
     message.printMsgBuf(FontData::FONT_HIRAGANA);
     reinterpret_cast<msTexObj*>(texObj)->copyTexObjFromEFB(0.0f, 0.0f, (float)width, (float)height, format,
                                                             Heaps::MenuInstance, true);
-    fn_800B881C(lbl_8049E01C, font);
+    g_MuMsgFontMngr.unloadFont(font);
     return length;
 }
 
