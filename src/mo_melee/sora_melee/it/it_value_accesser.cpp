@@ -321,3 +321,14 @@ extern "C" s32 fn_27_2C0828(void) {
 }
 }
 
+// TODO: clean up - placeholder pair type and names (the same pair of statics as so_sinit_pair_*.cpp, from a header this
+// unit includes), and the placeholder name of the item value accesser instance that it_item.cpp reads by that name.
+struct SinitPair {
+    s32 m_a;
+    s32 m_b;
+    SinitPair(s32 a, s32 b) : m_a(a), m_b(b) {}
+};
+
+SinitPair lbl_27_bss_71A8(0xFF, 0);
+SinitPair lbl_27_bss_71B0(0xFF, 1);
+itValueAccesser itValueAccesserGlobalStorage;
