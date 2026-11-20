@@ -41,7 +41,6 @@ extern "C" void fn_8009D158(CameraController* camera, cmStageParamPaused* param)
 extern "C" u32 fn_800DCD94(IfMngr* mngr);
 extern "C" void fn_800DCDD4(IfMngr* mngr, int kind, float distance);
 // IfPlayer::updateDamageHP / setDamageState (the barrier shows its health on the damage gauge of the player)
-extern "C" void fn_800E14A4(IfPlayer* player, u32 value, int a);
 extern "C" void fn_27_239BDC(stMelee* stage, Vec3f* out, Vec3f* from, Vec3f* to, float t, u8 ease);
 extern "C" void fn_27_239E58(stMelee* stage, float* out, float from, float to, float t, u8 ease);
 // stTrigger::setBeltConveyorParam
@@ -863,9 +862,14 @@ void stHomerun::updateSandBagDmg(float deltaFrame) {
         float hp = m_sandBag->getParamFloat(2);
         IfMngr* ifMngr = g_IfMngr;
         u8 playerIndex = reinterpret_cast<u8*>(ifMngr)[0x6A];
-        fn_800E14A4(ifMngr->m_ifPlayers[playerIndex], (u32)hp, 0);
+        ifMngr->m_ifPlayers[playerIndex]->updateDamageHP((u32)hp, 0);
         if (hp != m_sandBagHp) {
-            float gauge = 0.6f * ((hp - m_sandBagHp - 3.0f) / (15.0f - 3.0f));
+            // the damage of one hit between 3 and 15 fills the gauge up to 0.6
+            float minDamage = 3.0f;
+            float maxDamage = 15.0f;
+            float rate = 0.6f;
+            float gauge = rate * ((hp - m_sandBagHp - minDamage) / (maxDamage - minDamage));
+
             if (gauge < 0.0f) {
                 gauge = 0.0f;
             }
