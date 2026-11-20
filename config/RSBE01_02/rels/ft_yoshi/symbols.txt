@@ -109,7 +109,7 @@ __dt__117soInstancePoolSub<71soInstancePoolInfo<11wnYoshiStar,1,16wnInstanceHold
 __dt__509soInstancePool<73soInstancePoolInfo<13wnYoshiTamago,4,16wnInstanceHolder,14soIntToType<1>>,387soLineInvertHierarchy<296soTypeList<77soInstancePoolInfo<17wnYoshiFireCannon,2,16wnInstanceHolder,14soIntToType<4>>,201soTypeList<77soInstancePoolInfo<17wnYoshiFireBreath,4,16wnInstanceHolder,14soIntToType<3>>,106soTypeList<71soInstancePoolInfo<11wnYoshiWing,1,16wnInstanceHolder,14soIntToType<2>>,18soTypeListNullType>>>,14soInstancePool,18soInstancePoolRoot,22soKindInfoGeneric<0,4>,2>,22soKindInfoGeneric<0,4>,3>Fv = .text:0x00004BA0; // type:function size:0x7C
 __dt__119soInstancePoolSub<73soInstancePoolInfo<13wnYoshiTamago,4,16wnInstanceHolder,14soIntToType<1>>,22soKindInfoGeneric<0,4>>Fv = .text:0x00004C1C; // type:function size:0x6C scope:weak
 __dt__75wnInstanceHolder<13wnYoshiTamago,22soKindInfoGeneric<0,4>,14soIntToType<1>>Fv = .text:0x00004C88; // type:function size:0x60 scope:weak
-fn_95_4CE8 = .text:0x00004CE8; // type:function size:0x2B4
+__dt__13wnYoshiTamagoFv = .text:0x00004CE8; // type:function size:0x2B4
 __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<3,2,2,0,0,1,0,8>>Fv = .text:0x00004F9C; // type:function size:0x8C
 __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<2,2,2,0,0,1,0,8>>Fv = .text:0x00005028; // type:function size:0x8C
 __dt__79soAnimCmdControlUnitBuilder<48soAnimCmdControlUnitBuildConfig<1,2,2,0,0,1,0,8>>Fv = .text:0x000050B4; // type:function size:0x8C
