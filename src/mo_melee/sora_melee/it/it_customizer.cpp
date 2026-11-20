@@ -26,6 +26,7 @@
 #include <cm/cm_controller_ai.h>
 #include <gm/gm_global.h>
 #include <mt/mt_trig.h>
+#include <gm/gm_common.h>
 #include <mt/mt_prng.h>
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/so_external_value_accesser.h>
@@ -43,6 +44,10 @@ public:
     virtual void onReset(BaseItem* item);
     virtual bool onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
     virtual itParam::KineticFlag getKineticFlags(BaseItem* item);
+    // HYPOTHESIS: name and argument types (a new slot of this class, 0x297658): picks the two names the messages fill in
+    // (kinds, full-width and UTF-16 strings).
+    virtual void getMessageNames(int* kind1, const char** str1, const wchar_t** wstr1, int* kind2, const char** str2,
+                                 const wchar_t** wstr2);
 };
 
 class itBananaCustomizer : public itCustomizer<itBananaCustomizer> {
@@ -2184,4 +2189,58 @@ u32 itSuperScopeCustomizer::onShoot(BaseItem* item, u32 charge, float lr, float)
     }
     work->setInt(bullets, 0x10000000);
     return bullets;
+}
+
+// TODO: clean up - MATCH-ONLY: soAnimCmdArgList::getFloat returns a float here (the shadow header declares double), so
+// it is called through its symbol.
+extern "C" float getFloat__16soAnimCmdArgListFUl(itAnimCmdArgList* args, u32 index);
+
+// Anim cmd type 0x11 with seven arguments shows a message in Mr. Resetti's window (messages 0x4F and 0x6F name someone).
+bool itResetsanCustomizer::onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3) {
+    switch (acmd->getType()) {
+    case 0x11:
+        if (acmd->getArgNum() == 7) {
+            itAnimCmdArgList args(moduleAccesser, acmd->getArgList());
+            int msgId = args.getInt(0);
+            float delay1 = getFloat__16soAnimCmdArgListFUl(&args, 1);
+            float delay3 = getFloat__16soAnimCmdArgListFUl(&args, 2);
+            float delay4 = getFloat__16soAnimCmdArgListFUl(&args, 3);
+            float delay2 = getFloat__16soAnimCmdArgListFUl(&args, 4);
+            float wait = getFloat__16soAnimCmdArgListFUl(&args, 5);
+            float posY = getFloat__16soAnimCmdArgListFUl(&args, 6);
+            if (!args.m_errorOnValueFetch) {
+                // TODO: clean up - the window's task id is a BaseItem field that is not declared yet (0x3D2C).
+                u32 taskId = *reinterpret_cast<u32*>(reinterpret_cast<u8*>(item) + 0x3D2C);
+                if (taskId != 0xFFFFFFFF) {
+                    IfResetsanTask* task = dynamic_cast<IfResetsanTask*>(gfTask::getTask(taskId));
+                    if (task != NULL) {
+                        if (msgId == 0x4F || msgId == 0x6F) {
+                            int kind1;
+                            int kind2;
+                            const char* str1 = NULL;
+                            const char* str2 = NULL;
+                            const wchar_t* wstr1 = NULL;
+                            const wchar_t* wstr2 = NULL;
+                            soWorkManageModule* work = &itWork(item);
+                            getMessageNames(&kind1, &str1, &wstr1, &kind2, &str2, &wstr2);
+                            work->setInt(kind1, 0x10000002);
+                            task->m_nameKind1 = kind1;
+                            task->m_nameStr1 = str1;
+                            task->m_nameWStr1 = wstr1;
+                            task->m_nameKind2 = kind2;
+                            task->m_nameStr2 = str2;
+                            task->m_nameWStr2 = wstr2;
+                        }
+                        if (msgId == 4) {
+                            gmSetUseRisetsan();
+                        }
+                        task->setMessage(msgId, delay1, delay3, delay4, delay2, wait, posY);
+                        return true;
+                    }
+                }
+            }
+        }
+        break;
+    }
+    return false;
 }
