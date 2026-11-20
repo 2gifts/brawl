@@ -28,6 +28,7 @@ public:
     void endSwap(bool unk);
     void process();
     void processHit();
+    int pushEntity(int unk);
     int enumEntryId(int entryId);
     int enumIncludeEntryId(int entryId);
     int getEntryIdFromPlayerNo(int playerNo);
