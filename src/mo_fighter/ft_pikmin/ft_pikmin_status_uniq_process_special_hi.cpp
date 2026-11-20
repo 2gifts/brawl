@@ -58,8 +58,6 @@ void ftPikminStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAcce
     }
 }
 
-// MATCH-ONLY: the native code copies the third argument of setVisibilityChain from the first.
-#pragma opt_propagation off
 void ftPikminStatusUniqProcessSpecialHi::execFixPos(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().isFlag(0x22000013) == true) {
         moduleAccesser->getWorkManageModule().offFlag(0x22000013);
@@ -70,8 +68,7 @@ void ftPikminStatusUniqProcessSpecialHi::execFixPos(soModuleAccesser* moduleAcce
                 hold->at(i)->changeStatus(0x2f);
             }
             wnPikminPikminTroopsManager* troops = m_troops;
-            int visible = 1;
-            troops->setVisibilityChain(visible, 1, visible);
+            troops->setVisibilityChain(true, 1, true);
         }
     } else if (moduleAccesser->getWorkManageModule().isFlag(0x22000014) == true) {
         moduleAccesser->getWorkManageModule().offFlag(0x22000014);

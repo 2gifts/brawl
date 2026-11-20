@@ -82,11 +82,9 @@ void ftPikminStatusUniqProcessSpecialS::execFixPos(soModuleAccesser* moduleAcces
     }
 }
 
-// MATCH-ONLY: the original keeps the task id in a register loaded before the calls.
-#pragma opt_propagation off
 void ftPikminStatusUniqProcessSpecialS::exitStatus(soModuleAccesser* moduleAccesser, int nextStatusKind) {
     if (m_troops->getHoldPikminNum() > 0) {
-        int taskId = moduleAccesser->getStageObject().m_taskId;
+        int taskId = moduleAccesser->getStageObject().getTaskId();
         wnPikminPikminTroopsManager* troops = m_troops;
         if (troops->isConstraint(troops->getHoldPikminTop(), taskId) == true) {
             if (soExternalValueAccesser::getStatusKind(m_troops->getHoldPikminTop()) == 0x15 ||
@@ -101,7 +99,6 @@ void ftPikminStatusUniqProcessSpecialS::exitStatus(soModuleAccesser* moduleAcces
         ftPikminUtility::reducePikminAllHelper(&moduleAccesser->getStageObject());
     }
 }
-#pragma opt_propagation reset
 
 // The hold Pikmin is placed at the node 0x29 while the throw statuses run.
 void ftPikminStatusUniqProcessSpecialS::updateHoldPikmin(soModuleAccesser* moduleAccesser) {

@@ -402,7 +402,10 @@ void wnPikminPikminTroopsManager::holdPikminForce(int taskId) {
 // TODO(match): 95.6%. The original uses the u8 parameter without zero-extending it (cntlzw on the saved register for
 // !visible, and a plain mr into setVisible), while this form adds clrlwi at both uses; the mangled name fixes the
 // parameter as u8. The rest of the function is identical.
-void wnPikminPikminTroopsManager::setVisibilityChain(u8 visible, int num, int rest) {
+// bool visible / bool rest: the callers pass equal constants for both in one register (Pikmin special_hi, ftPikmin::notifyEventLink).
+// The two setVisible calls still mask (clrlwi) where the original does not: setVisible and soVisibilityModule::setWhole
+// probably take bool too (not changed here: setWhole has ~160 callers).
+void wnPikminPikminTroopsManager::setVisibilityChain(bool visible, int num, bool rest) {
     if (m_hold.isEmpty() == false) {
         wnPikminPikminEnumerator enm = m_hold.getEnumerator();
         int index = 0;

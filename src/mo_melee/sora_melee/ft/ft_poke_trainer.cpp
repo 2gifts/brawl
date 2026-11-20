@@ -391,8 +391,6 @@ Fighter* ftPokeTrainer::getPartner() {
     return g_ftManager->getFighter(m_entryId, -1);
 }
 
-#pragma push
-#pragma opt_propagation off
 bool ftPokeTrainer::isInclude(float* rect, Vec3f* out) {
     soModuleAccesser* acc = m_moduleAccesser;
     soGenerateArticleManageModule& articleModule = acc->getGenerateArticleManageModule();
@@ -407,7 +405,6 @@ bool ftPokeTrainer::isInclude(float* rect, Vec3f* out) {
     }
     return false;
 }
-#pragma pop
 
 void ftPokeTrainer::processUpdate() {
     soModuleAccesser* acc = m_moduleAccesser;
@@ -543,13 +540,10 @@ struct ftPokeTrainerLinkEvent : soLinkEventArgs {
     ftPokeTrainerLinkEvent(int kind) : soLinkEventArgs(kind) { }
 };
 
-#pragma push
-#pragma opt_propagation off
 bool ftPokeTrainer::isExistAdvFollowEffect() {
     soModuleAccesser* acc = m_moduleAccesser;
     return acc->getWorkManageModule().getInt(Work_Int_TrainerEffect) != 0;
 }
-#pragma pop
 
 // Tells the Pokemon where they should stand: while the trainer is in the Final Smash throw (status 0x116) the positions come
 // from the Final Smash article, otherwise from the work slots that hold where the trainer wants the next Pokemon to appear.

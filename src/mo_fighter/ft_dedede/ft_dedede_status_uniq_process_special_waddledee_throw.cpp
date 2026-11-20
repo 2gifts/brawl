@@ -177,14 +177,11 @@ float ftDededeWaddledeeThrowABS(float value) {
 }
 #pragma dont_inline reset
 
-// MATCH-ONLY: keep the creation owner argument live across the manager getter.
-#pragma push
-#pragma opt_propagation off
 void ftDededeStatusUniqProcessSpecialWaddledeeThrow::execFixPos(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getWorkManageModule().getInt(0x20000000) == 3) {
         if (moduleAccesser->getWorkManageModule().isFlag(0x22000012) &&
             moduleAccesser->getWorkManageModule().getInt(0x20000000) == 3) {
-            int ownerTaskId = moduleAccesser->m_stageObject->m_taskId;
+            int ownerTaskId = moduleAccesser->m_stageObject->getTaskId();
             BaseItem* item = itManager::getInstance()->createItem(itKind(9), 0, ownerTaskId);
             if (item != NULL) {
                 item->have(moduleAccesser->m_stageObject->m_taskId, 54, -1);
@@ -227,8 +224,6 @@ void ftDededeStatusUniqProcessSpecialWaddledeeThrow::execFixPos(soModuleAccesser
         }
     }
 }
-
-#pragma pop
 
 void ftDededeStatusUniqProcessSpecialWaddledeeThrow::exitStatus(soModuleAccesser* moduleAccesser, int) {
     if (moduleAccesser->getWorkManageModule().getInt(0x20000000) == 3) {

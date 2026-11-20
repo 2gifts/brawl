@@ -52,7 +52,7 @@ public:
     void updateNodeSRT(wnPikminPikmin* pikmin);
     void holdPikminForce(int taskId);
     void updateJostlePriority();
-    void setVisibilityChain(u8 visible, int num, int rest);
+    void setVisibilityChain(bool visible, int num, bool rest);
     void setTeamAll(int team, int teamOwner, int skipFlagged);
 };
 static_assert(sizeof(wnPikminPikminTroopsManager) == 0x184, "Troops manager layout");

@@ -72,10 +72,7 @@ float soGroundModuleImpl::getRotateYForGrCollisionMatrix() {
     return m_moduleAccesser->getPostureModule().getRotYLr();
 }
 void soGroundModuleImpl::pause(bool p0) { m_pause = p0; }
-#pragma push
-#pragma opt_propagation off
 soGroundShapeImpl::CorrectKind soGroundModuleImpl::getCorrect(u32 index) { return (soGroundShapeImpl::CorrectKind)m_groundShapeArray->at(index).m_correctKind; }
-#pragma pop
 void soGroundModuleImpl::setCalcLineMove(bool calcLineMove, u32 index) { m_groundShapeArray->at(index).setCalcLineMove(calcLineMove); }
 void soGroundModuleImpl::setTargetLineCategory(grCollisionLine::CategoryMask targetLineCategory, u32 index) { setTargetLineCategory__17soGroundShapeImplFUc(&m_groundShapeArray->at(index), targetLineCategory); }
 void soGroundModuleImpl::setExclusiveLineAttr(short exclusiveLineAttr, u32 index) { m_groundShapeArray->at(index).setExclusiveLineAttr(exclusiveLineAttr); }
