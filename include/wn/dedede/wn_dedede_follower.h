@@ -117,6 +117,7 @@ public:
     virtual bool isCanInhaled();
     virtual bool isCanEat();
     virtual void onDeactivate();
+    virtual void notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4);
     virtual void notifyEventCollisionHit(float power, soCollisionAttackData* attackData, u32 index, int, soModuleAccesser* moduleAccesser, soCollisionLog* log);
     void had(int ownerTaskId, int nodeId, int teamNo);
     bool isPossibleDeadChange();
