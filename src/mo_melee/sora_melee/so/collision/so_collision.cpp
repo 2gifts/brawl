@@ -16,7 +16,7 @@ static inline clManager* getClManager() {
 // The log entry as this group sees it: an entry of a referenced log group lives in the manager.
 static inline soCollisionLog* getLogEntry(soCollisionGroupImpl& group, soCollisionLog* log) {
     if (group.isRefLogGroup() == true) {
-        return fn_27_5012C(getCollisionManager(), (u16)log->m_30); // TODO: clean up: m_30 is the entry's index in the manager
+        return soCollisionManagerGetLog(getCollisionManager(), (u16)log->m_30); // TODO: clean up: m_30 is the entry's index in the manager
     }
     return log;
 }
@@ -130,7 +130,7 @@ void soCollision::updatePastLog(bool isStop, u32 groupIndex) {
                 u16& frames = *(u16*)&past->m_life;
                 if (frames != 0 && --frames == 0) {
                     nw4r::ut::List_Remove(pastLogList, past);
-                    fn_27_50108(getCollisionManager(), past);
+                    soCollisionManagerFreeLog(getCollisionManager(), past);
                 }
             }
             past = next;
@@ -160,10 +160,10 @@ void soCollision::initPastLogAll(u32 keep) {
 
 void soCollision::invalidLog(soCollisionLog* collisionLog, u32 groupIndex) {
     if (getGroup(m_collisionGroupArray, groupIndex).isRefLogGroup() == true) {
-        collisionLog = fn_27_5012C(getCollisionManager(), (u16)collisionLog->m_30);
+        collisionLog = soCollisionManagerGetLog(getCollisionManager(), (u16)collisionLog->m_30);
     }
     nw4r::ut::List_Remove(getGroup(m_collisionGroupArray, groupIndex).m_refLogList, collisionLog);
-    fn_27_50108(getCollisionManager(), collisionLog);
+    soCollisionManagerFreeLog(getCollisionManager(), collisionLog);
 }
 
 // HYPOTHESIS: names (the map leaves both unnamed); they write the entry as the group sees it.
@@ -178,8 +178,6 @@ void soCollisionSetLogLife(soCollision* collision, soCollisionLog* collisionLog,
     log->m_life = life;
 }
 
-// TODO: clean up: still unnamed manager helper (allocates a log entry).
-extern "C" soCollisionLog* fn_27_500B8(soCollisionManager* manager);
 
 // HYPOTHESIS: the field at 0x4 is the team accessor of the owner (slot 0x10 gives the team number), not an int.
 class soCollisionTeamView {
@@ -192,12 +190,12 @@ public:
 // Records a hit by another collision's group into this group's past log.
 // NONMATCHING: register assignment of the values read from the other collision.
 void soCollision::addPastLog(soCollision* collision, u32 index, u32 groupIndex) {
-    soCollisionLog* log = fn_27_500B8(getCollisionManager());
+    soCollisionLog* log = soCollisionManagerAllocateLog(getCollisionManager());
     u8 situation = getGroup(collision->m_collisionGroupArray, index).m_situation;
     Vec3f zero(0.0f, 0.0f, 0.0f);
     int kind = collision->m_kind;
     s8 teamNo = (*(soCollisionTeamView**)&collision->m_indirectTeam)->getTeamNo();
-    u8 taskCategory = ((u8*)collision)[0x10];
+    u8 taskCategory = ((u8*)collision)[0x10]; // TODO: clean up: the category byte (see the constructor)
     int taskId = collision->m_taskId;
     *(int*)&log->_spacer[8] = getGroup(collision->m_collisionGroupArray, index).m_id; // TODO: clean up: name the group id field
     log->m_taskId = taskId;
@@ -318,7 +316,7 @@ bool soCollisionIsLogged(soCollision* collision, u32 index, soCollision* other, 
             ((u32)collision->m_taskId == (u32)past->m_taskId && collision->m_kind != past->m_kind)) {
             if (past->_42 == 1 && situation == 0 && collision->m_kind == past->m_kind) {
                 nw4r::ut::List_Remove(pastLogList, past);
-                fn_27_50108(getCollisionManager(), past);
+                soCollisionManagerFreeLog(getCollisionManager(), past);
             } else {
                 return true;
             }
@@ -326,4 +324,23 @@ bool soCollisionIsLogged(soCollision* collision, u32 index, soCollision* other, 
         past = next;
     }
     return false;
+}
+
+// Registers the collision for this frame's checks and recomputes each group's bounding box from its active primitives.
+void soCollision::addCheckList() {
+    soCollisionManagerAddCheckList(getCollisionManager(), this, m_kind);
+    int n = m_collisionGroupArray->size();
+    for (int i = 0; i < n; i++) {
+        newCollision* primitive = NULL;
+        soCollisionGroupImpl& group = getGroup(m_collisionGroupArray, i);
+        float* bbox = group.m_bbox;
+        bbox[0] = bbox[1] = bbox[2] = 3.4028235e38f;
+        bbox[3] = bbox[4] = bbox[5] = -3.4028235e38f;
+        nw4r::ut::List* list = &getGroup(m_collisionGroupArray, i).m_collisionList;
+        while ((primitive = (newCollision*)nw4r::ut::List_GetNext(list, primitive)) != NULL) {
+            if (primitive->m_isActive == true) {
+                primitive->updateBBox(bbox);
+            }
+        }
+    }
 }

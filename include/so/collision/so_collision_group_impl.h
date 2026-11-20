@@ -30,13 +30,14 @@ public:
     float m_posX;                     // 0x4C
     float m_unk50;                    // 0x50
     float m_posY;                     // 0x54
-    u8 unk58[0x70 - 0x58];
+    float m_bbox[6];                  // 0x58: bounding box of the active primitives (min xyz, max xyz)
     s16 m_logGroup;                   // 0x70
     u8 m_logGroupKey;                 // 0x72
     u8 unk73;
     u8 m_situation;                   // 0x74
 
-    void removeLog(nw4r::ut::List* list, bool free, bool all);
+    void removeLog(nw4r::ut::List* list, bool free, u32 all);
+    void addLog(soCollisionLog* log, bool check);
     void refLogGroup(int logGroup);
     void unRefLogGroup();
     bool isRefLogGroup();
@@ -62,22 +63,17 @@ inline soCollisionManager* getCollisionManager() {
     return g_soCollisionManager;
 }
 
-// TODO: clean up: soCollisionManager log-group helpers that are still unnamed (the manager's text range is not split).
-extern "C" soCollisionLog* fn_27_5012C(soCollisionManager* manager, u16 logIndex);
-extern "C" void fn_27_50108(soCollisionManager* manager, void* log);
-extern "C" u8 fn_27_501A4(soCollisionManager* manager, int logGroup, int* id);
-extern "C" void fn_27_502EC(soCollisionManager* manager, int logGroup);
-
 // A shared log group of the collision manager (0x34 bytes; the manager keeps an array of them at +0xA4).
 // HYPOTHESIS: layout from the reference and use counting below.
 struct soCollisionLogGroup {
     nw4r::ut::List m_logList;     // 0x00
     nw4r::ut::List m_pastLogList; // 0x0C
     nw4r::ut::List m_checkList;   // 0x18
-    u32 unk24;
-    u32 unk28_0 : 16;
-    u32 m_useCount : 15;          // 0x28
-    u32 unk28_31 : 1;
+    int m_groupId;                // 0x24: the group id of the first referencer
+    u32 m_index : 8;              // 0x28
+    u32 m_refCount : 8;
+    u32 m_useCount : 15;
+    u32 m_isLeaveFree : 1;        // release the logs when the last reference goes
     u8 unk2C[8];
 };
 
@@ -90,3 +86,16 @@ inline soCollisionLogGroup* getLogGroups() {
 inline soCollisionGroupImpl& getGroup(soArray<soCollisionGroup>* groups, u32 index) {
     return (soCollisionGroupImpl&)groups->at(index);
 }
+
+// soCollisionManager log helpers (so_collision_manager.cpp).
+// HYPOTHESIS: names; the map leaves them unnamed.
+// TODO: clean up: make these soCollisionManager members (so/collision/so_collision_manager.h).
+void soCollisionManagerAddCheckList(soCollisionManager* manager, soCollision* collision, int kind);
+void soCollisionManagerClearCheckList(soCollisionManager* manager);
+soCollisionLog* soCollisionManagerAllocateLog(soCollisionManager* manager);
+void soCollisionManagerFreeLog(soCollisionManager* manager, void* log);
+u32 soCollisionManagerGetLogIndex(soCollisionManager* manager, soCollisionLog* log);
+soCollisionLog* soCollisionManagerGetLog(soCollisionManager* manager, int index);
+u8 soCollisionManagerRefLogGroup(soCollisionManager* manager, int logGroup, int* groupId);
+void soCollisionManagerReleaseLogGroup(soCollisionManager* manager, int logGroup);
+void soCollisionManagerUnRefLogGroup(soCollisionManager* manager, int logGroup);
