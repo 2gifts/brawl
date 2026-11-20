@@ -408,9 +408,9 @@ struct Self {
 };
 
 extern "C" {
-void fn_27_3627C(void*, int);
-void fn_27_37880(void*, int, float, float);
-void fn_27_36768(void*, int, int);
+void initCheck__11soCollisionFUl(void*, int);
+void updateGroup__11soCollisionFffUl(void*, int, float, float);
+void updatePastLog__11soCollisionFbUl(void*, int, int);
 int getCollision__11soCollisionFUlUl(void*, int, int);
 void addCheckList__11soCollisionFv(void*);
 unsigned int update__21soCollisionSearchPartFfP16soModuleAccesserP25soCollisionShieldPartUnitP5Vec3fP5Vec3f(void*, int, int, void*, void*, float);
@@ -424,9 +424,9 @@ extern "C" void fn_27_4E670(Self* self, float a, float b) {
     int r27 = self->f28->fd8->f44->s9();
     int r29 = ((Counter*)((char*)self + 0x34))->s3();
     for (int i = 0; i < r29; i++) {
-        fn_27_3627C(self->b8, i);
-        fn_27_37880(self->b8, i, a, lbl_27_rodata_534);
-        fn_27_36768(self->b8, r27, i);
+        initCheck__11soCollisionFUl(self->b8, i);
+        updateGroup__11soCollisionFffUl(self->b8, i, a, lbl_27_rodata_534);
+        updatePastLog__11soCollisionFbUl(self->b8, r27, i);
     }
     if (self->fFC > 0) {
         if (self->f100 == 0) {
@@ -479,10 +479,10 @@ extern "C" s32 notifyEventCollisionSearchCheck__30soCollisionSearchEventObserver
 
 // TODO: clean up, give variables real names
 namespace jj_4EDC0 {
-extern "C" void fn_27_36510(void*);
+extern "C" void soCollisionResetLogTaskId__FP11soCollisionP14soCollisionLogUl(void*);
 
 extern "C" void fn_27_4EDC0(void* self) {
-    fn_27_36510(reinterpret_cast<u8*>(self) + 0xb8);
+    soCollisionResetLogTaskId__FP11soCollisionP14soCollisionLogUl(reinterpret_cast<u8*>(self) + 0xb8);
 }
 }
 

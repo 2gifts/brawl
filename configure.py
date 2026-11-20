@@ -6206,6 +6206,8 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/so/so_vtable_dt_ArrayNull_PC13acAnimCmdConv.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/ground/so_ground_tracer_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/situation/so_situation_module_impl.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/so/collision/so_collision.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/so/collision/so_collision_group.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/collision/so_collision_attack_part.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/collision/so_collision_attack_module_impl.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/collision/so_collision_hit_part.cpp"),

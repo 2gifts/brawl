@@ -386,7 +386,7 @@ extern "C" {
  extern const char __RTTI__6gfTask[];
  void* __dynamic_cast(void*, long, const void*, const void*, long);
  void* getLogList__11soCollisionFUl(void*, int);
- float fn_27_379A0(void*, int);
+ float getPosX__11soCollisionFUl(void*, int);
  soNullable* getCollisionAttackModule__23soExternalValueAccesserFP11StageObject(void*);
  void* getCollisionSearchModule__23soExternalValueAccesserFP11StageObject(void*);
  Mode* getGlowModule__23soExternalValueAccesserFP11StageObject(void*);
@@ -412,7 +412,7 @@ extern "C" void fn_27_496EC(Self* self) {
       value = ((Mode*)task)->slot26(posture->slot42(entry->arg24, entry->arg27), mode, value);
      }
      v = self->array->slot1(i)->value;
-     float other = fn_27_379A0(self->collection, i);
+     float other = getPosX__11soCollisionFUl(self->collection, i);
      self->handler->slot1(posture, entry, i, self->access, value, other, v);
     } else {
      self->handler->slot2(getCollisionSearchModule__23soExternalValueAccesserFP11StageObject(task), entry, i, self->access);

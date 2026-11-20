@@ -607,7 +607,7 @@ struct Object {
     char target[4];
 };
 
-extern "C" void fn_27_37A64(void*, void*, void*);
+extern "C" void soCollisionAddAbsolute__FP11soCollisionUlPv(void*, void*, void*);
 
 extern "C" void fn_27_3AF7C(
     Object* self,
@@ -625,7 +625,7 @@ extern "C" void fn_27_3AF7C(
         data->flags = flags;
         data->index = index;
         data->position = *position;
-        fn_27_37A64(
+        soCollisionAddAbsolute__FP11soCollisionUlPv(
             self->target,
             self->provider->get(index)->handle,
             &self->provider->get(index)->value
@@ -641,9 +641,9 @@ extern void* g_soCollisionManager;
 void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 void* __ct__18soCollisionManagerFv(void*);
 s32 getSituation__11soCollisionFi(s32);
-void fn_27_3627C(void*, s32);
-void fn_27_37880(void*, s32, float, float);
-void fn_27_36768(void*, s32, s32);
+void initCheck__11soCollisionFUl(void*, s32);
+void updateGroup__11soCollisionFffUl(void*, s32, float, float);
+void updatePastLog__11soCollisionFbUl(void*, s32, s32);
 void* getCollision__11soCollisionFUlUl(void*, s32, s32, void*);
 u32 fn_27_389E0(void*, s32, s32, s32, s32, u32, u32, float);
 void addCheckList__11soCollisionFv(void*);
@@ -704,9 +704,9 @@ extern "C" void fn_27_3B1A8(void* self, void* vec1, s32 index, void* vec2, float
         s32 cnt = (*(Object_vptr_0**)(base + 0x64))->slot3();
         i = 0;
         while (i < cnt) {
-            fn_27_3627C(base + 0x68, i);
-            fn_27_37880(base + 0x68, i, *(float*)vec1, f1);
-            fn_27_36768(base + 0x68, val, i);
+            initCheck__11soCollisionFUl(base + 0x68, i);
+            updateGroup__11soCollisionFffUl(base + 0x68, i, *(float*)vec1, f1);
+            updatePastLog__11soCollisionFbUl(base + 0x68, val, i);
             i++;
         }
         cnt = (*(Object_vptr_0**)(base + 0x30))->slot3();
@@ -915,7 +915,7 @@ int fn_27_3BAFC(soCollisionAttackModuleImpl* self, Access* accesser, void* task,
 
 // TODO: clean up, give variables real names
 namespace jj_40784 {
-extern "C" void fn_27_37A14(void* p, u32 index);
+extern "C" void initAbsolute__11soCollisionFUl(void* p, u32 index);
 
 struct Elem {
     unsigned char pad[0x64];
@@ -993,7 +993,7 @@ extern "C" void fn_27_40784(Mod* self, int a1, int a2, Params* p) {
     }
     int n = self->m64->size();
     for (i = 0; i < n; i++) {
-        fn_27_37A14(&self->m68, i);
+        initAbsolute__11soCollisionFUl(&self->m68, i);
     }
 }
 }

@@ -238,6 +238,15 @@ mo_melee/sora_melee/so/situation/so_situation_module_impl.cpp:
 	.text       start:0x0003513C end:0x00035C3C
 	.data       start:0x00003260 end:0x000033F8
 
+mo_melee/sora_melee/so/collision/so_collision.cpp:
+	.text       start:0x00035C3C end:0x00037C80
+	.rodata     start:0x00000478 end:0x00000488
+	.data       start:0x000033F8 end:0x00003418
+
+mo_melee/sora_melee/so/collision/so_collision_group.cpp:
+	.text       start:0x00037C80 end:0x00038550
+	.rodata     start:0x00000488 end:0x00000490
+
 mo_melee/sora_melee/so/collision/so_collision_attack_part.cpp:
 	.text       start:0x00038550 end:0x00039590
 	.rodata     start:0x00000490 end:0x00000498
