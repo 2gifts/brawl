@@ -80,11 +80,11 @@ FAT_VF_CHECK_LAYOUT(offsetof(PF_DTA, pattern) == 0x1C);
 // One entry of the per-FAT-type value table (lbl_804169B0); the third word is
 // what VFiPFFAT_GetValueOfEOC2 returns.
 typedef struct PF_FAT_VALUES {
-    u32 unk0;
-    u32 unk4;
+    u32 bad;
+    u32 eoc1;
     u32 eoc2;
-    u32 unkC;
-    u32 unk10;
+    u32 fat0_mask;
+    u32 fat1;
 } PF_FAT_VALUES;
 extern const PF_FAT_VALUES lbl_804169B0[3];
 
@@ -129,25 +129,22 @@ extern VFTimeStampCallback lbl_805A1224;
 
 // Functions of this library that our symbols do not name yet. HYPOTHESIS names
 // from the Wii Sports VF headers, by address order.
-int fn_803A962C(int c);                                    // VFipf_toupper
-void* fn_803A9644(void* dst, const void* src, u32 length); // VFipf_memcpy
-void* fn_803A976C(void* dst, int c, u32 length);           // VFipf_memset
-u32 fn_803A9864(const s8* s);                              // VFipf_strlen
-s8* fn_803A9884(s8* dst, const s8* src);                   // VFipf_strcpy
-s32 fn_803A98A8(u8* s1, u8* s2);                           // VFipf_strcmp
-s32 fn_803A98E0(u8* s1, u8* s2, u32 length);               // VFipf_strncmp
+int VFipf_toupper(int c);                                    // VFipf_toupper
+void* VFipf_memcpy(void* dst, const void* src, u32 length); // VFipf_memcpy
+void* VFipf_memset(void* dst, int c, u32 length);           // VFipf_memset
+u32 VFipf_strlen(const s8* s);                              // VFipf_strlen
+s8* VFipf_strcpy(s8* dst, const s8* src);                   // VFipf_strcpy
+s32 VFipf_strcmp(u8* s1, u8* s2);                           // VFipf_strcmp
+s32 VFipf_strncmp(u8* s1, u8* s2, u32 length);               // VFipf_strncmp
 int VFiPFCODE_Combine_Width(int oem_width, int uni_width);
 void VFiPFCODE_Divide_Width(unsigned int width, short* oem_width, short* uni_width);
-u16 fn_803A9948(const u8* buf);                            // VFiPF_GET_LE_U16
-u32 fn_803A9A78(struct PF_STR* p_str);                     // VFiPFSTR_GetCodeMode
-void fn_803A9A80(struct PF_STR* p_str, s8* p_local);       // VFiPFSTR_SetLocalStr
-const s8* fn_803A9AA8(struct PF_STR* p_str, u32 target);   // VFiPFSTR_GetStrPos
-s32 fn_803A9FF8(const u16* s);
-u16* fn_803AA01C(u16* dst, const u16* src);
-s32 fn_803AA040(u16* s1, u16* s2, s32 length);
-s32 fn_803AB6EC(struct PDM_DISK* p_disk, struct PDM_DISK* lp_disk);        // VFipdm_disk_do_get_permission
-s32 fn_803AB8C4(struct PDM_INIT_DISK* p_init_disk_tbl, struct PDM_DISK** pp_disk); // VFipdm_disk_open_disk
-s32 fn_803ABA30(struct PDM_DISK* p_disk);                                  // VFipdm_disk_close_disk
+u16 VFiPF_GET_LE_U16(const u8* buf);                            // VFiPF_GET_LE_U16
+s32 VFipf_w_strlen(const u16* s);
+u16* VFipf_w_strcpy(u16* dst, const u16* src);
+s32 VFipf_w_strncmp(u16* s1, u16* s2, s32 length);
+s32 VFipdm_disk_do_get_permission(struct PDM_DISK* p_disk, struct PDM_DISK* lp_disk);        // VFipdm_disk_do_get_permission
+s32 VFipdm_disk_open_disk(struct PDM_INIT_DISK* p_init_disk_tbl, struct PDM_DISK** pp_disk); // VFipdm_disk_open_disk
+s32 VFipdm_disk_close_disk(struct PDM_DISK* p_disk);                                  // VFipdm_disk_close_disk
 s32 fn_803B11A4(struct PF_VOLUME* p_vol, struct PF_STR* p_path);
 s32 fn_803B161C(PF_DTA* p_dta);
 s32 VFiPFDIR_p_fsfirst(struct PF_VOLUME* p_vol, struct PF_STR* p_path, s8 attr, PF_DTA* p_dta);
