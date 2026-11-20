@@ -175,3 +175,7 @@ void wnLucarioAuraBallStatusUniqProcessShoot::applyShoot(soModuleAccesser* acc) 
     pos.m_y = y + wobbleY * scale;
     posture.setPos(&pos);
 }
+
+wnLucarioAuraBallStatusUniqProcessStart g_wnLucarioAuraBallStatusUniqProcessStart;
+wnLucarioAuraBallStatusUniqProcessCharge g_wnLucarioAuraBallStatusUniqProcessCharge;
+wnLucarioAuraBallStatusUniqProcessShoot g_wnLucarioAuraBallStatusUniqProcessShoot;

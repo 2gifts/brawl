@@ -100,3 +100,5 @@ extern "C" void fn_27_1DCB10(void) {
 }
 }
 
+// HYPOTHESIS: local name of the weapon value accesser instance (as g_ykValueAccesser).
+wnValueAccesser g_wnValueAccesser;

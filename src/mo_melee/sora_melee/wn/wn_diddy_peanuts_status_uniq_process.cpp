@@ -12,6 +12,17 @@ public:
     virtual void exitStatus(soModuleAccesser* moduleAccesser, int nextStatus);
 };
 
+// TODO: clean up - placeholder pair type and names (the same pair of statics as so_sinit_pair_*.cpp, from a header this
+// unit includes); replace them with the real static object type and names once that header is identified.
+struct SinitPair {
+    s32 m_a;
+    s32 m_b;
+    SinitPair(s32 a, s32 b) : m_a(a), m_b(b) {}
+};
+
+SinitPair lbl_27_bss_82A8(0xFF, 0);
+SinitPair lbl_27_bss_82B0(0xFF, 1);
+
 wnDiddyPeanutsStatusUniqProcess g_wnDiddyPeanutsStatusUniqProcess;
 
 void wnDiddyPeanutsStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser) {

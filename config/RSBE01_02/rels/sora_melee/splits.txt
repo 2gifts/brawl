@@ -11344,6 +11344,7 @@ mo_melee/sora_melee/wn/wn_module_accesser_build_data.cpp:
 mo_melee/sora_melee/wn/wn_value_accesser.cpp:
 	.text       start:0x001DC8D8 end:0x001DCB6C
 	.ctors      start:0x00000260 end:0x00000264
+	.bss        start:0x000050A0 end:0x000050B8
 
 mo_melee/sora_melee/wn/wn_info.cpp:
 	.text       start:0x001DCB6C end:0x001DCC10
@@ -13789,6 +13790,8 @@ mo_melee/sora_melee/wn/wn_diddy_gun.cpp:
 mo_melee/sora_melee/wn/wn_diddy_peanuts_status_uniq_process.cpp:
 	.text       start:0x003684DC end:0x00368968
 	.ctors      start:0x00000484 end:0x00000488
+	.data       start:0x00091F00 end:0x00091F78
+	.bss        start:0x000082A8 end:0x000082C8
 
 mo_melee/sora_melee/ft/ft_pokemon_stamina_module.cpp:
 	.text       start:0x00368968 end:0x00368C08
@@ -14091,6 +14094,8 @@ mo_melee/sora_melee/wn/wn_lucario_aura_ball.cpp:
 mo_melee/sora_melee/wn/wn_lucario_aura_ball_status_uniq_process.cpp:
 	.text       start:0x003A0694 end:0x003A134C
 	.ctors      start:0x000004D4 end:0x000004D8
+	.data       start:0x0009BEC8 end:0x0009C660
+	.bss        start:0x000089D8 end:0x00008A08
 
 mo_melee/sora_melee/ft/ft_ike_transactor.cpp:
 	.text       start:0x003A134C end:0x003A1514
