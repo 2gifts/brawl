@@ -713,7 +713,7 @@ void itSpringCustomizer::onDestruct(BaseItem* item) {
 }
 
 // Shown again when the status changes to 2 (except from statuses 2 and 6).
-void itWarioBikeCustomizer::onNotifyEventChangeStatus(BaseItem* item, int prevStatus, int status, soStatusData*, soModuleAccesser*) {
+void itChewingCustomizer::onNotifyEventChangeStatus(BaseItem* item, int prevStatus, int status, soStatusData*, soModuleAccesser*) {
     if (prevStatus == 2) {
         return;
     }
@@ -1031,3 +1031,52 @@ void itFireFlowerCustomizer::onAction(BaseItem* item, u32 action, float rate) {
     }
 }
 
+
+// itManager (it/it_manager.h pulls in the shared customizer header, whose classes this unit declares itself).
+class itManager {
+public:
+    static itManager* getInstance();
+};
+
+// HYPOTHESIS: the default layer type depends on the item kind; a few kinds defer to a mode value inside itManager.
+int itCustomizerInterface::onGetLayerType(BaseItem* item) {
+    switch (item->m_kind) {
+    case 0x0:
+    case 0x4:
+    case 0xC:
+    case 0x17:
+    case 0x1A:
+    case 0x28:
+    case 0x32:
+    case 0x3A:
+    case 0x3F:
+    case 0x40:
+    case 0x41:
+    case 0x42:
+    case 0x45:
+    case 0x46:
+    case 0x47:
+    case 0x49:
+        return 3;
+    case 0xA0:
+        return 5;
+    case 0x4B:
+    case 0x4C:
+        return 0;
+    case 0x6E:
+    case 0x76:
+    case 0x77:
+    case 0x86:
+    case 0x87:
+        {
+            int* mgr = reinterpret_cast<int*>(reinterpret_cast<u8*>(itManager::getInstance()));
+            int layer = 2;
+            if (mgr[0x54 / 4] == 0x24) {
+                layer = 0;
+            }
+            return layer;
+        }
+    default:
+        return 2;
+    }
+}
