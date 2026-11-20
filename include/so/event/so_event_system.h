@@ -77,7 +77,7 @@ public:
     // family's disabled units (Samus's bomb) emits them the same way.
     soEventUnitNull() __attribute__((never_inline)) { }
     soEventUnitNull(s16, s16) __attribute__((never_inline)) { }
-#elif defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ARTICLE_BUILDER_CTOR_INLINE) // the bow units expand the empty units
+#elif defined(WN_MARIO_FIREBALL_UNIT) && !defined(WN_ARTICLE_BUILDER_CTOR_INLINE) && !defined(WN_POKE_FUSHIGISOU_SEED_UNIT) // the bow units (and the Pokemon seed unit) expand the empty units
     soEventUnitNull();
     soEventUnitNull(s16, s16);
 #if defined(WN_ARTICLE_BUILDER_DTOR_IN_CLASS) || defined(WN_EVENT_UNIT_DTOR_INLINE)
@@ -142,7 +142,8 @@ public:
 // BYTES: fighter RELs call sora_melee's global constructor/destructor of each instantiation (and use its vtable);
 // with FT_REL_LINK_EXTERN these are declarations only, so the unit emits no weak copy (the destructor
 // is then the key function and the vtable is not emitted either).
-#ifdef FT_REL_LINK_EXTERN
+// The Pokemon seed article unit expands the units its inside event builder owns (WN_POKE_FUSHIGISOU_SEED_UNIT).
+#if defined(FT_REL_LINK_EXTERN) && !defined(WN_POKE_FUSHIGISOU_SEED_UNIT)
     soEventUnitWithWorkArea(s16 mgrId, s16 p2);
 #ifdef WN_EVENT_UNIT_DTOR_INLINE
     // The unit's inside event builder destructor expands the unit destructors (Samus's articles in sora_melee).

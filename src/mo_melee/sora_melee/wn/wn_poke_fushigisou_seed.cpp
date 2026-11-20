@@ -1,12 +1,88 @@
+#define WN_STATUS_MODULE_KIND_COUNT_ZERO // BYTES: the status module is built with a status kind count of 0 (ft_builder_status.h)
+#define WN_ANIM_CMD_UNIQ_STACK_OF_UNIT0 // the uniq animation command thread has the stack capacity of thread 0 (wn_anim_cmd_full_property.h)
+#define WN_ZELDA_BUILDER_CTOR_WEAK // the module accesser builder constructor is a weak symbol of this unit
+#define WN_EVENT_UNIT_DTOR_INLINE // BYTES: the inside event builder destructor expands the event unit destructors
+#define SO_EVENT_OBSERVER_MANAGE_S16 // the observer registration keeps the manage id as the s16 the article returns (so_event_presenter.h)
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR // the kinetic builder destructor this unit owns expands the empty mediator destructor
+#define SO_OTHER_ANIM_CTOR // BYTES: the sora_melee motion builder constructs and destroys its other-animation slot
+#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: activate copies the Vec3f position as an aggregate (word moves), see mt_vector.h
+#define FT_MODULE_BUILDER
+#define WN_POKE_FUSHIGISOU_SEED_UNIT // the article unit mode of this source (the real class and its builders)
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
+#define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
+#define WN_ZELDA_LIGHTING_BOW_UNIT // the member layout and constructor of the module builder of this unit mode
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_STATUS_NO_TAIL
+#define WN_TRANSITION_CTOR_INLINE
+#define FT_POOL_ROOT_NONPOLYMORPHIC // BYTES: without it the hierarchy destructor is never_inline
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
+#define WN_ANIMCMD_PRESENTER_LOCAL_STORE // the interpreters' presenters take the list from the lookup as a value
+#define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk
+#define FT_REL_LINK_EXTERN
+#define SO_NULLABLE_INLINE_CTOR
+#include <wn/wn_module_accesser_builder.h>
 #include <wn/poke/wn_poke_fushigisou_seed.h>
 #include <wn/wn_class_info_impl.h>
 #include <so/so_module_accesser.h>
 #include <so/status/so_status_module_impl.h>
 #include <so/so_value_accesser.h>
 #include <mt/mt_prng.h>
+#include <wn/wn_activate_desc.h>
+#include <wn/wn_kinetic_energy_normal.h>
+#include <so/work/so_work_manage_module_impl.h>
+
+// BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
+inline soTeam::~soTeam() { }
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soResourceIdAccesser::~soResourceIdAccesser() { }
+
+wnPokeFushigisouSeed::wnPokeFushigisouSeed(s32 articleId, const wnArticleBuildInfo& info, const wnPokeFushigisouSeedData* data) :
+    wnWeaponBuilder<wnPokeFushigisouSeedModuleAccesserBuildConfig>(
+        "PokeFushigisouSeed", articleId, info,
+        wnModuleAccesserBuildData(0x4a, data, info.getHeapModule()->getInstanceHeap(),
+            info.getHeapModule()->getNWModelInstanceHeap(), info.getHeapModule()->getNWMotionInstanceHeap(),
+            static_cast<u8>(data->m_resGroupNo), -1, &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    Weapon::deactivate(false);
+}
+
+template class wnExtendParamAccesser<3999, 1, 23999, 1, 0, 0>;
+
+// The weak builders this unit owns in the link order (the other units with the same configurations reuse them).
+typedef wnPokeFushigisouSeedModuleAccesserBuildConfig SfBC;
+template soInsideEventManageModuleBuilder<SfBC::InsideEventManageModuleBuildConfig, SfBC::InsideEventManageModuleTypes>::soInsideEventManageModuleBuilder();
+// BYTES: the original addresses each singleton's destructor-chain record by its own address (no pooled anchor).
+#pragma push
+#pragma pool_data off
+template soMotionModuleBuilder<SfBC::MotionModuleBuildConfig>::soMotionModuleBuilder(soModuleAccesser*, void*);
+#pragma pop
+template soStatusModuleBuilder<SfBC::StatusModuleBuildConfig>::soStatusModuleBuilder(soModuleAccesser*, const soStatusData*, void*);
+
+#define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnPokeFushigisouSeedModuleAccesserBuildConfig
+#include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
+
 
 // Registers the Pokemon seed article class (kind 74) in the class info table during static initialization.
 wnClassInfoImpl<74, wnPokeFushigisouSeed, wnPokeFushigisouSeedData> g_wnPokeFushigisouSeedClassInfo;
+
+// Launches the seed straight up at the given speed; the kind flag selects the Kirby variant of the effect.
+void wnPokeFushigisouSeed::activate(int founderTaskId, int team, Vec3f* position, int unk, int kind, float lr, float speed) {
+    wnActivateDesc desc(founderTaskId, 0xFFFF, 0xFFFF, 0xFFFF, -1, -1, 0, 0, *position, lr, team, 0, 5, 0x80, 0, 0x35F, 0);
+    desc.flagsHigh = 1;
+    desc.flagsMidHigh = 0;
+    desc.flagsMidLow = 1;
+    desc.flagsLow = 0;
+    desc.unk4DHigh = 0;
+    Weapon::activate(&desc);
+    m_moduleAccesser->getWorkManageModule().setFlag(kind, 0x12000003);
+    m_moduleAccesser->getStatusModule().changeStatusForce(0, m_moduleAccesser);
+    wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*m_moduleAccesser->getKineticModule().getEnergy(0));
+    energy.m_speed = Vec2f(0.0f, speed);
+    updateNodeSRT();
+}
 
 void wnPokeFushigisouSeed::onDeactivate() { }
 
@@ -43,127 +119,5 @@ void wnPokeFushigisouSeed::notifyEventChangeStatus(int statusKind, int prevStatu
         break;
     }
     }
-}
-
-// TODO: clean up, give variables real names
-namespace jj_36EE34 {
-extern "C" void __dl__FPv(void*);
-
-extern "C" void* __dt__33wnPokeFushigisouSeedParamAccesserFv(void* ptr, int size) {
-    if (ptr != 0 && size > 0)
-        __dl__FPv(ptr);
-    return ptr;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_36EE74 {
-extern "C" void* fn_27_36EE74(void* self) {
-    return reinterpret_cast<u8*>(self) + 0x428;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_3700F0 {
-extern "C" void* fn_27_3700F0(void* self) {
-    return reinterpret_cast<u8*>(self) + 0x1c;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_3700F8 {
-extern "C" void* fn_27_3700F8(void* self) {
-    return reinterpret_cast<u8*>(self) + 0x80;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_370100 {
-extern "C" void* fn_27_370100(void* self) {
-    return reinterpret_cast<u8*>(self) + 0xb8;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_37057C {
-typedef unsigned int u32;
-
-struct Work;
-typedef void (*WorkMethod)(Work*);
-
-extern "C" WorkMethod __vt__19soGeneralWorkSimple[];
-
-struct VirtualBase {
-    u32 prefix[2];
-};
-
-struct VirtualWork : VirtualBase {
-    virtual void method0();
-    virtual void method1();
-    virtual void method2();
-    virtual void method3();
-    virtual void method4();
-    virtual void method5();
-    virtual void method6();
-    virtual void method7();
-    virtual void method8();
-    virtual void method9();
-    virtual void method10();
-    virtual void method11();
-    virtual void method12();
-    virtual void method13();
-    virtual void method14();
-    virtual void method15();
-    virtual void method16();
-    virtual void method17();
-    virtual void method18();
-    virtual void method19();
-    virtual void method20();
-    virtual void method21();
-    virtual void method22();
-    virtual void method23();
-    virtual void method24();
-    virtual void reset();
-    virtual void method25();
-};
-
-struct Work {
-    WorkMethod* secondary;
-    bool isNull;
-    WorkMethod* vtable;
-    void* owner;
-    u32 intCount;
-    void* ints;
-    u32 floatCount;
-    void* floats;
-    u32 flagCount;
-};
-
-struct Object {
-    unsigned char data[0x44];
-    Work work;
-};
-
-extern "C" Object* fn_27_37057C(Object* self) {
-    Work* work = &self->work;
-    work->isNull = false;
-    work->owner = self;
-    work->vtable = __vt__19soGeneralWorkSimple;
-    work->secondary = __vt__19soGeneralWorkSimple + 2;
-    work->intCount = 10;
-    work->ints = self->data + 0x28;
-    work->floatCount = 6;
-    work->floats = self->data + 0x40;
-    work->flagCount = 1;
-    reinterpret_cast<VirtualWork*>(work)->reset();
-    return self;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_370608 {
-extern "C" void* fn_27_370608(void* self) {
-    return reinterpret_cast<u8*>(self) + 0x44;
-}
 }
 
