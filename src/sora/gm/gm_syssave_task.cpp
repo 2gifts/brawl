@@ -79,10 +79,10 @@ struct Data28 {
 };
 
 extern "C" {
-extern unsigned char lbl_8042E8FC[0x64];
-extern int lbl_805A00F0;
-extern int lbl_805A00F4;
-extern Data28** g_GameGlobal;
+extern "C" unsigned char lbl_8042E8FC[0x64];
+extern "C" int lbl_805A00F0;
+extern "C" int lbl_805A00F4;
+extern "C" Data28** g_GameGlobal;
 
 void __dl__FPv(void*);
 void __dt__6gfTaskFv(void*, int);
@@ -122,11 +122,11 @@ int fn_80030DEC(Obj*, int);
 int fn_80030F2C(Obj*);
 void fn_8004EEC8(int, int);
 }
-extern int g_GameGlobal;
-extern int lbl_8059CE48;
-extern int lbl_805A00F0;
-extern Obj* lbl_805A00F8;
-extern int lbl_805A00FC;
+extern "C" int g_GameGlobal;
+extern "C" int lbl_8059CE48;
+extern "C" int lbl_805A00F0;
+extern "C" Obj* lbl_805A00F8;
+extern "C" int lbl_805A00FC;
 
 // TODO: clean up, give variables real names
 extern "C" void fn_8005A238(gfTask* t) {
@@ -183,10 +183,10 @@ int fn_80030F2C(Obj*);
 int fn_80030F58(Obj*);
 void fn_8004EEC8(int, int);
 }
-extern int g_GameGlobal;
-extern int lbl_8059CE48;
-extern gfTask* lbl_805A00F0;
-extern Obj* lbl_805A00F8;
+extern "C" int g_GameGlobal;
+extern "C" int lbl_8059CE48;
+extern "C" gfTask* lbl_805A00F0;
+extern "C" Obj* lbl_805A00F8;
 
 // TODO: clean up, give variables real names
 extern "C" void fn_8005A470(Arg* arg) {
@@ -296,11 +296,11 @@ extern "C" void fn_8005A470(Arg* arg) {
 namespace jj_8005A0E4 {
 
 extern "C" void __ct__6gfTaskFPCcQ26gfTask8Categoryiib(void*, const char*, int, int, int, bool);
-extern char lbl_8042E8A8[];
-extern char lbl_8042E8FC[];
-extern int lbl_8059CE48;
-extern gfTask* lbl_805A00F0;
-extern gfTask* lbl_805A00F4;
+extern "C" char lbl_8042E8A8[];
+extern "C" char lbl_8042E8FC[];
+extern "C" int lbl_8059CE48;
+extern "C" gfTask* lbl_805A00F0;
+extern "C" gfTask* lbl_805A00F4;
 
 extern "C" gfTask* create__13gmSysSaveTaskFi(int heap) {
     if (lbl_805A00F4) return 0;

@@ -104,7 +104,7 @@ namespace jj_8001ABE4 {
 extern "C" void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int, unsigned long);
 extern "C" void gfMemFill__FPvUcUl(void*, unsigned char, unsigned long);
 
-extern void* lbl_8059FFC8;
+extern "C" void* lbl_8059FFC8;
 
 struct Header {
     u16 count;
@@ -157,7 +157,7 @@ public:
 };
 
 extern "C" {
-extern gfHeapManager* lbl_8059FFC8;
+extern "C" gfHeapManager* lbl_8059FFC8;
 
 // TODO: clean up, give variables real names
 void fn_8001AC98(int unused, void* arg1) {

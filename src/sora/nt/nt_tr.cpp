@@ -255,7 +255,7 @@ extern "C" void fn_80143B48(void* arg) {
 namespace jj_8014615C {
 extern "C" void netReport__FPCce(const char*, ...);
 extern "C" void *memcpy(void *, const void *, unsigned long);
-extern char lbl_8045E7E8[];
+extern "C" char lbl_8045E7E8[];
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" int fn_8014615C(char *base, int idx, char *data, int len) {
@@ -480,14 +480,14 @@ int fn_800C8524();
 void fn_800D1314(void*, u8);
 void fn_800D55E8(void*);
 void fn_80146878(void*, int);
-extern char* lbl_805A03A8;
-extern char* lbl_805A0434;
-extern char* g_muWifiInterfaceTask;
-extern char lbl_8045E7E8[];
-extern unsigned char lbl_8049EC48[];
-extern u8 lbl_8059E744;
-extern u8 lbl_8059E745;
-extern char g_Network[];
+extern "C" char* lbl_805A03A8;
+extern "C" char* lbl_805A0434;
+extern "C" char* g_muWifiInterfaceTask;
+extern "C" char lbl_8045E7E8[];
+extern "C" unsigned char lbl_8049EC48[];
+extern "C" u8 lbl_8059E744;
+extern "C" u8 lbl_8059E745;
+extern "C" char g_Network[];
 }
 
 struct TopBit { u8 f : 1; u8 rest : 7; };

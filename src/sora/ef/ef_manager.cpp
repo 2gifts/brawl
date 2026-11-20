@@ -400,7 +400,7 @@ MemoryManager::~MemoryManager() { }
 // TODO: clean up, give variables real names
 namespace jj_8005B6F0 {
 
-extern s32 g_efScreen;
+extern "C" s32 g_efScreen;
 
 extern "C" {
 void* fn_801647B4();
@@ -566,12 +566,12 @@ void fn_8005F668(void*);
 void setIdentity__6MatrixFv(void*);
 }
 
-extern float lbl_805A18EC;
-extern float lbl_805A1900;
-extern float lbl_805A1904;
-extern float lbl_805A1908;
-extern void* g_gfSceneRoot;
-extern void* g_ecMgr;
+extern "C" float lbl_805A18EC;
+extern "C" float lbl_805A1900;
+extern "C" float lbl_805A1904;
+extern "C" float lbl_805A1908;
+extern "C" void* g_gfSceneRoot;
+extern "C" void* g_ecMgr;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8005B838(Self* self, int arg1) {
@@ -675,7 +675,7 @@ extern "C" void* fn_8005C5B0(void* arg0, int arg1) {
 namespace jj_8005C5F0 {
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 extern "C" void* fn_8005AD3C(void*);
-extern void* lbl_805A0110;
+extern "C" void* lbl_805A0110;
 
 // TODO: clean up, give variables real names
 extern "C" void fn_8005C5F0() {

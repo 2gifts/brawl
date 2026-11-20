@@ -381,7 +381,7 @@ struct Context {
     unsigned char active;
     unsigned char empty;
 };
-extern const float lbl_805A1CA8;
+extern "C" const float lbl_805A1CA8;
 // TODO: clean up, give variables real names
 extern "C" void fn_80095990(Context* self, int* __restrict count) {
     switch (self->reverse) {
@@ -442,8 +442,8 @@ struct Self {
 
 extern "C" void fn_8009A8EC(Obj*, Obj*);
 extern "C" void fn_8009ACA0(Obj*, Obj*);
-extern float lbl_805A1C98;
-extern float lbl_805A1C9C;
+extern "C" float lbl_805A1C98;
+extern "C" float lbl_805A1C9C;
 
 // TODO: clean up, give variables real names
 extern "C" void fn_8008AD64(Self* self) {
@@ -530,8 +530,8 @@ extern "C" void fn_80092250(char* self) {
 
 namespace jj_80091F28 {
 
-extern const float lbl_805A1CA8;
-extern const float lbl_805A1CDC;
+extern "C" const float lbl_805A1CA8;
+extern "C" const float lbl_805A1CDC;
 
 struct Node {
     char pad0[0x34];
@@ -661,10 +661,10 @@ struct ResNodeData {
     s32 n10;
 };
 
-extern GlobalMgrRef lbl_8049DEC8;
-extern char lbl_8059DBFA;
-extern char lbl_8059DBFC;
-extern const f32 lbl_805A1C98;
+extern "C" GlobalMgrRef lbl_8049DEC8;
+extern "C" char lbl_8059DBFA;
+extern "C" char lbl_8059DBFC;
+extern "C" const f32 lbl_805A1C98;
 
 extern "C" {
 void* fn_8008653C(void* mgr, Self* self, char* name);
@@ -1025,8 +1025,8 @@ int fn_8008F230(Object*);
 void fn_80095990(Object*, int*);
 void fn_801EC158(void*);
 void fn_801EC868(void*, void*, float, float, float);
-extern u8 lbl_8059DC01, lbl_8059DC02, lbl_8059DC03, lbl_8059DC04, lbl_8059DC05, lbl_8059DC06, lbl_8059DC07;
-extern const float lbl_805A1CA8;
+extern "C" u8 lbl_8059DC01, lbl_8059DC02, lbl_8059DC03, lbl_8059DC04, lbl_8059DC05, lbl_8059DC06, lbl_8059DC07;
+extern "C" const float lbl_805A1CA8;
 }
 static inline void clearObject(Object* o) {
     for (int i = 0; i < o->count; i++) o->nodes[i]->marked = 0;
@@ -1212,8 +1212,8 @@ extern "C" void* getArray2ndaryController__11phInterfaceFv(void*);
 extern "C" void delete2ndaryWorld__11phInterfaceFv(void*);
 extern "C" void delete2ndaryController__11phInterfaceFv(void*);
 extern "C" void deallocateChunk__14hkThreadMemoryFPvii(void*, void*, unsigned int, int);
-extern void* lbl_8049DEC8[3];
-extern void* s_instance__14hkThreadMemory;
+extern "C" void* lbl_8049DEC8[3];
+extern "C" void* s_instance__14hkThreadMemory;
 struct Mgr { char pad[0x58]; void* f58; };
 struct Obj { char pad[0x1fc]; void** data; int size; };
 struct Array {

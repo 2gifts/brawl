@@ -392,7 +392,7 @@ struct Entry {
     int (*f4)(void*);
 };
 
-extern Entry lbl_804090F0[];
+extern "C" Entry lbl_804090F0[];
 
 struct Self {
     char pad[8];
@@ -456,10 +456,10 @@ void fn_800B5854(MuObject* obj, int a, int b, int c, int d);
 void Pushback__Q34nw4r3g3d6ScnMdlFPvPvPc(void*, void*, char*);
 }
 
-extern char lbl_8059E518[8];
-extern nw4r::g3d::ScnMdl* lbl_805A030C;
-extern float lbl_805A2728;
-extern float lbl_805A2740;
+extern "C" char lbl_8059E518[8];
+extern "C" nw4r::g3d::ScnMdl* lbl_805A030C;
+extern "C" float lbl_805A2728;
+extern "C" float lbl_805A2740;
 
 class VCall {
 public:

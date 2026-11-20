@@ -229,7 +229,7 @@ extern "C" void fn_80067B24(Vec3* arg0, Seg* arg1, Seg* arg2, f32* arg3, s32 arg
 // TODO: clean up, give variables real names
 namespace jj_80065C98 {
 class ecMgr;
-extern ecMgr* g_ecMgr;
+extern "C" ecMgr* g_ecMgr;
 
 extern "C" void* __nwa__FUlQ25Heaps8HeapType(unsigned long, int);
 extern "C" void* __construct_new_array(void*, void (*)(), void*, unsigned long, int);
@@ -238,8 +238,8 @@ extern "C" int fn_8005F79C(ecMgr*);
 extern "C" void fn_80065E60();
 extern "C" void fn_80065BF8();
 
-extern const float lbl_805A1990;
-extern const float lbl_805A1994;
+extern "C" const float lbl_805A1990;
+extern "C" const float lbl_805A1994;
 
 struct Vec3f {
     float x, y, z;

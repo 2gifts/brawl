@@ -172,10 +172,10 @@ extern "C" int fn_800FBFDC(State* self) {
 namespace jj_800FBC38 {
 
 struct Cfg { const char* name; u8 a; u8 b; u8 c; };
-extern Cfg lbl_805A26E8;
-extern char lbl_8059E4C8;
-extern const float lbl_805A26F0;
-extern const float lbl_805A26F4;
+extern "C" Cfg lbl_805A26E8;
+extern "C" char lbl_8059E4C8;
+extern "C" const float lbl_805A26F0;
+extern "C" const float lbl_805A26F4;
 extern "C" {
 MuMsg* create__5MuMsgFUlQ25Heaps8HeapTypeUl(u32, HeapType, u32);
 void setFontType__5MuMsgFUlUl(void*, u32, u32);

@@ -269,7 +269,7 @@ void cmAIController::draw() {
 
 // TODO: clean up, give variables real names
 namespace jj_8009FCF4 {
-extern float lbl_805A1E80;
+extern "C" float lbl_805A1E80;
 
 extern "C" void fn_8009FCF4(char *arg0, float farg0)
 {

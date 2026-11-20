@@ -1013,7 +1013,7 @@ void ChrAnmResult::SetRotTrans(const math::MTX34* pRotTrans) {
 namespace jj_801956CC {
 typedef unsigned int u32;
 
-extern float lbl_805A31F4;
+extern "C" float lbl_805A31F4;
 
 struct Vec {
     float x, y, z;

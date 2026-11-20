@@ -390,7 +390,7 @@ extern "C" u32* fn_8004E580(void*);
 extern "C" u32* fn_8004E634(void*);
 extern "C" u8* fn_8004E7B8(void*, int);
 extern "C" u32 fn_8005297C();
-extern void* g_GameGlobal;
+extern "C" void* g_GameGlobal;
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_80056E68() {
     if (!(*fn_8004E580(g_GameGlobal) & 0x80000000) && *fn_8004E634(g_GameGlobal) / 60 / 60 >= 10) {
@@ -416,7 +416,7 @@ namespace jj_800596EC {
 
 struct Pair { s32 a; s32 b; };
 struct Blob { Pair p[10]; };
-extern const Blob lbl_80406F98;
+extern "C" const Blob lbl_80406F98;
 struct Table { Blob b; s32 pad; };
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -516,7 +516,7 @@ extern "C" int fn_80058320(int arg0) {
 
 namespace jj_80059890 {
 extern "C" {
-extern void* g_GameGlobal;
+extern "C" void* g_GameGlobal;
 void* fn_8004E5D8(void*, void*);
 int fn_80055888(int, int);
 }
@@ -762,7 +762,7 @@ extern "C" int fn_800589C8(int arg0) {
 
 namespace jj_80058544 {
 extern "C" {
-extern void* g_GameGlobal;
+extern "C" void* g_GameGlobal;
 void* fn_8004E5D8(void*, void*);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -860,8 +860,8 @@ extern "C" s32 fn_80058544(s32 arg0) {
 namespace jj_80058C48 {
 extern "C" {
 struct OriginalIds { int values[10]; };
-extern const OriginalIds lbl_80406EA8;
-extern void* g_GameGlobal;
+extern "C" const OriginalIds lbl_80406EA8;
+extern "C" void* g_GameGlobal;
 void* fn_8004E5C4(void*);
 u8* fn_8004E7B8(void*, int);
 }
@@ -931,7 +931,7 @@ extern "C" s32 fn_80058C48(s32 arg0) {
 
 namespace jj_80059C00 {
 extern "C" {
-extern void* g_GameGlobal;
+extern "C" void* g_GameGlobal;
 unsigned char* fn_8004E790(void*, int);
 int fn_80055888(int, int);
 unsigned int fn_8004F4A0(int);
@@ -1014,8 +1014,8 @@ struct FigureEntry {
 
 extern "C" {
 u32 gmCheckExistSeal__Fi(u16 value);
-extern FigureEntry lbl_8042DC18[40];
-extern FigureEntry lbl_8042DCB8[145];
+extern "C" FigureEntry lbl_8042DC18[40];
+extern "C" FigureEntry lbl_8042DCB8[145];
 }
 
 extern "C" void gmCheckSoftList__Fv(void) {

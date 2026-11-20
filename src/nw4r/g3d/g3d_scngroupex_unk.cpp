@@ -34,7 +34,7 @@ extern "C" u32 fn_801B3FB4(void* self) {
 namespace jj_801B4AE8 {
 extern "C" {
 
-extern unsigned char lbl_8040ABF8[];
+extern "C" unsigned char lbl_8040ABF8[];
 
 // TODO: clean up, give variables real names
 unsigned char* fn_801B4AE8(void) {
@@ -177,10 +177,10 @@ namespace jj_801B4A50 {
 #pragma optimization_level 1
 
 extern "C" {
-extern unsigned char lbl_8040ABF8[0x10];
-extern unsigned char lbl_8040ABA0[0x10];
-extern unsigned char lbl_8040AB80[0x10];
-extern unsigned char lbl_8040AA68[0x10];
+extern "C" unsigned char lbl_8040ABF8[0x10];
+extern "C" unsigned char lbl_8040ABA0[0x10];
+extern "C" unsigned char lbl_8040AB80[0x10];
+extern "C" unsigned char lbl_8040AA68[0x10];
 
 // TODO: clean up, give variables real names
 int fn_801B4A50(void* unused, unsigned int* p) {
@@ -226,7 +226,7 @@ extern "C" s32 fn_801B4374(Obj* arg0, Obj* arg1) {
 
 // TODO: clean up, give variables real names
 namespace jj_801B3CC4 {
-extern unsigned char lbl_8040ABF8[];
+extern "C" unsigned char lbl_8040ABF8[];
 class Class_804664C0 {
 public:
     virtual int fn_801B4A50(void*);

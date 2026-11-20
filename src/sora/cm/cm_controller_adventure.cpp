@@ -85,8 +85,8 @@ extern "C" void fn_800A41E4(void *dst, const void *src)
 }
 
 namespace jj_800A5990 {
-extern float lbl_805A1F90;
-extern float lbl_805A1FF8;
+extern "C" float lbl_805A1F90;
+extern "C" float lbl_805A1FF8;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800A5990(char* arg0, float* arg1)
@@ -182,8 +182,8 @@ struct Object { char pad[0x98]; float width, height; Mesh* mesh; };
 extern "C" int fn_80041D64(Box*, Box*);
 extern "C" int fn_80041978(Box*, Box*);
 extern "C" void fn_800A46B4(Object*, Box*, Vec2*, Vec2*);
-extern float lbl_805A1FA0;
-extern float lbl_805A1FCC;
+extern "C" float lbl_805A1FA0;
+extern "C" float lbl_805A1FCC;
 
 // TODO: clean up, give variables real names
 inline void makeBox(Box* box, float left, float bottom, float right, float top) {
@@ -273,7 +273,7 @@ struct Head {
     Node head;
 };
 
-extern Head lbl_8049DEDC;
+extern "C" Head lbl_8049DEDC;
 
 struct Object {
     u8 pad0[0xB];

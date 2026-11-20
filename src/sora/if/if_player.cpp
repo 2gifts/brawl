@@ -2370,8 +2370,8 @@ extern "C" void fn_800E407C(char* self) {
 // TODO: clean up, give variables real names
 namespace jj_800E3FB0 {
 
-extern float lbl_805A2448;
-extern float lbl_805A23B0;
+extern "C" float lbl_805A2448;
+extern "C" float lbl_805A23B0;
 
 class AnmChrSlots {
 public:
@@ -2423,7 +2423,7 @@ struct ModelAnimation { char pad[0xC]; Animation* animation; };
 struct MuObject { char pad[0x14]; ModelAnimation* modelAnimation; };
 struct Sub { char pad[0x10]; int field18; char pad1[0xC]; MuObject* objects[6]; };
 struct State { char pad0[0x8]; Sub sub; char pad2[0xEC]; float field12C; int field130; int field134; };
-extern float lbl_805A23B0;
+extern "C" float lbl_805A23B0;
 extern "C" void setFrameNode__8MuObjectFf(MuObject*, float);
 extern "C" int fn_800B5854(MuObject*, int, int, int, int);
 extern "C" void fn_800E1588(State*, int, int, int);
@@ -2460,9 +2460,9 @@ struct State {
  char pad2[8];
  MuObject* objects[6];
 };
-extern float lbl_805A23B0;
-extern float lbl_805A23C0;
-extern float lbl_805A23E4;
+extern "C" float lbl_805A23B0;
+extern "C" float lbl_805A23C0;
+extern "C" float lbl_805A23E4;
 extern "C" void fn_800E1588(State*, unsigned int, int, int);
 // TODO: clean up, give variables real names
 extern "C" void fn_800E370C(State* self) {
@@ -2506,8 +2506,8 @@ public:
  virtual void slot4(); virtual void slot5(); virtual void slot6(); virtual void slot7();
  virtual void slot8(f32);
 };
-extern f32 lbl_805A23E4;
-extern f32 lbl_805A23C0;
+extern "C" f32 lbl_805A23E4;
+extern "C" f32 lbl_805A23C0;
 extern "C" int fn_800B5854(void*, int, int, int, int);
 extern "C" void fn_800B6838(MuObject*, const Vec3f*);
 extern "C" void fn_800E1840(void*, u32, int);
@@ -2563,9 +2563,9 @@ public:
     virtual void slot8(f32);
 };
 
-extern f32 lbl_805A23B0;
-extern f32 lbl_805A23B4;
-extern f32 lbl_805A23C0;
+extern "C" f32 lbl_805A23B0;
+extern "C" f32 lbl_805A23B4;
+extern "C" f32 lbl_805A23C0;
 
 extern "C" void fn_800B6838(MuObject*, const Vec3f*);
 extern "C" void fn_800E1588(void*, u32, s32, s32);
@@ -2639,11 +2639,11 @@ char pad[0xE0]; int value;
 struct Frame { char pad[8]; Object_vptr_0* animation; };
 struct Child { char pad[0x10]; int handle; Frame* frame; };
 struct Object { char pad[0xC4]; Child* child; char pad1[0x2B0-0xC8]; int mode; };
-extern const double lbl_805A23B8;
+extern "C" const double lbl_805A23B8;
 extern "C" {
-extern Object_vptr_0* lbl_805A02E0;
-extern float lbl_805A23B0, lbl_805A23C0, lbl_805A244C, lbl_805A2454, lbl_805A2458;
-extern float lbl_804088A0[], lbl_804088B0[];
+extern "C" Object_vptr_0* lbl_805A02E0;
+extern "C" float lbl_805A23B0, lbl_805A23C0, lbl_805A244C, lbl_805A2454, lbl_805A2458;
+extern "C" float lbl_804088A0[], lbl_804088B0[];
 void fn_800B6F6C(void*,const float*);
 void fn_800B6838(void*,const float*,float,float,float,float);
 // TODO: clean up, give variables real names
@@ -2748,11 +2748,11 @@ public:
 };
 
 extern "C" {
-extern Vt* lbl_805A02E0;
-extern const float lbl_805A23B0;
-extern const float lbl_805A23C0;
-extern const float lbl_805A23F0;
-extern const double lbl_805A23B8;
+extern "C" Vt* lbl_805A02E0;
+extern "C" const float lbl_805A23B0;
+extern "C" const float lbl_805A23C0;
+extern "C" const float lbl_805A23F0;
+extern "C" const double lbl_805A23B8;
 void fn_800B798C(MuObject* obj, float f);
 void fn_800E5318(Self* self, s32 v);
 }
@@ -2821,11 +2821,11 @@ public:
 };
 
 extern "C" {
-extern Object_vptr_0* lbl_805A02DC;
-extern const f32 lbl_805A23B0;
-extern const f32 lbl_805A23C0;
-extern const f32 lbl_805A23F0;
-extern const u8 lbl_805A23E8[8];
+extern "C" Object_vptr_0* lbl_805A02DC;
+extern "C" const f32 lbl_805A23B0;
+extern "C" const f32 lbl_805A23C0;
+extern "C" const f32 lbl_805A23F0;
+extern "C" const u8 lbl_805A23E8[8];
 void fn_800E5318(void*);
 void fn_800E1840(void*, u32, s32);
 void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjUl(void*, void*, int);

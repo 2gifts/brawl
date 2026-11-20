@@ -629,7 +629,7 @@ extern "C" void fn_80137298(void* arg0, u32* arg1) {
 namespace jj_80135950 {
 
 
-extern const f32 lbl_805A2A40;
+extern "C" const f32 lbl_805A2A40;
 
 struct Self {
     u8 pad0[8];

@@ -8,7 +8,7 @@
 // TODO: clean up, give variables real names
 namespace jj_80110310 {
 extern "C" {
-extern int lbl_8045D908[4];
+extern "C" int lbl_8045D908[4];
 int fn_80110190(int*, int*, int*);
 
 // TODO: clean up, give variables real names
@@ -43,8 +43,8 @@ extern "C" void fn_8011031C(void* arg0) {
 namespace jj_8010FF20 {
 extern "C" {
 void getSysPadStatus__11gfPadSystemFiP11gfPadStatus(void*, int, void*);
-extern int lbl_8045D908[4];
-extern void* g_gfPadSystem;
+extern "C" int lbl_8045D908[4];
+extern "C" void* g_gfPadSystem;
 
 struct gfPadStatus {
     unsigned int _0x0;
@@ -84,8 +84,8 @@ int fn_8010FF20(unsigned int mask) {
 
 namespace jj_8010FFBC {
 extern "C" void getSysPadStatus__11gfPadSystemFiP11gfPadStatus(void*, int, void*);
-extern void* g_gfPadSystem;
-extern u32 lbl_8045D918[];
+extern "C" void* g_gfPadSystem;
+extern "C" u32 lbl_8045D918[];
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" s32 fn_8010FFBC(s32 arg0) {
@@ -106,8 +106,8 @@ extern "C" s32 fn_8010FFBC(s32 arg0) {
 namespace jj_80110058 {
 extern "C" {
 void getSysPadStatus__11gfPadSystemFiP11gfPadStatus(void*, int, void*);
-extern void* g_gfPadSystem;
-extern unsigned int lbl_8045D928[];
+extern "C" void* g_gfPadSystem;
+extern "C" unsigned int lbl_8045D928[];
 }
 
 struct PadStatusLocal {
@@ -138,7 +138,7 @@ namespace jj_801100F4 {
 
 extern "C" {
 
-extern s32 lbl_8045D938[4];
+extern "C" s32 lbl_8045D938[4];
 
 // TODO: clean up, give variables real names
 s32 fn_801100F4(s32 mask) {
@@ -158,7 +158,7 @@ s32 fn_801100F4(s32 mask) {
 }
 
 namespace jj_80110368 {
-extern void* g_GameGlobal;
+extern "C" void* g_GameGlobal;
 extern "C" int fn_8004D9A8(void* p, int i);
 extern "C" void* getGlobalRecordMenuDatap__10GameGlobalFv(void* global);
 
@@ -332,15 +332,15 @@ extern "C" void fn_8011058C(unsigned char* self)
 namespace jj_8010F960 {
 
 extern "C" {
-extern void* lbl_805A01D8;
-extern u8 lbl_8045D8A0[];
-extern f32 lbl_805A28E8;
-extern f32 lbl_805A28EC;
-extern f32 lbl_805A28F0;
-extern f32 lbl_805A28F4;
-extern f32 lbl_805A28F8;
-extern f32 lbl_805A28FC;
-extern f32 lbl_805A2900;
+extern "C" void* lbl_805A01D8;
+extern "C" u8 lbl_8045D8A0[];
+extern "C" f32 lbl_805A28E8;
+extern "C" f32 lbl_805A28EC;
+extern "C" f32 lbl_805A28F0;
+extern "C" f32 lbl_805A28F4;
+extern "C" f32 lbl_805A28F8;
+extern "C" f32 lbl_805A28FC;
+extern "C" f32 lbl_805A2900;
 s32 fn_8007923C(void*, s32, s32, s32);
 void fn_801E1D80(s64, OSCalendarTime*);
 f32 randf__Fv();
@@ -544,7 +544,7 @@ void reset__11ipPadConfigFv(void*);
 void* getInstance__11ipPadConfigFv();
 void setButtonConfig__11ipPadConfigFiUlPC14ipButtonConfig(void*, int, unsigned int, void*);
 void createPadNo2PlayerNoTable__11ipPadConfigFv(void*);
-extern void* g_GameGlobal;
+extern "C" void* g_GameGlobal;
 
 struct PadElem {
     unsigned char pad0[7];

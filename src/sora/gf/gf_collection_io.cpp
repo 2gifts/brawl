@@ -765,13 +765,13 @@ u64 fn_8014FC84(void);
 u8 fn_8014F9A8(void);
 int fn_800305FC(char* buf);
 }
-extern void* g_GameGlobal;
-extern OSMutex* lbl_8059C6D4;
-extern u16 lbl_805A00A8;
-extern char lbl_8059C6DC[5];
-extern char lbl_8059C708[2];
-extern const char* lbl_80423560[];
-extern const char* lbl_804235B8[];
+extern "C" void* g_GameGlobal;
+extern "C" OSMutex* lbl_8059C6D4;
+extern "C" u16 lbl_805A00A8;
+extern "C" char lbl_8059C6DC[5];
+extern "C" char lbl_8059C708[2];
+extern "C" const char* lbl_80423560[];
+extern "C" const char* lbl_804235B8[];
 
 struct Args {
     int unk0;
@@ -881,16 +881,16 @@ void __dt__11gfCryptoESPFv(void*, int);
 int fn_8003C4E4(void*, int, int, int);
 int sprintf(char*, const char*, ...);
 }
-extern OSMutex lbl_80497768;
-extern OSMutex* lbl_8059C6D4;
-extern OSMutex* lbl_8059C6D8;
-extern u16 lbl_805A00A8;
-extern u16 lbl_805A00AA;
-extern char lbl_8059C6DC[5];
-extern char lbl_8059C6E4[4];
-extern char lbl_8059C700[6];
-extern char MOD_PATCH_DIR[];
-extern const char* lbl_80423560[];
+extern "C" OSMutex lbl_80497768;
+extern "C" OSMutex* lbl_8059C6D4;
+extern "C" OSMutex* lbl_8059C6D8;
+extern "C" u16 lbl_805A00A8;
+extern "C" u16 lbl_805A00AA;
+extern "C" char lbl_8059C6DC[5];
+extern "C" char lbl_8059C6E4[4];
+extern "C" char lbl_8059C700[6];
+extern "C" char MOD_PATCH_DIR[];
+extern "C" const char* lbl_80423560[];
 
 struct Args {
     int unk0;
@@ -1084,16 +1084,16 @@ void fn_80153498(void*, int);
 int fn_80153504(void*, void*);
 int getDataType__10nteSectionFv(void*);
 }
-extern OSMutex lbl_80497768;
-extern OSMutex* lbl_8059C6D4;
-extern OSMutex* lbl_8059C6D8;
-extern u16 lbl_805A00A8;
-extern u16 lbl_805A00AA;
-extern char lbl_8059C6DC[5];
-extern char lbl_8059C6E4[4];
-extern char lbl_8059C708[2];
-extern char MOD_PATCH_DIR[];
-extern const char* lbl_80423560[];
+extern "C" OSMutex lbl_80497768;
+extern "C" OSMutex* lbl_8059C6D4;
+extern "C" OSMutex* lbl_8059C6D8;
+extern "C" u16 lbl_805A00A8;
+extern "C" u16 lbl_805A00AA;
+extern "C" char lbl_8059C6DC[5];
+extern "C" char lbl_8059C6E4[4];
+extern "C" char lbl_8059C708[2];
+extern "C" char MOD_PATCH_DIR[];
+extern "C" const char* lbl_80423560[];
 
 struct Args { int unk0; int mode; int index; char name[1]; };
 
@@ -1311,16 +1311,16 @@ extern "C" {
 void fn_8003B420(void*);
 int getCollectionVFName__14gfSysRecorder2FPc(char*);
 }
-extern OSMutex lbl_80497768;
-extern OSMutex* lbl_8059C6D4;
-extern OSMutex* lbl_8059C6D8;
-extern u16 lbl_805A00A8;
-extern u16 lbl_805A00AA;
-extern char lbl_8059C6DC[5];
-extern char lbl_8059C6E4[4];
-extern char MOD_PATCH_DIR[];
-extern const char* lbl_80423560[];
-extern const char* lbl_80423680[];
+extern "C" OSMutex lbl_80497768;
+extern "C" OSMutex* lbl_8059C6D4;
+extern "C" OSMutex* lbl_8059C6D8;
+extern "C" u16 lbl_805A00A8;
+extern "C" u16 lbl_805A00AA;
+extern "C" char lbl_8059C6DC[5];
+extern "C" char lbl_8059C6E4[4];
+extern "C" char MOD_PATCH_DIR[];
+extern "C" const char* lbl_80423560[];
+extern "C" const char* lbl_80423680[];
 
 struct Args { int unk0; int mode; int index; };
 
@@ -1455,16 +1455,16 @@ extern "C" {
 void fn_8003B420(void*);
 int getCollectionVFName__14gfSysRecorder2FPc(char*);
 }
-extern OSMutex lbl_80497768;
-extern OSMutex* lbl_8059C6D4;
-extern OSMutex* lbl_8059C6D8;
-extern u16 lbl_805A00A8;
-extern u16 lbl_805A00AA;
-extern char lbl_8059C6DC[5];
-extern char lbl_8059C6E4[4];
-extern char MOD_PATCH_DIR[];
-extern const char* lbl_80423560[];
-extern const char* lbl_80423680[];
+extern "C" OSMutex lbl_80497768;
+extern "C" OSMutex* lbl_8059C6D4;
+extern "C" OSMutex* lbl_8059C6D8;
+extern "C" u16 lbl_805A00A8;
+extern "C" u16 lbl_805A00AA;
+extern "C" char lbl_8059C6DC[5];
+extern "C" char lbl_8059C6E4[4];
+extern "C" char MOD_PATCH_DIR[];
+extern "C" const char* lbl_80423560[];
+extern "C" const char* lbl_80423680[];
 
 struct Args { int unk0; int mode; int index; };
 
@@ -1595,14 +1595,14 @@ int checkSDInserted__8gfFileIOFv(void);
 int checkSDWriteProtected__8gfFileIOFv(void);
 }
 
-extern void* g_GameGlobal;
-extern OSMutex* lbl_8059C6D4;
-extern OSMutex* lbl_8059C6D8;
-extern OSMutex lbl_80497768;
-extern u16 lbl_805A00A8;
-extern u16 lbl_805A00AA;
-extern char lbl_8059C714;
-extern char lbl_8059C71C;
+extern "C" void* g_GameGlobal;
+extern "C" OSMutex* lbl_8059C6D4;
+extern "C" OSMutex* lbl_8059C6D8;
+extern "C" OSMutex lbl_80497768;
+extern "C" u16 lbl_805A00A8;
+extern "C" u16 lbl_805A00AA;
+extern "C" char lbl_8059C714;
+extern "C" char lbl_8059C71C;
 
 struct FileState {
     u8 unk0;
@@ -1611,7 +1611,7 @@ struct FileState {
     s32 unk8;
     s32 unkC;
 };
-extern FileState lbl_80423690;
+extern "C" FileState lbl_80423690;
 
 extern "C" s32 fn_8003C4E4(u8* self, void* unused, gfFileIOHandle* arg2, u32 mode) {
     char buf[0x40];
@@ -1736,16 +1736,16 @@ extern "C" {
 int getCollectionVFName__14gfSysRecorder2FPc(char*);
 int fn_8003C4E4(void*, int, int, int);
 }
-extern OSMutex lbl_80497768;
-extern OSMutex* lbl_8059C6D4;
-extern OSMutex* lbl_8059C6D8;
-extern u16 lbl_805A00A8;
-extern u16 lbl_805A00AA;
-extern char lbl_8059C6DC[5];
-extern char lbl_8059C6E4[4];
-extern char lbl_8059C708[2];
-extern char MOD_PATCH_DIR[];
-extern const char* lbl_80423560[];
+extern "C" OSMutex lbl_80497768;
+extern "C" OSMutex* lbl_8059C6D4;
+extern "C" OSMutex* lbl_8059C6D8;
+extern "C" u16 lbl_805A00A8;
+extern "C" u16 lbl_805A00AA;
+extern "C" char lbl_8059C6DC[5];
+extern "C" char lbl_8059C6E4[4];
+extern "C" char lbl_8059C708[2];
+extern "C" char MOD_PATCH_DIR[];
+extern "C" const char* lbl_80423560[];
 
 struct Args { int unk0; int mode; int index; char name[1]; };
 
