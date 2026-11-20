@@ -1,14 +1,12 @@
 #include <gf/gf_heap_manager.h>
+#include <ms/ms_resfont.h>
+#include <mu/mu_msg_font_mngr.h>
 #include <nw4r/g3d/g3d_scnmdlsmpl.h>
 #include <sora/ms_message.h>
 #include <sr/sr_common.h>
 #include <stdio.h>
 #include <types.h>
 
-// Font manager (global object) used to load/release the font used by a MuMsg.
-extern u8 lbl_8049E01C[];
-extern "C" u8 fn_800B8648(void* mgr, u32 fontSetting, int p2, int p3);
-extern "C" void fn_800B881C(void* mgr, u8 fontId);
 
 class MuObject;
 
@@ -98,6 +96,72 @@ public:
     ~MuMsg();
 };
 
+MuMsgFontMngr g_MuMsgFontMngr;
+
+u8 MuMsgFontMngr::loadFont(u32 flags, int heapType, int watch) {
+    if (m_locked == 1) {
+        return 0;
+    }
+    u32 held;
+    u32 wanted = flags;
+    if (flags & 4) {
+        wanted = flags & ~1;
+    }
+    held = 0;
+    for (int i = 0; i < 16; i++) {
+        held |= m_slots[i];
+    }
+    if ((wanted & 1) && !(held & 1)) {
+        int heap = heapType;
+        if (heapType == 0xFF) {
+            heap = 0x2F; // the heap below MeleeFont (no name in sr_common.h)
+        }
+        if (watch == 0) {
+            FontData::loadNormalFont((Heaps::HeapType)heap);
+        } else {
+            FontData::loadNormalFontWatch((Heaps::HeapType)heap);
+        }
+    }
+    if ((wanted & 4) && !(held & 4)) {
+        int heap = heapType;
+        if (heapType == 0xFF) {
+            heap = 0x31; // the heap below OverlayCommon (no name in sr_common.h)
+        }
+        FontData::loadNormal12Font((Heaps::HeapType)heap);
+    }
+    int slot;
+    for (slot = 0; slot < 16; slot++) {
+        if (m_slots[slot] == 0) {
+            break;
+        }
+    }
+    m_slots[slot] = flags;
+    return slot;
+}
+
+void MuMsgFontMngr::unloadFont(int slot) {
+    u32 held = 0;
+    if (m_locked != 1) {
+        u8 flags = m_slots[slot];
+        m_slots[slot] = 0;
+        for (int i = 0; i < 16; i++) {
+            held |= m_slots[i];
+        }
+        if ((flags & 2) && !(held & 2)) {
+            FontData::removeHiraganaFont();
+        }
+        if ((flags & 1) && !(held & 1)) {
+            FontData::removeNormalFont();
+        }
+        if ((flags & 4) && !(held & 4)) {
+            FontData::removeNormal12Font();
+        }
+        if ((flags & 8) && !(held & 8)) {
+            FontData::removeMeleeFont();
+        }
+    }
+}
+
 MuMsg* MuMsg::create(u32 fontSetting, Heaps::HeapType heapType, u32 heapType2) {
     MuMsg* msg = new (heapType) MuMsg;
     if (msg != NULL) {
@@ -105,7 +169,7 @@ MuMsg* MuMsg::create(u32 fontSetting, Heaps::HeapType heapType, u32 heapType2) {
         msg->m_msgData = NULL;
         msg->m_message = new (heapType) Message(0, heapType);
         if (fontSetting != 0) {
-            msg->m_fontId = fn_800B8648(lbl_8049E01C, fontSetting, 0xff, 0);
+            msg->m_fontId = g_MuMsgFontMngr.loadFont(fontSetting, 0xff, 0);
         } else {
             msg->m_fontId = 0xff;
         }
@@ -119,7 +183,7 @@ MuMsg* MuMsg::create(u32 fontSetting, Heaps::HeapType heapType, u32 heapType2) {
 
 MuMsg::~MuMsg() {
     if (m_fontId != 0xff) {
-        fn_800B881C(lbl_8049E01C, m_fontId);
+        g_MuMsgFontMngr.unloadFont(m_fontId);
     }
     if (m_msgData != NULL && !m_isMsgDataSet) {
         gfHeapManager::free(m_msgData);
