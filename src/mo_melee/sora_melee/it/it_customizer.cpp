@@ -7,6 +7,7 @@
 #define SO_ARRAY_LIST_EXTERNAL_eraseSub
 #include <so/so_array.h>
 #include <it/item.h>
+#include <it/kinetic/it_kinetic_module_impl.h>
 #include <math.h>
 #include <st/stage.h>
 #include <cm/cm_camera_controller.h>
@@ -970,4 +971,21 @@ bool itMetalBlockCustomizer::onDamage(BaseItem* item, int damageStatusKind, soDa
         item->sendTouchMessage(damageLog->m_attackerTeamOwnerId, &pos, lbl_27_rodata_46DC[0]);
     }
     return true;
+}
+
+// TODO: clean up - two bytes of itKineticModuleImpl (0x304, 0x305; HYPOTHESIS: a ground mode and its kind) are written
+// by hand; name them once the item kinetic module header has the fields.
+void itCurryShotCustomizer::onReset(BaseItem* item) {
+    itKineticModuleImpl& kinetic = dynamic_cast<itKineticModuleImpl&>(item->m_moduleAccesser->getKineticModule());
+    reinterpret_cast<u8*>(&kinetic)[0x304] = 0;
+    reinterpret_cast<u8*>(&kinetic)[0x305] = 2;
+}
+
+void itMoneyCustomizer::onReset(BaseItem* item) {
+    item->m_moduleAccesser->getCollisionSearchModule().setCheckInterval(6);
+    if (item->m_kind == 0xf) {
+        itKineticModuleImpl& kinetic = dynamic_cast<itKineticModuleImpl&>(item->m_moduleAccesser->getKineticModule());
+        reinterpret_cast<u8*>(&kinetic)[0x304] = 0;
+        reinterpret_cast<u8*>(&kinetic)[0x305] = 5;
+    }
 }

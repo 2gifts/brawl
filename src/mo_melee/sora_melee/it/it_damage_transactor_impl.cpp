@@ -83,8 +83,8 @@ itDamageTransactorImpl::~itDamageTransactorImpl() { }
 // TODO: clean up, give variables real names
 namespace jj_2B32A8 {
 extern "C" {
-extern const char lbl_27_data_71BE0[];
-extern const char lbl_27_data_CDC0[];
+extern const char __RTTI__19itKineticModuleImpl[];
+extern const char __RTTI__15soKineticModule[];
 extern const float lbl_27_rodata_5EA8;
 extern const float lbl_27_rodata_5EAC;
 void* __dynamic_cast(void*, int, const void*, const void*, int);
@@ -160,13 +160,13 @@ int result = queryObj->query(0x10000016);
 switch (result) {
 case 2: {
 LocalVec3f position(arg3->x, arg3->y, lbl_27_rodata_5EA8);
-Obj7C* obj = (Obj7C*)__dynamic_cast(*(void**)(*(char**)(self + 0xD8) + 0x7C), 0, lbl_27_data_71BE0, lbl_27_data_CDC0, 1);
+Obj7C* obj = (Obj7C*)__dynamic_cast(*(void**)(*(char**)(self + 0xD8) + 0x7C), 0, __RTTI__19itKineticModuleImpl, __RTTI__15soKineticModule, 1);
 obj->slot9(); obj->slot47(&position.x, arg2); break;
 }
 case 3: {
 LocalVec3f position;
 position.x = arg3->x; position.y = lbl_27_rodata_5EA8; position.z = lbl_27_rodata_5EA8;
-Obj7C* obj = (Obj7C*)__dynamic_cast(*(void**)(*(char**)(self + 0xD8) + 0x7C), 0, lbl_27_data_71BE0, lbl_27_data_CDC0, 1);
+Obj7C* obj = (Obj7C*)__dynamic_cast(*(void**)(*(char**)(self + 0xD8) + 0x7C), 0, __RTTI__19itKineticModuleImpl, __RTTI__15soKineticModule, 1);
 obj->slot9(); obj->slot47(&position.x, arg2); break;
 }
 }
