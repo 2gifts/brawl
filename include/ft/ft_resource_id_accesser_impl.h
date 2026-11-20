@@ -9,10 +9,7 @@
 class soModuleAccesser;
 
 class ftResourceIdAccesserImpl : public soResourceIdAccesser {
-#ifdef FT_KIRBY_COPY_ABILITY_MODULE_RESOURCE_ACCESSER
-    // Opt-in: the Kirby accesser (defined in the copy ability module unit) reads the module accesser.
-protected:
-#endif
+protected: // the Kirby accesser (defined in the copy ability module unit) reads the module accesser
     soModuleAccesser* m_moduleAccsr;
 public:
     ftResourceIdAccesserImpl(soModuleAccesser* acc) :
