@@ -27,6 +27,7 @@
 #include <gm/gm_global.h>
 #include <mt/mt_trig.h>
 #include <gm/gm_common.h>
+#include <so/catch/so_catch_module.h>
 #include <mt/mt_prng.h>
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/so_external_value_accesser.h>
@@ -2243,4 +2244,47 @@ bool itResetsanCustomizer::onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd,
         break;
     }
     return false;
+}
+
+// The link event (kind 0x34) the Gooey Bomb sends what it holds when it lets go.
+struct itGokulinLinkEventArgs : public soLinkEventArgs {
+    itGokulinLinkEventArgs() : soLinkEventArgs(0x34) { }
+};
+
+// Lets go of whatever the bomb holds (link 0).
+static inline void itGokulinRelease(soModuleAccesser* moduleAccesser) {
+    if (moduleAccesser->getLinkModule().isLinked(0) == true) {
+        itGokulinLinkEventArgs args;
+        moduleAccesser->getLinkModule().sendEventNodes(0, args, 0);
+    }
+    if (moduleAccesser->getLinkModule().isLink(0) == true) {
+        moduleAccesser->getLinkModule().removeModelConstraint(true);
+        moduleAccesser->getLinkModule().unlink(0);
+    }
+    static_cast<soCatchModule*>(moduleAccesser->m_enumerationStart->m_catchModule)->offCatchFlag();
+}
+
+void itGokulinCustomizer::onDestruct(BaseItem* item) {
+    if (item->m_moduleAccesser->getLinkModule().isLinked(0) == true) {
+        itGokulinLinkEventArgs args;
+        item->m_moduleAccesser->getLinkModule().sendEventNodes(0, args, 0);
+    }
+    if (item->m_moduleAccesser->getLinkModule().isLink(0) == true) {
+        item->m_moduleAccesser->getLinkModule().removeModelConstraint(true);
+        item->m_moduleAccesser->getLinkModule().unlink(0);
+    }
+    static_cast<soCatchModule*>(item->m_moduleAccesser->m_enumerationStart->m_catchModule)->offCatchFlag();
+}
+
+// Status 0xA (stuck to someone) marks its link 4 and clears the float work 0x11000003; other statuses release the
+// holder unless flag 0x12000002 is set.
+void itGokulinCustomizer::onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    if (statusKind == 0xA) {
+        if (moduleAccesser->getLinkModule().isLink(4) == true) {
+            moduleAccesser->getLinkModule().setAttribute(4, static_cast<soLinkConnection::Attribute>(4), true);
+            itWork(item).setFloat(lbl_27_rodata_46DC[0], 0x11000003);
+        }
+    } else if (moduleAccesser->getLinkModule().isLinked(0) && !itWork(item).isFlag(0x12000002)) {
+        itGokulinRelease(moduleAccesser);
+    }
 }
