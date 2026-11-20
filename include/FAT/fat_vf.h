@@ -5,6 +5,21 @@
 // FAT units. The structure layouts are the DWARF-derived ones of the Wii Sports
 // decompilation (include/ogws/revolution/VF/vf_struct.h); Brawl links a later
 // build of the same library, and the sizes below match its .bss objects.
+// The FA (SD card) PrFile2 copy in pf_clib.c/pf_str.c already uses these names, so the VF copy gets a _vf suffix.
+#define VFipf_toupper VFipf_toupper_vf
+#define VFipf_memcpy VFipf_memcpy_vf
+#define VFipf_memset VFipf_memset_vf
+#define VFipf_strlen VFipf_strlen_vf
+#define VFipf_strcpy VFipf_strcpy_vf
+#define VFipf_strcmp VFipf_strcmp_vf
+#define VFipf_strncmp VFipf_strncmp_vf
+#define VFipf_w_strlen VFipf_w_strlen_vf
+#define VFipf_w_strcpy VFipf_w_strcpy_vf
+#define VFipf_w_strncmp VFipf_w_strncmp_vf
+#define VFiPF_GET_LE_U16 VFiPF_GET_LE_U16_vf
+#define VFiPFSTR_GetCodeMode VFiPFSTR_GetCodeMode_vf
+#define VFiPFSTR_SetLocalStr VFiPFSTR_SetLocalStr_vf
+#define VFiPFSTR_GetStrPos VFiPFSTR_GetStrPos_vf
 #include <stddef.h>
 #include <types.h>
 #include <revolution/OS/OSMutex.h>
