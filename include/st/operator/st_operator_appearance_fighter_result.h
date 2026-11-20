@@ -5,6 +5,8 @@
 
 class stOperatorAppearanceFighterResult : public stOperatorAppearanceFighter {
 public:
+    void* unk1B8;
+
     stOperatorAppearanceFighterResult();
     virtual ~stOperatorAppearanceFighterResult();
     virtual void startAppearance();

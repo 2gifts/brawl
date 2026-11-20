@@ -11,6 +11,9 @@ global_destructor_chain.c:
 	.dtors      start:0x00000000 end:0x00000008
 	.bss        start:0x00000000 end:0x00000004
 
+mo_scene/sora_scene/sc_scene_init.cpp:
+	.text       start:0x00000070 end:0x0000040C
+
 mo_scene/sora_scene/sc_boot.cpp:
 	.text       start:0x0000040C end:0x0000068C
 	.data       start:0x00000000 end:0x000000A0
@@ -28,14 +31,20 @@ mo_scene/sora_scene/sc_memory_change.cpp:
 	.ctors      start:0x00000000 end:0x00000004
 
 mo_scene/sora_scene/sc_intro.cpp:
-	.text       start:0x00004EB4 end:0x000061A4
+	.text       start:0x00004EB4 end:0x000052AC
+
+mo_scene/sora_scene/sc_ending.cpp:
+	.text       start:0x000052AC end:0x000061A4
 
 mo_scene/sora_scene/sc_staffroll.cpp:
 	.text       start:0x000061A4 end:0x0000624C
 	.data       start:0x00001400 end:0x00001448
 
 mo_scene/sora_scene/sc_gameover.cpp:
-	.text       start:0x0000624C end:0x000067D8
+	.text       start:0x0000624C end:0x000065B8
+
+mo_scene/sora_scene/sc_ty_fig_list.cpp:
+	.text       start:0x000065B8 end:0x000067D8
 
 mo_scene/sora_scene/sc_ty_fig_disp.cpp:
 	.text       start:0x000067D8 end:0x00006B08
@@ -164,7 +173,7 @@ mo_scene/sora_scene/mu_menu_main.cpp:
 	.text       start:0x00010720 end:0x00013884
 
 mo_scene/sora_scene/sc_melee.cpp:
-	.text       start:0x00013884 end:0x0001AFE4
+	.text       start:0x00013884 end:0x0001B004
 	.ctors      start:0x00000014 end:0x00000018
 
 mo_scene/sora_scene/sc_simple_result.cpp:

@@ -13,41 +13,10 @@
 #include <nw4r/g3d/g3d_scngroup.h>
 #include <types.h>
 
-// The camera task of the menu that draws the models: it keeps the group of the scene that the models are inserted into.
-// HYPOTHESIS: the field names follow how the scene group is reached from the intro.
-class muIntroCameraTask : public gfTask {
-public:
-    u32 m_unk40;
-    u32 m_unk44;
-    nw4r::g3d::ScnGroup* m_scnRoot;    // 0x48
-};
-struct muIntroCameraRef {
-    muIntroCameraTask* m_task;
-};
-
-// The scene of the intro (module sora_scene; only what this menu needs is declared here). The intro shows who fights:
-// the players (up to 3) and the enemies (up to 2), each with a character and a kind of entry.
-// HYPOTHESIS: the class hierarchy gfScene <- muMenu <- scIntro follows from the run time type information of the module.
-class scIntro : public muMenu {
-public:
-    struct Entry {
-        int m_charKind;     // the character (index of the fighter kind)
-        int m_type;         // how the character enters (0 .. 3), 4 when there is none
-    };
-
-    u8 m_unk350[0xC];
-    int m_introNo;                  // 0x35C the number of the intro (the map animation "ItrSimpleMap0000_TopN__%d")
-    int m_mode;                     // 0x360 0 and 1 are fights, a larger value is the number of a mini intro (mode - 2)
-    int m_playerNum;                // 0x364
-    Entry m_players[3];             // 0x368
-    int m_enemyNum;                 // 0x380
-    Entry m_enemies[2];             // 0x384
-    int m_rumbleController;         // 0x394
-    muIntroCameraRef* m_camera;     // 0x398
-    u8 m_unk39C;
-    u8 m_rumbleSetting;             // 0x39D
-
-    scIntro(const char* name) : muMenu(name) { }
+// One character of the intro.
+struct muIntroEntry {
+    int m_charKind;     // the character (index of the fighter kind)
+    int m_type;         // how the character enters (0 .. 3), 4 when there is none
 };
 
 // The intro of a fight: loads the models of the fighters and the enemies, shows them on the intro map with the sounds
@@ -74,9 +43,9 @@ public:
     int m_introNo;                              // 0xAC copy of the values of the scene
     int m_mode;                                 // 0xB0
     int m_playerNum;                            // 0xB4
-    scIntro::Entry m_players[3];                // 0xB8
+    muIntroEntry m_players[3];                  // 0xB8
     int m_enemyNum;                             // 0xD0
-    scIntro::Entry m_enemies[2];                // 0xD4
+    muIntroEntry m_enemies[2];                  // 0xD4
     int m_unkE4;
     muFileIOHandle m_handles[HandleNum];        // 0xE8
     bool m_started;                             // 0x108
