@@ -72,7 +72,7 @@ public:
     U m_arrayVector;
 
 // BYTES: fighter RELs call the sora_melee constructor (FT_REL_LINK_EXTERN: no weak copy).
-#ifdef FT_REL_LINK_EXTERN
+#if defined(FT_REL_LINK_EXTERN) && !defined(WN_POKE_FUSHIGISOU_SEED_UNIT) // the Pokemon seed unit expands the constructor
     soInstanceManagerSimpleEntity();
 #else
     soInstanceManagerSimpleEntity() : m_fixedSimple(&m_arrayVector) { }

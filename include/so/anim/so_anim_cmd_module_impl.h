@@ -222,7 +222,7 @@ public:
 #else
     virtual void setAddressPackList();
 #endif
-#ifdef WN_EM_SIMPLE_UNIT
+#if defined(WN_EM_SIMPLE_UNIT) || defined(WN_KIRBY_PIKMIN_UNIT)
     virtual void unk44(s32, void*);
 #else
     virtual void unk44(); // HYPOTHESIS: unnamed slot; the article initialize reads the interpreter count one slot later (0x48)

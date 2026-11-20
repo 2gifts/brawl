@@ -14,7 +14,11 @@ public:
     typedef soAnimCmdControlUnitBuildConfig<1, 2, C1, A1, B1, 1, 0, S1> Unit1Config;
     typedef soAnimCmdControlUnitBuildConfig<2, 2, C2, A2, B2, 1, 0, S2> Unit2Config;
     typedef soAnimCmdControlUnitBuildConfig<3, 2, C3, A3, B3, 1, 0, S3> Unit3Config;
+#ifdef WN_ANIM_CMD_UNIQ_STACK_OF_UNIT0 // opt-in (the Pokemon seed): the uniq thread takes the stack capacity of thread 0
+    typedef soAnimCmdControlUnitBuildConfigUniq<4, S0> Unit4Config;
+#else
     typedef soAnimCmdControlUnitBuildConfigUniq<4, 2> Unit4Config;
+#endif
     enum { Unit0Enabled = E0, Unit1Enabled = E1, Unit2Enabled = E2, Unit3Enabled = E3, Unit4Enabled = 1 };
 };
 #endif

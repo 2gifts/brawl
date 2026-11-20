@@ -167,6 +167,11 @@ inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, co
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnLucarioAuraBall*) {
     return g_ftCommonDataAccesser.getWeaponData<wnLucarioAuraBallData>(subKind, resourceGroup);
 }
+#ifdef WN_POKE_LIZARDON_BREATH_BUILD
+inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnPokeLizardonBreath*) {
+    return g_ftCommonDataAccesser.getWeaponData<wnPokeLizardonBreathData>(subKind, resourceGroup);
+}
+#endif
 inline const void* wnFetchBlasterBulletData(s32 subKind, bool* resourceGroup, const wnKoopaBreath*) {
     return g_ftCommonDataAccesser.getWeaponData<wnKoopaBreathData>(subKind, resourceGroup);
 }

@@ -502,6 +502,58 @@ void wnDededeFollower::notifyEventCollisionHit(float power, soCollisionAttackDat
     Weapon::notifyEventCollisionHit(power, attackData, index, unk, moduleAccesser, log);
 }
 
+// HYPOTHESIS: the link events of the Dedede fighter carry two floats after the event kind.
+struct wnDededeFollowerLinkArgs {
+    int m_eventKind;
+    bool unk4;
+    float m_value8;
+    float m_valueC;
+};
+
+// The fighter's animation commands set the follower's flags with the events 0x838, 0x839 and 0x83C, and throw it with 0x83A and 0x83B.
+void wnDededeFollower::notifyEventLink(soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    switch (eventInfo->m_eventKind) {
+    case 0x838:
+        m_moduleAccesser->getWorkManageModule().offFlag(0x22000002);
+        m_moduleAccesser->getWorkManageModule().onFlag(0x22000001);
+        break;
+    case 0x839:
+        m_moduleAccesser->getWorkManageModule().onFlag(0x22000002);
+        m_moduleAccesser->getWorkManageModule().onFlag(0x22000001);
+        break;
+    case 0x83C:
+        if (m_moduleAccesser->getWorkManageModule().isFlag(0x22000005)) {
+            m_moduleAccesser->getWorkManageModule().onFlag(0x22000004);
+        }
+        break;
+    case 0x83A:
+        if (moduleAccesser->getStatusModule().getStatusKind() == 1) {
+            Vec3f pos = m_moduleAccesser->getLinkModule().getParentModelNodeGlobalPosition(3, ((const int*)Weapon::m_data)[2], true);
+            pos.m_z = m_moduleAccesser->getGroundModule().getZ();
+            float lr = m_moduleAccesser->getLinkModule().getParentLr(3);
+            m_moduleAccesser->getPostureModule().init(&pos, lr);
+            m_moduleAccesser->getLinkModule().removeModelConstraint(true);
+            m_moduleAccesser->getWorkManageModule().setFloat(((wnDededeFollowerLinkArgs*)eventInfo)->m_valueC, 0x21000005);
+            m_moduleAccesser->getWorkManageModule().setFloat(((wnDededeFollowerLinkArgs*)eventInfo)->m_value8, 0x21000006);
+            Weapon::unlinkOwner(3);
+            m_moduleAccesser->getStatusModule().changeStatusForce(2, m_moduleAccesser);
+        }
+        break;
+    case 0x83B:
+        if (moduleAccesser->getStatusModule().getStatusKind() == 1) {
+            Vec3f pos = m_moduleAccesser->getLinkModule().getParentModelNodeGlobalPosition(3, ((const int*)Weapon::m_data)[2], true);
+            pos.m_z = m_moduleAccesser->getGroundModule().getZ();
+            float lr = m_moduleAccesser->getLinkModule().getParentLr(3);
+            m_moduleAccesser->getPostureModule().init(&pos, lr);
+            m_moduleAccesser->getLinkModule().removeModelConstraint(true);
+            Weapon::unlinkOwner(3);
+            m_moduleAccesser->getStatusModule().changeStatusForce(0x10, m_moduleAccesser);
+        }
+        break;
+    }
+    Weapon::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
+}
+
 void wnDededeFollowerStatusUniqProcessFinal::initStatus(soModuleAccesser* moduleAccesser) {
     soParamAccesser* params = (soParamAccesser*)moduleAccesser->getWorkManageModule().getParamAccesser();
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
@@ -741,10 +793,8 @@ extern "C" void fn_117_22014(void* self) {
 
 // TODO: clean up, give variables real names
 namespace jj_2201C {
-extern "C" void fn_117_1FCD0(void*);
-
-extern "C" void fn_117_2201C(void* self) {
-    fn_117_1FCD0(reinterpret_cast<u8*>(self) - 0x54);
+extern "C" void fn_117_2201C(void* self, soLinkEventArgs* eventInfo, soModuleAccesser* moduleAccesser, StageObject* stageObj, int unk4) {
+    reinterpret_cast<wnDededeFollower*>(reinterpret_cast<u8*>(self) - 0x54)->wnDededeFollower::notifyEventLink(eventInfo, moduleAccesser, stageObj, unk4);
 }
 }
 
