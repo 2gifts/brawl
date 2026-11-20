@@ -2377,3 +2377,48 @@ bool itTingleCustomizer::onProcessFixPosition(BaseItem* item) {
     }
     return true;
 }
+
+// A peel that hits someone while thrown (status 4) bounces off them, away from their facing, faster off heavier fighters.
+// TODO: clean up - MATCH-ONLY: the literals are read through the unit's pool label (46C8 + 0: 1, + 4: 0.5,
+// + 8: pi/180, + 0xC: pi, + 0x10: -1, + 0x14: 0).
+void itBananaCustomizer::onNotifyEventCollisionAttackCheck(BaseItem* item, int hitTaskId) {
+    const float* pool = lbl_27_rodata_46C8;
+    if (static_cast<u32>(hitTaskId) == 0xFFFFFFFF) {
+        return;
+    }
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() != 4) {
+        return;
+    }
+    gfTask* task = gfTask::getTask(hitTaskId);
+    if (task == NULL) {
+        return;
+    }
+    float lr = pool[0];
+    float weight = pool[1];
+    if (task->m_taskCategory == gfTask::Category_Fighter) {
+        Fighter* fighter = dynamic_cast<Fighter*>(task);
+        if (fighter == NULL) {
+            return;
+        }
+        lr = soExternalValueAccesser::getLr(fighter);
+        weight = ftExternalValueAccesser::getWeight(fighter);
+    } else if (task->m_taskCategory == gfTask::Category_Enemy) {
+        StageObject* object = dynamic_cast<StageObject*>(task);
+        if (object == NULL) {
+            return;
+        }
+        lr = soExternalValueAccesser::getLr(object);
+    }
+    float angle = pool[2] * item->getParamFloat(0x1004);
+    if (pool[4] == lr) {
+        angle = pool[3] - angle;
+    }
+    float speed = item->getParamFloat(0x1005) + weight * item->getParamFloat(0x1006);
+    float speedY = speed * (float)sin(angle);
+    float speedX = speed * (float)cos(angle);
+    Vec3f velocity(speedX, speedY, pool[5]);
+    soWorkManageModule* work = &itWork(item);
+    work->onFlag(0x12000000);
+    work->setInt(item->getParamInt(0x5E24), 0x1000000b);
+    item->fall(&velocity, lr);
+}
