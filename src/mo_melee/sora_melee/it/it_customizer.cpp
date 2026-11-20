@@ -7,6 +7,7 @@
 #define SO_ARRAY_LIST_EXTERNAL_eraseSub
 #include <so/so_array.h>
 #include <it/item.h>
+#include <math.h>
 #include <st/stage.h>
 #include <cm/cm_camera_controller.h>
 #include <so/event/so_gimmick_event_presenter.h>
@@ -870,4 +871,103 @@ void itDevilCustomizer::onDestruct(BaseItem* item) {
         g_Stage->setDevilScrool(lbl_27_rodata_46DC[0], lbl_27_rodata_46DC[0]);
         g_Stage->disableDevil();
     }
+}
+
+// TODO: clean up - MATCH-ONLY: a second literal of the unit's pool (the speed decay), read through its pool label.
+extern "C" const float lbl_27_rodata_46D8;
+
+// Each attack check slows the spin (float work 0x11000000) down by a factor until it is zero.
+void itSonansCustomizer::onNotifyEventCollisionAttackCheck(BaseItem* item, int hitTaskId) {
+    soWorkManageModule& work = itWork(item);
+    float speed = work.getFloat(0x11000000);
+    if (!((float)fabs(speed) <= lbl_27_rodata_46DC[0])) {
+        speed *= lbl_27_rodata_46D8;
+        work.setFloat(speed, 0x11000000);
+    }
+}
+
+
+// Bouncing off the ground in motions 11..16 drops the vertical speed.
+void itSandbagCustomizer::onPreBound(BaseItem* item, Vec2f* speed, BaseItem::BoundMask mask) {
+    if (mask & 1) {
+        int motion = item->m_moduleAccesser->getMotionModule().getKind();
+        if ((motion >= 12 && motion <= 16) || motion == 11) {
+            speed->m_y = lbl_27_rodata_46DC[0];
+        }
+    }
+}
+
+// The swing hit sound plays while the hammer is in motion 10.
+void itGoldenHammerCustomizer::onNotifyEventCollisionAttackCheck(BaseItem* item, int hitTaskId) {
+    if (item->m_moduleAccesser->getMotionModule().getKind() == 10) {
+        item->m_moduleAccesser->getSoundModule().playSE((SndID)0x1f52, 0, 0, 0);
+    }
+}
+
+// Link event 0x840 (HYPOTHESIS: the bike is broken up) takes parameter 2 as its float argument and removes the bike.
+void itWarioBikeCustomizer::onNotifyEventLink(BaseItem* item, void* unk1, soModuleAccesser* moduleAccesser, StageObject*, int unk4) {
+    switch (*static_cast<int*>(unk1)) {
+    case 0x840:
+        static_cast<float*>(unk1)[2] = item->getParamFloat(2);
+        item->remove();
+        break;
+    }
+}
+
+// Swing actions while held: 0x64 plays the swing motion, 0x65 the dash swing.
+void itStarRodCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 2) {
+        switch (action) {
+        case 0x64:
+            item->changeMotion(7, false);
+            break;
+        case 0x65:
+            item->changeMotion(1, false);
+            break;
+        }
+    }
+}
+
+void itBeamSwordCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 2) {
+        switch (action) {
+        case 0x64:
+            item->changeMotion(2, false);
+            break;
+        case 0x65:
+            item->changeMotion(1, false);
+            break;
+        }
+    }
+}
+
+// Actions 1 and 2 wake and sleep the hammer's attack collision while it is held.
+void itGoldenHammerCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 2) {
+        switch (action) {
+        case 1:
+            item->m_moduleAccesser->getCollisionAttackModule().sleep(false);
+            break;
+        case 2:
+            item->m_moduleAccesser->getCollisionAttackModule().sleep(true);
+            break;
+        }
+    }
+}
+
+bool itGoldenHammerCustomizer::onHave(BaseItem* item, int) {
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() != 2) {
+        return true;
+    }
+    item->changeMotion(9, false);
+    return true;
+}
+
+// A direct hit (outside status 6) sends the touch message to the attacker's owner.
+bool itMetalBlockCustomizer::onDamage(BaseItem* item, int damageStatusKind, soDamageLog* damageLog) {
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() != 6 && damageLog->m_isAttackDirect) {
+        Vec3f pos = item->m_moduleAccesser->getPostureModule().getPos();
+        item->sendTouchMessage(damageLog->m_attackerTeamOwnerId, &pos, lbl_27_rodata_46DC[0]);
+    }
+    return true;
 }
