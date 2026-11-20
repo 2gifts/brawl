@@ -128,3 +128,6 @@ static void updateAirSpeed(soModuleAccesser* moduleAccesser) {
         work.onFlag(0x22000013);
     }
 }
+
+ftGanonStatusUniqProcessGanonPunch g_ftGanonStatusUniqProcessGanonPunch;
+ftGanonStatusUniqProcessGanonPunchTurn g_ftGanonStatusUniqProcessGanonPunchTurn;
