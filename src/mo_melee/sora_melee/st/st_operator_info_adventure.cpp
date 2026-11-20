@@ -111,21 +111,9 @@ void stOperatorInfoAdventure::stopOperatorRequest() {
     m_isStopRequest = true;
 }
 
-// TODO: clean up, give variables real names
-namespace jj_25A69C {
-extern "C" void* __dt__10stOperatorFv(void* p, int flag);
-extern "C" void __dl__FPv(void* p);
+// TODO: clean up - MATCH-ONLY: the original inlines the (empty) stOperatorInfo destructor into the derived one, which
+// then calls ~stOperator directly; the header declares it out of line, so this unit redeclares it inline.
+inline stOperatorInfo::~stOperatorInfo() { }
 
-extern "C" void* fn_27_25A69C(void* p, int flag) {
-    if (p) {
-        if (p) {
-            __dt__10stOperatorFv(p, 0);
-        }
-        if (flag > 0) {
-            __dl__FPv(p);
-        }
-    }
-    return p;
-}
-}
+stOperatorInfoAdventure::~stOperatorInfoAdventure() { }
 

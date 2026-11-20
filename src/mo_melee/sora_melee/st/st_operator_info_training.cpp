@@ -1,8 +1,7 @@
 #include <st/operator/st_operator_info.h>
 #include <types.h>
 
-// The training-mode info operator (sora_melee 0x2575E4..0x2585D8; processBegin and the destructor are not decompiled
-// yet).
+// The training-mode info operator (sora_melee 0x2575E4..0x2585D8; processBegin is not decompiled yet).
 class stOperatorInfoTraining : public stOperatorInfo {
 public:
     bool m_isEnableOperation; // 0x11B
@@ -32,6 +31,12 @@ extern "C" {
 extern u32 lbl_27_data_532B8[1];
 extern const char lbl_27_data_532BC[];
 }
+
+// TODO: clean up - MATCH-ONLY: the original inlines the (empty) stOperatorInfo destructor into the derived one, which
+// then calls ~stOperator directly; the header declares it out of line, so this unit redeclares it inline.
+inline stOperatorInfo::~stOperatorInfo() { }
+
+stOperatorInfoTraining::~stOperatorInfoTraining() { }
 
 stOperatorInfoTraining::stOperatorInfoTraining() : stOperatorInfo(lbl_27_data_532BC) {
     m_isEnableOperation = false;
