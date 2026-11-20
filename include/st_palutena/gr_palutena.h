@@ -38,38 +38,47 @@ static inline gfModelAnimation* grPalutenaNewModelAnim(nw4r::g3d::ResFile* resFi
     return anim;
 }
 
-static inline void grPalutenaFreeModelAnim(gfModelAnimation* anim) {
-    if (anim != NULL) {
-        if (anim->m_anmObjChrRes != NULL) {
-            anim->m_anmObjChrRes->Destroy();
+// The ground frees its animation with `delete`: the inline destructor below keeps its own `this` check (the second
+// branch to the same label in the target) and reads the owner flag as an unsigned byte.
+// TODO: clean up: view of gfModelAnimation with an inline destructor; HYPOTHESIS: gfModelAnimation has this inline
+// destructor itself (no out-of-line one exists in main.dol).
+struct grPalutenaModelAnim : public gfModelAnimation {
+    ~grPalutenaModelAnim() {
+        if (m_anmObjChrRes != NULL) {
+            m_anmObjChrRes->Destroy();
         }
-        if (anim->m_anmObjVisRes != NULL) {
-            anim->m_anmObjVisRes->Destroy();
+        if (m_anmObjVisRes != NULL) {
+            m_anmObjVisRes->Destroy();
         }
-        if (anim->m_anmObjTexPatRes != NULL) {
-            anim->m_anmObjTexPatRes->Destroy();
+        if (m_anmObjTexPatRes != NULL) {
+            m_anmObjTexPatRes->Destroy();
         }
-        if (anim->m_anmObjTexSrtRes != NULL) {
-            anim->m_anmObjTexSrtRes->Destroy();
+        if (m_anmObjTexSrtRes != NULL) {
+            m_anmObjTexSrtRes->Destroy();
         }
-        if (anim->m_anmObjMatClrRes != NULL) {
-            anim->m_anmObjMatClrRes->Destroy();
+        if (m_anmObjMatClrRes != NULL) {
+            m_anmObjMatClrRes->Destroy();
         }
-        if (anim->m_anmObjShpRes != NULL) {
-            anim->m_anmObjShpRes->Destroy();
+        if (m_anmObjShpRes != NULL) {
+            m_anmObjShpRes->Destroy();
         }
-        void** resPtr = reinterpret_cast<void**>(&anim->m_resFile);
-        if (*resPtr != NULL && anim->_spacer[0] != 0) {
+        void** resPtr = reinterpret_cast<void**>(&m_resFile);
+        if (*resPtr != NULL && static_cast<u8>(_spacer[0]) != 0) {
             gfHeapManager::free(*resPtr);
             *resPtr = NULL;
         }
-        anim->m_anmObjChrRes = NULL;
-        anim->m_anmObjVisRes = NULL;
-        anim->m_anmObjTexPatRes = NULL;
-        anim->m_anmObjTexSrtRes = NULL;
-        anim->m_anmObjMatClrRes = NULL;
-        anim->m_anmObjShpRes = NULL;
-        delete anim;
+        m_anmObjChrRes = NULL;
+        m_anmObjVisRes = NULL;
+        m_anmObjTexPatRes = NULL;
+        m_anmObjTexSrtRes = NULL;
+        m_anmObjMatClrRes = NULL;
+        m_anmObjShpRes = NULL;
+    }
+};
+
+static inline void grPalutenaFreeModelAnim(gfModelAnimation* anim) {
+    if (anim != NULL) {
+        delete static_cast<grPalutenaModelAnim*>(anim);
     }
 }
 

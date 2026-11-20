@@ -323,6 +323,30 @@ void grPalutenaAshiba::updateShake(float deltaFrame) {
     }
 }
 
+// TODO: clean up: MATCH-ONLY copy of the inline Vec3f add (mt_vector.h) with the register choice of this unit: the XY sum
+// goes to the right operand register and the Z sum to the left one.
+static inline void grPalutenaAshibaVecAdd(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
+    register f32 fr3, fr2, fr1, fr0;
+    // clang-format off
+    asm {
+        psq_l  fr3, Vec3f.m_x(lhs), 0, 0
+        psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+        psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+        ps_add fr1, fr3, fr1
+        psq_l  fr0, Vec3f.m_z(rhs), 1, 0
+        ps_add fr2, fr2, fr0
+        psq_st fr1, Vec3f.m_x(pOut), 0, 0
+        psq_st fr2, Vec3f.m_z(pOut), 1, 0
+    }
+    // clang-format on
+}
+
+static inline Vec3f grPalutenaAshibaAddVec(const Vec3f* lhs, const Vec3f* rhs) {
+    Vec3f result;
+    grPalutenaAshibaVecAdd(&result, lhs, rhs);
+    return result;
+}
+
 void grPalutenaAshiba::updateCallBack(float deltaFrame) {
     Vec3f pos;
     grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
@@ -336,7 +360,7 @@ void grPalutenaAshiba::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = m_nodeIndex;
             }
             grNodeCallbackData* data = &calcWorldCallBack->m_nodeCallbackDatas[0];
-            Vec3f offset = m_offset + m_shakePos;
+            Vec3f offset = grPalutenaAshibaAddVec(&m_offset, &m_shakePos);
             data->m_offsetPos.m_x = offset.m_x;
             data->m_offsetPos.m_y = offset.m_y;
             data->m_offsetPos.m_z = offset.m_z;
@@ -599,3 +623,6 @@ void grPalutenaAshiba::getPos_Shake(Vec3f* out) {
     out->m_y = m_shakePos.m_y;
     out->m_z = m_shakePos.m_z;
 }
+
+// The deferred soArrayVectorAbstract<soCollisionAttackPart>::set has no loop guard in this REL.
+#pragma opt_loop_invariants off
