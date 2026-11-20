@@ -1,22 +1,16 @@
 #include <so/damage/so_damage_value_accesser.h>
 #include <so/damage/so_damage_module_impl.h>
+#include <so/damage/so_damage_transactor_actor.h>
 #include <so/so_module_accesser.h>
 #include <types.h>
 
-// HYPOTHESIS: the damage transactor's slot 0xC hands out the table of the 22 damage status kinds (the slot is declared
-// as getDamageValueParam(soModuleAccesser*) in so/damage/so_damage_transactor_actor.h, but these calls pass no
-// accesser).
-// TODO: clean up: MATCH-ONLY view of the transactor until the slot's real signature is settled.
-class soDamageTransactorStatusTableView {
-public:
-    virtual ~soDamageTransactorStatusTableView();
-    virtual const int* getStatusKindTable();
-};
-
 static const int DamageStatusKindNum = 22;
 
+// The damage transactor's value parameter is the table of the 22 damage status kinds.
+// MATCH-ONLY: the original passes no accesser to getDamageValueParam (its argument register is left as it is).
 static inline const int* getDamageStatusKindTable(const soModuleAccesser* moduleAccesser) {
-    return ((soDamageTransactorStatusTableView*)moduleAccesser->getDamageModule().getTransactor())->getStatusKindTable();
+    soModuleAccesser* unused;
+    return (const int*)moduleAccesser->getDamageModule().getTransactor()->getDamageValueParam(unused);
 }
 
 // Map name soDamageValueAccesser::getConstantStatusKind: the status kind of a damage status index.
