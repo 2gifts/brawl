@@ -227,11 +227,13 @@ public:
 
 #endif
 
+#if !defined(WN_POKE_TRAINER_M_BALL_UNIT) && !defined(WN_POKE_TRAINER_FINAL_UNIT) // the Poke Ball and Final Smash units build the shared module builders with their own layouts
 static_assert(sizeof(soModuleAccesserBuilder<wnMarioFireballModuleAccesserBuildConfig>) == 0x1848,
               "Mario module builder extent");
 static_assert(sizeof(wnModuleAccesserBuilder<wnMarioFireballModuleAccesserBuildConfig>) == 0x1DF8,
               "Mario article modules extent");
-#ifndef WN_WEAPON_NO_COMMON_ENERGIES
+#endif
+#if !defined(WN_WEAPON_NO_COMMON_ENERGIES) && !defined(WN_POKE_TRAINER_M_BALL_UNIT)
 static_assert(sizeof(wnWeaponBuilder<wnMarioFireballModuleAccesserBuildConfig>) == 0x1F40,
               "Mario weapon builder extent");
 static_assert(sizeof(wnMarioFireball) == 0x1F44, "Mario fireball article extent");

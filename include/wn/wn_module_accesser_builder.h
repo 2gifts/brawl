@@ -738,7 +738,7 @@ class soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 1, Transiti
     soArraySelectHolder<1, soArrayVector<soOtherAnim, 1>, soSingletonHolder<soArrayNull<soOtherAnim> > > m_otherAnims;
     soSingletonHolder<soArrayNull<soTransitionTermPack> > m_termPacks;
     soSingletonHolder<soArrayNull<u32> > m_u32s;
-#ifdef FT_POKETRAINER_MOTION_DTOR
+#if defined(FT_POKETRAINER_MOTION_DTOR) && !defined(WN_POKE_TRAINER_M_BALL_UNIT)
     // The weapon teardown never destroys this table. A real soArrayContractibleTable would emit that call.
     u32 m_motionDataPad[4];
 #else
@@ -749,7 +749,7 @@ class soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 1, Transiti
 public:
     soMotionModuleBuilder(soModuleAccesser* acc, void* motionData) :
         m_transitionBuilder(), m_otherAnims(1, 0),
-#ifdef FT_POKETRAINER_MOTION_DTOR
+#if defined(FT_POKETRAINER_MOTION_DTOR) && !defined(WN_POKE_TRAINER_M_BALL_UNIT)
         m_module(acc, (soArrayContractibleTable<soMotionDataConst>*)m_motionDataPad, m_transitionBuilder.getModule(),
 #else
         m_motionData((const soMotionData*)motionData, DataNum),
@@ -843,16 +843,26 @@ template <>
 class soCollisionAttackModuleBuilder<soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 7, 0, soCollisionAttackModuleImpl, 1, false, true> > {
     soArrayVector<soCollisionAttackPart, 7> m_attackPartArrayVector;
     soArrayVector<soCollisionGroup, 7> m_collisionGroupArrayVector;
+#ifdef WN_POKE_TRAINER_FINAL_UNIT // the article unit builds the (empty) absolute array; the fighter never tears it down
+    soArrayNull<soCollisionAttackAbsolute> m_attackAbsoluteArray;
+#else
     u32 m_attackAbsolutePad;
+#endif
     soCollisionAttackModuleImpl m_attackModule;
 public:
     soCollisionAttackModuleBuilder(soModuleAccesser* moduleAccesser, int taskId, u8 taskCategory,
                                    soEventObserverRegistrationDesc* registrationDesc) :
         m_attackPartArrayVector(7, soCollisionAttackPart(soCollision::Category_Fighter, false), 0),
         m_collisionGroupArrayVector(7, 0),
+#ifdef WN_POKE_TRAINER_FINAL_UNIT
+        m_attackAbsoluteArray(0, soCollisionAttackAbsolute()),
+        m_attackModule(moduleAccesser, taskId, (gfTask::Category)taskCategory, &m_attackPartArrayVector, &m_collisionGroupArrayVector,
+                       &m_attackAbsoluteArray, registrationDesc, true) { }
+#else
         m_attackAbsolutePad(0),
         m_attackModule(moduleAccesser, taskId, (gfTask::Category)taskCategory, &m_attackPartArrayVector, &m_collisionGroupArrayVector,
                        (soArray<soCollisionAttackAbsolute>*)0, registrationDesc, true) { }
+#endif
     ~soCollisionAttackModuleBuilder() __attribute__((never_inline));
     soCollisionAttackModule* getModule() { return &m_attackModule; }
 };
@@ -1198,7 +1208,11 @@ class soArrayPool<soIntToType<4>, soArrayPoolRoot<soInstanceUnitFullProperty<soT
     soArrayVector<soInstanceUnitFullProperty<soTransitionTerm>, 1> m_array;
 public:
     enum { Depth = 1 };
+#ifdef WN_POKE_TRAINER_M_BALL_UNIT // the Poke Ball unit default-constructs the term array
+    soArrayPool() : m_array() { }
+#else
     soArrayPool() : m_array(0) { }
+#endif
     soArray<soInstanceUnitFullProperty<soTransitionTerm> >* getArray(int index, int total) {
         if (index == total - Depth) {
             return &m_array;
@@ -1207,6 +1221,7 @@ public:
     }
 };
 
+#ifndef WN_POKE_TRAINER_M_BALL_UNIT // the Poke Ball unit builds the generic transition module over the one-term arrays
 template <>
 class soTransitionModuleBuilder<soTransitionModuleBuildConfig<wnMotionTransitionTypeList> > {
     soArrayVector<soTransitionTermGroup, 1> m_groups;
@@ -1223,6 +1238,7 @@ public:
     ~soTransitionModuleBuilder() { }
     soTransitionModule* getModule() { return (soTransitionModule*)m_moduleBytes; }
 };
+#endif
 #endif
 
 class wnCommonBuildConfig {
