@@ -423,24 +423,16 @@ extern "C" void fn_110_2070C(void* self, u8 value) {
 }
 }
 
-// TODO: clean up, give variables real names
+// ftKineticMediatorImplT::updateEnergy2 of Wario Man's mediator (include/ft/builder/ft_builder_kinetic.h): every enabled,
+// not suspended energy of the list is updated (the enable / suspend test is repeated by the inlined checks).
 namespace jj_20C7C {
-#pragma opt_propagation off
-
-
-extern "C" void fn_110_20C7C(void*, soArrayFixed<soKineticEnergy**>* energies,
-                             soModuleAccesser* accesser) {
-    for (int i = 0; i < energies->size(); ++i) {
-        soKineticEnergy* energy = *energies->at(i);
-        u32 disabled =
-            ((static_cast<u32>(reinterpret_cast<const u8*>(energy)[5]) & 0x80) >> 7) == 0;
-        u32 enabled = disabled == 0;
-        u32 suspension;
-
-        if (enabled && (suspension = reinterpret_cast<const u8*>(energy)[6]) != 1) {
-            if (enabled == true && suspension == 0) {
-                if (enabled == true && suspension == 0) {
-                    energy->updateEnergy(accesser);
+extern "C" void fn_110_20C7C(void*, soArray<soKineticEnergy**>* energies, soModuleAccesser* acc) {
+    for (int i = 0; i < energies->size(); i++) {
+        soKineticEnergy* energy = **&energies->at(i);
+        if (energy->isEnable() != false && energy->isSuspend() != true) {
+            if (energy->isEnable() == true && energy->isSuspend() == false) {
+                if (energy->isEnable() == true && energy->isSuspend() == false) {
+                    energy->updateEnergy(acc);
                 }
             }
         }
