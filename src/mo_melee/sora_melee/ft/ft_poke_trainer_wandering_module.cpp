@@ -1,3 +1,8 @@
+// TODO: clean up - MATCH-ONLY (compiler workaround): MWCC hits an internal compiler error (CTemplateTools.c:256) on the
+// explicit builder instantiations of ft_builder_noinline.h depending on how many preprocessor names the unit has seen
+// (adding or removing an unused #ifdef name flips it). This unused name keeps the unit compiling; change it if the ICE returns.
+#ifdef FT_POKETRAINER_ICE_DODGE_0
+#endif
 #define FT_FIGHTER_ANIMCMD_LONG
 #define FT_POKETRAINER_DISGUISE_PUSH_RANGE
 #define FT_POKETRAINER_ARTICLE_POOLS
