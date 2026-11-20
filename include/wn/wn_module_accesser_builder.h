@@ -738,7 +738,7 @@ class soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 1, Transiti
     soArraySelectHolder<1, soArrayVector<soOtherAnim, 1>, soSingletonHolder<soArrayNull<soOtherAnim> > > m_otherAnims;
     soSingletonHolder<soArrayNull<soTransitionTermPack> > m_termPacks;
     soSingletonHolder<soArrayNull<u32> > m_u32s;
-#ifdef FT_POKETRAINER_MOTION_DTOR
+#if defined(FT_POKETRAINER_MOTION_DTOR) && !defined(WN_POKE_TRAINER_M_BALL_UNIT)
     // The weapon teardown never destroys this table. A real soArrayContractibleTable would emit that call.
     u32 m_motionDataPad[4];
 #else
@@ -749,7 +749,7 @@ class soMotionModuleBuilder<soMotionModuleBuildConfig<DataNum, T, 0, 1, Transiti
 public:
     soMotionModuleBuilder(soModuleAccesser* acc, void* motionData) :
         m_transitionBuilder(), m_otherAnims(1, 0),
-#ifdef FT_POKETRAINER_MOTION_DTOR
+#if defined(FT_POKETRAINER_MOTION_DTOR) && !defined(WN_POKE_TRAINER_M_BALL_UNIT)
         m_module(acc, (soArrayContractibleTable<soMotionDataConst>*)m_motionDataPad, m_transitionBuilder.getModule(),
 #else
         m_motionData((const soMotionData*)motionData, DataNum),
@@ -1198,7 +1198,11 @@ class soArrayPool<soIntToType<4>, soArrayPoolRoot<soInstanceUnitFullProperty<soT
     soArrayVector<soInstanceUnitFullProperty<soTransitionTerm>, 1> m_array;
 public:
     enum { Depth = 1 };
+#ifdef WN_POKE_TRAINER_M_BALL_UNIT // the Poke Ball unit default-constructs the term array
+    soArrayPool() : m_array() { }
+#else
     soArrayPool() : m_array(0) { }
+#endif
     soArray<soInstanceUnitFullProperty<soTransitionTerm> >* getArray(int index, int total) {
         if (index == total - Depth) {
             return &m_array;
@@ -1207,6 +1211,7 @@ public:
     }
 };
 
+#ifndef WN_POKE_TRAINER_M_BALL_UNIT // the Poke Ball unit builds the generic transition module over the one-term arrays
 template <>
 class soTransitionModuleBuilder<soTransitionModuleBuildConfig<wnMotionTransitionTypeList> > {
     soArrayVector<soTransitionTermGroup, 1> m_groups;
@@ -1223,6 +1228,7 @@ public:
     ~soTransitionModuleBuilder() { }
     soTransitionModule* getModule() { return (soTransitionModule*)m_moduleBytes; }
 };
+#endif
 #endif
 
 class wnCommonBuildConfig {

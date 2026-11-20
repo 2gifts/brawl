@@ -227,6 +227,7 @@ public:
 
 #endif
 
+#ifndef WN_POKE_TRAINER_M_BALL_UNIT // the Poke Ball unit builds the shared motion builder with its own table padding
 static_assert(sizeof(soModuleAccesserBuilder<wnMarioFireballModuleAccesserBuildConfig>) == 0x1848,
               "Mario module builder extent");
 static_assert(sizeof(wnModuleAccesserBuilder<wnMarioFireballModuleAccesserBuildConfig>) == 0x1DF8,
@@ -236,3 +237,4 @@ static_assert(sizeof(wnWeaponBuilder<wnMarioFireballModuleAccesserBuildConfig>) 
               "Mario weapon builder extent");
 static_assert(sizeof(wnMarioFireball) == 0x1F44, "Mario fireball article extent");
 #endif
+#endif // WN_POKE_TRAINER_M_BALL_UNIT
