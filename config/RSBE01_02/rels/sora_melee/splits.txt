@@ -12068,7 +12068,9 @@ mo_melee/sora_melee/st/st_operator_info_melee.cpp:
 	.ctors      start:0x000002E8 end:0x000002EC
 
 mo_melee/sora_melee/st/st_operator_info_training.cpp:
-	.text       start:0x002575E4 end:0x002585A8
+	.text       start:0x002575E4 end:0x002585D8
+	.ctors      start:0x000002EC end:0x000002F0
+	.bss        start:0x000059E8 end:0x000059F8
 
 mo_melee/sora_melee/st/st_operator_info_wifi_melee.cpp:
 	.text       start:0x002585D8 end:0x00258FBC
@@ -12967,6 +12969,9 @@ mo_melee/sora_melee/so/so_array_list_archive_ptr_itArchive_128_part6.cpp:
 
 mo_melee/sora_melee/so/so_array_base_soArrayFixed_P12itGenArchive_2AF4B4.cpp:
 	.text       start:0x002AF4B4 end:0x002AF4E8
+
+mo_melee/sora_melee/so/so_array_base_soArrayFixed_ItemInfo_2AF4E8.cpp:
+	.text       start:0x002AF4E8 end:0x002AF51C
 
 mo_melee/sora_melee/so/so_array_base_soArrayFixed_P9itArchive_2AF51C.cpp:
 	.text       start:0x002AF51C end:0x002AF550

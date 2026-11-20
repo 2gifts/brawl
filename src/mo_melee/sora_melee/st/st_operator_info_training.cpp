@@ -1,8 +1,8 @@
 #include <st/operator/st_operator_info.h>
 #include <types.h>
 
-// The training-mode info operator (sora_melee 0x2575E4..0x2585A8; processBegin, the destructor and the static
-// initialiser are not decompiled yet).
+// The training-mode info operator (sora_melee 0x2575E4..0x2585D8; processBegin and the destructor are not decompiled
+// yet).
 class stOperatorInfoTraining : public stOperatorInfo {
 public:
     bool m_isEnableOperation; // 0x11B
@@ -68,3 +68,14 @@ u32 stOperatorInfoTraining::getErrorLevel() {
 void stOperatorInfoTraining::stopOperatorRequest() {
     m_isStopRequest = true;
 }
+
+// TODO: clean up - placeholder pair type and names (the same pair of statics as so_sinit_pair_*.cpp); replace them with
+// the real static object type and names once the header that declares them is identified.
+struct SinitPair {
+    s32 m_a;
+    s32 m_b;
+    SinitPair(s32 a, s32 b) : m_a(a), m_b(b) {}
+};
+
+SinitPair lbl_27_bss_59E8(0xFF, 0);
+SinitPair lbl_27_bss_59F0(0xFF, 1);
