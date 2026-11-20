@@ -205,3 +205,18 @@ s32 VFi_nanddrv_init_drv_tbl(PDM_DISK_TBL* p_disk_tbl, u32 ui_ext) {
 void VFi_InitSDWrok(void) {
 }
 
+
+// TODO: clean up - body adapted from the ogws nand_drv.c donor; give variables real names
+s32 nanddrv_mount(struct PDM_DISK* p_disk) {
+    struct VF_HANDLE_DRIVE* drive_p;
+    s32 err;
+    if (p_disk == NULL) {
+        return -20;
+    }
+    drive_p = (struct VF_HANDLE_DRIVE*)VFSysPDMDisk2DriveP(p_disk);
+    if (drive_p == NULL) {
+        return -20;
+    }
+    err = _MountPrfFile(p_disk, (s8*)drive_p->pf_filename);
+    return err == 0 ? 0 : err;
+}

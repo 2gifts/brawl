@@ -1711,59 +1711,6 @@ extern "C" void* fn_800B85B0(void* p, int n) {
 }
 }
 
-namespace jj_800B881C {
-extern "C" int removeHiraganaFont__8FontDataFv();
-extern "C" int removeNormalFont__8FontDataFv();
-extern "C" int removeNormal12Font__8FontDataFv();
-extern "C" int removeMeleeFont__8FontDataFv();
-// TODO: clean up, give variables real names
-extern "C" void fn_800B881C(unsigned char* p, int index) {
-    int flags = 0;
-    if ((unsigned int)((p[16] >> 7) & 1) != 1) {
-        unsigned char old = p[index];
-        p[index] = 0;
-        for (int i = 0; i < 16; i++) flags |= p[i];
-        if ((old & 2) && !(flags & 2U)) removeHiraganaFont__8FontDataFv();
-        if ((old & 1) && !(flags & 1)) removeNormalFont__8FontDataFv();
-        if ((old & 4) && !(flags & 4)) removeNormal12Font__8FontDataFv();
-        if ((old & 8) && !(flags & 8)) removeMeleeFont__8FontDataFv();
-    }
-}
-}
-
-namespace jj_800B8648 {
-extern "C" s32 loadNormalFont__8FontDataFQ25Heaps8HeapType(s32);
-extern "C" s32 loadNormalFontWatch__8FontDataFQ25Heaps8HeapType(s32);
-extern "C" s32 loadNormal12Font__8FontDataFQ25Heaps8HeapType(s32);
-// TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
-extern "C" u8 fn_800B8648(u8* arg0, s32 arg1, s32 arg2, s32 arg3) {
-    if ((u32)((*(u8*)(arg0 + 0x10) >> 7) & 1) == 1U) return 0;
-    u32 orval;
-    s32 flag;
-    flag = arg1;
-    if (arg1 & 4) flag = arg1 & ~1;
-    orval = 0;
-    for (s32 i = 0; i < 16; i++) orval |= arg0[i];
-    if ((flag & 1) && !(orval & 1)) {
-        s32 val = arg2;
-        if (arg2 == 0xFF) val = 0x2F;
-        if (arg3 == 0) loadNormalFont__8FontDataFQ25Heaps8HeapType(val);
-        else loadNormalFontWatch__8FontDataFQ25Heaps8HeapType(val);
-    }
-    if ((flag & 4) && !(orval & 4)) {
-        s32 val2 = arg2;
-        if (arg2 == 0xFF) val2 = 0x31;
-        loadNormal12Font__8FontDataFQ25Heaps8HeapType(val2);
-    }
-    s32 idx;
-    for (idx = 0; idx < 16; idx++) {
-        if (arg0[idx] == 0) break;
-    }
-    *(u8*)(arg0 + idx) = (u8)arg1;
-    return (u8)idx;
-}
-}
-
 namespace jj_800B8350 {
 typedef unsigned char u8;
 typedef unsigned short u16;
