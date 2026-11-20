@@ -4575,3 +4575,33 @@ return r3 != 0;
 }
 }
 
+
+// TODO: clean up - names unknown: frees the player areas of a node (all of them for localPlayer -1); 98.5%, the
+// string base takes r27 instead of r29 (retail addresses the strings from the .data pool anchor)
+static inline void muWifiClearPlayerArea(muWifiPlayerArea* area) {
+    area->m_aid = 0xFF;
+    area->m_localPlayer = 0;
+    area->unk4_b24 = 0;
+    area->unk2[0] = 0;
+    area->unk2[1] = 0;
+    area->unk5_b7 = 0;
+}
+
+extern "C" bool fn_800D0908(muWifiInterfaceTask* self, u32 aid, int localPlayer) {
+    char* base = lbl_80457158;
+    for (int i = 0; i < 4; i++) {
+        if (aid == self->m_playerAreas[i].m_aid && localPlayer == -1) {
+            netReport(base + 0x132C, i, aid, self->m_playerAreas[i].m_localPlayer);
+            muWifiClearPlayerArea(&self->m_playerAreas[i]);
+        } else if (aid == self->m_playerAreas[i].m_aid && localPlayer == self->m_playerAreas[i].m_localPlayer) {
+            netReport(base + 0x1360, aid, self->m_playerAreas[i].m_localPlayer);
+            muWifiClearPlayerArea(&self->m_playerAreas[i]);
+            return true;
+        }
+    }
+    if (localPlayer == -1) {
+        return true;
+    }
+    netReport(base + 0x1390, aid, localPlayer);
+    return false;
+}
