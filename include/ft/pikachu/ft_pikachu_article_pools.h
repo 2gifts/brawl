@@ -25,6 +25,10 @@ public:
 };
 static_assert(sizeof(wnPikachuThunderJolt) == 0x1F94, "wnPikachuThunderJolt layout is wrong!");
 
+#ifdef WN_PIKACHU_CLOUD_UNIT
+// The cloud's own unit (src/mo_fighter/ft_pikachu/wn_pikachu_cloud.cpp) defines the cloud and the thunder bolt it owns.
+#include <wn/pikachu/wn_pikachu_cloud.h>
+#else
 // The Thunder cloud (the class is in the REL). Opaque shell for the same reason.
 class wnPikachuCloud : public Weapon {
     u8 m_unreconstructed[0xA5FC - sizeof(Weapon)];
@@ -47,7 +51,10 @@ public:
 };
 static_assert(sizeof(wnPikachuCloud) == 0xA5FC, "wnPikachuCloud layout is wrong!");
 
+#endif // WN_PIKACHU_CLOUD_UNIT
+
 #ifndef WN_PIKACHU_THUNDER_UNIT // the bolt's own unit defines the full class (wn/pikachu/wn_pikachu_thunder.h)
+#ifndef WN_PIKACHU_CLOUD_UNIT // the cloud header declares the bolt it owns
 // The Thunder bolt (the class is in sora_melee). Opaque shell for the same reason.
 class wnPikachuThunder : public Weapon {
     u8 m_unreconstructed[0x1FC4 - sizeof(Weapon)];
@@ -57,6 +64,7 @@ public:
     bool activeArticle(soModuleAccesser* acc);
 };
 static_assert(sizeof(wnPikachuThunder) == 0x1FC4, "wnPikachuThunder layout is wrong!");
+#endif
 
 // The fighter owns the vortex teardown and needs its complete type.
 #define WN_WEAPON_BUILDER
@@ -93,5 +101,7 @@ public:
 FT_DOL_ARRAY_VECTOR(soArticle*, 5);
 
 typedef wnArticleManageModuleBuilder<ftPikachuArticleMediator, 5> ftPikachuArticleManageModuleBuilder;
+#ifndef WN_PIKACHU_CLOUD_UNIT
 static_assert(sizeof(ftPikachuArticleManageModuleBuilder) == 0x22AE8, "Pikachu article manage builder layout is wrong!");
+#endif
 #endif // WN_PIKACHU_THUNDER_UNIT
