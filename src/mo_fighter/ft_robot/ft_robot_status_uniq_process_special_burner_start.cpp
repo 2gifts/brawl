@@ -31,10 +31,8 @@ static inline void setControllerTarget(ftKineticEnergyController& controller, co
 // MATCH-ONLY: the reset mode is kept in a saved register across the speed queries and vector construction, as in the
 // native register lifetime. One mode variable declared first in the function and assigned in each branch (not one per
 // branch, and not declared later) gives the original saved-register numbering.
-#pragma push
-#pragma opt_propagation off
 void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* moduleAccesser) {
-    int controllerMode;
+    ftKineticEnergyController::ResetType controllerMode;
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
     moduleAccesser->getWorkManageModule().onFlag(0x22000012);
@@ -54,7 +52,7 @@ void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* mo
         }
         resetGravityEnergy(gravity, 0, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(0.0f, speed.m_y), moduleAccesser);
         gravity.enable();
-        controllerMode = 0xb;
+        controllerMode = ftKineticEnergyController::ResetType_11;
         if (absValue(speed.m_x) > soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0)) {
             int sign = (speed.m_x < 0.0f) ? -1 : 1;
             float signF = sign;
@@ -74,7 +72,7 @@ void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* mo
         moduleAccesser->getEffectModule().reqFollow(static_cast<EfID>(0x240002), 0x60, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, -90.0f), 1.0f, false, 1, 0, -1);
     } else {
         // Out of fuel: no lift, the fighter keeps its speed.
-        controllerMode = 0xb;
+        controllerMode = ftKineticEnergyController::ResetType_11;
         resetController(controller, controllerMode, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(speed.m_x, 0.0f), moduleAccesser);
         setControllerSpeed(controller, Vec2f(speed.m_x, 0.0f));
         resetGravityEnergy(gravity, 0, &Vec3f(0.0f, 0.0f, 0.0f), Vec2f(0.0f, speed.m_y), moduleAccesser);
@@ -84,7 +82,6 @@ void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* mo
     moduleAccesser->getWorkManageModule().offFlag(0x12000040);
     moduleAccesser->getWorkManageModule().offFlag(0x12000041);
 }
-#pragma pop
 
 // While there is fuel the start motion already applies the lift of the thrust (and burns one unit per frame).
 void ftRobotStatusUniqProcessSpecialBurnerStart::execStatus(soModuleAccesser* moduleAccesser) {

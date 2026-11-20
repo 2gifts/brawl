@@ -55,7 +55,6 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::initStatus(soModuleAccesser
 // getSumSpeed result in a hidden slot plus a named copy and the Vec2f below them (we elide the copy).
 // MATCH-ONLY: copy propagation off plus the `zero` local keep the int 0 (resetEnergy mode) in a callee-saved register
 // next to the shared 1 (flag), as the target does; the target's source for that 0 is not known.
-#pragma opt_propagation off
 void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser* moduleAccesser) {
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
     case 0x126: // HYPOTHESIS: the status kinds 0x126 and 0x127 do nothing per frame (0x126 is handled in initStatus)
@@ -67,7 +66,7 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser
             if (moduleAccesser->getWorkManageModule().getFloat(0x2100000b) <= 0.0f) {
                 ftKineticEnergyController& controller =
                     dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-                int zero = 0;
+                ftKineticEnergyController::ResetType zero = ftKineticEnergyController::ResetType_0;
                 Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
                 Vec2f speed(sumSpeed.m_x, 0.0f);
                 controller.resetEnergy(zero, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
@@ -78,7 +77,6 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser
         break;
     }
 }
-#pragma opt_propagation reset
 
 void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStop(soModuleAccesser* moduleAccesser) { }
 void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::exitStatus(soModuleAccesser* moduleAccesser, int) { }

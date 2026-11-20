@@ -40,8 +40,6 @@ static inline void resetController(ftKineticEnergyController& controller, int mo
 }
 
 // MATCH-ONLY: retain the reset mode across the sum-speed query, as in the native register lifetime.
-#pragma push
-#pragma opt_propagation off
 void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* moduleAccesser) {
     // MATCH-ONLY: declared at function scope so the saved-register numbering (energy r29, reset mode r28, work module r30)
     // follows the native allocation.
@@ -67,7 +65,7 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
     case 0x130: {
         ftKineticEnergyController& energy = dynamic_cast<ftKineticEnergyController&>(
             *moduleAccesser->getKineticModule().getEnergy(2));
-        int resetKind = 0xB;
+        ftKineticEnergyController::ResetType resetKind = ftKineticEnergyController::ResetType_11;
         Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         float speedLimit = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC0, 0);
         if (speed.m_x > speedLimit) {
@@ -98,7 +96,6 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
     }
 }
 
-#pragma pop
 
 void ftDededeStatusUniqProcessSpecialJetHammer::execStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getStatusModule().getStatusKind() == 0x137) {

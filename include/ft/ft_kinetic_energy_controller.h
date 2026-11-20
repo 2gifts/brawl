@@ -7,6 +7,14 @@
 // HYPOTHESES from resetEnergy/updateEnergy.
 class ftKineticEnergyController : public soKineticEnergyNormal {
 public:
+    // The mode argument of resetEnergy (m_mode). Status code that picks the mode in a local of this type keeps it in a
+    // saved register until the call: an enum local is not constant-propagated. Only the values that are held that way
+    // are listed; their names are not known, so they carry the number.
+    enum ResetType {
+        ResetType_0 = 0,   // walk-style setup from the common constants 0xbd3-0xbd8 (resetEnergy case 0)
+        ResetType_11 = 0xb
+    };
+
     ftKineticEnergyController();
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
     virtual void resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser* moduleAccesser);

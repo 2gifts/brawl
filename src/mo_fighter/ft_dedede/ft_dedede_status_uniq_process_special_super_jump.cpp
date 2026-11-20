@@ -27,11 +27,9 @@ static inline void resetKinetic(soKineticEnergy& energy, int mode, Vec3f* accel,
 }
 
 // MATCH-ONLY: retain reset mode across the sum-speed query and vector construction, as in the native register lifetime.
-#pragma push
-#pragma opt_propagation off
 void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* moduleAccesser) {
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-    int mode = 0xb;
+    ftKineticEnergyController::ResetType mode = ftKineticEnergyController::ResetType_11;
     Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
     if (sumSpeed.m_x > soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0)) {
         sumSpeed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0);
@@ -52,7 +50,6 @@ void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* mod
         energy.disable();
     }
 }
-#pragma pop
 
 void ftDededeStatusUniqProcessSpecialSuperJump::execStatus(soModuleAccesser* moduleAccesser) {
     float stickX = moduleAccesser->getControllerModule().getStickX();

@@ -27,13 +27,11 @@ static inline void setControllerTarget(ftKineticEnergyController& controller, co
 
 // MATCH-ONLY: the reset mode is kept in a saved register across the speed queries and vector construction, as in the
 // native register lifetime.
-#pragma push
-#pragma opt_propagation off
 void ftRobotStatusUniqProcessSpecialBurner::initStatus(soModuleAccesser* moduleAccesser) {
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
     // Cap the positive horizontal speed carried into the burner.
     Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-    int mode = 0xb;
+    ftKineticEnergyController::ResetType mode = ftKineticEnergyController::ResetType_11;
     if (speed.m_x > soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0)) {
         speed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0);
     }
@@ -48,7 +46,6 @@ void ftRobotStatusUniqProcessSpecialBurner::initStatus(soModuleAccesser* moduleA
     moduleAccesser->getWorkManageModule().onFlag(0x22000013);
     moduleAccesser->getControllerModule().setRumble(2, 0, false, 7);
 }
-#pragma pop
 
 void ftRobotStatusUniqProcessSpecialBurner::execStatus(soModuleAccesser* moduleAccesser) {
     specialButtonPushCheck(moduleAccesser);
