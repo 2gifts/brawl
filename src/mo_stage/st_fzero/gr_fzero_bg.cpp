@@ -134,8 +134,6 @@ void grFzeroBg::updateJoint(float deltaFrame) {
 
 void grFzeroBg::updateScene(float deltaFrame) {
     switch (m_state) {
-    case 2:
-        break;
     case 0:
         setMotion(0, 0, 0, 0);
         m_unk1F8 = 0.0f;
@@ -162,7 +160,12 @@ void grFzeroBg::updateScene(float deltaFrame) {
         }
         break;
     }
+    case 2:
+        return;
+    case 3:
+        break;
     }
+
 }
 
 // Drives the course section animation: it waits on the section's timer, plays the section animation forwards until its

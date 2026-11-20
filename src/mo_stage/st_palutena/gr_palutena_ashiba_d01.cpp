@@ -1,3 +1,4 @@
+#define MT_VEC3F_ADD_FRESH_REGS // MATCH-ONLY: register choice of the inline Vec3f adds in updateCallBack, see mt_vector.h
 #include <gr/gr_calc_world_callback.h>
 #include <memory.h>
 #include <nw4r/g3d/g3d_scnmdl.h>
@@ -91,7 +92,32 @@ void grPalutenaAshibaD01::updateLanding(float deltaFrame) {
 }
 
 // The model follows the platform (shake, landing dip and the translation of the cloud under it).
+// TODO: clean up: MATCH-ONLY copy of the inline Vec3f add (mt_vector.h) for the first sum of updateCallBack: its paired-single
+// registers are declared in operand order, the two later sums use the MT_VEC3F_ADD_FRESH_REGS form.
+static inline void grPalutenaD01VecAdd(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
+    register f32 leftXY, rightXY, leftZ, rightZ, resultXY, resultZ;
+    // clang-format off
+    asm {
+        psq_l leftXY, Vec3f.m_x(lhs), 0, 0
+        psq_l rightXY, Vec3f.m_x(rhs), 0, 0
+        psq_l leftZ, Vec3f.m_z(lhs), 1, 0
+        psq_l rightZ, Vec3f.m_z(rhs), 1, 0
+        ps_add resultXY, leftXY, rightXY
+        ps_add resultZ, leftZ, rightZ
+        psq_st resultXY, Vec3f.m_x(pOut), 0, 0
+        psq_st resultZ, Vec3f.m_z(pOut), 1, 0
+    }
+    // clang-format on
+}
+
+static inline Vec3f grPalutenaD01AddVec(const Vec3f* lhs, const Vec3f* rhs) {
+    Vec3f result;
+    grPalutenaD01VecAdd(&result, lhs, rhs);
+    return result;
+}
+
 void grPalutenaAshibaD01::updateCallBack(float deltaFrame) {
+
     Vec3f pos;
     grCalcWorldCallBack* calcWorldCallBack = &m_calcWorldCallBack;
     if (calcWorldCallBack != NULL) {
@@ -102,9 +128,7 @@ void grPalutenaAshibaD01::updateCallBack(float deltaFrame) {
             scnMdl->EnableScnMdlCallbackTiming(1);
             scnMdl->m_nodeIndex = m_nodeIndex;
             grNodeCallbackData* data = &calcWorldCallBack->m_nodeCallbackDatas[0];
-            Vec3f shaken = m_offset + m_shakePos;
-            Vec3f landed = shaken + m_landing;
-            Vec3f offset = landed + m_translate;
+            Vec3f offset = grPalutenaD01AddVec(&m_offset, &m_shakePos) + m_landing + m_translate;
             data->m_offsetPos.m_x = offset.m_x;
             data->m_offsetPos.m_y = offset.m_y;
             data->m_offsetPos.m_z = offset.m_z;

@@ -836,12 +836,10 @@ void stGW::updateScene(float deltaFrame) {
             m_typeManhore = 0x10;
             m_sceneState = 1;
             break;
-        case 1: {
-            float r = randf();
+        case 1:
+            m_sceneTimer = data[0] + (data[1] - data[0]) * randf();
             m_sceneState = 2;
-            m_sceneTimer = data[0] + (data[1] - data[0]) * r;
             break;
-        }
         case 2:
             if (m_sceneTimer == 0.0f) {
                 selectScene();
@@ -855,12 +853,10 @@ void stGW::updateScene(float deltaFrame) {
                 m_sceneState = 3;
             }
             break;
-        case 3: {
-            float r = randf();
+        case 3:
+            m_sceneTimer = data[2] + (data[3] - data[2]) * randf();
             m_sceneState = 4;
-            m_sceneTimer = data[2] + (data[3] - data[2]) * r;
             break;
-        }
         case 4:
             if (m_sceneTimer == 0.0f || m_scene == 4) {
                 changeScene(0);

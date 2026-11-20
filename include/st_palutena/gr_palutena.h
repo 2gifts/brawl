@@ -38,39 +38,72 @@ static inline gfModelAnimation* grPalutenaNewModelAnim(nw4r::g3d::ResFile* resFi
     return anim;
 }
 
-static inline void grPalutenaFreeModelAnim(gfModelAnimation* anim) {
-    if (anim != NULL) {
-        if (anim->m_anmObjChrRes != NULL) {
-            anim->m_anmObjChrRes->Destroy();
+// The ground frees its animation with `delete`: the inline destructor below keeps its own `this` check (the second
+// branch to the same label in the target) and reads the owner flag as an unsigned byte.
+// TODO: clean up: view of gfModelAnimation with an inline destructor; HYPOTHESIS: gfModelAnimation has this inline
+// destructor itself (no out-of-line one exists in main.dol).
+struct grPalutenaModelAnim : public gfModelAnimation {
+    ~grPalutenaModelAnim() {
+        if (m_anmObjChrRes != NULL) {
+            m_anmObjChrRes->Destroy();
         }
-        if (anim->m_anmObjVisRes != NULL) {
-            anim->m_anmObjVisRes->Destroy();
+        if (m_anmObjVisRes != NULL) {
+            m_anmObjVisRes->Destroy();
         }
-        if (anim->m_anmObjTexPatRes != NULL) {
-            anim->m_anmObjTexPatRes->Destroy();
+        if (m_anmObjTexPatRes != NULL) {
+            m_anmObjTexPatRes->Destroy();
         }
-        if (anim->m_anmObjTexSrtRes != NULL) {
-            anim->m_anmObjTexSrtRes->Destroy();
+        if (m_anmObjTexSrtRes != NULL) {
+            m_anmObjTexSrtRes->Destroy();
         }
-        if (anim->m_anmObjMatClrRes != NULL) {
-            anim->m_anmObjMatClrRes->Destroy();
+        if (m_anmObjMatClrRes != NULL) {
+            m_anmObjMatClrRes->Destroy();
         }
-        if (anim->m_anmObjShpRes != NULL) {
-            anim->m_anmObjShpRes->Destroy();
+        if (m_anmObjShpRes != NULL) {
+            m_anmObjShpRes->Destroy();
         }
-        void** resPtr = reinterpret_cast<void**>(&anim->m_resFile);
-        if (*resPtr != NULL && anim->_spacer[0] != 0) {
+        void** resPtr = reinterpret_cast<void**>(&m_resFile);
+        if (*resPtr != NULL && static_cast<u8>(_spacer[0]) != 0) {
             gfHeapManager::free(*resPtr);
             *resPtr = NULL;
         }
-        anim->m_anmObjChrRes = NULL;
-        anim->m_anmObjVisRes = NULL;
-        anim->m_anmObjTexPatRes = NULL;
-        anim->m_anmObjTexSrtRes = NULL;
-        anim->m_anmObjMatClrRes = NULL;
-        anim->m_anmObjShpRes = NULL;
-        delete anim;
+        m_anmObjChrRes = NULL;
+        m_anmObjVisRes = NULL;
+        m_anmObjTexPatRes = NULL;
+        m_anmObjTexSrtRes = NULL;
+        m_anmObjMatClrRes = NULL;
+        m_anmObjShpRes = NULL;
     }
+};
+
+static inline void grPalutenaFreeModelAnim(gfModelAnimation* anim) {
+    if (anim != NULL) {
+        delete static_cast<grPalutenaModelAnim*>(anim);
+    }
+}
+
+// TODO: clean up: MATCH-ONLY copy of the inline Vec3f add (mt_vector.h) with the register choice of the grounds of this stage: the XY sum
+// goes to the right operand register and the Z sum to the left one.
+static inline void grPalutenaVecAdd(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
+    register f32 fr3, fr2, fr1, fr0;
+    // clang-format off
+    asm {
+        psq_l  fr3, Vec3f.m_x(lhs), 0, 0
+        psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+        psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+        ps_add fr1, fr3, fr1
+        psq_l  fr0, Vec3f.m_z(rhs), 1, 0
+        ps_add fr2, fr2, fr0
+        psq_st fr1, Vec3f.m_x(pOut), 0, 0
+        psq_st fr2, Vec3f.m_z(pOut), 1, 0
+    }
+    // clang-format on
+}
+
+static inline Vec3f grPalutenaAddVec(const Vec3f* lhs, const Vec3f* rhs) {
+    Vec3f result;
+    grPalutenaVecAdd(&result, lhs, rhs);
+    return result;
 }
 
 static inline gmMeleeInitData* palutenaMeleeInitData() {

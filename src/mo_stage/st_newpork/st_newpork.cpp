@@ -28,9 +28,8 @@
 extern "C" void fn_8003E5B4(Matrix* matrix);
 extern "C" void fn_8003EBF4(Matrix* matrix, float angle);
 // cmSubject::clear() / setPos(Vec3f*)
-extern "C" void fn_8009EF8C(cmSubject* subject, Vec3f* pos);
 // efScreen::cancelFill(frames, handle)
-extern "C" void fn_8005E3C8(efScreen* screen, float frames, u8* handle);
+// TODO: clean up: the screen fill handles are kept as u8 here (efScreen::cancelFill takes an efScreenHandle*).
 // efScreen::requestFlash(frames, int, u8, u32, GXColor*)
 extern "C" int requestFlash__8efScreenFfiUcUlP8_GXColor(efScreen* screen, float frames, int a, u8 b, u32 c, GXColor* color);
 
@@ -552,7 +551,7 @@ limousineEnd:
             Vec3f backPos(0.0f, 3.0f, -8.0f);
             headMtx.mulPos(&backPos, &backPos);
             m_chimeraArea2->setPos(&backPos);
-            fn_8009EF8C(&m_subject, &m_chimeraPos);
+            m_subject.setPos(&m_chimeraPos);
             following = true;
         }
         if (m_chimera->m_isVisible) {
@@ -889,7 +888,7 @@ limousineEnd:
                 m_chimeraAttack->endEntity();
                 newporkEnableSubject(&m_subject);
                 u8 fillHandle = m_screenFill;
-                fn_8005E3C8(g_efScreen, 60.0f, &fillHandle);
+                g_efScreen->cancelFill(reinterpret_cast<efScreenHandle*>(&fillHandle), 60.0f);
                 goto chimeraFixedWait;
             }
             chimeraLeave:

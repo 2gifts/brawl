@@ -304,7 +304,8 @@ protected:
 
 public:
     // (inline: the original has no constructor of its own)
-    inline grEarthPellet(const char* taskName) : grEarth(taskName) {
+    inline grEarthPellet(const char* taskName) : grEarth(taskName), m_mtx(true) {
+
         m_pelletData = NULL;
         m_mtx.setIdentity();
         grCalcWorldCallBack* callback = &m_calcWorldCallBack;

@@ -67,6 +67,12 @@ static_assert(sizeof(stJungleData) == 0x70, "Class is wrong size!");
 // Rumble Falls (Jungle Japes): a scrolling stage. The model of the stage is a long tower of platforms ("Ashiba") that go
 // by as the camera climbs; some of them have buttons, traps, spikes or break. The grounds get their positions from the
 // stage (the "gimmick positions" published by grJungleBg) and report back through the byte arrays.
+// TODO: clean up: MATCH-ONLY plain storage for the two block matrices (the constructor sets them to the identity itself,
+// not through Matrix's own constructor); getMtxN gives the Matrix view.
+struct stJungleMtx {
+    float m[3][4];
+};
+
 class stJungle : public stMelee {
     Vec3f m_limit[2];               // 0x1D8 the camera limits (lower left, upper right corner)
     Vec3f m_posGimmick[13];         // 0x1F0 the positions that grJungleBg publishes (nodes of the model)
@@ -81,7 +87,7 @@ class stJungle : public stMelee {
     Vec3f m_posPrev[2];             // 0x388 the positions of the last frame (the camera limit and the water)
     Vec3f m_scroll;                 // 0x3A0 how far the stage scrolled in the last frame
     Vec3f m_pos3AC[3];              // 0x3AC the places of the ladders
-    Matrix m_mtxN[2];               // 0x3D0 the matrices of the left and right stone blocks
+    stJungleMtx m_mtxN[2];          // 0x3D0 the matrices of the left and right stone blocks
     grGimmickLadderData* m_ladderData; // 0x430 the data of the three ladders
     u8 m_enable[13];                // 0x434 which platforms are on screen (from updateAshiba)
     u8 m_state[5];                  // 0x441 the states of the platforms with buttons
@@ -102,6 +108,7 @@ class stJungle : public stMelee {
     int m_dangerZone;               // 0x46C the id of the danger zone of the AI
 
 public:
+    Matrix* getMtxN(int i) { return reinterpret_cast<Matrix*>(&m_mtxN[i]); }
     stJungle();
     static stJungle* create();
 

@@ -336,7 +336,7 @@ void grPalutenaAshiba::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = m_nodeIndex;
             }
             grNodeCallbackData* data = &calcWorldCallBack->m_nodeCallbackDatas[0];
-            Vec3f offset = m_offset + m_shakePos;
+            Vec3f offset = grPalutenaAddVec(&m_offset, &m_shakePos);
             data->m_offsetPos.m_x = offset.m_x;
             data->m_offsetPos.m_y = offset.m_y;
             data->m_offsetPos.m_z = offset.m_z;
@@ -599,3 +599,6 @@ void grPalutenaAshiba::getPos_Shake(Vec3f* out) {
     out->m_y = m_shakePos.m_y;
     out->m_z = m_shakePos.m_z;
 }
+
+// The deferred soArrayVectorAbstract<soCollisionAttackPart>::set has no loop guard in this REL.
+#pragma opt_loop_invariants off

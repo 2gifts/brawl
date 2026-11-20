@@ -80,18 +80,26 @@ void grDolpicBell::update(float deltaFrame) {
 
 // The bells ring from a random point in their swing.
 void grDolpicBell::updateActive(float deltaFrame) {
-    int state = m_state;
-    if (state != 2 && state < 2) {
-        if (state == 0) {
-            m_state = 1;
-        } else {
-            if (m_type == 1) {
-                float offset = randf() * 0.5f;
-                setMotionFrame(getMotionFrame(0) * 0.25f + offset, 0);
-            }
-            m_state = 3;
+    switch (m_state) {
+    case 0:
+        m_state = 1;
+        break;
+    case 1:
+        if (m_type == 1) {
+            float offset = randf() * 0.5f;
+            float frame = getMotionFrame(0) * 0.25f;
+            setMotionFrame(frame + offset, 0);
+
         }
+        m_state = 3;
+        break;
+    case 2:
+        return;
+    case 3:
+        break;
     }
+
+
 }
 
 void grDolpicBell::updateCallBack(float deltaFrame) {

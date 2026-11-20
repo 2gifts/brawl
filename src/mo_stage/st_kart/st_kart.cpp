@@ -180,13 +180,14 @@ void stKart::createObjIcon(int team, int mdlIndex) {
     grKartIcon* ground;
     switch (mdlIndex) {
     case 0xB:
-        ground = grKartIcon::create(0xB, "StgKartIcon01", "grKartIcon");
+        ground = grKartIcon::create(mdlIndex, "StgKartIcon01", "grKartIcon");
         break;
     case 0xC:
         ground = grKartIcon::create(mdlIndex, "StgKartIcon02", "grKartIcon");
         break;
     case 0xD:
-        ground = grKartIcon::create(0xD, "StgKartIcon03", "grKartIcon");
+        ground = grKartIcon::create(mdlIndex, "StgKartIcon03", "grKartIcon");
+
         break;
     case 0xE:
         ground = grKartIcon::create(mdlIndex, "StgKartIcon04", "grKartIcon");

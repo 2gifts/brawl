@@ -307,6 +307,7 @@ public:
     char _6af5[3];
 
     ResultInfo(grMadein* model, int numEntries);
+    inline ~ResultInfo();
     void reset();
     void start();
     void on();

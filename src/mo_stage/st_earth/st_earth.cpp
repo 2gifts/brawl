@@ -20,7 +20,6 @@
 #include <st_earth/st_earth.h>
 
 // sndSystem::stopSE (main, unnamed)
-extern "C" void fn_80075F1C(sndSystem* system, s32 handle, int fade);
 // stTrigger::setBeltConveyorTrigger for the triangle belt (sora_melee, unnamed)
 // stTrigger::setBeltConveyorParam for the triangle belt (sora_melee, unnamed)
 
@@ -672,7 +671,7 @@ void stEarth::updateWeather(float deltaFrame) {
                 registScnAnim(static_cast<nw4r::g3d::ResFileData*>(m_fileData->getData(Data_Type_Scene, 0, 0xFFFE)), m_weather);
                 m_timerWeather = data->unkD4 + (data->unkD8 - data->unkD4) * randf();
                 if (m_seHandle >= 0) {
-                    fn_80075F1C(g_sndSystem, m_seHandle, 0x3C);
+                    g_sndSystem->stopSE(static_cast<s32>(m_seHandle), 0x3C);
                 }
                 m_seHandle = g_sndSystem->playSE(static_cast<SndID>(0x1CD8), 0, 0x3C, 0, -1);
                 Vec3f effectPos;
@@ -717,7 +716,7 @@ void stEarth::updateWeather(float deltaFrame) {
                 }
                 if (m_firstWeather != 1) {
                     if (m_seHandle >= 0) {
-                        fn_80075F1C(g_sndSystem, m_seHandle, 0x3C);
+                        g_sndSystem->stopSE(static_cast<s32>(m_seHandle), 0x3C);
                     }
                     m_seHandle = g_sndSystem->playSE(static_cast<SndID>(0x1CD9), 0, 0x3C, 0, -1);
                 }

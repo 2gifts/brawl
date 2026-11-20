@@ -386,9 +386,11 @@ void grPalutenaAshibaKumoD::updateCallBack(float deltaFrame) {
                 scnMdl->m_nodeIndex = m_nodeIndex;
             }
             grNodeCallbackData* data = &calcWorldCallBack->m_nodeCallbackDatas[0];
-            data->m_offsetPos.m_x = m_translate.m_x + m_landing.m_x;
-            data->m_offsetPos.m_y = m_translate.m_y + m_landing.m_y;
-            data->m_offsetPos.m_z = m_translate.m_z + m_landing.m_z;
+            Vec3f offset = grPalutenaAddVec(&m_translate, &m_landing);
+            data->m_offsetPos.m_x = offset.m_x;
+            data->m_offsetPos.m_y = offset.m_y;
+            data->m_offsetPos.m_z = offset.m_z;
+
         }
     }
 }

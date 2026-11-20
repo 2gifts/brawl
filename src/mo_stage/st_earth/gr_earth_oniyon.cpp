@@ -402,8 +402,6 @@ void grEarthOniyon::makeItem() {
             getNodePosition(&pos, m_unk1, 3);
             int lot;
             switch (m_itemKind) {
-            case 0:
-                return;
             case 1:
                 lot = 3;
                 break;
@@ -413,12 +411,11 @@ void grEarthOniyon::makeItem() {
             case 3:
                 lot = 5;
                 break;
-            default:
-                if (4 < m_itemKind) {
-                    return;
-                }
+            case 4:
                 lot = 6;
                 break;
+            default:
+                return;
             }
             grEarthLotCreateStageItem(items, static_cast<itGenId>(lot), &pos);
             m_snd.playSE(static_cast<SndID>(0x1CCE), 0, 0, -1);

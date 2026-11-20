@@ -46,12 +46,13 @@ void grEarthHaneMizu::updateWeather(float deltaFrame) {
         }
         break;
     case 0xE:
-        if (*m_weatherWork == 1 || *m_weatherWork == 2) {
-            setVisibility(1);
-        } else {
+        if (*m_weatherWork != 1 && *m_weatherWork != 2) {
             setVisibility(0);
             m_state = 0xA;
+        } else {
+            setVisibility(1);
         }
+
         break;
     }
 }

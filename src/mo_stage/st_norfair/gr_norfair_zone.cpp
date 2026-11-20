@@ -250,16 +250,13 @@ void grNorfairZone::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
-            grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
             Vec3f* posWork = m_posWork;
             if (posWork != NULL) {
-                Vec3f* pos = &posWork[*m_posIndex];
-                data->m_pos.m_x = pos->m_x;
-                data->m_pos.m_y = pos->m_y;
-                data->m_pos.m_z = pos->m_z;
+                calcWorldCallBack->m_nodeCallbackDatas->m_pos = posWork[*m_posIndex];
             }
             float scaleY = m_scaleY;
-            data = calcWorldCallBack->m_nodeCallbackDatas;
+            grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
+
             data->m_scale.m_x = 1.0f;
             data->m_scale.m_y = scaleY;
             data->m_scale.m_z = 1.0f;

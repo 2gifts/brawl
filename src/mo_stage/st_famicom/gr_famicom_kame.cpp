@@ -146,8 +146,10 @@ void grFamicomKame::toItem() {
                 Vec3f* enemyPos = &m_enemyData[m_index].m_pos;
                 Vec3f pos;
                 pos.m_x = enemyPos->m_x;
-                pos.m_y = enemyPos->m_y + 15.0f;
+                pos.m_y = enemyPos->m_y;
                 pos.m_z = enemyPos->m_z;
+                pos.m_y += 15.0f;
+
                 item->warp(&pos);
                 Vec3f speed;
                 speed.m_x = 0.0f;
@@ -157,15 +159,15 @@ void grFamicomKame::toItem() {
                 if (m_hitDir == -1.0f) {
                     speed.m_x = m_speed;
                     lr = 1.0f;
+                } else if (m_hitDir == 1.0f) {
+                    speed.m_x = -m_speed;
+                    lr = -1.0f;
+                } else if (m_enemyData[m_index].m_speed.m_y == 180.0f) {
+                    lr = -1.0f;
                 } else {
                     lr = 1.0f;
-                    if (m_hitDir == 1.0f) {
-                        speed.m_x = -m_speed;
-                        lr = -1.0f;
-                    } else if (m_enemyData[m_index].m_speed.m_y == 180.0f) {
-                        lr = -1.0f;
-                    }
                 }
+
                 item->fall(&speed, lr);
                 m_itemId = item->m_instanceId;
                 setVisibility(0);
@@ -188,196 +190,6 @@ void grFamicomKame::toGround() {
             }
         }
     }
-}
-
-// The enemy is hit from below (the floor under it was hit): it falls over.
-void grFamicomKame::requestDown() {
-    stFamicomData* data = static_cast<stFamicomData*>(getStageData());
-    if (data != NULL) {
-        FAMICOM_LEVEL_MOTION(0, 4, 8, false)
-        m_actionTimer = data->unk38 - 320.0f;
-        disableHit(0, 0);
-        disableAttack(0);
-        m_attackSet = 0;
-        m_turnState = 0;
-        float side = m_enemyData[m_index].m_hitDir;
-        if (0.0f <= side && side <= 1.0f) {
-            if (0.5f <= side) {
-                if (side <= 0.6f) {
-                    m_hitDir = 500.0f;
-                } else {
-                    m_hitDir = 1.0f;
-                }
-            } else {
-                m_hitDir = -1.0f;
-            }
-        }
-        playSEDown();
-        m_fixPosition = 1;
-        m_enemyData[m_index].m_state = 1;
-        m_state = 0xC;
-    }
-}
-
-// The flipped enemy gets up again (or, if it was left on the floor with an item, it is removed).
-void grFamicomKame::requestDown2() {
-    if (m_fixPosition != 1 && getStageData() != NULL) {
-        if (isExistItem() == 0) {
-            m_state = 0x11;
-        } else if (isRemoveItem() != 0 && isTurnGround() != 0) {
-            FAMICOM_LEVEL_MOTION(1, 5, 9, false)
-            setMotionFrame(172.0f, 0);
-            m_actionTimer = 148.0f;
-            disableHit(0, 0);
-            disableAttack(0);
-            m_attackSet = 0;
-            m_turnState = 0;
-            toGround();
-            m_state = 0xC;
-        }
-    }
-}
-
-void grFamicomKame::requestMove() {
-    stFamicomData* data = static_cast<stFamicomData*>(getStageData());
-    if (data == NULL) {
-        return;
-    }
-    switch (m_level) {
-    case 2:
-        m_speed = data->unk30 * data->enemySpeedMulLevel2;
-        break;
-    case 1:
-        m_speed = data->unk30;
-        break;
-    case 3:
-        m_speed = data->unk30 * data->enemySpeedMulLevel3;
-        break;
-    default:
-        m_speed = 0.0f;
-        break;
-    }
-    m_fallSpeed = data->enemyFallSpeed;
-    if (randf() > 0.5f) {
-        Vec3f* src = &m_posCtrlWork[0];
-        Vec3f* dst = &m_enemyData[m_index].m_pos;
-        dst->m_x = src->m_x;
-        dst->m_y = src->m_y;
-        dst->m_z = src->m_z;
-        m_enemyData[m_index].m_pos.m_y = m_enemyData[m_index].m_pos.m_y - 6.9f;
-        m_enemyData[m_index].m_pos.m_z = m_enemyData[m_index].m_pos.m_z - 15.0f;
-        m_enemyData[m_index].m_dir = 1;
-        m_enemyData[m_index].m_speed.m_x = 0.0f;
-        m_enemyData[m_index].m_speed.m_y = 0.0f;
-        m_enemyData[m_index].m_speed.m_z = 0.0f;
-    } else {
-        Vec3f* src = &m_posCtrlWork[1];
-        Vec3f* dst = &m_enemyData[m_index].m_pos;
-        dst->m_x = src->m_x;
-        dst->m_y = src->m_y;
-        dst->m_z = src->m_z;
-        m_enemyData[m_index].m_pos.m_y = m_enemyData[m_index].m_pos.m_y - 6.9f;
-        m_enemyData[m_index].m_pos.m_z = m_enemyData[m_index].m_pos.m_z - 15.0f;
-        m_enemyData[m_index].m_dir = 0;
-        m_enemyData[m_index].m_speed.m_x = 0.0f;
-        m_enemyData[m_index].m_speed.m_y = 180.0f;
-        m_enemyData[m_index].m_speed.m_z = 0.0f;
- 
-    }
-    FAMICOM_LEVEL_MOTION(2, 6, 10, true)
-    m_firstStep = 1;
-    m_state = 4;
-}
-
-void grFamicomKame::requestReMove() {
-    stFamicomData* data = static_cast<stFamicomData*>(getStageData());
-    if (data == NULL) {
-        return;
-    }
-    switch (m_level) {
-    case 2:
-        m_speed = data->unk30 * data->enemySpeedMulLevel2;
-        break;
-    case 1:
-        m_speed = data->unk30;
-        break;
-    case 3:
-        m_speed = data->unk30 * data->enemySpeedMulLevel3;
-        break;
-    default:
-        m_speed = 0.0f;
-        break;
-    }
-    m_fallSpeed = data->enemyFallSpeed;
-    FAMICOM_LEVEL_MOTION(2, 6, 10, true)
-    m_state = 4;
-    m_attackTimer = 0.0f;
-}
-
-void grFamicomKame::requestReMoveAttack() {
-    if (m_fixPosition == 1) {
-        return;
-    }
-    if (getStageData() == NULL) {
-        return;
-    }
-    if (isExistItem() == 0) {
-        switch (m_motion) {
-        case 5:
-        case 1:
-        case 9:
-            break;
-        default:
-            m_state = 0x11;
-            return;
-        }
-    }
-    FAMICOM_LEVEL_MOTION(2, 6, 10, true)
-    disableHit(0, 0);
-    disableAttack(0);
-    toGround();
-    m_fallSpeed = -1.75f;
-    m_moving = 0;
-    stFamicomEnemyData* enemy = &m_enemyData[m_index];
-    float side = enemy->m_hitDir;
-    if (0.0f <= side && side <= 1.0f) {
-        if (0.5f <= side) {
-            if (0.6f < side) {
-                enemy->m_dir = 0;
-                enemy = &m_enemyData[m_index];
-                enemy->m_speed.m_x = 0.0f;
-                enemy->m_speed.m_y = 180.0f;
-                enemy->m_speed.m_z = 0.0f;
-                m_moving = 1;
-            }
-        } else {
-            enemy->m_dir = 1;
-            enemy = &m_enemyData[m_index];
-            enemy->m_speed.m_x = 0.0f;
-            enemy->m_speed.m_y = 0.0f;
-            enemy->m_speed.m_z = 0.0f;
-            m_moving = 1;
-        }
-    }
-    m_state = 4;
-}
-
-void grFamicomKame::requestTurn() {
-    disableHit(0, 0);
-    disableAttack(0);
-    m_attackSet = 0;
-    FAMICOM_LEVEL_MOTION(3, 7, 11, true)
-    m_enemyData[m_index].m_state = 2;
-    m_enemyData[m_index].m_timer = 60.0f;
-    m_state = 10;
-}
-
-void grFamicomKame::playSEAppear() {
-    m_snd.playSE(static_cast<SndID>(0x1CE5), 0, 0, -1);
-}
-
-void grFamicomKame::playSEDown() {
-    m_snd.playSE(static_cast<SndID>(0x1CE7), 0, 0, -1);
 }
 
 // The animations of the shellcreeper are bound with all their parts. The character and the visibility animations are the
@@ -470,4 +282,196 @@ void grFamicomKame::setMotion(u32 animId, bool loop, bool force, float* frameCou
             *frameCount = modelAnim->getFrameCount();
         }
     }
+}
+
+// The enemy is hit from below (the floor under it was hit): it falls over.
+void grFamicomKame::requestDown() {
+    stFamicomData* data = static_cast<stFamicomData*>(getStageData());
+    if (data != NULL) {
+        FAMICOM_LEVEL_MOTION(0, 4, 8, false)
+        m_actionTimer = data->unk38 - 320.0f;
+        disableHit(0, 0);
+        disableAttack(0);
+        m_attackSet = 0;
+        m_turnState = 0;
+        float side = m_enemyData[m_index].m_hitDir;
+        if (side >= 0.0f && side <= 1.0f) {
+            if (side < 0.5f) {
+                m_hitDir = -1.0f;
+            } else if (side > 0.6f) {
+                m_hitDir = 1.0f;
+            } else {
+                m_hitDir = 500.0f;
+            }
+        }
+
+        playSEDown();
+        m_fixPosition = 1;
+        m_enemyData[m_index].m_state = 1;
+        m_state = 0xC;
+    }
+}
+
+// The flipped enemy gets up again (or, if it was left on the floor with an item, it is removed).
+void grFamicomKame::requestDown2() {
+    if (m_fixPosition != 1 && getStageData() != NULL) {
+        if (isExistItem() == 0) {
+            m_state = 0x11;
+        } else if (isRemoveItem() != 0 && isTurnGround() != 0) {
+            FAMICOM_LEVEL_MOTION(1, 5, 9, false)
+            setMotionFrame(172.0f, 0);
+            m_actionTimer = 148.0f;
+            disableHit(0, 0);
+            disableAttack(0);
+            m_attackSet = 0;
+            m_turnState = 0;
+            toGround();
+            m_state = 0xC;
+        }
+    }
+}
+
+void grFamicomKame::requestMove() {
+    stFamicomData* data = static_cast<stFamicomData*>(getStageData());
+    if (data == NULL) {
+        return;
+    }
+    switch (m_level) {
+    case 1:
+        m_speed = data->unk2C;
+        break;
+    case 2:
+        m_speed = data->unk2C * data->enemySpeedMulLevel2;
+        break;
+    case 3:
+        m_speed = data->unk2C * data->enemySpeedMulLevel3;
+        break;
+
+    default:
+        m_speed = 0.0f;
+        break;
+    }
+    m_fallSpeed = data->enemyFallSpeed;
+    if (randf() > 0.5f) {
+        Vec3f* src = &m_posCtrlWork[0];
+        Vec3f* dst = &m_enemyData[m_index].m_pos;
+        dst->m_x = src->m_x;
+        dst->m_y = src->m_y;
+        dst->m_z = src->m_z;
+        m_enemyData[m_index].m_pos.m_y = m_enemyData[m_index].m_pos.m_y - 6.9f;
+        m_enemyData[m_index].m_pos.m_z = m_enemyData[m_index].m_pos.m_z - 15.0f;
+        m_enemyData[m_index].m_dir = 1;
+        Vec3f* speed = &m_enemyData[m_index].m_speed;
+        speed->m_x = 0.0f;
+        speed->m_y = 0.0f;
+        speed->m_z = 0.0f;
+    } else {
+        Vec3f* src = &m_posCtrlWork[1];
+        Vec3f* dst = &m_enemyData[m_index].m_pos;
+        dst->m_x = src->m_x;
+        dst->m_y = src->m_y;
+        dst->m_z = src->m_z;
+        m_enemyData[m_index].m_pos.m_y = m_enemyData[m_index].m_pos.m_y - 6.9f;
+        m_enemyData[m_index].m_pos.m_z = m_enemyData[m_index].m_pos.m_z - 15.0f;
+        m_enemyData[m_index].m_dir = 0;
+        Vec3f* speed = &m_enemyData[m_index].m_speed;
+        speed->m_x = 0.0f;
+        speed->m_y = 180.0f;
+        speed->m_z = 0.0f;
+ 
+    }
+    FAMICOM_LEVEL_MOTION(2, 6, 10, true)
+    m_firstStep = 1;
+    m_state = 4;
+}
+
+void grFamicomKame::requestReMove() {
+    stFamicomData* data = static_cast<stFamicomData*>(getStageData());
+    if (data == NULL) {
+        return;
+    }
+    switch (m_level) {
+    case 1:
+        m_speed = data->unk2C;
+        break;
+    case 2:
+        m_speed = data->unk2C * data->enemySpeedMulLevel2;
+        break;
+    case 3:
+        m_speed = data->unk2C * data->enemySpeedMulLevel3;
+        break;
+    default:
+        m_speed = 0.0f;
+        break;
+    }
+    m_fallSpeed = data->enemyFallSpeed;
+    FAMICOM_LEVEL_MOTION(2, 6, 10, true)
+    m_state = 4;
+
+    m_attackTimer = 0.0f;
+}
+
+void grFamicomKame::requestReMoveAttack() {
+    if (m_fixPosition == 1) {
+        return;
+    }
+    if (getStageData() == NULL) {
+        return;
+    }
+    if (isExistItem() == 0) {
+        switch (m_motion) {
+        case 5:
+        case 1:
+        case 9:
+            break;
+        default:
+            m_state = 0x11;
+            return;
+        }
+    }
+    FAMICOM_LEVEL_MOTION(2, 6, 10, true)
+    disableHit(0, 0);
+    disableAttack(0);
+    toGround();
+    m_fallSpeed = -1.75f;
+    m_moving = 0;
+    stFamicomEnemyData* enemy = &m_enemyData[m_index];
+    float side = enemy->m_hitDir;
+    if (side >= 0.0f && side <= 1.0f) {
+        if (side < 0.5f) {
+            enemy->m_dir = 1;
+            enemy = &m_enemyData[m_index];
+            enemy->m_speed.m_x = 0.0f;
+            enemy->m_speed.m_y = 0.0f;
+            enemy->m_speed.m_z = 0.0f;
+            m_moving = 1;
+        } else if (side > 0.6f) {
+            enemy->m_dir = 0;
+            enemy = &m_enemyData[m_index];
+            enemy->m_speed.m_x = 0.0f;
+            enemy->m_speed.m_y = 180.0f;
+            enemy->m_speed.m_z = 0.0f;
+            m_moving = 1;
+        }
+    }
+
+    m_state = 4;
+}
+
+void grFamicomKame::requestTurn() {
+    disableHit(0, 0);
+    disableAttack(0);
+    m_attackSet = 0;
+    FAMICOM_LEVEL_MOTION(3, 7, 11, true)
+    m_enemyData[m_index].m_state = 2;
+    m_enemyData[m_index].m_timer = 60.0f;
+    m_state = 10;
+}
+
+void grFamicomKame::playSEAppear() {
+    m_snd.playSE(static_cast<SndID>(0x1CE5), 0, 0, -1);
+}
+
+void grFamicomKame::playSEDown() {
+    m_snd.playSE(static_cast<SndID>(0x1CE7), 0, 0, -1);
 }

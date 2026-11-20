@@ -12863,11 +12863,26 @@ mo_melee/sora_melee/it/it_manager.cpp:
 mo_melee/sora_melee/so/so_array_vector_destructor_BaseItem_1.cpp:
 	.text       start:0x002AC298 end:0x002AC2D8
 
+mo_melee/sora_melee/so/so_array_list_dtor_itGenArchive_2AC2D8.cpp:
+	.text       start:0x002AC2D8 end:0x002AC340
+
 mo_melee/sora_melee/so/so_array_list_members_ptr_itGenArchive_3_part1.cpp:
 	.text       start:0x002AC340 end:0x002AC960
 
+mo_melee/sora_melee/so/so_array_list_dtor_ItemInfo_2AC960.cpp:
+	.text       start:0x002AC960 end:0x002AC9C8
+
+mo_melee/sora_melee/so/so_array_list_archive_ItemInfo_12_2AC9C8.cpp:
+	.text       start:0x002AC9C8 end:0x002ACFE8
+
+mo_melee/sora_melee/so/so_array_list_dtor_BaseItem_2ACFE8.cpp:
+	.text       start:0x002ACFE8 end:0x002AD050
+
 mo_melee/sora_melee/so/so_array_list_members_ptr_BaseItem_64_part2.cpp:
 	.text       start:0x002AD050 end:0x002AD668
+
+mo_melee/sora_melee/so/so_array_list_dtor_itArchive_2AD668.cpp:
+	.text       start:0x002AD668 end:0x002AD6D0
 
 mo_melee/sora_melee/so/so_array_list_archive_ptr_itArchive_128_part1.cpp:
 	.text       start:0x002AD6D0 end:0x002AD778
@@ -12884,11 +12899,35 @@ mo_melee/sora_melee/so/so_array_list_members_ptr_itArchive_128_part2.cpp:
 mo_melee/sora_melee/so/so_array_list_archive_ptr_itArchive_128_part3.cpp:
 	.text       start:0x002AD89C end:0x002ADCF8
 
+mo_melee/sora_melee/so/so_array_base_dtors_itArchive_2ADCF8.cpp:
+	.text       start:0x002ADCF8 end:0x002ADDB8
+
+mo_melee/sora_melee/so/so_array_base_dtors_ItemInfo_2ADDB8.cpp:
+	.text       start:0x002ADDB8 end:0x002ADE78
+
+mo_melee/sora_melee/so/so_array_base_dtors_itGenArchive_2ADE78.cpp:
+	.text       start:0x002ADE78 end:0x002ADF38
+
+mo_melee/sora_melee/so/so_array_list_unit_itArchive_2ADF38.cpp:
+	.text       start:0x002ADF38 end:0x002ADF94
+
+mo_melee/sora_melee/so/so_array_list_unit_BaseItem_2ADF94.cpp:
+	.text       start:0x002ADF94 end:0x002ADFF0
+
+mo_melee/sora_melee/so/so_array_list_unit_ItemInfo_2ADFF0.cpp:
+	.text       start:0x002ADFF0 end:0x002AE04C
+
+mo_melee/sora_melee/so/so_array_list_unit_itGenArchive_2AE04C.cpp:
+	.text       start:0x002AE04C end:0x002AE0A8
+
 mo_melee/sora_melee/so/so_array_vector_accessors_BaseItem_1.cpp:
 	.text       start:0x002AE0A8 end:0x002AE170
 
 mo_melee/sora_melee/so/so_array_list_members_ptr_itGenArchive_3_part2.cpp:
 	.text       start:0x002AE170 end:0x002AE644
+
+mo_melee/sora_melee/so/so_array_list_members_ItemInfo_12_2AE644.cpp:
+	.text       start:0x002AE644 end:0x002AEB18
 
 mo_melee/sora_melee/so/so_array_list_members_ptr_BaseItem_64_part3.cpp:
 	.text       start:0x002AEB18 end:0x002AEFEC

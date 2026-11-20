@@ -55,7 +55,9 @@ stHalberd::stHalberd() : stMelee("stHalberd", Stages::Halberd), m_subject(0, 1) 
     for (u8 i = 0; i < 12; i++) {
         mtx(&m_mtxJoint[i])->setIdentity();
     }
-    mtx(&m_mtxHand[0])->setIdentity();
+    for (u8 i = 0; i < 1; i++) {
+        mtx(&m_mtxHand[i])->setIdentity();
+    }
     m_armState = 0;
     m_armTimer = 0.0f;
     m_armTimerMax = 0.0f;
@@ -949,7 +951,9 @@ void stHalberd::updateArmPos(float deltaFrame) {
         dir.m_y *= len;
         dir.m_z *= len;
         Vec3f hand(shoulder.m_x + dir.m_x, shoulder.m_y + dir.m_y, shoulder.m_z + dir.m_z);
-        mtx(&m_mtxHand[0])->setIdentity();
+        for (u8 i = 0; i < 1; i++) {
+        mtx(&m_mtxHand[i])->setIdentity();
+    }
         mtx(&m_mtxHand[0])->setTrans(hand.m_x, hand.m_y, hand.m_z);
         Vec3f whole(hand.m_x - shoulder.m_x, hand.m_y - shoulder.m_y, hand.m_z - shoulder.m_z);
         float dist = whole.length();

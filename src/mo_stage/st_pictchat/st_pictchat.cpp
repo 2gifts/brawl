@@ -19,7 +19,6 @@
 // sndSystem::setSeqSpeed (main, unnamed): it changes how fast a sequence plays (the sound of the picture follows the speed
 // of the game)
 // sndSystem::isPlay (main, unnamed)
-extern "C" bool fn_80077DA0(sndSystem* sndSystem, s32 handle);
 
 stClassInfoImpl<Stages::PictChat, stPictchat> stPictchat::bss_loc_14;
 
@@ -616,35 +615,31 @@ void grPictchatAttack007::setIndex(u8 index) {
 
 
 // The data of the two ladders (the nodes they are on are "ladderL" and "ladderR").
+// The ladder entries are set up by hand; the motion path model of the first entry is cleared each time (the list is read
+// again from the stage after the name is copied).
+#define PICTCHAT_INIT_LADDER(index, mdlIndex, unk49, nodeName, offsetY, rangeX, rangeY) \
+    {                                                                       \
+        grGimmickLadderData* data = &m_hashigoData[index];                   \
+        memset(data, 0, sizeof(grGimmickLadderData));                       \
+        data->m_mdlIndex = mdlIndex;                                        \
+        *reinterpret_cast<u8*>(&data->m_49) = unk49; /* TODO: clean up: an unsigned byte here */ \
+        data->m_restrictUpExit = false;                                     \
+        data->m_51 = 1;                                                     \
+        strcpy(data->m_nodeName, nodeName);                                 \
+        /* TODO: clean up: the model index is written as an unsigned byte */ \
+        *reinterpret_cast<u8*>(&m_hashigoData->m_motionPathData.m_mdlIndex) = 0xFF; \
+        data->m_areaData.m_offsetPos.m_x = 0.0f;                            \
+        data->m_areaData.m_offsetPos.m_y = offsetY;                         \
+        data->m_areaData.m_range.m_x = rangeX;                              \
+        data->m_areaData.m_range.m_y = rangeY;                              \
+    }
 void stPictchat::createObjHashigo() {
-    // MATCH-ONLY: the data of the ladders is raw storage (no cookie, no constructors) and its bytes are set as unsigned bytes
-    u8* bytes = new (Heaps::StageResource) u8[2 * sizeof(grGimmickLadderData)];
-    m_hashigoData = reinterpret_cast<grGimmickLadderData*>(bytes);
-    if (bytes != NULL) {
-        memset(bytes, 0, sizeof(grGimmickLadderData));
-        bytes[0x30] = 0xE4;
-        bytes[0x31] = 0xDC;
-        bytes[0x32] = 0;
-        bytes[0x33] = 1;
-        strcpy(reinterpret_cast<char*>(bytes + 0x34), "ladderL");
-        reinterpret_cast<u8*>(m_hashigoData)[6] = 0xFF;
-        reinterpret_cast<grGimmickLadderData*>(bytes)->m_areaData.m_offsetPos.m_x = 0.0f;
-        reinterpret_cast<grGimmickLadderData*>(bytes)->m_areaData.m_offsetPos.m_y = 27.0f;
-        reinterpret_cast<grGimmickLadderData*>(bytes)->m_areaData.m_range.m_x = 10.0f;
-        reinterpret_cast<grGimmickLadderData*>(bytes)->m_areaData.m_range.m_y = 54.0f;
+    // TODO: clean up: MATCH-ONLY raw storage (no cookie, no element constructor), as in stDonkey
+    m_hashigoData = reinterpret_cast<grGimmickLadderData*>(new (Heaps::StageResource) u8[2 * sizeof(grGimmickLadderData)]);
+    if (m_hashigoData != NULL) {
+        PICTCHAT_INIT_LADDER(0, 0xE4, 0xDC, "ladderL", 27.0f, 10.0f, 54.0f);
         createObjHashigo1(0x23);
-        bytes = reinterpret_cast<u8*>(m_hashigoData) + sizeof(grGimmickLadderData);
-        memset(bytes, 0, sizeof(grGimmickLadderData));
-        bytes[0x30] = 0xE5;
-        bytes[0x31] = 0xDC;
-        bytes[0x32] = 0;
-        bytes[0x33] = 1;
-        strcpy(reinterpret_cast<char*>(bytes + 0x34), "ladderR");
-        reinterpret_cast<u8*>(m_hashigoData)[6] = 0xFF;
-        reinterpret_cast<grGimmickLadderData*>(bytes)->m_areaData.m_offsetPos.m_x = 0.0f;
-        reinterpret_cast<grGimmickLadderData*>(bytes)->m_areaData.m_offsetPos.m_y = 27.0f;
-        reinterpret_cast<grGimmickLadderData*>(bytes)->m_areaData.m_range.m_x = 10.0f;
-        reinterpret_cast<grGimmickLadderData*>(bytes)->m_areaData.m_range.m_y = 54.0f;
+        PICTCHAT_INIT_LADDER(1, 0xE5, 0xDC, "ladderR", 27.0f, 10.0f, 54.0f);
         createObjHashigo1(0x24);
     }
 }
@@ -994,7 +989,7 @@ void stPictchat::updatePict(float deltaFrame) {
             break;
         case 2:
             if (m_seHandle != -1) {
-                if (fn_80077DA0(g_sndSystem, m_seHandle) == 1) {
+                if (g_sndSystem->isPlay(m_seHandle) == 1) {
                     float rate = static_cast<float>(g_gfApplication->m_frameRate) / 60.0f;
                     float speed = deltaFrame;
                     if (rate > 1.0f) {

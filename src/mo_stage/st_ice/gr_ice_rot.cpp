@@ -149,18 +149,21 @@ void grIceRot::updateCallBack(float deltaFrame) {
         if (scnMdl != NULL) {
             if (scnMdl->m_calcWorldCallBack == NULL) {
                 calcWorldCallBack->m_index = 0;
+                calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex = m_nodeIndex;
                 scnMdl->m_calcWorldCallBack = calcWorldCallBack;
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
             if (m_mtxWork != NULL) {
                 Matrix matrix = *m_mtxWork;
-                fn_8003EBF4(&matrix, m_angle * 0.017453292f);
+                float angle = m_angle;
+                fn_8003EBF4(&matrix, angle * 0.017453292f);
                 calcWorldCallBack->m_nodeCallbackDatas[0].m_matrix = matrix;
-                Vec3f pos;
-                pos.m_x = matrix.m[0][3];
-                pos.m_y = matrix.m[1][3];
-                pos.m_z = matrix.m[2][3];
+                float z = matrix.m[2][3];
+                float y = matrix.m[1][3];
+                float x = matrix.m[0][3];
+                Vec3f pos(x, y, z);
+
                 m_snd.setPos(&pos);
             }
         }
