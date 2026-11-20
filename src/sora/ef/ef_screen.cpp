@@ -151,9 +151,9 @@ void GXSetBlendMode(int, int, int, int);
 void GXBegin(int, int, int);
 void gfDrawSetVtxPosColorPrimEnvironment__Fv(void);
 
-extern const float lbl_805A1948;
-extern const float lbl_805A194C;
-extern const float lbl_805A1950;
+extern "C" const float lbl_805A1948;
+extern "C" const float lbl_805A194C;
+extern "C" const float lbl_805A1950;
 
 }
 
@@ -243,7 +243,7 @@ struct Self {
 };
 extern "C" void fn_8005DA68(Self*, Data*);
 extern "C" void fn_8005DE38(Self*, unsigned char, int);
-extern float lbl_805A1918;
+extern "C" float lbl_805A1918;
 
 // TODO: clean up, give variables real names
 extern "C" void fn_8005D7D8(Self* self, float delta) {
@@ -356,7 +356,7 @@ extern "C" void reset__8efScreenFv(Screen* self) {
 
 // TODO: clean up, give variables real names
 namespace jj_8005E344 {
-extern float lbl_805A1918;
+extern "C" float lbl_805A1918;
 struct Col { unsigned char r, g, b, a; };
 struct Ent {
     unsigned char pad[0x9D]; unsigned char k; unsigned char pad2[3]; unsigned char m;

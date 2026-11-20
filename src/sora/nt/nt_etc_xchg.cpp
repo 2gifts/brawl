@@ -95,7 +95,7 @@ void* __dt__8gfThreadFv(void*, short);
 void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 void createThread__8gfThreadFP10gfRunnableUlUlQ25Heaps8HeapType(
     void*, void*, unsigned long, unsigned long, int);
-extern unsigned char __vt__8gfThread[];
+extern "C" unsigned char __vt__8gfThread[];
 void* fn_80038984(void*, int);
 }
 
@@ -238,7 +238,7 @@ namespace jj_8014E478 {
 extern "C" {
 void __ct__15nteWiiConnect24FQ25Heaps8HeapType(void*);
 void* memset(void*, int, unsigned long);
-extern char lbl_80461048[];
+extern "C" char lbl_80461048[];
 }
 
 extern "C" void* __ct__11nteExchangeFQ25Heaps8HeapType(void* self) {
@@ -268,7 +268,7 @@ extern "C" void* __ct__11nteExchangeFQ25Heaps8HeapType(void* self) {
 namespace jj_8014E520 {
 
 extern "C" {
-extern char lbl_80461048[];
+extern "C" char lbl_80461048[];
 void* __dt__15nteWiiConnect24Fv(void*, int);
 }
 
@@ -330,7 +330,7 @@ s32 sendMails__15nteWiiConnect24FUlPP11NWC24MsgObj(void*, u32, s32*);
 int sprintf(char*, const char*, ...);
 u32 strlen(const char*);
 void OSSleepTicks(s64);
-extern char lbl_8059E7E0[6];
+extern "C" char lbl_8059E7E0[6];
 }
 
 extern "C" s32 _mail_SendMail__11nteExchangeFv(void* arg) {
@@ -687,7 +687,7 @@ void* getSectionData_Direct__7nteFileFPUcUl(void*, u8);
 int requestNewFileNameVF__14gfCollectionIOFi(void*, int);
 int requestSaveVF__14gfCollectionIOFiPCcPvib(void*, int, void*, int, int, int);
 }
-extern unsigned char lbl_80423690[];
+extern "C" unsigned char lbl_80423690[];
 extern "C" int fn_8014F0F0(void* arg0, void* collection, void* arg2, u8* target) {
     int entry[2];
     int value;
@@ -783,7 +783,7 @@ extern "C" {
     void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
     void createThread__8gfThreadFP10gfRunnableUlUlQ25Heaps8HeapType(
         gfThread*, gfRunnable*, unsigned long, unsigned long, int);
-    extern char __vt__8gfThread[];
+    extern "C" char __vt__8gfThread[];
 }
 
 inline bool terminated(gfThread* thread) {

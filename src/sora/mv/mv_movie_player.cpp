@@ -65,7 +65,7 @@ void CallbackTHPAudioFrame() {
 namespace jj_8007FDF4 {
 extern "C" {
 
-extern unsigned char lbl_8040ABC0[0x18];
+extern "C" unsigned char lbl_8040ABC0[0x18];
 
 // TODO: clean up, give variables real names
 unsigned char *fn_8007FDF4(void) {
@@ -247,16 +247,16 @@ void Disable__Q34nw4r2ut2LCFv(void);
 void THPPlayerInit__Fv(void);
 void CallbackTHPAudioFrame__Fv(void);
 
-extern int lbl_805A0210;
-extern int lbl_805A025C;
-extern int lbl_805A0230;
-extern void* lbl_805A021C;
-extern void* lbl_805A0220;
-extern void* lbl_805A0224;
-extern void* lbl_805A0228;
-extern unsigned char lbl_805A024C[2];
-extern unsigned char lbl_805A024E;
-extern unsigned char lbl_805A024A;
+extern "C" int lbl_805A0210;
+extern "C" int lbl_805A025C;
+extern "C" int lbl_805A0230;
+extern "C" void* lbl_805A021C;
+extern "C" void* lbl_805A0220;
+extern "C" void* lbl_805A0224;
+extern "C" void* lbl_805A0228;
+extern "C" unsigned char lbl_805A024C[2];
+extern "C" unsigned char lbl_805A024E;
+extern "C" unsigned char lbl_805A024A;
 
 int __ct__13mvMoviePlayerFv(int arg0) {
     int tmp = lbl_805A0210;
@@ -302,20 +302,20 @@ void DVDClose(void*);
 void Enable__Q34nw4r2ut2LCFv();
 void AXRegisterCallback(int);
 void __dl__FPv(void*);
-extern S lbl_8049DDF0[2];
-extern int lbl_805A0210;
-extern int lbl_805A0214;
-extern void* lbl_805A0218;
-extern void* lbl_805A021C;
-extern void* lbl_805A0220;
-extern void* lbl_805A0224;
-extern void* lbl_805A0228;
-extern void* lbl_805A022C;
-extern int lbl_805A0230;
-extern unsigned char lbl_805A024C[2];
-extern int lbl_805A0250;
-extern int lbl_805A025C;
-extern void* lbl_805A0260;
+extern "C" S lbl_8049DDF0[2];
+extern "C" int lbl_805A0210;
+extern "C" int lbl_805A0214;
+extern "C" void* lbl_805A0218;
+extern "C" void* lbl_805A021C;
+extern "C" void* lbl_805A0220;
+extern "C" void* lbl_805A0224;
+extern "C" void* lbl_805A0228;
+extern "C" void* lbl_805A022C;
+extern "C" int lbl_805A0230;
+extern "C" unsigned char lbl_805A024C[2];
+extern "C" int lbl_805A0250;
+extern "C" int lbl_805A025C;
+extern "C" void* lbl_805A0260;
 
 void* __dt__13mvMoviePlayerFv(void* p, int n) {
     if (p != 0) {
@@ -369,16 +369,16 @@ extern "C" int THPPlayerDrawCurrentFrame__Fiiiiii(int, int, int, int, int, int);
 extern "C" void THPPlayerDrawDone__Fv(void);
 extern "C" void fn_8007FE00(int, int, int, int, int, int, int);
 extern "C" char g_thpObject[];
-extern int lbl_8049DDB0[4];
-extern int lbl_8059DBA0;
-extern int lbl_8059DBA4;
-extern int lbl_805A0214;
-extern int lbl_805A0238;
-extern int lbl_805A023C;
-extern unsigned int lbl_805A0240;
-extern unsigned char lbl_805A024E;
-extern int lbl_805A0250;
-extern int lbl_805A0254;
+extern "C" int lbl_8049DDB0[4];
+extern "C" int lbl_8059DBA0;
+extern "C" int lbl_8059DBA4;
+extern "C" int lbl_805A0214;
+extern "C" int lbl_805A0238;
+extern "C" int lbl_805A023C;
+extern "C" unsigned int lbl_805A0240;
+extern "C" unsigned char lbl_805A024E;
+extern "C" int lbl_805A0250;
+extern "C" int lbl_805A0254;
 
 extern "C" int drawFrame__13mvMoviePlayerFiiii(int a1, int a2, int a3, int a4, int a5) {
     int ret = -1;

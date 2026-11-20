@@ -426,7 +426,7 @@ struct B {
     VEC3 pos;
 };
 extern "C" {
-extern const float lbl_805A1BB8;
+extern "C" const float lbl_805A1BB8;
 void fn_801EC158(MTX34*);
 void fn_801EC868(const MTX34*, MTX34*, float, float, float);
 void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
@@ -502,15 +502,15 @@ struct Node {
 
 extern "C" float fn_801ED04C(const VEC3*);
 extern "C" void fn_801ED008(const VEC3*, VEC3*);
-extern const float lbl_805A1BB8;
-extern const float lbl_805A1BBC;
-extern const float lbl_805A1BD0;
-extern const float lbl_805A1BD4;
-extern const float lbl_805A1BD8;
-extern const float lbl_805A1BDC;
-extern const float lbl_805A1BE0;
-extern const float lbl_805A1BE4;
-extern const float lbl_805A1BE8;
+extern "C" const float lbl_805A1BB8;
+extern "C" const float lbl_805A1BBC;
+extern "C" const float lbl_805A1BD0;
+extern "C" const float lbl_805A1BD4;
+extern "C" const float lbl_805A1BD8;
+extern "C" const float lbl_805A1BDC;
+extern "C" const float lbl_805A1BE0;
+extern "C" const float lbl_805A1BE4;
+extern "C" const float lbl_805A1BE8;
 
 // TODO: clean up, give variables real names
 extern "C" void fn_800835B4(void* self, Node* node, int arg2, int arg3)
@@ -721,11 +721,11 @@ void fn_80162974(MTX34*, const VEC3*, float);
 void fn_801629AC(MTX34*, float, float, float);
 void fn_801EC868(const MTX34*, MTX34*, float, float, float);
 void fn_801EC1B8(const MTX34*, const MTX34*, MTX34*);
-extern const float lbl_805A1BB8;
-extern const float lbl_805A1BBC;
-extern const float lbl_805A1BFC;
-extern const float lbl_805A1C00;
-extern const float lbl_805A1C04;
+extern "C" const float lbl_805A1BB8;
+extern "C" const float lbl_805A1BBC;
+extern "C" const float lbl_805A1BFC;
+extern "C" const float lbl_805A1C00;
+extern "C" const float lbl_805A1C04;
 }
 // TODO: clean up, give variables real names
 extern "C" void fn_80084524(Context* self, Node* node) {
@@ -833,10 +833,10 @@ void fn_800893F0(Context*, Node*);
 int fn_800867E8(Context*, Node*, unsigned char, VEC2*);
 int fn_800879FC(Context*, Node*, unsigned int, int);
 void fn_80081DC4(Node*);
-extern const float lbl_805A1BB8;
-extern const float lbl_805A1BBC;
-extern const float lbl_805A1C08;
-extern const float lbl_805A1C0C;
+extern "C" const float lbl_805A1BB8;
+extern "C" const float lbl_805A1BBC;
+extern "C" const float lbl_805A1C08;
+extern "C" const float lbl_805A1C0C;
 }
 
 // TODO: clean up, give variables real names
@@ -952,10 +952,10 @@ namespace jj_80086AC0 {
 
 
 extern "C" {
-extern const float lbl_805A1BB8;
-extern const float lbl_805A1BBC;
-extern const float lbl_805A1BE4;
-extern const float lbl_805A1C20;
+extern "C" const float lbl_805A1BB8;
+extern "C" const float lbl_805A1BBC;
+extern "C" const float lbl_805A1BE4;
+extern "C" const float lbl_805A1C20;
 
 float mtSqrtf__Ff(float);
 float rsqrtf__Ff(float);
@@ -1253,13 +1253,13 @@ int fn_800851C8(Manager*, Entry*, Entry*, int, int, unsigned char, int, int,
 void fn_80082FDC(Manager*, int, int, EntryList*);
 void fn_800831AC(Manager*, int, int, EntryList*);
 void fn_8027EABC(void*, void*, unsigned int, int);
-extern void* lbl_805A0EC8;
+extern "C" void* lbl_805A0EC8;
 }
 
-extern const float lbl_805A1BB8;
-extern const float lbl_805A1BBC;
-extern const double lbl_805A1BC0;
-extern const double lbl_805A1BC8;
+extern "C" const float lbl_805A1BB8;
+extern "C" const float lbl_805A1BBC;
+extern "C" const double lbl_805A1BC0;
+extern "C" const double lbl_805A1BC8;
 
 static int findGroup(Manager* self, int id)
 {
@@ -1521,11 +1521,11 @@ void fn_80113EC0(Entry*, Entry*);
 Vec2f fn_80114CBC(Entry*, Vec2f*);
 Vec2f fn_80114E9C(Entry*);
 float rsqrtf__Ff(float);
-extern const float lbl_805A1BB8;
-extern const float lbl_805A1BD8;
-extern const float lbl_805A1C20;
-extern const float lbl_805A1C24;
-extern const float lbl_805A1C5C;
+extern "C" const float lbl_805A1BB8;
+extern "C" const float lbl_805A1BD8;
+extern "C" const float lbl_805A1C20;
+extern "C" const float lbl_805A1C24;
+extern "C" const float lbl_805A1C5C;
 }
 
 // TODO: clean up, give variables real names
@@ -1811,7 +1811,7 @@ namespace jj_80082544 {
 extern "C" void deallocateChunk__14hkThreadMemoryFPvii(void*, void*, unsigned int, int);
 extern "C" void* __dt__16grCollCollectionFv(char*, int);
 extern "C" void __dl__FPv(void*);
-extern void* s_instance__14hkThreadMemory;
+extern "C" void* s_instance__14hkThreadMemory;
 
 struct Array {
     void* data;
@@ -1951,15 +1951,15 @@ void fn_80088FB8(Context*, Node*, s32);
 void updateMatrix__12ph2ndaryLineFPCQ34nw4r4math5MTX34PQ34nw4r4math4VEC3PQ34nw4r4math4VEC3(Node*, const MTX34*, VEC3*, VEC3*);
 void updateMatrixForMyPosture__12ph2ndaryLineFv(Node*);
 s32 memcmp(const void*, const void*, u32);
-extern const f32 lbl_805A1BB8;
-extern const f32 lbl_805A1BBC;
-extern const f32 lbl_805A1BD8;
-extern const f32 lbl_805A1BEC;
-extern const f32 lbl_805A1BF0;
-extern const f32 lbl_805A1C10;
-extern const f32 lbl_805A1C14;
-extern const f32 lbl_805A1C18;
-extern const f32 lbl_805A1C1C;
+extern "C" const f32 lbl_805A1BB8;
+extern "C" const f32 lbl_805A1BBC;
+extern "C" const f32 lbl_805A1BD8;
+extern "C" const f32 lbl_805A1BEC;
+extern "C" const f32 lbl_805A1BF0;
+extern "C" const f32 lbl_805A1C10;
+extern "C" const f32 lbl_805A1C14;
+extern "C" const f32 lbl_805A1C18;
+extern "C" const f32 lbl_805A1C1C;
 }
 static inline bool different(const MTX34& a, const MTX34& b) {
     return memcmp(&a, &b, 0x30) != 0;

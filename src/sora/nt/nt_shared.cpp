@@ -84,8 +84,8 @@ extern "C" void* fn_801410CC(void* self, int index) {
 
 namespace jj_8013DBD8 {
 extern "C" {
-extern unsigned char lbl_8045E7AC[];
-extern unsigned char __vt__8NtBuffer[];
+extern "C" unsigned char lbl_8045E7AC[];
+extern "C" unsigned char __vt__8NtBuffer[];
 void __dl__FPv(void*);
 }
 class NtBuffer {
@@ -223,7 +223,7 @@ struct Object {
     char pad[0x11]; unsigned char flag; char pad2[0x9e];
     struct Player { signed char active; char pad[0x1f]; } players[4];
 };
-extern Manager* lbl_805A0390;
+extern "C" Manager* lbl_805A0390;
 extern "C" void fn_80140C84(Object*);
 inline bool checkPlayers(Object* obj, Entry::Player* players) {
     for (int i = 0; i < 4; i++) {
@@ -261,11 +261,11 @@ namespace jj_8013F9B8 {
 extern "C" {
 int fn_800D278C(void* self, int idx);
 void fn_800D2164(void* self, int idx, u8 value);
-extern void* lbl_805A0390;
-extern u8 lbl_8059E742;
-extern const f32 lbl_805A2AC8;
-extern const f32 lbl_805A2B14;
-extern const f32 lbl_805A2B18;
+extern "C" void* lbl_805A0390;
+extern "C" u8 lbl_8059E742;
+extern "C" const f32 lbl_805A2AC8;
+extern "C" const f32 lbl_805A2B14;
+extern "C" const f32 lbl_805A2B18;
 }
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -300,13 +300,13 @@ extern "C" void fn_8013F9B8(char* arg0) {
 }
 
 namespace jj_80143974 {
-extern u8 lbl_8059E742;
-extern u8* lbl_805A0390;
-extern const f32 lbl_805A2AC8;
-extern const f32 lbl_805A2ACC;
-extern const f32 lbl_805A2B40;
-extern const f32 lbl_805A2B44;
-extern const f32 lbl_805A2B48;
+extern "C" u8 lbl_8059E742;
+extern "C" u8* lbl_805A0390;
+extern "C" const f32 lbl_805A2AC8;
+extern "C" const f32 lbl_805A2ACC;
+extern "C" const f32 lbl_805A2B40;
+extern "C" const f32 lbl_805A2B44;
+extern "C" const f32 lbl_805A2B48;
 
 struct Ent {
     s8 active;
@@ -363,7 +363,7 @@ extern "C" f32 fn_80143974(Self* self) {
 
 namespace jj_80142A80 {
 
-extern NtSend* lbl_805A03D4;
+extern "C" NtSend* lbl_805A03D4;
 
 struct SendEntry {
     char pad[8];
@@ -464,12 +464,12 @@ struct Pair {
     u8 b;
 };
 
-extern Mgr* lbl_805A0390;
-extern NtSend* lbl_805A03D4;
-extern u8 lbl_805A0409;
-extern u8 lbl_8059E742;
-extern Pair lbl_805A0418[4];
-extern char lbl_8045E1D0[];
+extern "C" Mgr* lbl_805A0390;
+extern "C" NtSend* lbl_805A03D4;
+extern "C" u8 lbl_805A0409;
+extern "C" u8 lbl_8059E742;
+extern "C" Pair lbl_805A0418[4];
+extern "C" char lbl_8045E1D0[];
 
 // TODO: clean up, give variables real names
 extern "C" u32 fn_80140604(u8 arg0, u32 arg1, Arg* arg2) {
@@ -551,10 +551,10 @@ u64 fn_800C8F68(const char* fmt, ...);
 void netReport__FPCce(const char* fmt, ...);
 }
 
-extern int lbl_805A0434;
-extern u8 lbl_8059E742;
-extern char lbl_8045E188[];
-extern NtReport lbl_8045E1C0;
+extern "C" int lbl_805A0434;
+extern "C" u8 lbl_8059E742;
+extern "C" char lbl_8045E188[];
+extern "C" NtReport lbl_8045E1C0;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8014044C(Obj* obj) {
@@ -608,10 +608,10 @@ void fn_800C8F68(const char*, ...);
 void fn_80140EBC(void*, int);
 void fn_80143F7C(int, int);
 void fn_8014B130(int);
-extern unsigned char lbl_8059E742;
-extern int lbl_805A03A8;
-extern char lbl_8045E380[];
-extern char lbl_8045E3A8[];
+extern "C" unsigned char lbl_8059E742;
+extern "C" int lbl_805A03A8;
+extern "C" char lbl_8045E380[];
+extern "C" char lbl_8045E3A8[];
 }
 // TODO: clean up, give variables real names
 inline void update(unsigned char* self) {
@@ -684,12 +684,12 @@ struct Main {
     Node* unk454;
 };
 extern "C" void netReport__FPCce(const char*, ...);
-extern char lbl_8045E218[];
-extern Main* lbl_805A0390;
-extern NtSend* lbl_805A03D4;
-extern const f32 lbl_805A2AC8;
-extern const f32 lbl_805A2AD4;
-extern const f32 lbl_805A2B1C;
+extern "C" char lbl_8045E218[];
+extern "C" Main* lbl_805A0390;
+extern "C" NtSend* lbl_805A03D4;
+extern "C" const f32 lbl_805A2AC8;
+extern "C" const f32 lbl_805A2AD4;
+extern "C" const f32 lbl_805A2B1C;
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" u32 fn_80140790(u8 arg0, u32 arg1, u8* arg2) {
     Node* n;
@@ -758,20 +758,20 @@ void __dt__8NtBufferFv(void*);
 void fn_8013DB48(void*);
 void fn_8014B964(s32, s32, s32);
 void fn_8014B96C(s32, s32, s32);
-extern unsigned char __vt__8NtBuffer[];
-extern unsigned char lbl_8045E794[];
-extern unsigned char lbl_8045E7AC[];
-extern unsigned char lbl_8045E7C0[];
-extern void* lbl_805A0390;
-extern s32 lbl_805A0434;
-extern const f32 lbl_805A2AC8;
-extern const f32 lbl_805A2ACC;
-extern const f32 lbl_805A2AD0;
-extern const f32 lbl_805A2AD4;
-extern const f32 lbl_805A2AD8;
-extern const f32 lbl_805A2ADC;
-extern const f32 lbl_805A2AE0;
-extern const f32 lbl_805A2AE4;
+extern "C" unsigned char __vt__8NtBuffer[];
+extern "C" unsigned char lbl_8045E794[];
+extern "C" unsigned char lbl_8045E7AC[];
+extern "C" unsigned char lbl_8045E7C0[];
+extern "C" void* lbl_805A0390;
+extern "C" s32 lbl_805A0434;
+extern "C" const f32 lbl_805A2AC8;
+extern "C" const f32 lbl_805A2ACC;
+extern "C" const f32 lbl_805A2AD0;
+extern "C" const f32 lbl_805A2AD4;
+extern "C" const f32 lbl_805A2AD8;
+extern "C" const f32 lbl_805A2ADC;
+extern "C" const f32 lbl_805A2AE0;
+extern "C" const f32 lbl_805A2AE4;
 }
 
 struct Byte1D8 {
@@ -958,7 +958,7 @@ struct Mgr {
     Elem* unk458;
 };
 
-extern Mgr* lbl_805A0390;
+extern "C" Mgr* lbl_805A0390;
 
 static inline void resetMgr(Mgr* g) {
     Elem* p;
@@ -1055,7 +1055,7 @@ struct Mgr {
     Elem* unk458;
 };
 
-extern Mgr* lbl_805A0390;
+extern "C" Mgr* lbl_805A0390;
 
 static inline void resetMgr(Mgr* g) {
     Elem* e = g->elems;
@@ -1107,10 +1107,10 @@ extern "C" void fn_8013FB0C(void) {
 namespace jj_8013FDD4 {
 
 extern "C" {
-extern unsigned char lbl_8059E742;
-extern unsigned char* lbl_805A0434;
-extern const float lbl_805A2B10;
-extern const float lbl_805A2AC8;
+extern "C" unsigned char lbl_8059E742;
+extern "C" unsigned char* lbl_805A0434;
+extern "C" const float lbl_805A2B10;
+extern "C" const float lbl_805A2AC8;
 unsigned char fn_800CB194(muWifiInterfaceTask*, int);
 int fn_800CB0D8(muWifiInterfaceTask*, int);
 int fn_800CB354(muWifiInterfaceTask*, int);
@@ -1250,10 +1250,10 @@ void* memcpy(void*, const void*, unsigned long);
 void* memset(void*, int, unsigned long);
 }
 
-extern char lbl_8045E3BC[];
-extern char lbl_8045E3D8[];
-extern u8 lbl_8059E742;
-extern u8 lbl_805A0418[8];
+extern "C" char lbl_8045E3BC[];
+extern "C" char lbl_8045E3D8[];
+extern "C" u8 lbl_8059E742;
+extern "C" u8 lbl_805A0418[8];
 extern void (*lbl_805A0398)(s32*, u32*, u16);
 
 // TODO: clean up, give variables real names
@@ -1351,7 +1351,7 @@ struct Mgr {
  char padAC[0x154-0xAC]; u32 unk154; char pad158[0x160-0x158]; void* unk160; s32 unk164;
  char pad168[0x450-0x168]; u32 unk450; u32 unk454; Elem* unk458;
 };
-extern Mgr* lbl_805A0390;
+extern "C" Mgr* lbl_805A0390;
 extern "C" int g_muWifiInterfaceTask;
 extern "C" void fn_800D1A9C(int);
 extern "C" void fn_8004A914(void*, int);
@@ -1513,13 +1513,13 @@ void fn_800C8F68(const char*, ...);
 void fn_8014B130(int);
 void fn_80143F7C(s32, int);
 void* fn_801410CC(void*, int);
-extern char lbl_8045E018[];
-extern u8 lbl_8059E742;
-extern void* lbl_805A0390;
-extern s32 lbl_805A03A8;
-extern u8 lbl_805A0418[8];
-extern const f32 lbl_805A2ADC;
-extern const f32 lbl_805A2AEC;
+extern "C" char lbl_8045E018[];
+extern "C" u8 lbl_8059E742;
+extern "C" void* lbl_805A0390;
+extern "C" s32 lbl_805A03A8;
+extern "C" u8 lbl_805A0418[8];
+extern "C" const f32 lbl_805A2ADC;
+extern "C" const f32 lbl_805A2AEC;
 }
 
 // TODO: clean up, give variables real names
@@ -1773,13 +1773,13 @@ struct State {
     u8 pad1db;
     int timer, x1e0, x1e4, error;
 };
-extern Mgr* lbl_805A0390;
-extern gfCameraController* lbl_805A0428;
-extern int lbl_805A03E8;
-extern u8 lbl_805A0409, lbl_8059E742;
-extern char lbl_8045E018[], g_Network[];
-extern void* g_muWifiInterfaceTask;
-extern const float lbl_805A2B10;
+extern "C" Mgr* lbl_805A0390;
+extern "C" gfCameraController* lbl_805A0428;
+extern "C" int lbl_805A03E8;
+extern "C" u8 lbl_805A0409, lbl_8059E742;
+extern "C" char lbl_8045E018[], g_Network[];
+extern "C" void* g_muWifiInterfaceTask;
+extern "C" const float lbl_805A2B10;
 extern void (*lbl_805A039C)(u16,u8);
 extern void (*lbl_805A03A0)(u8,u16,u8);
 extern "C" {
@@ -1961,7 +1961,7 @@ namespace jj_8013E3E8 {
 extern "C" {
     void netReport__FPCce(const char*, ...);
     void flushLogToSDCard__Fv();
-    extern char lbl_8045E018[];
+    extern "C" char lbl_8045E018[];
 
     struct S {
         unsigned pad : 1;
@@ -2065,14 +2065,14 @@ struct PeerB {
     u8 a, b;
 };
 
-extern Mgr* lbl_805A0390;
-extern gfCameraController* lbl_805A0428;
-extern int lbl_805A03E8;
-extern u8 lbl_8059E742;
-extern PeerB lbl_805A0418[4];
-extern char lbl_8045E018[];
-extern void* g_muWifiInterfaceTask;
-extern int g_NtMatchingStatus;
+extern "C" Mgr* lbl_805A0390;
+extern "C" gfCameraController* lbl_805A0428;
+extern "C" int lbl_805A03E8;
+extern "C" u8 lbl_8059E742;
+extern "C" PeerB lbl_805A0418[4];
+extern "C" char lbl_8045E018[];
+extern "C" void* g_muWifiInterfaceTask;
+extern "C" int g_NtMatchingStatus;
 
 extern "C" {
 void netReport__FPCce(const char*, ...);

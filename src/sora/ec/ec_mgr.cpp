@@ -795,7 +795,7 @@ struct Entry {
     u32 tail;
 };
 
-extern Entry* lbl_805A0164;
+extern "C" Entry* lbl_805A0164;
 
 class EcMgr {
 public:
@@ -842,7 +842,7 @@ struct Entry {
     u32 tail;
 };
 
-extern Entry* lbl_805A0164;
+extern "C" Entry* lbl_805A0164;
 
 class EcMgr {
 public:
@@ -912,9 +912,9 @@ static inline Entry* findEntry(Owner* self, u32 id) {
 }
 
 extern "C" {
-extern const Tbl1 lbl_80407198;
-extern const Tbl2 lbl_804073B0;
-extern void* g_GameGlobal;
+extern "C" const Tbl1 lbl_80407198;
+extern "C" const Tbl2 lbl_804073B0;
+extern "C" void* g_GameGlobal;
 u32 fn_8004E958(void* p);
 void* fn_8018D3F0(void* a, const char* b);
 
@@ -1100,7 +1100,7 @@ struct Entry {
     u32 tail;
 };
 
-extern Entry* lbl_805A0164;
+extern "C" Entry* lbl_805A0164;
 
 struct Manager {
     char pad[0x60];
@@ -1219,8 +1219,8 @@ extern "C" void fn_8005F08C(Owner* self)
 
 namespace jj_800613B8 {
 
-extern unsigned char lbl_8040ABC0[0x18];
-extern unsigned char lbl_8040AC08[0x18];
+extern "C" unsigned char lbl_8040ABC0[0x18];
+extern "C" unsigned char lbl_8040AC08[0x18];
 extern "C" void GetMtx__Q34nw4r3g3d6ScnObjCFQ44nw4r3g3d6ScnObj13ScnObjMtxTypePQ34nw4r4math5MTX34(nw4r::g3d::ScnMdlSimple* self, u32 arg1, Matrix* arg2);
 extern "C" void GetScnMtxPos__Q34nw4r3g3d12ScnMdlSimpleCFPQ34nw4r4math5MTX34Q44nw4r3g3d6ScnObj13ScnObjMtxTypeUl(const nw4r::g3d::ScnMdlSimple* self, Matrix* out, u32 type, u32 arg3);
 
@@ -1268,16 +1268,16 @@ extern "C" void fn_800613B8(Matrix* arg0, nw4r::g3d::ScnMdlSimple* arg1, u32 arg
 // TODO: clean up, give variables real names
 namespace jj_8005E6C8 {
 extern "C" {
-extern char lbl_8059DAB0[6];
-extern char lbl_80453DB8[];
-extern s32 lbl_805A014C;
-extern s32 lbl_805A0150;
-extern s32 lbl_805A0154;
-extern s32 lbl_805A0158;
-extern s32 lbl_805A015C;
-extern s32 lbl_805A0160;
-extern s32 lbl_805A0164;
-extern void* g_gfSceneRoot;
+extern "C" char lbl_8059DAB0[6];
+extern "C" char lbl_80453DB8[];
+extern "C" s32 lbl_805A014C;
+extern "C" s32 lbl_805A0150;
+extern "C" s32 lbl_805A0154;
+extern "C" s32 lbl_805A0158;
+extern "C" s32 lbl_805A015C;
+extern "C" s32 lbl_805A0160;
+extern "C" s32 lbl_805A0164;
+extern "C" void* g_gfSceneRoot;
 
 void* __ct__6gfTaskFPCcQ26gfTask8Categoryiib(void* self, const char* name, int category, int a, int b, bool c);
 void* __ct__10ecTraceMgrFv(void* self);
@@ -1389,7 +1389,7 @@ extern "C" gfTask* __ct__5ecMgrFUlUlUl(gfTask* arg0, u32 arg1, u32 arg2, u32 arg
 namespace jj_8005E920 {
 
 extern "C" {
-extern char lbl_80453DB8[];
+extern "C" char lbl_80453DB8[];
 void Destroy__Q34nw4r3g3d6G3dObjFv(nw4r::g3d::G3dObj* obj);
 void __dla__FPv(void* p);
 void __dl__FPv(void* p);
@@ -1399,7 +1399,7 @@ void fn_8001AC98();
 void release__12ecEffectWorkFb(void* arg0, unsigned int arg1);
 void __destroy_new_array(void* block, void (*destroy)(void*, int));
 extern void __dt__10ecResourceFv(void*, int);
-extern void* g_ecMgr;
+extern "C" void* g_ecMgr;
 }
 
 struct gfTask {
@@ -1476,7 +1476,7 @@ struct Manager {
     u32 count;
 };
 extern "C" {
-extern unsigned char lbl_80407060[];
+extern "C" unsigned char lbl_80407060[];
 void set_file_img__10ecResourceFPviUl(Entry*, void*, int, u32);
 }
 inline Entry* findEntry(Manager* self, u32 id) {
@@ -1556,12 +1556,12 @@ struct Owner {
     u32 mask;
 };
 
-extern s32 lbl_805A014C;
-extern s32 lbl_805A0150;
-extern s32 lbl_805A0154;
-extern s32 lbl_805A0158;
-extern s32 lbl_805A015C;
-extern s32 lbl_805A0160;
+extern "C" s32 lbl_805A014C;
+extern "C" s32 lbl_805A0150;
+extern "C" s32 lbl_805A0154;
+extern "C" s32 lbl_805A0158;
+extern "C" s32 lbl_805A015C;
+extern "C" s32 lbl_805A0160;
 
 extern "C" void end__12ecEffectWorkFbb(Record*, int, int);
 extern "C" void set_mdl_texpat__12ecEffectWorkFUl(Record*, int);

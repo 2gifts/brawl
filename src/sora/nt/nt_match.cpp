@@ -439,7 +439,7 @@ int NtMatching::searchFriendID(u32 aid) {
 // TODO: clean up, give variables real names
 namespace jj_8014BF68 {
 extern "C" void netReport__FPCce(const char*, ...);
-extern char lbl_8045F7A8[];
+extern "C" char lbl_8045F7A8[];
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8014BF68(char* arg0, int arg1) {
@@ -469,9 +469,9 @@ extern "C" void fn_8014BF68(char* arg0, int arg1) {
 
 namespace jj_80149BC0 {
 extern "C" {
-extern char lbl_80460CF0[];
-extern unsigned char __vt__8NtBuffer[];
-extern char* lbl_805A0434;
+extern "C" char lbl_80460CF0[];
+extern "C" unsigned char __vt__8NtBuffer[];
+extern "C" char* lbl_805A0434;
 void fn_80025A74(void*);
 void free__13gfHeapManagerFPv(void*);
 void __dl__FPv(void*);
@@ -524,8 +524,8 @@ extern "C" char* getFriendInfo__12ntFriendInfoFv(void*);
 extern "C" int fn_80351C70(FriendData*, FriendData*);
 extern "C" void netReport__FPCce(const char*, ...);
 
-extern char lbl_8045F7B8[];
-extern char lbl_8045F7DC[];
+extern "C" char lbl_8045F7B8[];
+extern "C" char lbl_8045F7DC[];
 
 // TODO: clean up, give variables real names
 extern "C" int fn_801474A0(NetworkState* self, u64 id, bool* found, bool* own) {
@@ -562,10 +562,10 @@ extern "C" int fn_801474A0(NetworkState* self, u64 id, bool* found, bool* own) {
 
 namespace jj_80149AA0 {
 extern "C" {
-extern unsigned char __vt__8NtBuffer[];
-extern char lbl_80460CF0[];
-extern char* lbl_805A0434;
-extern char lbl_8059E7C0;
+extern "C" unsigned char __vt__8NtBuffer[];
+extern "C" char lbl_80460CF0[];
+extern "C" char* lbl_805A0434;
+extern "C" char lbl_8059E7C0;
 void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int, unsigned long);
 void* create__12gfMemoryPoolFPvUlPCc(void*, unsigned long, const char*);
 
@@ -629,7 +629,7 @@ void* fn_80149AA0(void* arg0) {
 namespace jj_80147784 {
 
 extern "C" {
-extern OSMutex lbl_8049EC30;
+extern "C" OSMutex lbl_8049EC30;
 s32 fn_801475A4(void* self, s32 a, u64 id, s32 b);
 int fn_801483A4(u64 id);
 void fn_80147C9C(void* self, s32 idx);
@@ -699,10 +699,10 @@ extern "C" s32 fn_80147784(FriendSelf* self, u64 id, s32 flag) {
 namespace jj_80149EF8 {
 class BufferSlots { public: virtual void slot0(); virtual void slot1(); virtual void freeBuffer(); };
 extern "C" {
-extern unsigned char __vt__8NtBuffer[];
+extern "C" unsigned char __vt__8NtBuffer[];
 void __dl__FPv(void*);
-extern char lbl_8045F7A8[];
-extern NtSend* lbl_805A03D4;
+extern "C" char lbl_8045F7A8[];
+extern "C" NtSend* lbl_805A03D4;
 void netReport__FPCce(const char*, ...);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -756,16 +756,16 @@ int fn_8033A798(void*, void*);
 unsigned char fn_800C851C(void);
 unsigned char fn_8033A77C(void*);
 void* memcpy(void*, const void*, unsigned long);
-extern int gUnk805a03d8;
-extern int g_NtAIDBitmap;
-extern int g_muWifiInterfaceTask;
-extern char lbl_8045F7A8[];
-extern unsigned char lbl_8049EC30[];
-extern unsigned char lbl_805A03D0;
-extern void* lbl_805A0434;
-extern unsigned char lbl_805A0414;
-extern unsigned char lbl_805A0410;
-extern signed char lbl_8059E742;
+extern "C" int gUnk805a03d8;
+extern "C" int g_NtAIDBitmap;
+extern "C" int g_muWifiInterfaceTask;
+extern "C" char lbl_8045F7A8[];
+extern "C" unsigned char lbl_8049EC30[];
+extern "C" unsigned char lbl_805A03D0;
+extern "C" void* lbl_805A0434;
+extern "C" unsigned char lbl_805A0414;
+extern "C" unsigned char lbl_805A0410;
+extern "C" signed char lbl_8059E742;
 }
 
 struct Bits7C {
@@ -831,10 +831,10 @@ void fn_800C8F68(const char*, ...);
 void fn_80146FCC(int);
 void fn_8014B130(int);
 void fn_801473AC(void);
-extern char lbl_8045F7A8[];
-extern int lbl_805A03E8;
-extern int lbl_805A03F4;
-extern int g_NtMatchingStatus;
+extern "C" char lbl_8045F7A8[];
+extern "C" int lbl_805A03E8;
+extern "C" int lbl_805A03F4;
+extern "C" int g_NtMatchingStatus;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 int fn_80149644(char* self) {
@@ -919,13 +919,13 @@ void fn_80146FCC(int);
 void* fn_8014C180();
 void fn_8014C26C(void*, int, int);
 void fn_800D221C(int, int);
-extern unsigned char lbl_805A03D0;
-extern void* lbl_805A0434;
-extern int gUnk805a03d8;
-extern int g_muWifiInterfaceTask;
-extern char lbl_8045F7A8[];
-extern unsigned char lbl_8049EC30[];
-extern int lbl_805A0430;
+extern "C" unsigned char lbl_805A03D0;
+extern "C" void* lbl_805A0434;
+extern "C" int gUnk805a03d8;
+extern "C" int g_muWifiInterfaceTask;
+extern "C" char lbl_8045F7A8[];
+extern "C" unsigned char lbl_8049EC30[];
+extern "C" int lbl_805A0430;
 }
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -986,11 +986,11 @@ extern "C" {
 void fn_80146FCC(int);
 void fn_801473AC();
 void* fn_8014B364(void*);
-extern int lbl_805A03E0, lbl_805A03E8, lbl_805A03F4;
-extern unsigned char lbl_805A03E4, lbl_805A0438;
-extern OSMutex lbl_8049EC78, lbl_8049EC30, lbl_8049EC48;
-extern NtSend* lbl_805A03D4;
-extern unsigned char __vt__8NtBuffer[];
+extern "C" int lbl_805A03E0, lbl_805A03E8, lbl_805A03F4;
+extern "C" unsigned char lbl_805A03E4, lbl_805A0438;
+extern "C" OSMutex lbl_8049EC78, lbl_8049EC30, lbl_8049EC48;
+extern "C" NtSend* lbl_805A03D4;
+extern "C" unsigned char __vt__8NtBuffer[];
 void* __nw__FUlQ25Heaps8HeapType(unsigned int, Heaps::HeapType);
 }
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
@@ -1084,9 +1084,9 @@ extern "C" void fn_80149C70(unsigned char* self, int arg1) {
 namespace jj_8014A0F4 {
 
 
-extern unsigned char* lbl_805A0434;
-extern int gUnk805a03d8;
-extern char lbl_804603B8[];
+extern "C" unsigned char* lbl_805A0434;
+extern "C" int gUnk805a03d8;
+extern "C" char lbl_804603B8[];
 
 extern "C" unsigned long long fn_8014FEB4();
 extern "C" int fn_80336928(void*, int);
@@ -1203,7 +1203,7 @@ void fn_80148210(int,int);
 void fn_80148280();
 void fn_801482C8();
 }
-extern char lbl_8045F890[];
+extern "C" char lbl_8045F890[];
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8014792C(void* arg) {
     unsigned char* self = (unsigned char*)arg;
@@ -1252,17 +1252,17 @@ unsigned char fn_8033C180(int, void*, int*);
 unsigned char fn_8033C5D8(int, void*, char*);
 int snprintf(char*, unsigned long, const char*, ...);
 char* strcpy(char*, const char*);
-extern char lbl_8045F7A8[];
-extern char lbl_8059E770[4];
-extern char lbl_8059E794[6];
-extern char lbl_8059E7A0[8];
-extern char lbl_8059E7A8[5];
-extern char lbl_8059E7B0[5];
-extern int lbl_805A03FC;
-extern int lbl_805A0400;
-extern int lbl_805A0404;
-extern char* lbl_805A0434;
-extern float lbl_805A2B68;
+extern "C" char lbl_8045F7A8[];
+extern "C" char lbl_8059E770[4];
+extern "C" char lbl_8059E794[6];
+extern "C" char lbl_8059E7A0[8];
+extern "C" char lbl_8059E7A8[5];
+extern "C" char lbl_8059E7B0[5];
+extern "C" int lbl_805A03FC;
+extern "C" int lbl_805A0400;
+extern "C" int lbl_805A0404;
+extern "C" char* lbl_805A0434;
+extern "C" float lbl_805A2B68;
 void fn_80148A74(void);
 void fn_80148A94(void);
 void fn_8014B874(void);
@@ -1399,20 +1399,20 @@ void* memcpy(void*, const void*, unsigned long);
 int DWC_GetLastErrorEx(int*, int*);
 void DWC_ClearError(void);
 
-extern int gUnk805a03d8;
-extern int g_NtAIDBitmap;
-extern int g_NtMatchingStatus;
-extern int lbl_805A03A8;
-extern char lbl_8045F7A8[];
-extern OSMutex lbl_8049EC30;
-extern unsigned char lbl_805A03D0;
-extern unsigned char lbl_805A0414;
-extern unsigned char lbl_805A0410;
-extern void* lbl_805A0434;
-extern unsigned char lbl_8059E742;
-extern unsigned char lbl_8059E743;
-extern unsigned char lbl_8059E744;
-extern unsigned char lbl_8059E745;
+extern "C" int gUnk805a03d8;
+extern "C" int g_NtAIDBitmap;
+extern "C" int g_NtMatchingStatus;
+extern "C" int lbl_805A03A8;
+extern "C" char lbl_8045F7A8[];
+extern "C" OSMutex lbl_8049EC30;
+extern "C" unsigned char lbl_805A03D0;
+extern "C" unsigned char lbl_805A0414;
+extern "C" unsigned char lbl_805A0410;
+extern "C" void* lbl_805A0434;
+extern "C" unsigned char lbl_8059E742;
+extern "C" unsigned char lbl_8059E743;
+extern "C" unsigned char lbl_8059E744;
+extern "C" unsigned char lbl_8059E745;
 }
 
 struct Bits7C {
@@ -1617,7 +1617,7 @@ void changetFriendStatusCallback__10NtMatchingFiUcPCcPv();
 void deleteFriendListCallback__10NtMatchingFiiPv();
 }
 
-extern char lbl_8045F7A8[];
+extern "C" char lbl_8045F7A8[];
 
 extern "C" s32 fn_801475A4(NetworkState* self, s32 index, u64 id, s32 flag) {
     const char* base = lbl_8045F7A8;
@@ -1686,8 +1686,8 @@ extern "C" void lock__12ntFriendInfoFv(ntFriendInfo*);
 extern "C" void unlock__12ntFriendInfoFv(ntFriendInfo*);
 extern "C" void setDirtyFlag__12ntFriendInfoFb(ntFriendInfo*, int);
 extern "C" int DWC_GetNumFriend(char*, int);
-extern char lbl_8045F7A8[];
-extern void* lbl_805A0434;
+extern "C" char lbl_8045F7A8[];
+extern "C" void* lbl_805A0434;
 
 extern "C" unsigned int fn_80147C9C(unsigned char* self, int arg) {
     char* base = lbl_8045F7A8;
@@ -1742,8 +1742,8 @@ extern "C" void lock__12ntFriendInfoFv(ntFriendInfo*);
 extern "C" void unlock__12ntFriendInfoFv(ntFriendInfo*);
 extern "C" void setDirtyFlag__12ntFriendInfoFb(ntFriendInfo*, int);
 extern "C" int DWC_GetNumFriend(char*, int);
-extern char lbl_8045F7A8[];
-extern void* lbl_805A0434;
+extern "C" char lbl_8045F7A8[];
+extern "C" void* lbl_805A0434;
 
 extern "C" unsigned int deleteDisplayOrder__10NtMatchingFib(unsigned char* self, int arg, int flag) {
     char* base = lbl_8045F7A8;
@@ -1798,15 +1798,15 @@ void setMatchingStatus__6NtBaseFi(int);
 int getErrorStr__6NtBaseFl(int, int);
 void clearGlobalAIDStatusLive__19muWifiInterfaceTaskFv(int);
 void fn_8014403C(int);
-extern char lbl_8045F7A8[];
-extern int g_muWifiInterfaceTask;
-extern int lbl_805A0390;
-extern int lbl_805A0434;
-extern int lbl_805A03A8;
-extern int lbl_805A03E0;
-extern int lbl_805A03E8;
-extern int lbl_805A03F4;
-extern int g_NtMatchingStatus;
+extern "C" char lbl_8045F7A8[];
+extern "C" int g_muWifiInterfaceTask;
+extern "C" int lbl_805A0390;
+extern "C" int lbl_805A0434;
+extern "C" int lbl_805A03A8;
+extern "C" int lbl_805A03E0;
+extern "C" int lbl_805A03E8;
+extern "C" int lbl_805A03F4;
+extern "C" int g_NtMatchingStatus;
 
 void setErrorStatus__10NtMatchingFl(int arg0) {
     char* base = lbl_8045F7A8;

@@ -219,7 +219,7 @@ extern "C" u32 fn_800F1750(void* self) {
 namespace jj_800F1774 {
 // fn_800F1774: returns the global sound system pointer/handle (sda21-relative load).
 
-extern int g_sndSystem;
+extern "C" int g_sndSystem;
 
 // TODO: clean up, give variables real names
 extern "C" int fn_800F1774(void) {
@@ -243,7 +243,7 @@ void exit__6gfTaskFv(void*);
 void fn_800B8EDC(void*, void*);
 void fn_800B8A0C(void*, int);
 void __dl__FPv(void*);
-extern char lbl_8045B824[];
+extern "C" char lbl_8045B824[];
 
 struct Part {
     char padding[0x5C];
@@ -299,9 +299,9 @@ void fn_800A9620(void*, s32);
 void fn_800A8DA8(void*, s32);
 void fn_800A709C(void*, s32);
 void fn_800F1014(void*);
-extern char lbl_8059E3A0;
-extern char lbl_8059DEC0;
-extern char __RTTI__18gfCameraController;
+extern "C" char lbl_8059E3A0;
+extern "C" char lbl_8059DEC0;
+extern "C" char __RTTI__18gfCameraController;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800F00D4(void* arg0, s8 arg1, s32 arg2, s32 arg3, s32 arg4) {
@@ -363,8 +363,8 @@ int fn_800F0A08(void*, int*, int);
 void fn_800F1764(void*);
 sndSystem* fn_800F1774();
 void fn_800F0954(void*);
-extern char lbl_8059DEC0, __RTTI__18gfCameraController;
-extern char lbl_8045B7E8[];
+extern "C" char lbl_8059DEC0, __RTTI__18gfCameraController;
+extern "C" char lbl_8045B7E8[];
 }
 // TODO: clean up, give variables real names
 inline Raw getPad(Self* self) {
@@ -417,8 +417,8 @@ extern "C" int fn_800F14C0(Self* self) {
 namespace jj_800F05CC {
 
 
-extern unsigned char lbl_805A25AC[4];
-extern unsigned char lbl_805A25B0[4];
+extern "C" unsigned char lbl_805A25AC[4];
+extern "C" unsigned char lbl_805A25B0[4];
 
 class Object_vptr_0 {
 public:

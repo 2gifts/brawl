@@ -159,7 +159,7 @@ namespace jj_803EEFCC {
 extern void __construct_array(void*, void (*)(void*), void (*)(void*), unsigned long, int);
 extern void fn_803EF038(void*);
 extern void fn_80072FD4(void*, int);
-extern int lbl_805A12C8;
+extern "C" int lbl_805A12C8;
 
 typedef struct Obj {
     u32 unk0;
@@ -201,7 +201,7 @@ extern void fn_801CA7E8(void*);
 extern void* fn_80072FD4(void*, int);
 extern void __destroy_arr(void*, void (*)(void*, int), unsigned long, unsigned long);
 extern void __dl__FPv(void*);
-extern int lbl_805A12C8;
+extern "C" int lbl_805A12C8;
 
 // TODO: clean up, give variables real names
 extern "C" Object* fn_803EF044(Object* self, int flag) {
@@ -232,9 +232,9 @@ extern "C" Object* fn_803EF044(Object* self, int flag) {
 namespace jj_803EF4A8 {
 typedef unsigned char u8;
 
-extern float lbl_805A4B04;
-extern float lbl_805A4B0C;
-extern float lbl_805A4B10;
+extern "C" float lbl_805A4B04;
+extern "C" float lbl_805A4B0C;
+extern "C" float lbl_805A4B10;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_803EF4A8(u8 *arg0, int arg1) {
@@ -375,26 +375,26 @@ typedef struct {
 
 extern int fn_803EFEA4(void *, int, int);
 
-extern const float lbl_805A4B04;
-extern const float lbl_805A4B10;
-extern const float lbl_805A4B14;
-extern const float lbl_805A4B18;
-extern const float lbl_805A4B1C;
-extern const float lbl_805A4B20;
-extern const float lbl_805A4B24;
-extern const float lbl_805A4B28;
-extern const float lbl_805A4B2C;
-extern const float lbl_805A4B30;
-extern const float lbl_805A4B34;
-extern const float lbl_805A4B38;
-extern const float lbl_805A4B3C;
-extern const float lbl_805A4B40;
-extern const float lbl_805A4B44;
-extern const float lbl_805A4B48;
-extern const float lbl_805A4B4C;
-extern const float lbl_805A4B50;
-extern const float lbl_805A4B54;
-extern const float lbl_805A4B58;
+extern "C" const float lbl_805A4B04;
+extern "C" const float lbl_805A4B10;
+extern "C" const float lbl_805A4B14;
+extern "C" const float lbl_805A4B18;
+extern "C" const float lbl_805A4B1C;
+extern "C" const float lbl_805A4B20;
+extern "C" const float lbl_805A4B24;
+extern "C" const float lbl_805A4B28;
+extern "C" const float lbl_805A4B2C;
+extern "C" const float lbl_805A4B30;
+extern "C" const float lbl_805A4B34;
+extern "C" const float lbl_805A4B38;
+extern "C" const float lbl_805A4B3C;
+extern "C" const float lbl_805A4B40;
+extern "C" const float lbl_805A4B44;
+extern "C" const float lbl_805A4B48;
+extern "C" const float lbl_805A4B4C;
+extern "C" const float lbl_805A4B50;
+extern "C" const float lbl_805A4B54;
+extern "C" const float lbl_805A4B58;
 
 // TODO: clean up, give variables real names
 extern "C" int fn_803F004C(Object *obj, int arg1, int arg2, int arg3, int arg4)
@@ -669,7 +669,7 @@ struct NetObj {
 extern "C" void fn_803EF4A8(void*, int);
 extern "C" int fn_803F004C(void*, int, int, int, int, int);
 extern "C" void detail_StartSound__Q34nw4r3snd14SoundStartableFPQ34nw4r3snd11SoundHandleUlPQ54nw4r3snd6detail10BasicSound14AmbientArgInfoPQ44nw4r3snd6detail19ExternalSoundPlayerPCQ44nw4r3snd14SoundStartable9StartInfo(void*, void*, int, int, int, int);
-extern float lbl_805A4B04;
+extern "C" float lbl_805A4B04;
 inline void setVolume(Object_vptr_0* p, float v) { if (p) p->slot12(v, 0); }
 inline void setPitch(Object_vptr_0* p, float v) { if (p) p->slot13(v); }
 extern "C" void fn_803EF640(NetObj* obj) {

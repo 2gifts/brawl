@@ -184,6 +184,7 @@ public:
     void setFrameMatCol(float frame);
 
     MuObject(const char* path, int drawPriority, int node, MuObject* src, nw4r::g3d::ResFile* textureSource, Heaps::HeapType heapType);
+    MuObject* copy(int drawPriority, int node, Heaps::HeapType heapType);
     void initFromFile(const char* path, int drawPriority, int node, nw4r::g3d::ResFile* textureSource, Heaps::HeapType heapType);
     void initFromObject(MuObject* src, int drawPriority, int node, Heaps::HeapType heapType);
     virtual ~MuObject();
@@ -1770,7 +1771,7 @@ typedef unsigned int u32;
 typedef int s32;
 typedef float f32;
 
-extern f32 lbl_805A2200;
+extern "C" f32 lbl_805A2200;
 
 struct G {
     u8 p0[0x1C];
@@ -1953,7 +1954,7 @@ struct Obj {
 };
 
 extern "C" {
-extern f32 lbl_805A2200;
+extern "C" f32 lbl_805A2200;
 
 // TODO: clean up, give variables real names
 void fn_800B807C(Obj* self, s32 arg1, Iface* arg2) {
@@ -2103,7 +2104,7 @@ extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 extern "C" void ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(void*, int);
 extern "C" void ScnObj_EnableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
 extern "C" void ScnObj_DisableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
-extern int lbl_80455D18[8];
+extern "C" int lbl_80455D18[8];
 struct Owner;
 struct Node { virtual ~Node(); Node* next; Owner* owner; };
 struct Model {
@@ -2150,7 +2151,7 @@ extern "C" void ScnObj_EnableCallbackExecOp__FPQ34nw4r3g3d6ScnObjUl(void*, int);
 extern "C" void ScnObj_EnableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
 extern "C" void ScnObj_DisableCallbackTiming__FPQ34nw4r3g3d6ScnObjUl(void*, int);
 
-extern int lbl_80455D18[8];
+extern "C" int lbl_80455D18[8];
 
 struct Owner;
 
@@ -2208,16 +2209,8 @@ extern "C" void enableSkipMaterial__8MuObjectFb(Owner* self, int enabled) {
 }
 }
 
-// TODO: clean up, give variables real names
-namespace jj_800B2318 {
-extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-extern "C" void* __ct__8MuObjectFPCciiP8MuObjectPQ34nw4r3g3d7ResFileQ25Heaps8HeapType(void*, int, int, int, int, int, int);
-extern "C" void* copy__8MuObjectFiiQ25Heaps8HeapType(int a, int b, int c, int heap) {
-    void* p = __nw__FUlQ25Heaps8HeapType(0x60, heap);
-    if (p != 0)
-        p = __ct__8MuObjectFPCciiP8MuObjectPQ34nw4r3g3d7ResFileQ25Heaps8HeapType(p, 0, b, c, a, 0, heap);
-    return p;
-}
+MuObject* MuObject::copy(int drawPriority, int node, Heaps::HeapType heapType) {
+    return new (heapType) MuObject(NULL, drawPriority, node, this, NULL, heapType);
 }
 
 // TODO: clean up, give variables real names

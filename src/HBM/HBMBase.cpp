@@ -3183,7 +3183,7 @@ void* __dt__Q34nw4r2ut4RectFv(void*, int);
 void MEMFreeToAllocator(void*, void*);
 void* __dt__Q210homebutton10ControllerFv(void*, int);
 void __dl__FPv(void*);
-extern void* lbl_8059EE5C;
+extern "C" void* lbl_8059EE5C;
 }
 
 class VObj {
@@ -3308,7 +3308,7 @@ struct Owner {
     Object_vptr_0* e;
     void* f;
 };
-extern OSMutex lbl_80532170;
+extern "C" OSMutex lbl_80532170;
 extern "C" {
 void Close__Q34nw4r3snd15DvdSoundArchiveFv(void*);
 void Shutdown__Q34nw4r3snd18MemorySoundArchiveFv(void*);

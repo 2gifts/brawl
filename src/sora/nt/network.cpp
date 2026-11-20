@@ -95,7 +95,7 @@ void Network::shutdown() {
 // TODO: clean up, give variables real names
 namespace jj_801466AC {
 
-extern char lbl_8045F204[];
+extern "C" char lbl_8045F204[];
 
 extern "C" void fn_8014A060(void*);
 extern "C" void fn_80143C48(void*, int);
@@ -118,8 +118,8 @@ namespace jj_80146DC4 {
 extern "C" {
 void* getInstance__8ipSwitchFv(void);
 int fn_8013E380(void* p, unsigned int v);
-extern int gUnk805a03d8;
-extern char g_Network[];
+extern "C" int gUnk805a03d8;
+extern "C" char g_Network[];
 }
 
 // TODO: clean up, give variables real names
@@ -151,11 +151,11 @@ extern "C" {
     void fn_8013DDEC(void* arg0);
     void fn_80148F30(void* arg0, int arg1, int arg2, int arg3);
 
-    extern int gUnk805a03d8;
-    extern void* g_NtSend;
-    extern void* lbl_805A0434;
-    extern char lbl_8045F280[];
-    extern char lbl_8045F204[];
+    extern "C" int gUnk805a03d8;
+    extern "C" void* g_NtSend;
+    extern "C" void* lbl_805A0434;
+    extern "C" char lbl_8045F280[];
+    extern "C" char lbl_8045F204[];
 
     int fn_80146718(void* arg0, int arg1, int arg2, int arg3) {
         if (gUnk805a03d8 != 3) {
@@ -200,8 +200,8 @@ struct NetworkContext {
     NtReport* work3C;
 };
 
-extern char lbl_8045F244[];
-extern char lbl_8045F260[];
+extern "C" char lbl_8045F244[];
+extern "C" char lbl_8045F260[];
 
 extern "C" void fn_80149EF8(NetworkWork*);
 extern "C" void fn_80143C44(NtBase*);
@@ -245,14 +245,14 @@ extern "C" void fn_80146574(NetworkContext* self) {
 namespace jj_80146950 {
 
 extern "C" {
-extern OSMutex lbl_8049EC30;
-extern char lbl_8045F1D8[];
-extern int gUnk805a03d8;
-extern int g_NtMatchingStatus;
-extern int lbl_805A03E8;
-extern void* lbl_805A0390;
-extern void* lbl_805A0434;
-extern void* g_muWifiInterfaceTask;
+extern "C" OSMutex lbl_8049EC30;
+extern "C" char lbl_8045F1D8[];
+extern "C" int gUnk805a03d8;
+extern "C" int g_NtMatchingStatus;
+extern "C" int lbl_805A03E8;
+extern "C" void* lbl_805A0390;
+extern "C" void* lbl_805A0434;
+extern "C" void* g_muWifiInterfaceTask;
 
 s32 fn_801DEDC4(OSMutex* m);
 void fn_8014A828(void* param);
@@ -342,7 +342,7 @@ void fn_80146950(void* arg0) {
 // TODO: clean up, give variables real names
 namespace jj_801462B8 {
 typedef signed short s16;
-extern s16 lbl_805A040A;
+extern "C" s16 lbl_805A040A;
 
 extern "C" {
 void setLocalDataSize__7NetworkFUs(int unused, s16 arg1) {
@@ -354,11 +354,11 @@ void setLocalDataSize__7NetworkFUs(int unused, s16 arg1) {
 // TODO: clean up, give variables real names
 namespace jj_80146878 {
 extern "C" {
-extern int gUnk805a03d8;
-extern void* g_muWifiInterfaceTask;
-extern char lbl_8045F2B8[];
-extern char lbl_8045F2F0[];
-extern int lbl_805A0434;
+extern "C" int gUnk805a03d8;
+extern "C" void* g_muWifiInterfaceTask;
+extern "C" char lbl_8045F2B8[];
+extern "C" char lbl_8045F2F0[];
+extern "C" int lbl_805A0434;
 void netReport__FPCce(const char*, ...);
 int fn_80149644(char* self);
 void fn_80146950(void* arg0);

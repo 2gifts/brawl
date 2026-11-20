@@ -2964,8 +2964,8 @@ extern "C" int fn_800C8524();
 extern "C" u8 fn_800C8548();
 extern "C" void fn_80146878(void*, int);
 extern "C" void netReport__FPCce(const char*, ...);
-extern char g_Network[];
-extern char lbl_80457158[];
+extern "C" char g_Network[];
+extern "C" char lbl_80457158[];
 struct FccWord { u32 top : 8; u32 rest : 24; };
 struct Entry { char pad[0x218]; };
 struct Parent { char pad[0x70]; Entry entries[5]; };
@@ -3338,10 +3338,10 @@ extern "C" void fn_800D0398(void*);
 extern "C" void fn_800D0AE0(void*, void*);
 extern "C" void fn_80145B98(int, int);
 
-extern char lbl_80457158[];
-extern char g_Network[];
-extern int lbl_805A03A8;
-extern int lbl_805A0434;
+extern "C" char lbl_80457158[];
+extern "C" char g_Network[];
+extern "C" int lbl_805A03A8;
+extern "C" int lbl_805A0434;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800CFEB8(u8* self) {
@@ -3516,10 +3516,10 @@ extern "C" void fn_800D0AE0(void*, void*);
 extern "C" void fn_80145B98(int, int);
 extern "C" void fn_8014BF30(int, int, int);
 
-extern int lbl_805A03A8;
-extern int lbl_805A0434;
-extern char lbl_804579AC[];
-extern char lbl_804579E8[];
+extern "C" int lbl_805A03A8;
+extern "C" int lbl_805A0434;
+extern "C" char lbl_804579AC[];
+extern "C" char lbl_804579E8[];
 
 struct Entry {
     u8 pad0[0x56];
@@ -3771,9 +3771,9 @@ namespace jj_800CD934 {
 
 typedef unsigned char u8;
 
-extern int gUnk805a03d8;
-extern int lbl_805A03A8;
-extern char lbl_8045726C[];
+extern "C" int gUnk805a03d8;
+extern "C" int lbl_805A03A8;
+extern "C" char lbl_8045726C[];
 
 extern "C" u8 fn_800C851C();
 extern "C" int fn_800C8524();
@@ -3794,7 +3794,7 @@ struct Network {
     NetworkData* data;
 };
 
-extern Network g_Network;
+extern "C" Network g_Network;
 
 struct Flags {
     u8 rest : 7;
@@ -4023,9 +4023,9 @@ void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
 void* __ct__16ntFriendInfoSaveFv(void*);
 void startSave__16ntFriendInfoSaveFQ25Heaps8HeapTypeb(void*, int, int);
 void netMinReport__FPCce(const char*, ...);
-extern NameTable lbl_80408500;
-extern char lbl_80457158[];
-extern int s_savingCount__16ntFriendInfoSave;
+extern "C" NameTable lbl_80408500;
+extern "C" char lbl_80457158[];
+extern "C" int s_savingCount__16ntFriendInfoSave;
 }
 
 inline const char* errorName(int idx, const char* base) {
@@ -4074,7 +4074,7 @@ typedef signed int s32;
 extern "C" u8 getParentAID__7NetworkFv();
 extern "C" u8 getMyAID__7NetworkFv();
 extern "C" void netReport__FPCce(const char*, ...);
-extern char lbl_80457158[];
+extern "C" char lbl_80457158[];
 
 struct Slot {
     u8 player;
@@ -4239,9 +4239,9 @@ extern "C" u8 getParentAID__7NetworkFv();
 extern "C" void fn_800CD934(void*, u8);
 extern "C" void fn_800D0AE0(void*, void*);
 extern "C" void fn_80145B98(int, u8);
-extern char lbl_80457158[];
-extern int lbl_805A03A8;
-extern signed char lbl_805A0414;
+extern "C" char lbl_80457158[];
+extern "C" int lbl_805A03A8;
+extern "C" signed char lbl_805A0414;
 
 struct StatusWord {
     signed int state : 8;
@@ -4447,8 +4447,8 @@ extern "C" {
 u8 getMyAID__7NetworkFv();
 u8 getParentAID__7NetworkFv();
 void netReport__FPCce(const char*, ...);
-extern char lbl_80457158[];
-extern u8 lbl_805A0414;
+extern "C" char lbl_80457158[];
+extern "C" u8 lbl_805A0414;
 }
 inline void countPlayers(s32& count, u8& i, u8* p) {
     if (p == 0) count = -1;

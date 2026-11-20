@@ -73,7 +73,7 @@ void nteUpdateEvaluator::notifyEventBeat(int playerNo1, int playerNo2) {
 // TODO: clean up, give variables real names
 namespace jj_80158638 {
 extern "C" {
-extern int lbl_805A0460;
+extern "C" int lbl_805A0460;
 
 int getInstance__18nteUpdateEvaluatorFv(void) {
     return lbl_805A0460;
@@ -96,7 +96,7 @@ struct Data {
     u32 values[4];
 };
 
-extern void* g_GameGlobal;
+extern "C" void* g_GameGlobal;
 extern "C" float getGameFrame__10GameGlobalCFv(void* self);
 extern "C" void* getUploadSetting__9nteGlobalFv();
 

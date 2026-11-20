@@ -309,7 +309,7 @@ struct CameraController {
 
 extern "C" void fn_800A9E58(void*, int, int, int);
 extern "C" void changeInput__16CameraControllerFQ216CameraController4Kind(CameraController*, int);
-extern void* lbl_805A0278;
+extern "C" void* lbl_805A0278;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_8009CD94(CameraController* arg0, int a, int b, int c) {
@@ -341,8 +341,8 @@ struct CameraController {
 
 extern "C" void fn_8009F78C(void*);
 extern "C" void changeInput__16CameraControllerFQ216CameraController4Kind(CameraController*, int);
-extern const f32 lbl_805A1DA0;
-extern const f32 lbl_805A1DB8;
+extern "C" const f32 lbl_805A1DA0;
+extern "C" const f32 lbl_805A1DB8;
 
 // TODO: clean up, give variables real names
 extern "C" void fn_8009C61C(CameraController* self) {
@@ -501,9 +501,9 @@ public:
 };
 
 extern "C" {
-extern char lbl_80454BF0[];
-extern char lbl_8049DEDC[];
-extern void* lbl_805A0278;
+extern "C" char lbl_80454BF0[];
+extern "C" char lbl_8049DEDC[];
+extern "C" void* lbl_805A0278;
 void __dl__FPv(void*);
 void __dt__6gfTaskFv(void*, int);
 void __dt__22cmMeleeFixedControllerFv(void*, int);
@@ -635,14 +635,14 @@ void* __ct__20cmFigDisp1ControllerFv(void*);
 void* __ct__16cmTechControllerFv(void*);
 void* __ct__22cmMeleeFixedControllerFv(void*);
 void* __ct__16cmDemoControllerFv(void*);
-extern char lbl_8059DC20;
-extern char lbl_80454BF0[];
-extern char lbl_80454E70[];
-extern cmStageParam lbl_80455078;
-extern cmStageParamPaused lbl_804550B8;
-extern cmStageParamFixed lbl_80455108;
-extern char __vt__19cmDefaultController[];
-extern const f32 lbl_805A1DA0, lbl_805A1DA4, lbl_805A1DA8, lbl_805A1DAC, lbl_805A1DB0, lbl_805A1DB4, lbl_805A1DB8;
+extern "C" char lbl_8059DC20;
+extern "C" char lbl_80454BF0[];
+extern "C" char lbl_80454E70[];
+extern "C" cmStageParam lbl_80455078;
+extern "C" cmStageParamPaused lbl_804550B8;
+extern "C" cmStageParamFixed lbl_80455108;
+extern "C" char __vt__19cmDefaultController[];
+extern "C" const f32 lbl_805A1DA0, lbl_805A1DA4, lbl_805A1DA8, lbl_805A1DAC, lbl_805A1DB0, lbl_805A1DB4, lbl_805A1DB8;
 }
 struct Flags { u8 a:1; u8 b:1; u8 c:1; u8 d:5; };
 struct Pair { u32 a, b; };

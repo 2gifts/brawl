@@ -134,7 +134,7 @@ extern "C" void OSResumeThread(void*);
 extern "C" void exit__6gfTaskFv(void*);
 extern "C" void* __dt__8gfThreadFv(void*, short);
 extern "C" void __dl__FPv(void*);
-extern char lbl_804616D8[];
+extern "C" char lbl_804616D8[];
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_80154420(void* p, int flag)
@@ -163,8 +163,8 @@ extern "C" void* fn_80154420(void* p, int flag)
 // TODO: clean up, give variables real names
 namespace jj_801542C4 {
 extern "C" {
-extern char __vt__8gfThread[];
-extern char lbl_804616D8[];
+extern "C" char __vt__8gfThread[];
+extern "C" char lbl_804616D8[];
 
 void createThread__8gfThreadFP10gfRunnableUlUlQ25Heaps8HeapType(
     void*, void*, unsigned long, unsigned long, int);

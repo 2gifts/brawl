@@ -244,7 +244,7 @@ struct Root { char p[0x465]; unsigned char f465; };
 extern "C" void fn_800A6CF8(S*);
 extern "C" void fn_800A709C(S*, int);
 extern "C" const float lbl_805A205C;
-extern Root* g_gfSceneRoot;
+extern "C" Root* g_gfSceneRoot;
 // TODO: clean up, give variables real names
 extern "C" void fn_800A6B78(S* s) {
     fn_800A6CF8(s);
@@ -338,14 +338,14 @@ struct Node {
 };
 
 typedef void (Node::*Callback)(u8*);
-extern Callback lbl_80454F10;
+extern "C" Callback lbl_80454F10;
 
 struct Scene {
     char pad[0x465];
     u8 flags;
 };
 
-extern Scene* g_gfSceneRoot;
+extern "C" Scene* g_gfSceneRoot;
 
 struct Self {
     Camera* camera;
@@ -390,8 +390,8 @@ namespace jj_800A8C18 {
 extern "C" {
 extern void* memset(void*, int, unsigned long);
 extern void fn_800A8DB4(void*, void*, void*, int);
-extern float lbl_805A20C4;
-extern float lbl_805A208C;
+extern "C" float lbl_805A20C4;
+extern "C" float lbl_805A208C;
 union FloatInt { float f; unsigned int i; };
 struct Pair { FloatInt x, y; };
 struct Result { unsigned char a; Pair p1, p2; };
@@ -478,17 +478,17 @@ struct Input {
 };
 
 extern "C" {
-extern const float lbl_805A205C;
-extern const float lbl_805A2064;
-extern const float lbl_805A2068;
-extern const float lbl_805A206C;
-extern const float lbl_805A2070;
-extern const float lbl_805A2074;
-extern const float lbl_805A2078;
-extern const float lbl_805A207C;
-extern const float lbl_805A2080;
-extern const float lbl_805A2084;
-extern const float lbl_805A2088;
+extern "C" const float lbl_805A205C;
+extern "C" const float lbl_805A2064;
+extern "C" const float lbl_805A2068;
+extern "C" const float lbl_805A206C;
+extern "C" const float lbl_805A2070;
+extern "C" const float lbl_805A2074;
+extern "C" const float lbl_805A2078;
+extern "C" const float lbl_805A207C;
+extern "C" const float lbl_805A2080;
+extern "C" const float lbl_805A2084;
+extern "C" const float lbl_805A2088;
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 void fn_800A6E78(Output* out, Input* in) {

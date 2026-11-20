@@ -92,9 +92,9 @@ struct Obj {
 extern "C" {
 void fn_800FABEC(void*);
 void __dl__FPv(void*);
-extern char lbl_8045C4BC[];
-extern char lbl_8045B4B8[];
-extern utList lbl_8049E550;
+extern "C" char lbl_8045C4BC[];
+extern "C" char lbl_8045B4B8[];
+extern "C" utList lbl_8049E550;
 }
 // TODO: clean up, give variables real names
 extern "C" void* fn_800ED9D0(Obj* object, int deleting) {
@@ -145,9 +145,9 @@ extern "C" void* fn_800ED9D0(Obj* object, int deleting) {
 }
 
 namespace jj_800EE600 {
-extern char lbl_8059E2F8[3];
-extern char lbl_8059E2FC[7];
-extern char* lbl_8045B674[19];
+extern "C" char lbl_8059E2F8[3];
+extern "C" char lbl_8059E2FC[7];
+extern "C" char* lbl_8045B674[19];
 struct Context {
     char pad0[0x194];
     MuMsg* msg0;
@@ -194,12 +194,12 @@ void fn_800B8A0C(void*, int);
 void fn_800FABEC(void*, void*);
 void __dt__14gfFileIOHandleFv(void*, int);
 void __dt__6gfTaskFv(void*, int);
-extern void* g_sndSystem;
-extern char* g_gfSceneRoot;
-extern char lbl_8045B3B0[];
-extern char lbl_8045B4B8[];
-extern char lbl_8045C4BC[];
-extern utList lbl_8049E550;
+extern "C" void* g_sndSystem;
+extern "C" char* g_gfSceneRoot;
+extern "C" char lbl_8045B3B0[];
+extern "C" char lbl_8045B4B8[];
+extern "C" char lbl_8045C4BC[];
+extern "C" utList lbl_8049E550;
 }
 class gfPad5CProbe { public: char pad[0x5C]; };
 class gfVCallProbe : public gfPad5CProbe {

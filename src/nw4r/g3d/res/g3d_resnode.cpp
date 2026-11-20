@@ -236,7 +236,7 @@ void ResNode::SetRotate(f32 x, f32 y, f32 z) {
 
 // TODO: clean up, give variables real names
 namespace jj_80192ECC {
-extern float lbl_805A31A0;
+extern "C" float lbl_805A31A0;
 struct Inner { char pad[0x14]; unsigned int flags; char pad2[8]; float x,y,z; };
 extern "C" void ResNode_SetRotate__FPQ34nw4r3g3d7ResNodefff(Inner** pp, float x, float y, float z) {
  Inner* p = *pp;
@@ -258,7 +258,7 @@ extern "C" void ResNode_SetRotate__FPQ34nw4r3g3d7ResNodefff(Inner** pp, float x,
 
 // TODO: clean up, give variables real names
 namespace jj_80192FF8 {
-extern f32 lbl_805A31A8;
+extern "C" f32 lbl_805A31A8;
 
 struct Obj {
     u8 pad0[0x14];

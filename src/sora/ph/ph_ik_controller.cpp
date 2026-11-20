@@ -126,8 +126,8 @@ extern "C" void fn_80284F2C(Mat*,float*);
 extern "C" void fn_8003E388(const Mat*,Mat*);
 extern "C" void fn_8003E6DC(const Mat*,V*);
 static inline V getScale(const Mat* m) { V v; fn_8003E6DC(m,&v); return v; }
-extern Mat lbl_804864C0;
-extern float lbl_805A1D28,lbl_805A1D2C;
+extern "C" Mat lbl_804864C0;
+extern "C" float lbl_805A1D28,lbl_805A1D2C;
 // TODO: clean up, give variables real names
 static inline Obj* find(Mgr* m,int id) {
  for(int i=0;i<m->count;++i) {
@@ -246,7 +246,7 @@ void fn_80284DB0(void* src, float* dst);
 void* fn_8032EB2C(void* buf);
 void fn_8032F030(void* buf);
 }
-extern s32 lbl_805A0EC8;
+extern "C" s32 lbl_805A0EC8;
 
 static inline s32 flags(const Arr& arr) {
     return arr.cap & 0x80000000;
@@ -378,8 +378,8 @@ extern "C" void deallocateChunk__14hkThreadMemoryFPvii(void*, void*, unsigned in
 extern "C" void __dl__FPv(void*);
 extern "C" void relAll__11phContainerFv(void*);
 extern "C" void __dt__11phContainerFv(void*, int);
-extern void* s_instance__14hkThreadMemory;
-extern void* lbl_8049DEC8[3];
+extern "C" void* s_instance__14hkThreadMemory;
+extern "C" void* lbl_8049DEC8[3];
 
 struct Array {
     void* data;
@@ -455,7 +455,7 @@ extern "C" Object* __dt__14phIkControllerFv(Object* self, int flag) {
 
 // TODO: clean up, give variables real names
 namespace jj_80098388 {
-extern float lbl_805A1D38;
+extern "C" float lbl_805A1D38;
 struct S {
     int a;
     short b, c, d, e;

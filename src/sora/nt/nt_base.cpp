@@ -112,7 +112,7 @@ public:
     void report(const char*, ...);
 };
 
-extern char lbl_8045F4A8[];
+extern "C" char lbl_8045F4A8[];
 
 // TODO: clean up, give variables real names
 extern "C" int fn_80146F34(unsigned char* p) {
@@ -135,34 +135,34 @@ struct NtMutexes {
     OSMutex m3;
 };
 
-extern NtMutexes lbl_8049EC30;
-extern OSCond lbl_805A03C8;
-extern signed char lbl_805A03D0;
-extern s32 lbl_805A03D4;
-extern unsigned char lbl_805A0418[8];
-extern s32 gUnk805a03d8;
-extern s32 g_NtMatchingStatus;
-extern s32 lbl_805A03E0;
-extern unsigned char lbl_805A03E4;
-extern s32 lbl_805A03FC;
-extern s32 lbl_805A0400;
-extern s32 lbl_805A0404;
-extern unsigned char lbl_805A0408;
-extern unsigned char lbl_805A0409;
-extern unsigned char lbl_805A0410[4];
-extern unsigned char lbl_805A0414;
-extern unsigned char lbl_805A0415;
-extern unsigned char lbl_8059E742;
-extern unsigned char lbl_8059E743;
-extern unsigned char lbl_8059E744;
-extern unsigned char lbl_8059E745;
-extern s32 g_NtAIDBitmap;
-extern s32 lbl_805A03E8;
-extern s32 lbl_805A03EC;
-extern s32 lbl_805A03F0;
-extern s32 lbl_805A03F4;
-extern s32 lbl_805A0428;
-extern mtRand lbl_805A0420;
+extern "C" NtMutexes lbl_8049EC30;
+extern "C" OSCond lbl_805A03C8;
+extern "C" signed char lbl_805A03D0;
+extern "C" s32 lbl_805A03D4;
+extern "C" unsigned char lbl_805A0418[8];
+extern "C" s32 gUnk805a03d8;
+extern "C" s32 g_NtMatchingStatus;
+extern "C" s32 lbl_805A03E0;
+extern "C" unsigned char lbl_805A03E4;
+extern "C" s32 lbl_805A03FC;
+extern "C" s32 lbl_805A0400;
+extern "C" s32 lbl_805A0404;
+extern "C" unsigned char lbl_805A0408;
+extern "C" unsigned char lbl_805A0409;
+extern "C" unsigned char lbl_805A0410[4];
+extern "C" unsigned char lbl_805A0414;
+extern "C" unsigned char lbl_805A0415;
+extern "C" unsigned char lbl_8059E742;
+extern "C" unsigned char lbl_8059E743;
+extern "C" unsigned char lbl_8059E744;
+extern "C" unsigned char lbl_8059E745;
+extern "C" s32 g_NtAIDBitmap;
+extern "C" s32 lbl_805A03E8;
+extern "C" s32 lbl_805A03EC;
+extern "C" s32 lbl_805A03F0;
+extern "C" s32 lbl_805A03F4;
+extern "C" s32 lbl_805A0428;
+extern "C" mtRand lbl_805A0420;
 
 extern "C" {
 void init__6mtRandFl(mtRand*, u32);
