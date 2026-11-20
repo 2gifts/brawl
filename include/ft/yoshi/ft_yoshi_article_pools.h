@@ -8,10 +8,38 @@
 #include <wn/wn_article_pool.h>
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
+#ifdef FT_YOSHI_FULL_ARTICLES
+// The wing's model observer list calls its shared sora_melee destructor (as in ft_falco_article_pools.h).
+template <> class soEventUnitWithWorkArea<soModelEventObserver, 5> : public soEventUnitImpl<soModelEventObserver> {
+    soInstanceManagerFullPropertyVector<soModelEventObserver*, 5> m_observerList;
+public:
+    soEventUnitWithWorkArea(s16 managerId, s16 eventId) : soEventUnitImpl<soModelEventObserver>(managerId, eventId) { }
+    virtual ~soEventUnitWithWorkArea();
+    virtual u32 getObserverNum() const { return m_observerList.size(); }
+};
+
+// Full article types let the fighter own their pools and teardown.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#include <wn/wn_module_accesser_builder.h>
+// The fire breath's teardown calls these builder destructors out of line (the other articles inline theirs).
+#pragma dont_inline on
+template wnAnimCmdModuleSubBuilder<wnAnimCmdModuleSubBuildConfigDefault<1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0> >::~wnAnimCmdModuleSubBuilder();
+template soMotionModuleBuilder<soMotionModuleBuildConfig<1, soMotionModuleImpl, 0, 0, soTransitionModuleBuildConfig<wnMotionTransitionTypeList>,
+                                                         soMotionAnimObjCacheModuleBuildConfig<0, soMotionAnimObjCacheModuleNull> > >::~soMotionModuleBuilder();
+#pragma dont_inline off
+#include <wn/yoshi/wn_yoshi_fire_breath.h>
+#include <wn/yoshi/wn_yoshi_fire_cannon.h>
+#include <wn/yoshi/wn_yoshi_wing_build.h>
+#include <wn/yoshi/wn_yoshi_star.h>
+#include <wn/yoshi/wn_yoshi_tamago.h>
+#else
 #include <wn/yoshi/wn_yoshi_star.h>
 #include <wn/yoshi/wn_yoshi_tamago.h>
 #include <wn/yoshi/wn_yoshi_wing.h>
 #include <ft/yoshi/ft_yoshi_article_calls.h>
+#endif
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
 class ftYoshi;

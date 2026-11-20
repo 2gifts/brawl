@@ -1,4 +1,6 @@
 // TODO: clean up - raw offset accesses into fighter/module structs; add named fields to the fighter class (or a local struct) instead of *(T*)(p + 0x..)
+#define FT_YOSHI_FULL_ARTICLES
+#define FT_PARAM_ACCESSER_TYPED_DTOR
 #define FT_POOL_ROOT_NONPOLYMORPHIC
 #define SO_GENERAL_WORK_BOUNDED_CLEAR
 #define SO_INSTANCE_MANAGER_FULL_PROPERTY_DTOR_OUT_OF_LINE
@@ -20,17 +22,24 @@
 #include <so/catch/so_catch_module.h>
 #include <wn/yoshi/wn_yoshi_star.h>
 #include <wn/yoshi/wn_yoshi_tamago.h>
+#ifndef FT_YOSHI_FULL_ARTICLES
 #include <wn/yoshi/wn_yoshi_wing.h>
+#endif
 #include <wn/wn_article_pool.h>
+#ifndef FT_YOSHI_FULL_ARTICLES
 #include <ft/yoshi/ft_yoshi_article_calls.h>
+#endif
 #include <ft/yoshi/ft_yoshi_final_param.h>
 #include <ft/yoshi/ft_yoshi_transactor.h>
 #include <mt/mt_matrix.h>
 #include <math.h>
 
-namespace ftyoshi { template <class T> T ABS(T); }
+namespace ftyoshi { template <class T> T ABS(T) __attribute__((never_inline)); } // MATCH-ONLY: the original calls its out-of-line instantiation
 // Existing rotate-only matrix transform; unlike mulPos, it omits translation.
 
+#undef WN_ARTICLE_NATIVE_BUILDERS
+#undef WN_WEAPON_BUILDER
+#undef WN_SHARED_ARRAYS_1
 #define FT_BC ftYoshiBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
@@ -1379,3 +1388,10 @@ extern "C" void* __dt__25ftKineticEnergyControllerFv(void* object, short deletin
 }
 }
 
+
+namespace ftyoshi {
+template <class T> T ABS(T x) {
+    return __fabsf(x);
+}
+template float ABS<float>(float);
+}
