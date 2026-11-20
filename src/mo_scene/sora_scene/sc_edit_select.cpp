@@ -49,9 +49,9 @@ s32 scEditSelect::process() {
 // Leaving the browser: with modes 0 and 1 the chosen stage file is read into the stage edit record (mode 0 marks it
 // HYPOTHESIS: as a new copy); with mode 2 the record is cleared for a new stage of the chosen size and music.
 s32 scEditSelect::exit() {
-    gmStageEditData* editData;
+    gmStageEditData* editData = g_GameGlobal->m_stageEditData;
     muStageEditSelectTask* task = m_work->m_task;
-    editData = g_GameGlobal->m_stageEditData;
+
     int mode = gfSceneManager::getInstance()->unk1;
     switch (mode) {
     case 0:

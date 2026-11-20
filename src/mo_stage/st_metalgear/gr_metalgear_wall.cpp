@@ -1,3 +1,4 @@
+#define MT_VEC3F_ADD_NATIVE_ORDER // MATCH-ONLY: register choice of the inline Vec3f add in updateCallBack
 #define YK_STAGE_INLINE // inline members of the shared SO headers that the stage RELs emit themselves
 #define YK_CLTARGET_4_FIRST // the clTarget constructor writes the second member first in this REL
 #define YK_STAGE_FULL // ... and the ones of the hit objects with an attack module and an event observer
@@ -463,8 +464,10 @@ void grMetalgearWall::updateCallBack(float deltaFrame) {
                 scnMdl->EnableScnMdlCallbackTiming(1);
                 scnMdl->m_nodeIndex = calcWorldCallBack->m_nodeCallbackDatas[0].m_nodeIndex;
             }
+            Vec3f offset;
             grNodeCallbackData* data = calcWorldCallBack->m_nodeCallbackDatas;
-            data->m_offsetPos = m_pos + m_shake;
+            data->m_offsetPos = offset = m_pos + m_shake;
+
         }
     }
 }
