@@ -29,27 +29,12 @@ bool hkWorldObject::setShape(hkShape* shape) {
     return true;
 }
 
-// Statistics collector interface: only the slots used here (0x10 and 0x14) are known; names are placeholders.
-struct hkStatisticsCollectorIface {
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void unk10(const char* name, int alignment, const void* data, int size, int capacity);
-    virtual void unk14(const char* name, int count, const void* object);
-};
+#include <havok/hkStatisticsCollector.h>
 
 void hkWorldObject::calcStatistics(hkStatisticsCollector* collector) const {
-    ((hkStatisticsCollectorIface*)collector)->unk14("Shape", 1, m_collidable.m_shape);
-    if ((m_collidable.m_collisionEntries.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG) == 0) {
-        ((hkStatisticsCollectorIface*)collector)->unk10("collidable", 8, m_collidable.m_collisionEntries.m_data,
-                         m_collidable.m_collisionEntries.m_size * 8,
-                         (m_collidable.m_collisionEntries.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 8);
-    }
-    if ((m_properties.m_capacityAndFlags & hkArrayBase::DONT_DEALLOCATE_FLAG) == 0) {
-        ((hkStatisticsCollectorIface*)collector)->unk10("properties", 4, m_properties.m_data, m_properties.m_size * 16,
-                         (m_properties.m_capacityAndFlags & hkArrayBase::CAPACITY_MASK) * 16);
-    }
+    collector->addChildObject("Shape", 1, m_collidable.m_shape);
+    collector->addArrayStorage("CollAgtPtr", 8, m_collidable.m_collisionEntries, sizeof(hkLinkedCollidable::CollisionEntry));
+    collector->addArrayStorage("Properties", 4, m_properties, sizeof(hkProperty));
 }
 
 void hkWorldObject::addReference() {

@@ -79,28 +79,12 @@ void hkPhantom::removePhantomOverlapListener(hkPhantomOverlapListener* listener)
     m_overlapListeners.removeAtAndCopy(idx);
 }
 
-// Statistics collector interface: only the slot used here (0x10) is known; names are placeholders.
-// Same layout as the collector interface in hkWorldObject.cpp.
-struct hkStatisticsCollectorIface {
-    virtual void unk00();
-    virtual void unk04();
-    virtual void unk08();
-    virtual void unk0C();
-    virtual void unk10(const char* name, int alignment, const void* data, int size, int capacity);
-};
+#include <havok/hkStatisticsCollector.h>
 
 void hkPhantom::calcStatistics(hkStatisticsCollector* collector) const {
     hkWorldObject::calcStatistics(collector);
-    if (m_overlapListeners.mustDeallocate()) {
-        ((hkStatisticsCollectorIface*)collector)
-            ->unk10("overlapListeners", 4, m_overlapListeners.m_data, m_overlapListeners.m_size * 4,
-                    m_overlapListeners.getCapacity() * 4);
-    }
-    if (m_phantomListeners.mustDeallocate()) {
-        ((hkStatisticsCollectorIface*)collector)
-            ->unk10("phantomListeners", 4, m_phantomListeners.m_data, m_phantomListeners.m_size * 4,
-                    m_phantomListeners.getCapacity() * 4);
-    }
+    collector->addArrayStorage("OvrlapLisPtr", 4, m_overlapListeners, sizeof(void*));
+    collector->addArrayStorage("PhantmLisPtr", 4, m_phantomListeners, sizeof(void*));
 }
 
 void hkPhantom::deallocateInternalArrays() {

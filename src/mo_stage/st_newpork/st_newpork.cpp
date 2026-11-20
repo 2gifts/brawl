@@ -105,7 +105,7 @@ stNewpork* stNewpork::create() {
     return new (Heaps::StageInstance) stNewpork;
 }
 
-stNewpork::stNewpork() : stMelee("stNewpork", Stages::NewPork), m_chimeraMtx(true), m_screenFill(-1) {
+stNewpork::stNewpork() : stMelee("stNewpork", Stages::NewPork), m_subject(0, 1), m_chimeraMtx(true), m_screenFill(-1) {
     m_chikei = NULL;
     m_chikeiBG = NULL;
     m_viking = NULL;
@@ -154,7 +154,6 @@ stNewpork::stNewpork() : stMelee("stNewpork", Stages::NewPork), m_chimeraMtx(tru
 
 stNewpork::~stNewpork() {
     releaseArchive();
-    __dt__9cmSubjectFv(&m_subject, -1);
 }
 
 bool stNewpork::loading() {
