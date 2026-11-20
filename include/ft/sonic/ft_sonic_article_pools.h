@@ -8,8 +8,38 @@
 #include <wn/wn_article_build_info.h>
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
+#ifdef FT_SONIC_FULL_ARTICLES
+// Full article types let the fighter own their pools and teardown. Each article needs its own unit configuration.
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_WEAPON_BUILDER_CTOR_EXTERN
+#define WN_ANIMCMD_UNIT5_SELECT
+#define WN_STATUS_PROC_VECTOR_BOTH_CTORS
+#define WN_ARTICLE_ANIMCMD_INT
+#define FT_REL_LINK_EXTERN
+#include <wn/wn_module_accesser_builder.h>
+#define MT_VEC2F_CTOR_NOINLINE
+#define MT_VEC3F_FROM_VEC2_CTOR_NOINLINE
+#define MT_VEC3F_CTOR_NOINLINE
+#define SO_EVENT_OBSERVER_CTOR_EXTERN
+#define SO_GIMMICK_EVENT_OBSERVER_INLINE
+WN_STATUS_PROC_VECTOR_DEFAULT_CTOR(4);
+#define WN_STATUS_PROC_VECTOR_4_DECLARED
+FT_DOL_ARRAY_VECTOR(soAreaContactLog, 4);
+#include <wn/sonic/wn_sonic_gimmick_jump.h>
+#undef SO_EVENT_OBSERVER_CTOR_EXTERN
+#undef SO_GIMMICK_EVENT_OBSERVER_INLINE
+#define WN_WEAPON_NO_COMMON_ENERGIES
+#define WN_KINETIC_GENERIC_BUILDER
+#define WN_KINETIC_NORMAL_HOLDER_DEFAULT
+#define WN_KINETIC_NORMAL_EXTERN
+#include <wn/sonic/wn_sonic_super_sonic.h>
+#undef FT_REL_LINK_EXTERN // the fighter itself instantiates the queue destructor
+#else
 #include <wn/sonic/wn_sonic_gimmick_jump.h>
 #include <wn/sonic/wn_sonic_super_sonic.h>
+#endif
 
 typedef wnArticleHierarchy<wnSonicSuperSonic, 1, soInstancePoolRoot> ftSonicSuperSonicPool;
 typedef wnArticleHierarchy<wnSonicGimmickJump, 1, ftSonicSuperSonicPool> ftSonicGimmickJumpPool;

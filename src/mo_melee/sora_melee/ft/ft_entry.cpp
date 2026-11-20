@@ -267,7 +267,7 @@ void ftEntry::disappearTrainer() {
 }
 
 bool ftEntry::isProcessTechnique() {
-    if ((u8)((m_flags11 & 8) != 0) == 1) {
+    if ((u8)((u8)unk11_08 != 0) == 1) {
         return true;
     }
     if ((u8)_0x10 != 0) {
@@ -383,6 +383,27 @@ int ftEntryManager::getEntryIdFromPlayerNo(int playerNo) {
     for (int i = 0; i < count; i++) {
         if (playerNo == static_cast<const soArray<ftEntry*>&>(m_entryArrayVector).at(i)->m_playerNo) {
             return static_cast<const soArray<ftEntry*>&>(m_entryArrayVector).at(i)->m_entryId;
+        }
+    }
+    return -1;
+}
+
+// HYPOTHESIS: registers the first free entry (state 7) from the start slot (0 for unk 1, else 4) and returns its id
+// (a wrapping counter in the high half, the index in the low half), or -1.
+int ftEntryManager::pushEntity(int unk) {
+    for (int i = (unk == 1) ? 0 : 4; i < (int)m_entryCount; i++) {
+        if (m_entries[i].unkF == 7) {
+            int counter = *reinterpret_cast<int*>(_0x38);
+            int id = (counter << 16) | i;
+            counter++;
+            *reinterpret_cast<int*>(_0x38) = counter;
+            if (counter > 0xFFFF) {
+                *reinterpret_cast<int*>(_0x38) = 0;
+            }
+            ftEntry* entry = &m_entries[i];
+            m_entryArrayVector.push(entry);
+            m_entries[i].m_entryId = id;
+            return id;
         }
     }
     return -1;

@@ -76,6 +76,10 @@ public:
                  BC::StatusKindCap,
 #endif
                  1) { }
+#ifdef FT_STATUS_BUILDER_DTOR_NOINLINE
+    // The unit that defines this macro calls the teardown of the status builder out of line.
+    ~soStatusModuleBuilder() __attribute__((never_inline)) { }
+#endif
     soStatusModule* getModule() { return &m_module; }
 };
 

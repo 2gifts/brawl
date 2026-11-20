@@ -12,6 +12,13 @@
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1
 #include <wn/wn_module_accesser_builder.h>
+#ifdef FT_SHEIK_FULL_ARTICLES
+// Instantiate the event manage teardown shared by the needle and the vanish before their first use, so their destructors call it out of line.
+#pragma push
+#pragma dont_inline on
+template soInsideEventManageModuleBuilder<soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0, wnInsideEventManageModuleTypes>, wnInsideEventManageModuleTypes>::~soInsideEventManageModuleBuilder();
+#pragma pop
+#endif
 #include <wn/sheik/wn_sheik_needle.h>
 #include <wn/sheik/wn_sheik_needle_have.h>
 #include <wn/sheik/wn_sheik_iron_wire.h>
