@@ -5,6 +5,8 @@
 
 class stOperatorAppearanceFighterKumite : public stOperatorAppearanceFighter {
 public:
+    void* unk1B8;
+
     stOperatorAppearanceFighterKumite(u8 arg);
     virtual ~stOperatorAppearanceFighterKumite();
     virtual void startAppearance();

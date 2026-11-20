@@ -11,14 +11,6 @@
 #include <nw4r/g3d/g3d_resfile.h>
 #include <types.h>
 
-// The scene that shows the game over screen (module sora_scene; only what this menu needs is declared here).
-// HYPOTHESIS: the class hierarchy gfScene <- muMenu <- scGameover follows from the run time type information of the module.
-class scGameover : public muMenu {
-public:
-    scGameover(const char* name) : muMenu(name) { }
-    nw4r::g3d::ScnGroup* getScnRoot();
-};
-
 // What the scene gives to the game over task.
 struct muGameOverParam {
     int m_score;                    // 0x00 the points of the player
@@ -27,6 +19,8 @@ struct muGameOverParam {
     int m_cost;                     // 0x0C what a continue costs (in coins, shown divided by 10)
     u8 m_noContinue;                // 0x10 the player cannot continue
     int m_unk14;                    // 0x14 more than 0 shows an extra message line
+
+    muGameOverParam() : m_score(0), m_scoreAfter(0), m_coins(0), m_cost(0), m_noContinue(0), m_unk14(-1) { }
 };
 
 // The game over screen: "Continue?" with the cost in coins; when the player continues the numbers count to their new

@@ -13,6 +13,7 @@
 #include <types.h>
 
 #include <mu/mu_intro.h>
+#include <sc/sc_intro.h>
 
 // main.dol functions with names that the shared headers do not declare.
 // nw4r::g3d::ScnMdlExpand::Construct(allocator, size, capacity, base model) and PushBack(object, node name)
@@ -45,7 +46,7 @@ static inline scIntro* getScene() {
 // Puts a model into the scene group of the camera.
 static inline void insertToScene(void* object) {
     scIntro* scene = getScene();
-    nw4r::g3d::ScnGroup* root = scene->m_camera->m_task->m_scnRoot;
+    nw4r::g3d::ScnGroup* root = scene->m_work->m_root->scene;
     root->Insert(root->sceneItemsCount, reinterpret_cast<nw4r::g3d::ScnObj*>(object));
 }
 
@@ -280,20 +281,20 @@ void muIntroTask::makeSoundScript() {
 // Copies what the scene says about the fight.
 void muIntroTask::getStageSetting() {
     scIntro* scene = getScene();
-    m_introNo = scene->m_introNo;
-    m_mode = scene->m_mode;
-    m_playerNum = scene->m_playerNum;
-    m_enemyNum = scene->m_enemyNum;
-    m_players[0].m_charKind = scene->m_players[0].m_charKind;
-    m_players[0].m_type = scene->m_players[0].m_type;
-    m_players[1].m_charKind = scene->m_players[1].m_charKind;
-    m_players[1].m_type = scene->m_players[1].m_type;
-    m_players[2].m_charKind = scene->m_players[2].m_charKind;
-    m_players[2].m_type = scene->m_players[2].m_type;
-    m_enemies[0].m_charKind = scene->m_enemies[0].m_charKind;
-    m_enemies[0].m_type = scene->m_enemies[0].m_type;
-    m_enemies[1].m_charKind = scene->m_enemies[1].m_charKind;
-    m_enemies[1].m_type = scene->m_enemies[1].m_type;
+    m_introNo = scene->m_param.m_introNo;
+    m_mode = scene->m_param.m_mode;
+    m_playerNum = scene->m_param.m_playerNum;
+    m_enemyNum = scene->m_param.m_enemyNum;
+    m_players[0].m_charKind = scene->m_param.m_players[0].m_charKind;
+    m_players[0].m_type = scene->m_param.m_players[0].m_type;
+    m_players[1].m_charKind = scene->m_param.m_players[1].m_charKind;
+    m_players[1].m_type = scene->m_param.m_players[1].m_type;
+    m_players[2].m_charKind = scene->m_param.m_players[2].m_charKind;
+    m_players[2].m_type = scene->m_param.m_players[2].m_type;
+    m_enemies[0].m_charKind = scene->m_param.m_enemies[0].m_charKind;
+    m_enemies[0].m_type = scene->m_param.m_enemies[0].m_type;
+    m_enemies[1].m_charKind = scene->m_param.m_enemies[1].m_charKind;
+    m_enemies[1].m_type = scene->m_param.m_enemies[1].m_type;
 }
 
 // Asks for the files of the panels and of the fighters and enemies.
