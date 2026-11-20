@@ -389,3 +389,7 @@ void grDonkeyKong::setMotion(u32 animId, bool shouldLoop, bool force, float* fra
         *frameCount = modelAnim->getFrameCount();
     }
 }
+
+// TODO: clean up - this only reproduces the loop of the inlined soArrayVectorAbstract<soCollisionAttackPart>::set without its guard;
+// find where the original sets this (it is the state of the optimizer when the weak functions are compiled).
+#pragma opt_loop_invariants off

@@ -398,3 +398,7 @@ void fn_78_4694() {}
 u8 fn_78_46A0(u8* p) { return *(u8*)(p + 0x44); }
 void fn_78_47AC() {}
 } // extern "C"
+
+// TODO: clean up - this only reproduces the loop of the inlined soArrayVectorAbstract<soCollisionAttackPart>::set without its guard;
+// find where the original sets this (it is the state of the optimizer when the weak functions are compiled).
+#pragma opt_loop_invariants off

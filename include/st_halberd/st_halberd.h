@@ -122,7 +122,7 @@ class stHalberd : public stMelee {
     Vec3f m_shotPos;                   // 0x3D8
     int m_target;                      // 0x3E4 the number of the player the cannon aims at (-1 = none)
     Vec3f m_targetPos;                 // 0x3E8 where the cannon aims
-    stHalberdSubject m_subject;        // 0x3F4 the camera subject of the cannon ball
+    cmSubject m_subject;               // 0x3F4 the camera subject of the cannon ball
     u8 m_armState;                     // 0x478 the state of the arm
     char _479[3];
     float m_armTimer;                  // 0x47C
