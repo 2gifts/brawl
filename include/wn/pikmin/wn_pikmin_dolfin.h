@@ -42,7 +42,10 @@ public:
 static_assert(sizeof(wnPikminDolfinParamAccesser) == 0x54, "Dolfin parameter accesser extent");
 
 // sora_melee instances the article's builders call (declared only).
+#ifndef WN_PIKMIN_ATTACK_PART_ARRAY_3
+#define WN_PIKMIN_ATTACK_PART_ARRAY_3
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 3);
+#endif
 FT_DOL_ARRAY_VECTOR(soCollisionHitPart, 1);
 // The status process pointer vector uses the no-argument constructor, not the size overload.
 WN_STATUS_PROC_VECTOR_ARG_CTOR(5);

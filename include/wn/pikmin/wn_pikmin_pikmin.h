@@ -177,7 +177,10 @@ public:
 #include <ft/ft_kinetic_energy.h>
 
 // sora_melee instance the attack builder calls (declared only).
+#ifndef WN_PIKMIN_ATTACK_PART_ARRAY_3
+#define WN_PIKMIN_ATTACK_PART_ARRAY_3
 FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 3);
+#endif
 
 // The controller of the Pikmin reads its owner's controller through the link (one controller and one clatter slot).
 // HYPOTHESIS: same builder as Snake's C4 charge.
