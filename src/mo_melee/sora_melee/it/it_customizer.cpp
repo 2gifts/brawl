@@ -25,6 +25,7 @@
 #include <so/so_slow.h>
 #include <cm/cm_controller_ai.h>
 #include <gm/gm_global.h>
+#include <mt/mt_trig.h>
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/so_external_value_accesser.h>
 #include <types.h>
@@ -1054,6 +1055,9 @@ public:
     itFigureManager* m_figureManager;
 
     static itManager* getInstance();
+    BaseItem* createItem(Vec3f* safePos, Vec3f* pos, float lr, itKind kind, u32 variation = 0, int createOwnerTaskId = -1,
+                         soResourceModule* resourceModule = NULL, u8 groupNo = 0, int brresId = 0xffff,
+                         int texResIndex = 0, int texResId = 0xffff);
 };
 
 // HYPOTHESIS: the default layer type depends on the item kind; a few kinds defer to a mode value inside itManager.
@@ -1945,4 +1949,119 @@ bool itWarpstarCustomizer::onProcessFixPosition(BaseItem* item) {
         work->onFlag(0x12000000);
     }
     return true;
+}
+
+// Swinging the rod launches a star (item 0x3B) from node 2; swing kinds 0 and 1 have their own power and speed params.
+// TODO: clean up - MATCH-ONLY: the literals are read through the unit's pool label (46C8 + 0: 1, + 0x14: 0, + 0x48: 2.6).
+u32 itStarRodCustomizer::onShoot(BaseItem* item, u32 kind, float lr, float) {
+    const float* pool = lbl_27_rodata_46C8;
+    soWorkManageModule* work = &itWork(item);
+    int bullets = work->getInt(0x10000000);
+    if (bullets <= 0) {
+        return 0;
+    }
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() != 2) {
+        return 0;
+    }
+    Vec3f pos = item->m_moduleAccesser->getModelModule().getNodeGlobalPosition(2, false);
+    pos.m_z = pool[0x14 / 4];
+    BaseItem* star = itManager::getInstance()->createItem(&item->getHavedParentSafePos(), &pos, lr, static_cast<itKind>(0x3B), 0, item->m_taskId);
+    if (star != NULL) {
+        star->m_moduleAccesser->getGroundModule().setTestCollStop(true, 0);
+        star->setTeamOwnerTaskId(item);
+        star->updateOwnerScale(item);
+        Vec3f speed(pool[0x48 / 4] * lr, pool[0x14 / 4], pool[0x14 / 4]);
+        float power = pool[0];
+        switch (kind) {
+        case 0:
+            power = item->getParamFloat(0x1AF7);
+            speed.m_x *= item->getParamFloat(0x1AF5);
+            break;
+        case 1:
+            power = item->getParamFloat(0x1AF8);
+            speed.m_x *= item->getParamFloat(0x1AF6);
+            break;
+        }
+        star->throwAttack(lr, &speed, power);
+        if (bullets > 0 && --bullets == 0) {
+            item->m_moduleAccesser->getMotionModule().addOtherAnim(0, 8, false, pool[0x14 / 4], pool[0]);
+            item->m_moduleAccesser->getMotionModule().setOtherAnimRate(0, pool[0x14 / 4]);
+            item->m_moduleAccesser->getMotionModule().setOtherAnimFrame(pool[0], 0);
+        }
+    }
+    work->setInt(bullets, 0x10000000);
+    return bullets;
+}
+
+// Fires a shot (item 0x2D) from node 1; an empty gun plays the empty motion.
+// TODO: clean up - MATCH-ONLY: the literals are read through the unit's pool label (46C8 + 0x14: 0, + 0x2C: 5, + 0x34: 8,
+// + 0x38: 1.6).
+u32 itRayGunCustomizer::onShoot(BaseItem* item, u32, float lr, float) {
+    const float* pool = lbl_27_rodata_46C8;
+    soWorkManageModule* work = &itWork(item);
+    int bullets = work->getInt(0x10000000);
+    if (bullets <= 0) {
+        item->changeMotion(8, false);
+        return 0;
+    }
+    Vec3f pos = item->m_moduleAccesser->getModelModule().getNodeGlobalPosition(1, false);
+    float scale = item->getLinkOwnerScale();
+    pos.m_x += pool[0x34 / 4] * lr * scale;
+    pos.m_y += pool[0x38 / 4] * scale;
+    pos.m_z = pool[0x14 / 4];
+    BaseItem* shot = itManager::getInstance()->createItem(&item->getHavedParentSafePos(), &pos, lr, static_cast<itKind>(0x2D), 0, item->m_taskId);
+    if (shot != NULL) {
+        shot->m_moduleAccesser->getGroundModule().setTestCollStop(true, 0);
+        shot->setTeamOwnerTaskId(item);
+        shot->updateOwnerScale(item);
+        Vec3f speed(pool[0x2C / 4] * lr, pool[0x14 / 4], pool[0x14 / 4]);
+        shot->m_moduleAccesser->getKineticModule().addSpeed(&speed, shot->m_moduleAccesser);
+        if (--bullets <= 0) {
+            bullets = 0;
+        }
+        item->changeMotion(7, false);
+    }
+    work->setInt(bullets, 0x10000000);
+    return bullets;
+}
+
+// Throws a ball (item 0xE) from node 4 at the given angle (degrees from up) and the speed in float work 0x11000000.
+// TODO: clean up - MATCH-ONLY: the literals are read through the unit's pool label (46C8 + 0: 1, + 8: pi/180, + 0x14: 0,
+// + 0x30: pi/2, + 0x44: 2).
+u32 itClackerCustomizer::onShoot(BaseItem* item, u32, float lr, float angle) {
+    const float* pool = lbl_27_rodata_46C8;
+    soWorkManageModule* work = &itWork(item);
+    int bullets = work->getInt(0x10000000);
+    if (bullets <= 0) {
+        item->changeMotion(7, false);
+        return 0;
+    }
+    float scale = item->getLinkOwnerScale() - pool[0];
+    if (scale < pool[0x14 / 4]) {
+        scale = pool[0x14 / 4];
+    }
+    Vec3f offset(pool[0x44 / 4] * scale, pool[0x14 / 4], pool[0x14 / 4]);
+    Vec3f pos;
+    pos = item->m_moduleAccesser->getModelModule().getNodeGlobalPosition(4, &offset, false, false);
+    pos.m_z = pool[0x14 / 4];
+    BaseItem* ball = itManager::getInstance()->createItem(&item->getHavedParentSafePos(), &pos, lr, static_cast<itKind>(0xE), 0, item->m_taskId);
+    if (ball != NULL) {
+        ball->m_moduleAccesser->getGroundModule().setTestCollStop(true, 0);
+        ball->setTeamOwnerTaskId(item);
+        ball->updateOwnerScale(item);
+        float speed = work->getFloat(0x11000000);
+        Vec3f dir(pool[0x14 / 4], pool[0x14 / 4], pool[0x14 / 4]);
+        mtSinCosf(pool[0x30 / 4] + -(pool[8 / 4] * angle), &dir.m_y, &dir.m_x);
+        dir.m_x *= speed * lr;
+        dir.m_y *= speed;
+        ball->m_moduleAccesser->getKineticModule().addSpeed(&dir, ball->m_moduleAccesser);
+        if (bullets == 1) {
+            ball->changeMotion(1, false);
+        }
+        if (--bullets <= 0) {
+            bullets = 0;
+        }
+    }
+    work->setInt(bullets, 0x10000000);
+    return bullets;
 }
