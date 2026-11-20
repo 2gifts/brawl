@@ -413,7 +413,7 @@ void fn_27_37880(void*, int, float, float);
 void fn_27_36768(void*, int, int);
 int getCollision__11soCollisionFUlUl(void*, int, int);
 void addCheckList__11soCollisionFv(void*);
-unsigned int fn_27_4DA80(void*, int, int, void*, void*, float);
+unsigned int update__21soCollisionSearchPartFfP16soModuleAccesserP25soCollisionShieldPartUnitP5Vec3fP5Vec3f(void*, int, int, void*, void*, float);
 }
 
 extern const float lbl_27_rodata_534;
@@ -449,7 +449,7 @@ extern "C" void fn_27_4E670(Self* self, float a, float b) {
                 dv = self->f28->fd8->unk4;
                 v = (int)((SeqB*)self->f2c)->s1(j, self->f28->fd8);
                 res = getCollision__11soCollisionFUlUl(self->b8, j, (int)obj);
-                if (fn_27_4DA80((void*)v, dv, res, self->dc, self->e8, self->f30) == 1U) {
+                if (update__21soCollisionSearchPartFfP16soModuleAccesserP25soCollisionShieldPartUnitP5Vec3fP5Vec3f((void*)v, dv, res, self->dc, self->e8, self->f30) == 1U) {
                     r26 = 1U;
                 }
             } else {
@@ -457,7 +457,7 @@ extern "C" void fn_27_4E670(Self* self, float a, float b) {
                 dv = self->f28->fd8->unk4;
                 obj = ((SeqB*)self->f2c)->s1(j, self->f28->fd8);
                 res = getCollision__11soCollisionFUlUl(self->b8, j, v);
-                if (fn_27_4DA80(obj, dv, res, 0, 0, self->f30) == 1U) {
+                if (update__21soCollisionSearchPartFfP16soModuleAccesserP25soCollisionShieldPartUnitP5Vec3fP5Vec3f(obj, dv, res, 0, 0, self->f30) == 1U) {
                     r26 = 1U;
                 }
             }

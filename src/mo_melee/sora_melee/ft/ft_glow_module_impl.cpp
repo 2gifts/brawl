@@ -76,11 +76,11 @@ void ftGlowModuleImpl::clearGlowAttackStatus() {
 
 // TODO: clean up, give variables real names
 namespace jj_14CD88 {
-extern "C" void fn_27_C2E90(void* p);
+extern "C" void clear__16soGlowModuleImplFv(void* p);
 
 extern "C" void fn_27_14CD88(void* self) {
     s32* p = (s32*)self;
-    fn_27_C2E90(self);
+    clear__16soGlowModuleImplFv(self);
     p[19] = 12;
     p[9] = 0;
     p[18] = 0;

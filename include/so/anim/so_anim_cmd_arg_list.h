@@ -31,7 +31,9 @@ struct soAnimCmdArgList {
     // Returns the integer value of the specified argument. If the specified argument isn't a variable or Value/Integer typed, m_errorOnValueFetch is set to 1!
     int getInt(u32 index);
     // Returns the float value of the specified argument. If the specified argument isn't a variable or Scalar/Float typed, m_errorOnValueFetch is set to 1!
-#ifdef WN_EM_SIMPLE_UNIT
+// HYPOTHESIS: the definition returns a float (so_anim_cmd_arg_list.cpp); callers that convert the result as a double
+    // see the double declaration.
+#if defined(WN_EM_SIMPLE_UNIT) || defined(SO_ANIM_CMD_ARG_LIST_FLOAT)
     float getFloat(u32 index);
 #else
     double getFloat(u32 index);

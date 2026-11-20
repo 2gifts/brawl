@@ -12,6 +12,9 @@
 #include <so/collision/so_collision.h>
 #include <types.h>
 
+class soModuleAccesser;
+struct soCollisionShieldPartUnit;
+
 struct soCollisionHitData {
     enum Height {
         Height_Low = 0x1,
@@ -23,10 +26,10 @@ struct soCollisionHitData {
     Vec3f m_endOffsetPos;
     float m_size;
     unsigned int m_nodeIndex : 9;
-    soCollision::Part m_part : 2;
+    unsigned int m_part : 2; // soCollision::Part (read unsigned by soCollisionHitPart::setData)
     Height m_height : 2;
     unsigned int m_0x1c_3 : 2;
-    soCollision::ShapeType m_shapeType : 1;
+    unsigned int m_shapeType : 1; // soCollision::ShapeType (read unsigned by soCollisionHitPart::update)
     unsigned int m_0x1c_1 : 16;
 
     struct Simple {
@@ -50,7 +53,9 @@ class soCollisionHitPart {
     int unk4; // HYPOTHESIS: the status that soCollisionHitGroup::resetStatusAll restores
     soCollisionHitData m_hitData;
     soArrayVector<clTarget, 6> m_clTargetArrayVector;
-    char _0x64[4];
+    char _0x64;
+    bool m_isUpdated; // HYPOTHESIS: mirrors soCollisionShieldPartUnit::m_isUpdated
+    char _0x66[2];
 
 public:
     // HYPOTHESIS: signatures follow the hit-group calls and the linker map.
@@ -63,6 +68,10 @@ public:
     soCollisionHitPart();
     soCollisionHitPart(soCollision::Category selfCategory, u32 opponentCategory);
     ~soCollisionHitPart();
+    // HYPOTHESIS: names and parameter meanings are guesses (the linker map leaves these two unnamed).
+    bool update(soModuleAccesser* moduleAccesser, soCollisionShieldPartUnit* unit, int minStatus, u32 situation,
+                u32 arg, u32 situationMask, float scale);
+    int getNodeIndex();
 };
 static_assert(sizeof(soCollisionHitPart) == 0x68, "Class is wrong size!");
 #endif
