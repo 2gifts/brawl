@@ -220,16 +220,12 @@ void grCrayonGimic::updateYR(float deltaFrame) {
 
 // The thing between them turns to the angle that was drawn, at the speed of the stage data.
 void grCrayonGimic::updateYY(float deltaFrame) {
-    static float speed;
-    static char initialized;
     float* data = static_cast<float*>(getStageData());
     if (data != NULL) {
         unk164 = m_sceneModels[2];
         unk168 = unk164->m_resMdl;
-        if (initialized == 0) {
-            speed = data[3];
-            initialized = 1;
-        }
+        static float speed = data[3];
+
         grCalcWorldCallBack* callback = &m_calcWorldCallBack;
         if (callback != NULL) {
             u8 step = unk173;

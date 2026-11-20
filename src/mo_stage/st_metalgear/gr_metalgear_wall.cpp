@@ -334,15 +334,19 @@ void grMetalgearWall::updateShake(float deltaFrame) {
         m_shakeTimer = 0.0f;
     }
     if (m_shakeTimer > 0.0f) {
-        u32 step = (u32)m_shakeTimer % 3;
-        if ((float)step == 0.0f) {
+        float step = (u32)m_shakeTimer % 3;
+        if (step == 0.0f) {
+
             float sine;
             float cosine;
-            mtSinCosf(metalgearDegToRad(90.0f), &sine, &cosine);
+            float deg = 90.0f;
+            mtSinCosf(deg * 0.017453292f, &sine, &cosine);
+
             float scale = randf() * 0.8f + 0.5f;
             m_shake.m_x = scale * cosine;
-            m_shake.m_z = 0.0f;
             m_shake.m_y = scale * sine;
+            m_shake.m_z = 0.0f;
+
         }
     } else {
         m_shake.m_x = 0.0f;
