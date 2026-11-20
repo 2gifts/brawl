@@ -6,11 +6,18 @@
 #define SO_ARRAY_LIST_EXTERNAL_insertSub
 #define SO_ARRAY_LIST_EXTERNAL_eraseSub
 #include <so/so_array.h>
+#define IT_CUSTOMIZER_BOOL_HOOKS // the hooks below return values, see it/item.h
 #include <it/item.h>
 #include <it/kinetic/it_kinetic_module_impl.h>
 #include <math.h>
 #include <st/stage.h>
+#include <st_homerun/st_homerun.h>
 #include <cm/cm_camera_controller.h>
+#include <cm/cm_controller_photo.h>
+#include <if/if_resetsan.h>
+#include <it/it_figure_manager.h>
+#include <ft/ft_external_value_accesser.h>
+#include <so/ground/so_ground_module_impl.h>
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/so_external_value_accesser.h>
 #include <types.h>
@@ -25,7 +32,7 @@ public:
     virtual ~itResetsanCustomizer();
     virtual void onConstruct(BaseItem* item);
     virtual void onReset(BaseItem* item);
-    virtual void onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+    virtual bool onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
     virtual itParam::KineticFlag getKineticFlags(BaseItem* item);
 };
 
@@ -38,7 +45,7 @@ public:
 class itSmashBallCustomizer : public itCustomizer<itSmashBallCustomizer> {
 public:
     virtual ~itSmashBallCustomizer();
-    virtual void onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+    virtual bool onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
     virtual void onUpdateAiDir(BaseItem* item, Vec2f*, Vec2f*, Vec2f*, Vec2f*);
     virtual void onUpdateAiMove(BaseItem* item, Vec2f*, Vec2f*, Vec2f*);
     virtual bool onPreDamageCheck(BaseItem* item, int damageStatusKind, soDamageLog*);
@@ -55,7 +62,7 @@ public:
 class itSonansCustomizer : public itCustomizer<itSonansCustomizer> {
 public:
     virtual ~itSonansCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onNotifyEventCollisionAttackCheck(BaseItem* item, int hitTaskId);
     virtual bool onDamage(BaseItem* item, int damageStatusKind, soDamageLog*);
     virtual bool isUseSpeedDamage(BaseItem* item);
@@ -66,7 +73,7 @@ class itSandbagCustomizer : public itCustomizer<itSandbagCustomizer> {
 public:
     virtual ~itSandbagCustomizer();
     virtual void onReset(BaseItem* item);
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onNotifyEventLink(BaseItem* item, void* unk1, soModuleAccesser* moduleAccesser, StageObject*, int unk4);
     virtual bool onNotifyEventCaptureStatus(BaseItem* item);
     virtual bool onDamage(BaseItem* item, int damageStatusKind, soDamageLog*);
@@ -104,7 +111,7 @@ public:
 class itRayGunShotCustomizer : public itCustomizer<itRayGunShotCustomizer> {
 public:
     virtual ~itRayGunShotCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
 };
 
 class itClackerCustomizer : public itCustomizer<itClackerCustomizer> {
@@ -144,7 +151,7 @@ public:
     virtual void onConstruct(BaseItem* item);
     virtual void onDestruct(BaseItem* item);
     virtual void onReset(BaseItem* item);
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onRenderPre(BaseItem* item);
     virtual bool onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos);
     virtual void onAction(BaseItem* item, u32, float rate);
@@ -164,7 +171,7 @@ class itSpringCustomizer : public itCustomizer<itSpringCustomizer> {
 public:
     virtual ~itSpringCustomizer();
     virtual void onDestruct(BaseItem* item);
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual bool onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos);
     virtual void onNotifyEventGimmick(BaseItem* item, soGimmickEventArgs* eventInfo, int* taskId);
@@ -211,7 +218,7 @@ public:
 class itMetroidCustomizer : public itCustomizer<itMetroidCustomizer> {
 public:
     virtual ~itMetroidCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual bool onNotifyEventCollisionSearch(BaseItem* item, soCollisionLog* collisionLog);
     virtual bool onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos);
@@ -241,7 +248,7 @@ public:
 class itRobotGyroCustomizer : public itCustomizer<itRobotGyroCustomizer> {
 public:
     virtual ~itRobotGyroCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onAction(BaseItem* item, u32, float rate);
     virtual itParam::KineticFlag getKineticFlags(BaseItem* item);
 };
@@ -251,7 +258,7 @@ public:
     virtual ~itDragoonSetCustomizer();
     virtual void onDestruct(BaseItem* item);
     virtual void onReset(BaseItem* item);
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onProcessHit(BaseItem* item);
     virtual void onRenderDebug(BaseItem* item);
     virtual bool isUseScaleZ(BaseItem* item);
@@ -266,7 +273,7 @@ public:
     virtual void onConstruct(BaseItem* item);
     virtual void onDestruct(BaseItem* item);
     virtual void onReset(BaseItem* item);
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onNotifyEventLink(BaseItem* item, void* unk1, soModuleAccesser* moduleAccesser, StageObject*, int unk4);
     virtual int onGetLayerType(BaseItem* item);
 };
@@ -274,7 +281,7 @@ public:
 class itWarpstarCustomizer : public itCustomizer<itWarpstarCustomizer> {
 public:
     virtual ~itWarpstarCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual bool isConstraintHave(BaseItem* item);
     virtual bool isReferenceControlerHave(BaseItem* item);
     virtual itParam::KineticFlag getKineticFlags(BaseItem* item);
@@ -319,7 +326,7 @@ public:
 class itGreenShellCustomizer : public itCustomizer<itGreenShellCustomizer> {
 public:
     virtual ~itGreenShellCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onNotifyEventLink(BaseItem* item, void* unk1, soModuleAccesser* moduleAccesser, StageObject*, int unk4);
     virtual bool onReflect(BaseItem* item);
     virtual bool isTreadPassive(BaseItem* item);
@@ -329,13 +336,13 @@ public:
 class itBombheiCustomizer : public itCustomizer<itBombheiCustomizer> {
 public:
     virtual ~itBombheiCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
 };
 
 class itLinkBombCustomizer : public itCustomizer<itLinkBombCustomizer> {
 public:
     virtual ~itLinkBombCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual bool onNotifyEventCollisionSearch(BaseItem* item, soCollisionLog* collisionLog);
     virtual bool onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos);
 };
@@ -346,7 +353,7 @@ public:
     virtual void onConstruct(BaseItem* item);
     virtual void onDestruct(BaseItem* item);
     virtual void onProcessGameProc(BaseItem* item);
-    virtual void onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+    virtual bool onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
 };
 
 class itDoseisanCustomizer : public itCustomizer<itDoseisanCustomizer> {
@@ -366,7 +373,7 @@ class itGokulinCustomizer : public itCustomizer<itGokulinCustomizer> {
 public:
     virtual ~itGokulinCustomizer();
     virtual void onDestruct(BaseItem* item);
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual void onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual void onNotifyEventLink(BaseItem* item, void* unk1, soModuleAccesser* moduleAccesser, StageObject*, int unk4);
     virtual bool onEnumFighter(BaseItem* item, Fighter* fighter);
@@ -392,7 +399,7 @@ class itTingleCustomizer : public itCustomizer<itTingleCustomizer> {
 public:
     virtual ~itTingleCustomizer();
     virtual void onDestruct(BaseItem* item);
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
     virtual bool onEnumFighter(BaseItem* item, Fighter* fighter);
 };
 
@@ -411,13 +418,13 @@ class itManaphyCustomizer : public itCustomizer<itManaphyCustomizer> {
 public:
     virtual ~itManaphyCustomizer();
     virtual void onDestruct(BaseItem* item);
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
 };
 
 class itJeffCustomizer : public itCustomizer<itJeffCustomizer> {
 public:
     virtual ~itJeffCustomizer();
-    virtual void onProcessFixPosition(BaseItem* item);
+    virtual bool onProcessFixPosition(BaseItem* item);
 };
 
 class itJeffPencilCustomizer : public itCustomizer<itJeffPencilCustomizer> {
@@ -462,7 +469,7 @@ class itShadowCustomizer : public itCustomizer<itShadowCustomizer> {
 public:
     virtual ~itShadowCustomizer();
     virtual void onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
-    virtual void onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
+    virtual bool onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3);
 };
 
 itResetsanCustomizer::~itResetsanCustomizer() { }
@@ -1035,6 +1042,10 @@ void itFireFlowerCustomizer::onAction(BaseItem* item, u32 action, float rate) {
 // itManager (it/it_manager.h pulls in the shared customizer header, whose classes this unit declares itself).
 class itManager {
 public:
+    // TODO: clean up - only the trophy manager member is placed (it/it_manager.h has the full layout).
+    char _0[0x14B8];
+    itFigureManager* m_figureManager;
+
     static itManager* getInstance();
 };
 
@@ -1079,4 +1090,357 @@ int itCustomizerInterface::onGetLayerType(BaseItem* item) {
     default:
         return 2;
     }
+}
+
+void itResetsanCustomizer::onConstruct(BaseItem* item) {
+    IfResetsanTask* task = IfResetsanTask::create(item, item->m_itArchive, 0x80);
+    if (task != NULL) {
+        // TODO: clean up - the window's task id is kept in a BaseItem field that is not declared yet (0x3D2C).
+        *reinterpret_cast<u32*>(reinterpret_cast<u8*>(item) + 0x3D2C) = task->m_taskId;
+    }
+}
+
+bool itSandbagCustomizer::onProcessFixPosition(BaseItem* item) { return true; }
+
+bool itRobotGyroCustomizer::onProcessFixPosition(BaseItem* item) { return true; }
+
+// TODO: clean up - placeholder name of the sora_melee helper the fighter check goes through (ft_external_value_accesser.cpp).
+extern "C" bool fn_27_14D74C(Fighter* fighter);
+
+bool itGokulinCustomizer::onEnumFighter(BaseItem* item, Fighter* fighter) { return fn_27_14D74C(fighter); }
+
+bool itPasaranCustomizer::onReflect(BaseItem* item) {
+    return item->m_moduleAccesser->getStatusModule().changeStatusRequest(5, item->m_moduleAccesser);
+}
+
+void itDragoonSetCustomizer::onRenderDebug(BaseItem* item) {
+    int kind = item->m_moduleAccesser->getMotionModule().getKind();
+    if (kind == 1) {
+        return;
+    }
+}
+
+// TODO: clean up - the photo callbacks of the Nintendogs and Dragoon sight items are statics of the unit (with its
+// static initializer, not decompiled yet); they are reached through their bss labels.
+extern "C" utListNode lbl_27_bss_6460;
+extern "C" utListNode lbl_27_bss_6480;
+
+static inline cmPhotoController* itGetPhotoController() {
+    gfCameraController* cm = !CameraController::getInstance() ? 0 :
+        CameraController::getInstance()->getCameraController(CameraController::Photo);
+    return static_cast<cmPhotoController*>(cm);
+}
+
+void itNintendogsHiCustomizer::onConstruct(BaseItem* item) {
+    cmPhotoController* photo = itGetPhotoController();
+    if (photo) {
+        photo->addCallBack(&lbl_27_bss_6460);
+    }
+}
+
+void itNintendogsHiCustomizer::onDestruct(BaseItem* item) {
+    cmPhotoController* photo = itGetPhotoController();
+    if (photo) {
+        photo->removeCallBack(&lbl_27_bss_6460);
+    }
+}
+
+void itDragoonSightCustomizer::onConstruct(BaseItem* item) {
+    cmPhotoController* photo = itGetPhotoController();
+    if (photo) {
+        photo->addCallBack(&lbl_27_bss_6480);
+    }
+}
+
+void itDragoonSightCustomizer::onDestruct(BaseItem* item) {
+    item->m_moduleAccesser->getEffectModule().killAll(4, false, false);
+    cmPhotoController* photo = itGetPhotoController();
+    if (photo) {
+        photo->removeCallBack(&lbl_27_bss_6480);
+    }
+}
+
+// The owner's own coin search is ignored while int work 0x1000000B is positive.
+bool itMoneyCustomizer::onNotifyEventCollisionSearch(BaseItem* item, soCollisionLog* collisionLog) {
+    if (collisionLog->m_taskId == static_cast<u32>(item->m_createOwnerTaskId)) {
+        if (itWork(item).getInt(0x1000000b) > 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+extern "C" const float lbl_27_rodata_46C8[];
+
+// Status 0xB plays the 2D effect 0xCC0003.
+void itShadowCustomizer::onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    if (statusKind == 0xB) {
+        Vec3f pos;
+        Vec3f rot;
+        rot.m_x = lbl_27_rodata_46DC[0];
+        rot.m_y = lbl_27_rodata_46DC[0];
+        rot.m_z = lbl_27_rodata_46DC[0];
+        pos.m_x = lbl_27_rodata_46DC[0];
+        pos.m_y = lbl_27_rodata_46DC[0];
+        pos.m_z = lbl_27_rodata_46DC[0];
+        item->m_moduleAccesser->getEffectModule().req2D(static_cast<EfID>(0xCC0003), &pos, &rot, lbl_27_rodata_46C8[0], 6);
+    }
+}
+
+// Entering status 2 while linked to node 3 sets the link attribute 7 off.
+void itMetroidCustomizer::onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    if (statusKind == 2 && item->m_moduleAccesser->getLinkModule().isLink(3)) {
+        item->m_moduleAccesser->getLinkModule().setAttribute(3, static_cast<soLinkConnection::Attribute>(7), false);
+    }
+}
+
+// The trophy id is the item's variation (1 when it is not a valid trophy).
+static inline u32 itGetFigureId(BaseItem* item) {
+    u32 id = item->m_variation;
+    return itManager::getInstance()->m_figureManager->isValidFigureId(id) ? id : 1;
+}
+
+void itFigureCustomizer::onReset(BaseItem* item) {
+    itFigureManager* manager = itManager::getInstance()->m_figureManager;
+    if (manager->preloadFigureTex(itGetFigureId(item), true)) {
+        itWork(item).onFlag(0x12000003);
+    }
+}
+
+void itFigureCustomizer::onDestruct(BaseItem* item) {
+    itFigureManager* manager = itManager::getInstance()->m_figureManager;
+    u32 id = itGetFigureId(item);
+    if (itWork(item).isFlag(0x12000003)) {
+        manager->unloadFigureTex(id, true);
+    }
+}
+
+// A box held by someone else is unlinked from its previous holder.
+bool itCBoxCustomizer::onHave(BaseItem* item, int taskId) {
+    if (item->m_moduleAccesser->getLinkModule().isLink(1) &&
+        static_cast<u32>(taskId) != static_cast<u32>(item->m_moduleAccesser->getLinkModule().getParentTaskId(1))) {
+        item->m_moduleAccesser->getLinkModule().unlink(1);
+    }
+    return true;
+}
+
+// TODO: clean up - the original falls off the end in the handled cases (the result register keeps the last call's value).
+bool itTeamHealingCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8, Vec3f* searchHitPos) {
+    switch (item->sendTouchMessage(searchHitTaskId, searchHitPos, lbl_27_rodata_46DC[0])) {
+    case 1:
+        item->requestLost();
+        break;
+    case 2:
+        itWork(item).setInt(searchHitTaskId, 0x10000000);
+        item->m_moduleAccesser->getStatusModule().changeStatusRequest(7, item->m_moduleAccesser);
+        break;
+    default:
+        return false;
+    }
+}
+
+// TODO: clean up - MATCH-ONLY: the minimum height literal is read through the unit's pool label.
+extern "C" const float lbl_27_rodata_479C[];
+
+// Keeps the item at or above the height of param 0x403.
+bool itJeffCustomizer::onProcessFixPosition(BaseItem* item) {
+    float minY = item->getParamFloat(0x403);
+    if (minY > lbl_27_rodata_479C[0]) {
+        soPostureModule* posture = &item->m_moduleAccesser->getPostureModule();
+        Vec3f pos = posture->getPos();
+        if (pos.m_z < minY) {
+            pos.m_z = minY;
+        }
+        posture->setPos(&pos);
+        item->updateNodeSRT();
+    }
+    return true;
+}
+
+// A trophy that touches the Home-Run Contest sandbag is entered on the stage and removed.
+// TODO: clean up - the original falls off the end after removing the trophy (no return value on that path).
+bool itFigureCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8, Vec3f* searchHitPos) {
+    gfTask* task = gfTask::getTask(searchHitTaskId);
+    if (task == NULL) {
+        return false;
+    }
+    if (task->m_taskCategory != gfTask::Category_Item) {
+        return false;
+    }
+    BaseItem* hit = dynamic_cast<BaseItem*>(task);
+    if (hit == NULL || hit->m_kind != 0x4F) {
+        return false;
+    }
+    if (g_Stage != NULL && g_Stage->m_stageKind == Stages::HomeRunContest) {
+        static_cast<stHomerun*>(g_Stage)->entryFigure(item->m_instanceId, item->m_kind, item->m_variation);
+    }
+    item->requestLost();
+}
+
+// A fighter caught by the Metroid is held at its Metroid node (any other target at no node).
+bool itMetroidCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8, Vec3f* searchHitPos) {
+    gfTask* task = gfTask::getTask(searchHitTaskId);
+    if (task == NULL) {
+        return false;
+    }
+    int nodeId = -1;
+    if (dynamic_cast<Fighter*>(task) != NULL) {
+        nodeId = ftExternalValueAccesser::getMetroidNodeId();
+    }
+    itWork(item).onFlag(0x12000009);
+    item->have(searchHitTaskId, nodeId, -1);
+    return true;
+}
+
+// Only fighters that are not in status 0x102 can be caught; otherwise the touch flag is cleared.
+bool itMetroidCustomizer::onNotifyEventCollisionSearch(BaseItem* item, soCollisionLog* collisionLog) {
+    int taskId = collisionLog->m_taskId;
+    soWorkManageModule* work = &itWork(item);
+    gfTask* task = gfTask::getTask(taskId);
+    if (task == NULL || task->m_taskCategory != gfTask::Category_Fighter) {
+        work->offFlag(0x22000005);
+        return false;
+    }
+    Fighter* fighter = dynamic_cast<Fighter*>(task);
+    if (fighter == NULL || soExternalValueAccesser::getStatusKind(fighter) == 0x102) {
+        work->offFlag(0x22000005);
+        return false;
+    }
+    return true;
+}
+
+// The bomb bounces off whatever its search hits while the bounce flag is set.
+bool itLinkBombCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8, Vec3f* searchHitPos) {
+    soWorkManageModule* work = &itWork(item);
+    if (work->isFlag(0x12000000)) {
+        work->offFlag(0x12000000);
+        work->offFlag(0x22000005);
+        dynamic_cast<itKineticModuleImpl&>(item->m_moduleAccesser->getKineticModule()).characterBound(item->m_moduleAccesser, true);
+    }
+    return false;
+}
+
+void itWarioBikeCustomizer::onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    soGroundModule* ground = &item->m_moduleAccesser->getGroundModule();
+    ground->setShapeFlag(static_cast<soGroundShapeImpl::ShapeFlagId>(8), true, 0);
+    if (prevStatusKind == 2 && statusKind != 2 && statusKind != 6) {
+        ground->update(1);
+        ground->testGround(0);
+        item->updateNodeSRT();
+    }
+}
+
+// The reflected shell keeps the reflect frames of its kind's parameter.
+bool itGreenShellCustomizer::onReflect(BaseItem* item) {
+    soWorkManageModule* work = &itWork(item);
+    switch (item->m_kind) {
+    case 0x1C:
+        work->setInt(item->getParamInt(0x6338), 0x1000000c);
+        break;
+    case 0x51:
+        work->setInt(item->getParamInt(0x6D92), 0x1000000c);
+        break;
+    case 0x52:
+        work->setInt(item->getParamInt(0x6DC4), 0x1000000c);
+        break;
+    }
+    return false;
+}
+
+void itFigureCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    soWorkManageModule* work = &itWork(item);
+    switch (action) {
+    case 0:
+        work->onFlag(0x12000000);
+        item->m_moduleAccesser->getStatusModule().changeStatusRequest(3, item->m_moduleAccesser);
+        break;
+    case 1:
+        work->onFlag(0x12000001);
+        work->offFlag(0x12000008);
+        item->m_moduleAccesser->getStatusModule().changeStatusRequest(8, item->m_moduleAccesser);
+        break;
+    }
+}
+
+// The spring events whose top position (and shoot parameters) are filled in after construction.
+struct itSpringTopEventArgs : public soGimmickSpringEventArgs {
+    itSpringTopEventArgs(Gimmick::EventKind kind) : soGimmickSpringEventArgs(kind, 0) { }
+};
+
+// While the spring is in status 8 or 0xB it tells the gimmicks where its top (node 4) is.
+bool itSpringCustomizer::onProcessFixPosition(BaseItem* item) {
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 8 ||
+        item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 0xB) {
+        itSpringTopEventArgs args(Gimmick::Spring_Event_Pos);
+        args.m_topPos = item->m_moduleAccesser->getModelModule().getNodeGlobalPosition(4, false);
+        item->presentEventGimmick(&args, -1);
+    }
+    return true;
+}
+
+// Entering status 9 or 0xC, or status 6 from 8 or 0xB, shoots whoever stands on the spring.
+void itSpringCustomizer::onNotifyEventChangeStatus(BaseItem* item, int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser) {
+    if (statusKind == 9 || statusKind == 0xC || (statusKind == 6 && (prevStatusKind == 8 || prevStatusKind == 0xB))) {
+        itSpringTopEventArgs args(Gimmick::Spring_Event_Shoot);
+        Vec3f rot = item->m_moduleAccesser->getPostureModule().getRot(0);
+        args.m_topPos = moduleAccesser->getModelModule().getNodeGlobalPosition(4, false);
+        args.m_bounce = item->getParamFloat(0x1AC2);
+        args.m_rot = rot.m_z;
+        item->presentEventGimmick(&args, -1);
+    }
+}
+
+// The spring is pressed (status 8 on the ground, 0xB in the air) and reports its top position.
+void itSpringCustomizer::onNotifyEventGimmick(BaseItem* item, soGimmickEventArgs* eventInfo, int* taskId) {
+    switch (eventInfo->m_kind) {
+    case Gimmick::Spring_Event_On:
+        if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() != 6 &&
+            (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() != 8 ||
+             item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() != 0xB)) {
+            int status = 8;
+            if (item->m_moduleAccesser->getSituationModule().getKind() == 0 &&
+                item->m_moduleAccesser->getGroundModule().isTouch(static_cast<grCollStatus::TouchMask>(8), 0)) {
+                status = 0xB;
+            }
+            item->m_moduleAccesser->getStatusModule().changeStatusRequest(status, item->m_moduleAccesser);
+        }
+    case Gimmick::Spring_Event_Shoot:
+    case Gimmick::Spring_Event_Pos:
+        static_cast<soGimmickSpringEventArgs*>(eventInfo)->m_topPos =
+            item->m_moduleAccesser->getModelModule().getNodeGlobalPosition(4, false);
+        break;
+    case 0x33:
+        break;
+    }
+}
+
+// The spring turns to face what it hits (while flag 0x12000001 is set) and presses when the touch is accepted.
+// TODO: clean up - MATCH-ONLY: the literals are read through the unit's pool label (46C8: 1, 46D8: -1, 46DC: 0,
+// 4740: -90).
+bool itSpringCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8, Vec3f* searchHitPos) {
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 6) {
+        return false;
+    }
+    if (itWork(item).isFlag(0x12000001)) {
+        const float* pool = lbl_27_rodata_46C8;
+        gfTask* task = gfTask::getTask(searchHitTaskId);
+        StageObject* target = task != NULL ? dynamic_cast<StageObject*>(task) : NULL;
+        if (target != NULL) {
+            Vec3f targetPos = soExternalValueAccesser::getPos(target);
+            Vec3f pos = item->getPos();
+            float lr = targetPos.m_x >= pos.m_x ? pool[0] : pool[4];
+            item->m_moduleAccesser->getPostureModule().setLr(lr);
+            item->m_moduleAccesser->getPostureModule().updateRotYLr();
+            Vec3f rot(pool[5], pool[5], pool[30] * lr);
+            item->m_moduleAccesser->getPostureModule().setRot(&rot, 0);
+        }
+    }
+    if (item->sendTouchMessage(searchHitTaskId, searchHitPos, item->getParamFloat(0x1AC3))) {
+        int status = 8;
+        if (item->m_moduleAccesser->getSituationModule().getKind() == 0) {
+            status = 0xB;
+        }
+        item->m_moduleAccesser->getStatusModule().changeStatusRequest(status, item->m_moduleAccesser);
+    }
+    return false;
 }
