@@ -1,10 +1,68 @@
-#include <wn/snake/wn_snake_rgb6_sight.h>
+#define WN_SNAKE_RGB6SIGHT_UNIT // the sora_melee unit mode of this article (the module builder members and methods of the Snake pools header)
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
+#define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId (ft_builder_animcmd.h)
+#define WN_ANIMCMD_PRESENTER_LOCAL_STORE // BYTES: the interpreters' presenters keep the looked-up list in a local
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
+#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: activate copies the Vec3f position as an aggregate (word moves), see mt_vector.h
+#define WN_EVENT_UNIT_DTOR_INLINE // BYTES: the inside event builder destructor expands the event unit destructors
+#define WN_STATUS_MODULE_KIND_COUNT_ZERO // BYTES: the status module is built with a status kind count of 0 (ft_builder_status.h)
+#define WN_EVENT_UNIT_NULL_CTOR_OWNER // this unit owns the weak constructors of the disabled event units (so_event_system.h)
+#define SO_COLLISION_GROUP_ALIGNED // the collision group records are word-aligned (so_collision_group.h)
+#define WN_KINETIC_MEDIATOR_INLINE_DTOR // the kinetic builder destructor this unit owns expands the empty mediator destructor
+#define WN_KINETIC_GRAVITY_INLINE_DTOR // the article destructor expands the empty gravity energy destructor
+#define SO_KINETIC_ENERGY_3F_FULL // the weapon builder constructs the rotation energy inline
+#define FT_MODULE_BUILDER
+#define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
+#define WN_ZELDA_LIGHTING_BOW_UNIT // the member layout of the module builder of this unit mode (wn/zelda/wn_zelda_lighting_bow.h)
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define SO_OTHER_ANIM_CTOR // BYTES: the sora_melee motion builder constructs and destroys its other-animation slot
+#define WN_TRANSITION_CTOR_INLINE
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk, as in the original
+#define FT_REL_LINK_EXTERN
+#define SO_NULLABLE_INLINE_CTOR
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/snake/wn_snake_status_builder.h> // before the bow header, whose config instantiates the generic spelling of it
+#include <wn/zelda/wn_zelda_lighting_bow.h>
+#include <wn/snake/wn_snake_rgb6_sight_parts.h>
 #include <wn/wn_extend_param_accesser.h>
+#include <wn/wn_activate_desc.h>
+#include <so/so_module_accesser.h>
+#include <so/model/so_model_module_impl.h>
+#include <so/status/so_status_module_impl.h>
+#include <gf/gf_task_scheduler.h>
+#include <memory.h>
+
+// BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
+inline soTeam::~soTeam() { }
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soResourceIdAccesser::~soResourceIdAccesser() { }
+// BYTES: the controller module builder destructor expands the link reference's (empty) destructor and calls its base.
+inline soControllerModuleLinkRef::~soControllerModuleLinkRef() { }
+
+// The weapon builder ctor and the weak module builders (this unit owns them in the link order).
+#pragma push
+#pragma pool_data off
+wnSnakeRgb6Sight::wnSnakeRgb6Sight(s32 articleId, const wnArticleBuildInfo& info, const wnSnakeRgb6SightData* data) :
+    wnWeaponBuilder<wnSnakeRgb6SightModuleAccesserBuildConfig>(
+        "SnakeRgb6Sight", articleId, info,
+        wnModuleAccesserBuildData(0x88, data, info.getHeapModule()->getInstanceHeap(), Heaps::FighterTechqniq,
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
+                                  &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param) {
+    Weapon::deactivate(false);
+}
+#pragma pop
+
+#define WN_ZELDA_BUILDER_CTOR_WEAK
+#define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnSnakeRgb6SightModuleAccesserBuildConfig
+#include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
 
 void wnSnakeRgb6Sight::renderDebug() {
     StageObject::renderDebug();
 }
-
 template class wnExtendParamAccesser<3999, 6, 23999, 0, 0, 0>;
 
 // TODO: clean up, give variables real names
@@ -19,21 +77,8 @@ extern "C" void* __dt__29wnSnakeRgb6SightParamAccesserFv(void* ptr, int count) {
 }
 
 // TODO: clean up, give variables real names
-namespace jj_3B1760 {
-extern "C" void* fn_27_3B1760(void* self) {
-    return reinterpret_cast<u8*>(self) + 0x7f8;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_3B22C8 {
-extern "C" void* fn_27_3B22C8(void* self) {
-    return reinterpret_cast<u8*>(self) + 0x104;
-}
-}
-
-// TODO: clean up, give variables real names
 namespace jj_3B2C90 {
+#pragma push
 #pragma optimization_level 2
 #pragma scheduling off
 #pragma opt_propagation off
@@ -79,10 +124,12 @@ extern "C" void enableOperate__16wnSnakeRgb6SightFv(Object* self) {
     int value = 0x12000003;
     owner->middle->target->slot19(value, owner);
 }
+#pragma pop
 }
 
 // TODO: clean up, give variables real names
 namespace jj_3B2CB4 {
+#pragma push
 #pragma optimization_level 2
 #pragma scheduling off
 #pragma opt_propagation off
@@ -118,6 +165,7 @@ extern "C" void unableOperate__16wnSnakeRgb6SightFv(Object* self) {
     int value = 0x12000003;
     owner->middle->target->slot18(value, owner);
 }
+#pragma pop
 }
 
 // TODO: clean up, give variables real names
