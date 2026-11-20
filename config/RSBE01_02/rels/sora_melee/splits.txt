@@ -11322,6 +11322,9 @@ mo_melee/sora_melee/ft/ft_log_transactor.cpp:
 mo_melee/sora_melee/ft/ft_log_attack_info_module.cpp:
 	.text       start:0x001D71A4 end:0x001D72F4
 
+mo_melee/sora_melee/ft/ft_log_attack_info_module_vector_dtor_1D7D98.cpp:
+	.text       start:0x001D7D98 end:0x001D7E00
+
 mo_melee/sora_melee/so/so_array_vector_accessors_soLogAttackInfo_10.cpp:
 	.text       start:0x001D7E00 end:0x001D7EC8
 
@@ -11844,8 +11847,14 @@ mo_melee/sora_melee/st/st_loader_player.cpp:
 	.text       start:0x0023B4F4 end:0x0023B5F0
 	.data       start:0x0004D1D8 end:0x0004D330
 
+mo_melee/sora_melee/st/st_loader_player_d.cpp:
+	.text       start:0x0023B5F0 end:0x0023E614
+
 mo_melee/sora_melee/st/st_loader_player_b.cpp:
 	.text       start:0x0023E614 end:0x0023E890
+
+mo_melee/sora_melee/st/st_loader_player_start_lr_23E890.cpp:
+	.text       start:0x0023E890 end:0x0023EB4C
 
 mo_melee/sora_melee/st/st_loader_player_c.cpp:
 	.text       start:0x0023EB4C end:0x0023EB6C
@@ -12057,6 +12066,15 @@ mo_melee/sora_melee/st/st_operator_info.cpp:
 mo_melee/sora_melee/st/st_operator_info_melee.cpp:
 	.text       start:0x00256A08 end:0x00257598
 	.ctors      start:0x000002E8 end:0x000002EC
+
+mo_melee/sora_melee/st/st_operator_info_training.cpp:
+	.text       start:0x002575E4 end:0x002585A8
+
+mo_melee/sora_melee/st/st_operator_info_wifi_melee.cpp:
+	.text       start:0x002585D8 end:0x00258FBC
+
+mo_melee/sora_melee/st/st_operator_info_wifi_practice.cpp:
+	.text       start:0x00258FBC end:0x0025A62C
 
 mo_melee/sora_melee/st/st_operator_info_adventure.cpp:
 	.text       start:0x0025A62C end:0x0025BE08
@@ -12956,6 +12974,9 @@ mo_melee/sora_melee/so/so_array_base_soArrayFixed_P9itArchive_2AF51C.cpp:
 mo_melee/sora_melee/so/so_array_vector_thunks_P8BaseItem_1.cpp:
 	.text       start:0x002B1E48 end:0x002B1E70
 
+mo_melee/sora_melee/it/it_manager_thunks_2B1E70.cpp:
+	.text       start:0x002B1E70 end:0x002B1E80
+
 mo_melee/sora_melee/it/it_archive.cpp:
 	.text       start:0x002B1E80 end:0x002B2830
 	.ctors      start:0x00000324 end:0x00000328
@@ -12988,6 +13009,9 @@ mo_melee/sora_melee/so/so_sinit_pair_2BC544.cpp:
 
 mo_melee/sora_melee/so/so_instance_manager_thunks_UniqImpl_soKineticEnergy_11.cpp:
 	.text       start:0x002BC574 end:0x002BC58C
+
+mo_melee/sora_melee/it/it_item_resource_module_ref_dtor_2BC714.cpp:
+	.text       start:0x002BC714 end:0x002BC770
 
 mo_melee/sora_melee/it/it_switch_decide_module_impl.cpp:
 	.text       start:0x002BDF40 end:0x002BDFE4
@@ -13375,6 +13399,9 @@ mo_melee/sora_melee/so/so_instance_manager_value_soAnimCmdControlUnit_7_part3.cp
 mo_melee/sora_melee/so/so_instance_manager_free_id_soAnimCmdControlUnit_7.cpp:
 	.text       start:0x003198D0 end:0x00319AAC
 
+mo_melee/sora_melee/wn/wn_fox_land_master_thunks_319DB8.cpp:
+	.text       start:0x00319DB8 end:0x00319E40
+
 mo_melee/sora_melee/wn/wn_fox_land_master_status_uniq_process_common.cpp:
 	.text       start:0x0031AF40 end:0x0031D1BC
 	.ctors      start:0x000003B4 end:0x000003B8
@@ -13635,9 +13662,11 @@ mo_melee/sora_melee/wn/wn_falco_blaster_bullet.cpp:
 	.ctors      start:0x0000043C end:0x00000440
 
 mo_melee/sora_melee/ft/ft_ganon_status_uniq_process_ganon_punch.cpp:
-	.text       start:0x00356100 end:0x003567B4
+	.text       start:0x00356100 end:0x00356820
+	.ctors      start:0x00000440 end:0x00000444
 	.rodata     start:0x00007990 end:0x000079A0
 	.data       start:0x0008F168 end:0x0008F260
+	.bss        start:0x00007FF8 end:0x00008018
 
 mo_melee/sora_melee/ft/ft_wario_transactor.cpp:
 	.text       start:0x00356820 end:0x00356A14
@@ -13803,17 +13832,29 @@ mo_melee/sora_melee/so/so_array_vector_destructor_const_acAnimCmdConv_299.cpp:
 mo_melee/sora_melee/so/so_array_vector_destructor_soStatusUniqProcess_299.cpp:
 	.text       start:0x00384EAC end:0x00384EEC
 
+mo_melee/sora_melee/ft/ft_poke_trainer_kinetic_mediator_384EEC.cpp:
+	.text       start:0x00384EEC end:0x00385AE8
+
 mo_melee/sora_melee/so/so_array_vector_accessors_const_acAnimCmdConv_299.cpp:
 	.text       start:0x00385AE8 end:0x00385BB0
 
 mo_melee/sora_melee/so/so_array_vector_accessors_soStatusUniqProcess_299.cpp:
 	.text       start:0x00385BB0 end:0x00385C78
 
+mo_melee/sora_melee/ft/ft_poke_trainer_term_group_vector_385C78.cpp:
+	.text       start:0x00385C78 end:0x003862E0
+
+mo_melee/sora_melee/ft/ft_poke_trainer_vector_thunks_38649C.cpp:
+	.text       start:0x0038649C end:0x003864C4
+
 mo_melee/sora_melee/so/so_array_vector_thunks_P19soStatusUniqProcess_299.cpp:
 	.text       start:0x003864C4 end:0x003864EC
 
 mo_melee/sora_melee/so/so_array_vector_thunks_PC13acAnimCmdConv_299.cpp:
 	.text       start:0x003864EC end:0x00386514
+
+mo_melee/sora_melee/ft/ft_poke_trainer_thunks_386514.cpp:
+	.text       start:0x00386514 end:0x003865CC
 
 mo_melee/sora_melee/ft/ft_poke_trainer_status_uniq_process_turn.cpp:
 	.text       start:0x003865CC end:0x0038694C
@@ -14039,6 +14080,11 @@ mo_melee/sora_melee/wn/wn_lucario_aura_ball.cpp:
 mo_melee/sora_melee/wn/wn_lucario_aura_ball_status_uniq_process.cpp:
 	.text       start:0x003A0694 end:0x003A134C
 	.ctors      start:0x000004D4 end:0x000004D8
+
+mo_melee/sora_melee/ft/ft_ike_transactor.cpp:
+	.text       start:0x003A134C end:0x003A1514
+	.rodata     start:0x00007E88 end:0x00007E90
+	.data       start:0x0009C660 end:0x0009C6D8
 
 mo_melee/sora_melee/ft/ft_ike_status_uniq_process_special_nstart.cpp:
 	.text       start:0x003A1514 end:0x003A1BBC

@@ -7,7 +7,7 @@
 stLoaderPlayer::stLoaderPlayer(u32 playerId) : stLoader("StLoaderPlayer"), m_playerId(playerId), m_entryId(-1), m_slotId(-1) {
     _0x54[1] = 0;
     m_56 = 0;
-    reinterpret_cast<u8*>(this)[0x57] = Mode_Entry; // TODO: clean up - m_mode is a bitfield here; the original stores it as its own byte.
+    m_mode = Mode_Entry;
     _0x58[0] = 0;
     u32 flags = (u8)_0x5b[2];
     flags &= ~0x80;
