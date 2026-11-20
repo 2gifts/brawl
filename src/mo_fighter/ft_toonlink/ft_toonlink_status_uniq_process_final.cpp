@@ -174,11 +174,8 @@ bool ftToonLinkStatusUniqProcessFinal::notifyEventCollisionSearchCheck(soModuleA
 }
 
 // The caught fighter is told to get into the catch (its status 0xED) and the catch node of Toon Link holds it.
-// BYTES: native keeps the enumeration pointer in its own register (r4) instead of reusing the call result
-// register; only opt_propagation off produces that (status-first order alone, no `modules` local and
-// getStatusModule() were all tried without it).
-#pragma push
-#pragma opt_propagation off
+// The status module is named as a reference first: a pointer read straight from the enumeration is folded into the
+// call's `this` register and loaded after the capture module, the original loads it first.
 void ftToonLinkStatusUniqProcessFinal::catch_success(soModuleAccesser* moduleAccesser) {
     soWorkManageModule* work = &moduleAccesser->getWorkManageModule();
     u32 taskId = work->getInt(Work_Int_CaughtTaskId);
@@ -188,14 +185,14 @@ void ftToonLinkStatusUniqProcessFinal::catch_success(soModuleAccesser* moduleAcc
             StageObject& target = dynamic_cast<StageObject&>(*task);
             soModuleAccesser* targetAccesser = soExternalValueAccesser::getModuleAccesser(&target);
             const soModuleEnumeration* modules = targetAccesser->m_enumerationStart;
-            soStatusModule* status = modules->m_statusModule;
+            soStatusModule& statusModule = *modules->m_statusModule;
+            soStatusModule* status = &statusModule;
             soCaptureModuleHyp* capture = static_cast<soCaptureModuleHyp*>(modules->m_captureModule);
             status->changeStatusRequest(0xED, targetAccesser);
             capture->setCapture(moduleAccesser->m_stageObject->getTaskId(), 0xED, 0);
         }
     }
 }
-#pragma pop
 
 void ftToonLinkStatusUniqProcessFinalDash::initStatus(soModuleAccesser* moduleAccesser) {
     soLinkEventLinkFinal event;
