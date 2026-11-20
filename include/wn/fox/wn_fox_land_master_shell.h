@@ -7,7 +7,7 @@
 struct wnFoxLandMasterShellData;
 struct wnArticleBuildInfo;
 
-#if defined(WN_FOX_LAND_MASTER_FIGHTER_TU) && defined(WN_WEAPON_BUILDER) && (defined(FT_FOX_ARTICLE_POOLS) || defined(FT_WOLF_ARTICLE_POOLS) || defined(FT_FALCO_ARTICLE_POOLS))
+#if defined(WN_FOX_LAND_MASTER_SHELL_FULL) || defined(WN_FOX_LAND_MASTER_FIGHTER_TU) && defined(WN_WEAPON_BUILDER) && (defined(FT_FOX_ARTICLE_POOLS) || defined(FT_WOLF_ARTICLE_POOLS) || defined(FT_FALCO_ARTICLE_POOLS))
 // The fighter unit expands the shell's teardown inside the Landmaster's weak destructor (the shell sits in the
 // Landmaster's article mediator). Layout from that destructor's member offsets: the Blaster's status builder and command
 // threads (their teardowns are the Blaster's out-of-line copies), four model event observers, one collision attack
@@ -35,6 +35,10 @@ public:
     typedef wnAnimCmdModuleSubBuildConfigDefault<1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0> AnimCmdModuleSubBuildConfig;
 };
 
+#ifdef WN_FOX_LAND_MASTER_SHELL_FULL
+#include <wn/wn_weapon_builder_common_energies.h>
+WN_WEAPON_BUILDER_COMMON_ENERGIES(wnFoxLandMasterShellModuleAccesserBuildConfig);
+#endif
 // HYPOTHESIS: one parameter, as the Blaster's accesser (the extent is 0x2C).
 class wnFoxLandMasterShellParamAccesser : public wnExtendParamAccesser<3999, 1, 23999, 0, 0, 0> {
 public:
