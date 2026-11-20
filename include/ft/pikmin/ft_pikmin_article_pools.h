@@ -9,6 +9,30 @@
 #include <wn/weapon.h>
 #pragma dont_inline off // it/it_gen_archive.h (reached through weapon.h) leaves dont_inline on for everything parsed after it
 
+#ifdef FT_PIKMIN_FULL_ARTICLES
+// Full article types let the fighter own their pools and teardown .
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_SHARED_ARRAYS_1
+#define WN_ARTICLE_ANIMCMD_INT
+#define WN_WEAPON_NO_COMMON_ENERGIES
+#define WN_PIKMIN_FULL_BUILDER
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/pikmin/wn_pikmin_dolfin.h>
+#include <wn/pikmin/wn_pikmin_pikmin.h>
+class Vec3f;
+struct wnPikminChainData;
+// The Pikmin Chain (wn/pikmin/wn_pikmin_chain.h) keeps its opaque shell: it builds with the common energies, which the other
+// two articles' layout excludes (one wnWeaponBuilder template, one macro).
+class wnPikminChain : public Weapon {
+    u8 m_unreconstructed[0x1F40 - sizeof(Weapon)];
+public:
+    wnPikminChain(s32 articleId, const wnArticleBuildInfo& info, const wnPikminChainData* data);
+    virtual ~wnPikminChain();
+    void activate(float lr, int founderTaskId, int kind, int team, bool unk, int pikminNum);
+};
+static_assert(sizeof(wnPikminChain) == 0x1F40, "wnPikminChain layout is wrong!");
+#else
 class Vec3f;
 struct wnPikminPikminData;
 struct wnPikminDolfinData;
@@ -45,6 +69,8 @@ public:
     void activate(float lr, int founderTaskId, int kind, int team, bool unk, int pikminNum);
 };
 static_assert(sizeof(wnPikminChain) == 0x1F40, "wnPikminChain layout is wrong!");
+
+#endif
 
 typedef wnArticleHierarchy<wnPikminChain, 1, soInstancePoolRoot> ftPikminChainPool;
 typedef wnArticleHierarchy<wnPikminDolfin, 1, ftPikminChainPool> ftPikminDolfinPool;

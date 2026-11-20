@@ -11,6 +11,9 @@
 #define MT_VEC2F_LENGTH_SQ_OUT_OF_LINE
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_PIKMIN_ARTICLE_POOLS
+#define FT_PIKMIN_FULL_ARTICLES
+#define WN_KINETIC_GENERIC_BUILDER
+#define WN_KINETIC_GENERIC_IN_FIGHTER_TU
 #define WN_ARTICLE_MANAGE_BUILDER_OUT_OF_LINE
 #define FT_PARAM_ACCESSER_TYPED_DTOR
 #include <so/so_array.h>
@@ -40,6 +43,8 @@
 // HYPOTHESIS: soValueAccesser's variation value is a plain global here (no header declaration yet)
 extern s32 g_soValueVariation;
 
+
+#undef WN_ARTICLE_NATIVE_BUILDERS
 #define FT_BC ftPikminBuildConfig
 #include <ft/builder/ft_builder_noinline.h>
 
