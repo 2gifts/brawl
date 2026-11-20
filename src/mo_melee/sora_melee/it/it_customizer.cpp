@@ -22,6 +22,9 @@
 #include <ft/ft_manager.h>
 #include <so/anim/so_anim_cmd_arg_list.h>
 #include <so/team/so_team.h>
+#include <so/so_slow.h>
+#include <cm/cm_controller_ai.h>
+#include <gm/gm_global.h>
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/so_external_value_accesser.h>
 #include <types.h>
@@ -1735,4 +1738,211 @@ bool itCBoxCustomizer::onRemoveModelConstraint(BaseItem* item, int) {
     }
     item->m_moduleAccesser->getPostureModule().setRot(&rot, 0);
     return false;
+}
+
+// While the global slow motion lets objects move, a Metroid latched onto a fighter in status 0x102 drops off.
+bool itMetroidCustomizer::onProcessFixPosition(BaseItem* item) {
+    if (!soSlow::getInstance()->isAdjust()) {
+        return true;
+    }
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() != 2) {
+        return true;
+    }
+    if (item->m_moduleAccesser->getLinkModule().isLink(3)) {
+        u32 parentId = item->m_moduleAccesser->getLinkModule().getParentTaskId(3);
+        gfTask* task = parentId != 0xFFFFFFFF ? gfTask::getTask(parentId) : NULL;
+        Fighter* fighter = task != NULL ? dynamic_cast<Fighter*>(task) : NULL;
+        if (fighter != NULL && soExternalValueAccesser::getStatusKind(fighter) == 0x102) {
+            Vec3f speed(lbl_27_rodata_46DC[0], lbl_27_rodata_46DC[0], lbl_27_rodata_46DC[0]);
+            item->fall(&speed, lbl_27_rodata_46C8[0]);
+        }
+    }
+    return true;
+}
+
+// While the Devil is out (status 6) the camera offset it pushes decays (and stops below a length of 1).
+// TODO: clean up - MATCH-ONLY: Vec2f::length is spelled out so its literals come from the unit's pool label (46C8 + 0x18:
+// FLT_MIN, + 0x14: 0, + 0: 1, + 0xB4: 0.95).
+void itDevilCustomizer::onProcessGameProc(BaseItem* item) {
+    const float* pool = lbl_27_rodata_46C8;
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 6) {
+        cmAIController* controller = g_cmAIController;
+        soWorkManageModule* work = &itWork(item);
+        if (controller != NULL) {
+            Vec2f offset = controller->m_devilOffset;
+            float lengthSquared = offset.m_x * offset.m_x + offset.m_y * offset.m_y;
+            float length;
+            double absolute = __fabs(lengthSquared);
+            float magnitude = absolute;
+            if (magnitude <= pool[0x18 / 4]) {
+                length = pool[0x14 / 4];
+            } else {
+                length = lengthSquared * rsqrtf(lengthSquared);
+            }
+            if (length < pool[0]) {
+                work->onFlag(0x12000000);
+                offset.m_x *= pool[0x14 / 4];
+                offset.m_y *= pool[0x14 / 4];
+            } else {
+                offset.m_x *= pool[0xB4 / 4];
+                offset.m_y *= pool[0xB4 / 4];
+            }
+            controller->m_devilOffset = offset;
+        }
+    }
+}
+
+// The bomb swells and shakes as its fuse (int work 0x1000000B, out of 480 frames) runs down.
+// TODO: clean up - MATCH-ONLY: the literals are read through the unit's pool label (46C8 + 0: 1, + 0x14: 0, + 0x98: 480,
+// + 0xA8: -2.8, + 0xAC: -9, + 0xB0: 6.3); the int-to-float constant is the compiler's own.
+bool itLinkBombCustomizer::onProcessFixPosition(BaseItem* item) {
+    const float* pool = lbl_27_rodata_46C8;
+    soModelModule* model = &item->m_moduleAccesser->getModelModule();
+    float rate = pool[0] - itWork(item).getInt(0x1000000b) / pool[0x98 / 4];
+    if (rate < pool[0x14 / 4]) {
+        rate = pool[0x14 / 4];
+    }
+    float offset = pool[0xA8 / 4] * rate * item->getParam(static_cast<itValueAccesser::ParamFloat>(0xD71));
+    float scale = item->getParam(static_cast<itValueAccesser::ParamFloat>(0xD71));
+    Vec3f translate(pool[0x14 / 4], pool[0xB0 / 4] + offset, pool[0x14 / 4]);
+    float angle = pool[0xAC / 4] * rate * scale;
+    model->setNodeTranslate(4, &translate);
+    Vec3f rotate(pool[0x14 / 4], angle, pool[0x14 / 4]);
+    model->setNodeRotate(4, &rotate);
+    return true;
+}
+
+// The Bob-omb swells and shakes as its fuse runs down (fully once flag 0x12000000 is set).
+// TODO: clean up - MATCH-ONLY: the literals are read through the unit's pool label (46C8 + 0: 1, + 0x14: 0, + 0x98: 480,
+// + 0x9C: -0.8, + 0xA0: -15, + 0xA4: 3); the int-to-float constant is the compiler's own.
+bool itBombheiCustomizer::onProcessFixPosition(BaseItem* item) {
+    const float* pool = lbl_27_rodata_46C8;
+    soWorkManageModule* work = &itWork(item);
+    soModelModule* model = &item->m_moduleAccesser->getModelModule();
+    float rate;
+    if (work->isFlag(0x12000000)) {
+        rate = pool[0];
+    } else {
+        rate = pool[0] - work->getInt(0x1000000b) / pool[0x98 / 4];
+    }
+    if (rate < pool[0x14 / 4]) {
+        rate = pool[0x14 / 4];
+    }
+    float offset = pool[0x9C / 4] * rate * item->getParam(static_cast<itValueAccesser::ParamFloat>(0xD71));
+    float scale = item->getParam(static_cast<itValueAccesser::ParamFloat>(0xD71));
+    Vec3f translate(pool[0x14 / 4], pool[0xA4 / 4] + offset, pool[0x14 / 4]);
+    float angle = pool[0xA0 / 4] * rate * scale;
+    model->setNodeTranslate(0x12, &translate);
+    Vec3f rotate(pool[0x14 / 4], angle, pool[0x14 / 4]);
+    model->setNodeRotate(0x12, &rotate);
+    return true;
+}
+
+// A gum hit on a fighter (not in status 0x102) sticks to it at the hit node and takes its holder's team.
+bool itChewingCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos) {
+    soWorkManageModule* work = &itWork(item);
+    gfTask* task = gfTask::getTask(searchHitTaskId);
+    if (task == NULL || task->m_taskCategory != gfTask::Category_Fighter) {
+        work->offFlag(0x22000005);
+        return false;
+    }
+    Fighter* fighter = dynamic_cast<Fighter*>(task);
+    if (fighter == NULL || soExternalValueAccesser::getStatusKind(fighter) == 0x102) {
+        work->offFlag(0x22000005);
+        return false;
+    }
+    work->onFlag(0x12000009);
+    u32 ownerId = 0xFFFFFFFF;
+    if (item->m_moduleAccesser->getLinkModule().isLink(3)) {
+        ownerId = item->m_moduleAccesser->getLinkModule().getParentTaskId(3);
+    }
+    item->have(searchHitTaskId, ftExternalValueAccesser::getNodeIdFromHitNo(searchHitCollisionIndex), -1);
+    if (ownerId != 0xFFFFFFFF) {
+        item->setTeamOwnerTaskId(ownerId);
+    }
+    return true;
+}
+
+// Actions 0-3 play the swing motions (0-2 at the given rate); 4 and 5 grow and restore the fan.
+void itHarisenCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    switch (action) {
+    case 0:
+        item->changeMotion(7, false);
+        item->m_moduleAccesser->getMotionModule().setRate(rate);
+        break;
+    case 1:
+        item->changeMotion(8, false);
+        item->m_moduleAccesser->getMotionModule().setRate(rate);
+        break;
+    case 2:
+        item->changeMotion(9, false);
+        item->m_moduleAccesser->getMotionModule().setRate(rate);
+        break;
+    case 3:
+        item->changeMotion(10, false);
+        break;
+    case 4:
+        {
+            float scaleMin = item->getParamFloat(0x15AE);
+            item->setScaleAnimation(lbl_27_rodata_46C8[0], scaleMin, 3, item->getParamInt(0x63CE));
+        }
+        break;
+    case 5:
+        item->setScaleAnimation(lbl_27_rodata_46C8[0], lbl_27_rodata_46D8, 3, 1);
+        break;
+    }
+}
+
+// The sight starts with its two frame animations stopped (the second one on frame 1 in widescreen) and its 2D effect.
+void itDragoonSightCustomizer::onReset(BaseItem* item) {
+    soMotionModule* motion = &item->m_moduleAccesser->getMotionModule();
+    motion->addOtherAnim(0, 1, false, lbl_27_rodata_46DC[0], lbl_27_rodata_46C8[0]);
+    motion->setOtherAnimRate(0, lbl_27_rodata_46DC[0]);
+    motion->setOtherAnimFrame(lbl_27_rodata_46DC[0], 0);
+    motion->addOtherAnim(1, 2, false, lbl_27_rodata_46DC[0], lbl_27_rodata_46C8[0]);
+    motion->setOtherAnimRate(1, lbl_27_rodata_46DC[0]);
+    if (g_GameGlobal->getGlobalRecordMenuDatap()->m_isWidescreen == 1) {
+        motion->setOtherAnimFrame(lbl_27_rodata_46C8[0], 1);
+    } else {
+        motion->setOtherAnimFrame(lbl_27_rodata_46DC[0], 1);
+    }
+    Vec3f pos;
+    Vec3f rot;
+    rot.m_x = lbl_27_rodata_46DC[0];
+    rot.m_y = lbl_27_rodata_46DC[0];
+    rot.m_z = lbl_27_rodata_46DC[0];
+    pos.m_x = lbl_27_rodata_46DC[0];
+    pos.m_y = lbl_27_rodata_46DC[0];
+    pos.m_z = lbl_27_rodata_46DC[0];
+    item->m_moduleAccesser->getEffectModule().req2D(static_cast<EfID>(0x70), &pos, &rot, lbl_27_rodata_46C8[0], 4);
+}
+
+// The link event (kind 0x451) the Warp Star sends its rider once.
+struct itWarpstarLinkEventArgs : public soLinkEventArgs {
+    itWarpstarLinkEventArgs() : soLinkEventArgs(0x451) { }
+};
+
+// In motion 3 the star flies sideways by the stick (param 0x1D1A) and tells its rider once.
+// TODO: clean up - the kinetic slot 0xC0 call also passes the module accesser (clearSpeed is declared with one argument).
+bool itWarpstarCustomizer::onProcessFixPosition(BaseItem* item) {
+    if (!soSlow::getInstance()->isAdjust()) {
+        return true;
+    }
+    if (item->m_moduleAccesser->getMotionModule().getKind() != 3) {
+        return true;
+    }
+    soWorkManageModule* work = &itWork(item);
+    soControllerModule* controller = &item->m_moduleAccesser->getControllerModule();
+    itKineticModuleImpl& kinetic = dynamic_cast<itKineticModuleImpl&>(item->m_moduleAccesser->getKineticModule());
+    Vec3f speed(lbl_27_rodata_46DC[0], lbl_27_rodata_46DC[0], lbl_27_rodata_46DC[0]);
+    float speedMul = item->getParamFloat(0x1D1A);
+    speed.m_x = speedMul * controller->getStickX();
+    kinetic.clearSpeed(true);
+    kinetic.addSpeed(&speed, item->m_moduleAccesser);
+    if (!work->isFlag(0x12000000)) {
+        itWarpstarLinkEventArgs args;
+        item->m_moduleAccesser->getLinkModule().sendEventParents(3, args);
+        work->onFlag(0x12000000);
+    }
+    return true;
 }
