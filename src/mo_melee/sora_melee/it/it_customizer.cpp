@@ -18,6 +18,10 @@
 #include <it/it_figure_manager.h>
 #include <ft/ft_external_value_accesser.h>
 #include <so/ground/so_ground_module_impl.h>
+#include <gf/gf_task_scheduler.h>
+#include <ft/ft_manager.h>
+#include <so/anim/so_anim_cmd_arg_list.h>
+#include <so/team/so_team.h>
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/so_external_value_accesser.h>
 #include <types.h>
@@ -1442,5 +1446,293 @@ bool itSpringCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int s
         }
         item->m_moduleAccesser->getStatusModule().changeStatusRequest(status, item->m_moduleAccesser);
     }
+    return false;
+}
+
+// The ball remembers its last attacker (as the attacking fighter's owner when the attack came from an article).
+bool itSmashBallCustomizer::onPreDamageCheck(BaseItem* item, int damageStatusKind, soDamageLog* damageLog) {
+    // TODO: clean up - the attacker's task category is read as a plain byte (soDamageLog declares a signed bit field).
+    u8 category = reinterpret_cast<u8*>(damageLog)[0x44];
+    if (category == 6) {
+        return false;
+    }
+    u32 taskId = damageLog->m_attackerTaskId;
+    if (category != gfTask::Category_Fighter) {
+        gfTask* task = gfTaskScheduler::getInstance()->getTaskById(static_cast<gfTask::Category>(category), taskId);
+        if (task != NULL) {
+            taskId = soExternalValueAccesser::getTeamOwnerId(&dynamic_cast<StageObject&>(*task));
+            category = gfTask::Category_Fighter;
+        }
+    }
+    soWorkManageModule* work = &itWork(item);
+    work->setInt(taskId, 0x10000000);
+    work->setInt(category, 0x10000001);
+    return true;
+}
+
+// TODO: clean up - placeholder name of BaseItem's target search (it_item.cpp has not decompiled it yet).
+extern "C" bool fn_27_287890(BaseItem* item, int* taskId, Vec3f* pos, int);
+
+// Search kind 8 aims at the point mirrored through the owner item.
+bool itKatanaAnaCustomizer::onSearchTarget(BaseItem* item, int* taskId, Vec3f pos, int kind) {
+    if (kind == 8) {
+        gfTask* task = gfTask::getTask(item->m_createOwnerTaskId);
+        BaseItem* owner = task != NULL ? dynamic_cast<BaseItem*>(task) : NULL;
+        if (owner == NULL) {
+            return false;
+        }
+        if (fn_27_287890(owner, taskId, &pos, 0)) {
+            Vec3f ownerPos = soExternalValueAccesser::getPos(owner);
+            pos.m_x = pos.m_x - (ownerPos.m_x - pos.m_x);
+            pos.m_y = ownerPos.m_y;
+            pos.m_z = ownerPos.m_z;
+            return true;
+        }
+    }
+    return false;
+}
+
+// The last star plays the empty motion (other anim 8) frozen on its first frame.
+u32 itStarRodCustomizer::onShootBlanks(BaseItem* item, u32) {
+    soWorkManageModule& work = itWork(item);
+    int bullets = work.getInt(0x10000000);
+    if (bullets > 0) {
+        if (--bullets <= 0) {
+            item->m_moduleAccesser->getMotionModule().addOtherAnim(0, 8, false, lbl_27_rodata_46DC[0], lbl_27_rodata_46C8[0]);
+            item->m_moduleAccesser->getMotionModule().setOtherAnimRate(0, lbl_27_rodata_46DC[0]);
+            item->m_moduleAccesser->getMotionModule().setOtherAnimFrame(lbl_27_rodata_46C8[0], 0);
+        }
+        work.setInt(bullets, 0x10000000);
+    }
+    return bullets;
+}
+
+// A blank shot still uses up ammunition by how long it was charged (params 0x69AB-0x69B6).
+u32 itSuperScopeCustomizer::onShootBlanks(BaseItem* item, u32 charge) {
+    soWorkManageModule& work = itWork(item);
+    int bullets = work.getInt(0x10000000);
+    if (bullets > 0) {
+        int level;
+        if (static_cast<int>(charge) <= item->getParamInt(0x69AB)) {
+            level = 0;
+        } else if (static_cast<int>(charge) <= item->getParamInt(0x69AC) * 8) {
+            level = static_cast<int>(charge) / item->getParamInt(0x69AC) + 1;
+        } else {
+            level = 9;
+        }
+        if (level >= 0 && level <= 9) {
+            bullets -= item->getParamInt(0x69AD + level);
+            if (bullets < 0) {
+                bullets = 0;
+            }
+            work.setInt(bullets, 0x10000000);
+        }
+    }
+    return bullets;
+}
+
+// TODO: clean up - MATCH-ONLY: this unit's soAnimCmdArgList holds a non-const soArrayContractibleTable<acCmdArgConv>
+// (its vtable is the one referenced), so a local copy of the list is built and handed to the getters.
+struct itAnimCmdArgList {
+    soArrayContractibleTable<acCmdArgConv> m_argList;
+    soModuleAccesser* m_moduleAccesser;
+    u8 m_errorOnValueFetch;
+
+    itAnimCmdArgList(soModuleAccesser* moduleAccesser, const soArrayContractibleTable<const acCmdArgConv>& argList)
+        : m_argList(reinterpret_cast<const soArrayContractibleTable<acCmdArgConv>&>(argList)), m_moduleAccesser(moduleAccesser),
+          m_errorOnValueFetch(0) { }
+    int getInt(u32 index) { return reinterpret_cast<soAnimCmdArgList*>(this)->getInt(index); }
+};
+
+// Anim cmd type 0x16 with two arguments hands the Final Smash to the fighter they name.
+bool itSmashBallCustomizer::onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3) {
+    switch (acmd->getType()) {
+    case 0x16:
+        if (acmd->getArgNum() == 2) {
+            itAnimCmdArgList args(moduleAccesser, acmd->getArgList());
+            u8 category = args.getInt(0);
+            int taskId = args.getInt(1);
+            if (!args.m_errorOnValueFetch) {
+                g_ftManager->setFinalTask(category, taskId);
+                return true;
+            }
+        }
+        break;
+    }
+    return false;
+}
+
+// The damage's knockback speed goes into the float work 0x11000000 and the attack power grows with the damage taken.
+bool itSonansCustomizer::onDamage(BaseItem* item, int damageStatusKind, soDamageLog* damageLog) {
+    soWorkManageModule* work = &itWork(item);
+    work->getFloat(0x11000000);
+    float add = damageLog->m_damageAdd * damageLog->m_lr * item->getParamFloat(0x2937);
+    // TODO: clean up - the original also compares |add| with |speed| (an fcmpo whose result is unused); not reproduced.
+    work->setFloat(add, 0x11000000);
+    float powerMul = item->getParamFloat(0x2936);
+    float powerMax = item->getParamFloat(0x293C);
+    float power = damageLog->m_damageAdd * powerMul;
+    item->m_moduleAccesser->getCollisionAttackModule().setPowerMul(power > powerMax ? powerMax : power);
+    return true;
+}
+
+// In motion 3 the camera is forced onto the point given by the float work 0x11000007 / 0x11000008.
+void itDragoonSetCustomizer::onProcessHit(BaseItem* item) {
+    if (item->m_moduleAccesser->getMotionModule().getKind() == 3) {
+        soWorkManageModule* work = &itWork(item);
+        float y = work->getFloat(0x11000008);
+        float x = work->getFloat(0x11000007);
+        Vec3f target(x, y, lbl_27_rodata_46DC[0]);
+        Vec3f center = target;
+        Vec3f pos = target;
+        item->m_moduleAccesser->getCameraModule().updateForce(0, &pos, &center);
+    }
+}
+
+// TODO: clean up - MATCH-ONLY: the scale bounds are read through the unit's pool labels.
+extern "C" const float lbl_27_rodata_4704[];
+extern "C" const float lbl_27_rodata_4708[];
+
+// The shot grows by a seventh of its speed every frame, between 0.001 and param 0x186A.
+bool itRayGunShotCustomizer::onProcessFixPosition(BaseItem* item) {
+    soWorkManageModule* work = &itWork(item);
+    float scale = work->getFloat(0x11000000);
+    scale += lbl_27_rodata_4704[0] * (float)fabs(item->getParamFloat(0x3EF));
+    float max = item->getParamFloat(0x186A);
+    if (scale > max) {
+        scale = max;
+    } else if (scale < lbl_27_rodata_4708[0]) {
+        scale = lbl_27_rodata_4708[0];
+    }
+    Vec3f nodeScale(scale, item->m_moduleAccesser->getPostureModule().getOwnerScale(), scale);
+    item->m_moduleAccesser->getModelModule().setNodeScale(0, &nodeScale);
+    work->setFloat(scale, 0x11000000);
+    return true;
+}
+
+template <class T>
+static inline T* itCastTask(u32 taskId) {
+    if (taskId == 0xFFFFFFFF) {
+        return NULL;
+    }
+    gfTask* task = gfTask::getTask(taskId);
+    if (task != NULL) {
+        return dynamic_cast<T*>(task);
+    }
+    return NULL;
+}
+
+// The item ignores its thrower (int work 0x10000000) and the thrower's second team.
+static inline bool itIsOtherTeam(BaseItem* item, soCollisionLog* collisionLog) {
+    u32 throwerId = itWork(item).getInt(0x10000000);
+    if (collisionLog->m_taskId == throwerId) {
+        return false;
+    }
+    if (throwerId != 0xFFFFFFFF) {
+        gfTask* task = gfTask::getTask(throwerId);
+        StageObject* thrower = task != NULL ? dynamic_cast<StageObject*>(task) : NULL;
+        if (thrower != NULL) {
+            int team = soExternalValueAccesser::getTeam2ndNo(thrower);
+            if (team != -1) {
+                u32 targetId = collisionLog->m_taskId;
+                if (targetId != 0xFFFFFFFF) {
+                    // The original tests the thrower's task here instead of the target's (copy-paste slip).
+                    gfTask* targetTask = gfTask::getTask(targetId);
+                    StageObject* target = task != NULL ? dynamic_cast<StageObject*>(targetTask) : NULL;
+                    if (target != NULL) {
+                        int targetTeam = soExternalValueAccesser::getTeam2ndNo(target);
+                        if (targetTeam != -1 && targetTeam == team) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+bool itChewingCustomizer::onNotifyEventCollisionSearch(BaseItem* item, soCollisionLog* collisionLog) {
+    return itIsOtherTeam(item, collisionLog);
+}
+
+bool itSmokeScreenCustomizer::onNotifyEventCollisionSearch(BaseItem* item, soCollisionLog* collisionLog) {
+    return itIsOtherTeam(item, collisionLog);
+}
+
+// A fighter caught in the smoke holds the item at the node it was hit; the item takes the team of its holder.
+bool itSmokeScreenCustomizer::onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos) {
+    soWorkManageModule* work = &itWork(item);
+    gfTask* task = gfTask::getTask(searchHitTaskId);
+    if (task == NULL || task->m_taskCategory != gfTask::Category_Fighter) {
+        work->offFlag(0x22000005);
+        return false;
+    }
+    work->onFlag(0x12000009);
+    item->have(searchHitTaskId, ftExternalValueAccesser::getNodeIdFromHitNo(searchHitCollisionIndex), -1);
+    if (item->m_moduleAccesser->getLinkModule().isLink(3)) {
+        u32 ownerId = item->m_moduleAccesser->getLinkModule().getParentTaskId(3);
+        if (ownerId != 0xFFFFFFFF) {
+            item->setTeamOwnerTaskId(ownerId);
+        }
+    }
+    return true;
+}
+
+// Each punch motion plays its own hit sound.
+void itLittlemacCustomizer::onNotifyEventCollisionAttackCheck(BaseItem* item, int hitTaskId) {
+    switch (item->m_moduleAccesser->getMotionModule().getKind()) {
+    case 0:
+        item->m_moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1E68), false, false, 0);
+        break;
+    case 1:
+        item->m_moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1E69), false, false, 0);
+        break;
+    case 2:
+        item->m_moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1E6A), false, false, 0);
+        break;
+    case 3:
+        item->m_moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1E68), false, false, 0);
+        break;
+    case 4:
+        item->m_moduleAccesser->getSoundModule().playSE(static_cast<SndID>(0x1E69), false, false, 0);
+        break;
+    }
+}
+
+// Anim cmd type 0x19 with two arguments slows everyone but the item's team (strength, frames).
+bool itShadowCustomizer::onNotifyEventAnimCmd(BaseItem* item, acAnimCmd* acmd, soModuleAccesser* moduleAccesser, int unk3) {
+    switch (acmd->getType()) {
+    case 0x19:
+        if (acmd->getArgNum() == 2) {
+            itAnimCmdArgList args(moduleAccesser, acmd->getArgList());
+            int strength = args.getInt(0);
+            int frames = args.getInt(1);
+            if (!args.m_errorOnValueFetch) {
+                g_ftManager->setSlow(item->m_moduleAccesser->getTeamModule().getTeam()->getNo(), true, strength, frames);
+                return true;
+            }
+        }
+        break;
+    }
+    return false;
+}
+
+// The box is tilted back when it is let go (and set down a bit further when flag 0x12000000 is on).
+// TODO: clean up - MATCH-ONLY: the angles and offsets are read through the unit's pool label (46C8 + 0xCC: 7,
+// + 0xD0: 15, + 0x74: 90, + 0: 1, + 4: 0.5).
+bool itCBoxCustomizer::onRemoveModelConstraint(BaseItem* item, int) {
+    const float* pool = lbl_27_rodata_46C8;
+    Vec3f rot = item->m_moduleAccesser->getPostureModule().getRot(0);
+    rot.m_x -= pool[0xCC / 4];
+    rot.m_y += pool[0x74 / 4] * item->m_moduleAccesser->getPostureModule().getLr();
+    if (itWork(item).isFlag(0x12000000)) {
+        rot.m_x -= pool[0xD0 / 4];
+        Vec3f pos = item->m_moduleAccesser->getPostureModule().getPos();
+        pos.m_x += pool[0];
+        pos.m_z += pool[1];
+        item->m_moduleAccesser->getPostureModule().setPos(&pos);
+    }
+    item->m_moduleAccesser->getPostureModule().setRot(&rot, 0);
     return false;
 }
