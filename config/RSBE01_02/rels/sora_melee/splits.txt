@@ -1436,6 +1436,9 @@ mo_melee/sora_melee/so/so_instance_manager_thunks_Null_soTurnEventObserver.cpp:
 mo_melee/sora_melee/so/so_instance_manager_thunks_Null_soLogEventObserver.cpp:
 	.text       start:0x00087004 end:0x0008701C
 
+mo_melee/sora_melee/so/kinetic/so_kinetic_module_impl_87084.cpp:
+	.text       start:0x00087084 end:0x0008754C
+
 mo_melee/sora_melee/so/so_instance_unit_full_property_soKineticEnergy_part1.cpp:
 	.text       start:0x0008754C end:0x00087558
 
@@ -1873,9 +1876,11 @@ mo_melee/sora_melee/so/color/so_color_blend.cpp:
 
 mo_melee/sora_melee/so/color/so_color_flash.cpp:
 	.text       start:0x000C10BC end:0x000C1454
+	.rodata     start:0x00000EA8 end:0x00000EB8
 
 mo_melee/sora_melee/so/color/so_color_light.cpp:
 	.text       start:0x000C1454 end:0x000C152C
+	.rodata     start:0x00000EB8 end:0x00000EC0
 
 mo_melee/sora_melee/so/so_jostle_manager.cpp:
 	.text       start:0x000C152C end:0x000C1A30

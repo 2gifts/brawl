@@ -6049,6 +6049,7 @@ config.libs = [
             Object(NonMatching, "mo_melee/sora_melee/so/so_instance_manager_thunks_Null_soGimmickEventObserver.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_instance_manager_thunks_Null_soTurnEventObserver.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_instance_manager_thunks_Null_soLogEventObserver.cpp"),
+            Object(NonMatching, "mo_melee/sora_melee/so/kinetic/so_kinetic_module_impl_87084.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_instance_manager_thunks_Vector_soDisposeInstanceEventObserver_8.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_instance_manager_thunks_Vector_soLogEventObserver_1.cpp"),
             Object(NonMatching, "mo_melee/sora_melee/so/so_instance_manager_thunks_Vector_soLinkEventObserver_1.cpp"),
