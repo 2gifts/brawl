@@ -989,3 +989,45 @@ void itMoneyCustomizer::onReset(BaseItem* item) {
         reinterpret_cast<u8*>(&kinetic)[0x305] = 5;
     }
 }
+
+// The last shot plays the empty motion.
+u32 itFireFlowerCustomizer::onShootBlanks(BaseItem* item, u32) {
+    soWorkManageModule& work = itWork(item);
+    int bullets = work.getInt(0x10000000);
+    if (bullets > 0) {
+        if (--bullets <= 0) {
+            bullets = 0;
+            item->changeMotion(10, false);
+        }
+        work.setInt(bullets, 0x10000000);
+    }
+    return bullets;
+}
+
+// Action 0 makes the coin visible again and lets it be picked up.
+void itMoneyCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    soWorkManageModule& work = itWork(item);
+    switch (action) {
+    case 0:
+        item->setVanishMode(false);
+        work.offFlag(0x12000008);
+        item->m_moduleAccesser->getAreaModule().setWhole(0);
+        item->m_moduleAccesser->getStatusModule().changeStatusRequest(5, item->m_moduleAccesser);
+        break;
+    }
+}
+
+void itFireFlowerCustomizer::onAction(BaseItem* item, u32 action, float rate) {
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 2) {
+        switch (action) {
+        case 0:
+            item->changeMotion(8, false);
+            break;
+        case 1:
+            item->changeMotion(9, false);
+            break;
+        }
+        item->m_moduleAccesser->getStatusModule().changeStatusRequest(2, item->m_moduleAccesser);
+    }
+}
+
