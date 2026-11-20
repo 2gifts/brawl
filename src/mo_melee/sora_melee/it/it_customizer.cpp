@@ -2324,3 +2324,56 @@ extern "C" void fn_27_29EF44(itTingleCustomizer* self, BaseItem* item) {
 }
 
 void itTingleCustomizer::onDestruct(BaseItem* item) { fn_27_29EF44(this, item); }
+
+extern "C" const float lbl_27_rodata_4790[];
+
+// Starts Tingle's effect once flag 0x12000000 is set: 1 gives everyone curry, 2 makes the others slip, 4 zooms on the
+// owner. Flag 0x12000001 says whether the owner can be helped (no Final Smash running and an owner exists).
+bool itTingleCustomizer::onProcessFixPosition(BaseItem* item) {
+    if (!soSlow::getInstance()->isAdjust()) {
+        return true;
+    }
+    if (item->getEmbeddedModuleAccesser().getStatusModule().getStatusKind() == 6) {
+        fn_27_29EF44(this, item);
+        return true;
+    }
+    soWorkManageModule* work = &itWork(item);
+    u32 ownerTaskId = item->m_moduleAccesser->getTeamModule().getTeamOwnerId();
+    bool hasOwner = false;
+    if (!g_ftManager->isProcessTechnique() && ownerTaskId != 0xFFFFFFFF) {
+        hasOwner = true;
+    }
+    work->setFlag(hasOwner, 0x12000001);
+    if (!work->isFlag(0x12000000)) {
+        return true;
+    }
+    work->offFlag(0x12000000);
+    int effect = work->getInt(0x10000000);
+    if (effect < 0) {
+        return true;
+    }
+    int entryIds[8];
+    int entryCount = g_ftManager->enumEntryId(reinterpret_cast<int>(entryIds));
+    switch (effect) {
+    case 1:
+        for (int i = 0; i < entryCount; i++) {
+            g_ftManager->setCurry(entryIds[i]);
+        }
+        break;
+    case 2:
+        for (int i = 0; i < entryCount; i++) {
+            int entryId = entryIds[i];
+            if (entryId != g_ftManager->getEntryIdFromTaskId(ownerTaskId, NULL)) {
+                g_ftManager->getOwner(entryId)->setSlipMul(lbl_27_rodata_4790[0]);
+                g_ftManager->getOwner(entryId)->setSlipInterval(false);
+            }
+        }
+        break;
+    case 4:
+        if (hasOwner) {
+            g_ftManager->setZoom(g_ftManager->getEntryIdFromTaskId(ownerTaskId, NULL), lbl_27_rodata_46C8[0], 1, 0x3C);
+        }
+        break;
+    }
+    return true;
+}
