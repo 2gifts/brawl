@@ -1,10 +1,78 @@
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the empty soParamAccesser base destructor is inlined in sora_melee
+#define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
+#define FT_MODULE_BUILDER
+#define WN_MARIO_FIREBALL_UNIT // the sora_melee article unit mode shared with the Mario fireball (builders out of line)
+#define WN_ZELDA_LIGHTING_BOW_UNIT // the member layout and constructor of the module builder of this unit mode (wn/zelda/wn_zelda_lighting_bow.h)
+#define WN_KIRBY_PIKMIN_UNIT // the complete article class (wn/pikmin/wn_kirby_pikmin.h)
+#define SO_OTHER_ANIM_CTOR // the motion builder owns one other-animation slot (constructed and destroyed as an array)
+#define WN_TRANSITION_CTOR_INLINE // the motion builder constructor of this unit expands the transition module constructor
+#define WN_ANIMCMD_RESET_MODE_BOX // BYTES: word-aligned reset-mode temporaries (frame size of the anim cmd sub builder)
+#define WN_ANIMCMD_PRESENTER_LOCAL_STORE // BYTES: the interpreters' presenters keep the looked-up list in a local
+#define WN_ANIMCMD_STACK_PTR // BYTES: the interpreter stacks stay in a saved register across getManageId (ft_builder_animcmd.h)
+#define WN_WEAPON_BUILDER
+#define WN_ARTICLE_NATIVE_BUILDERS
+#define WN_STATUS_NO_TAIL
+#define WN_ARTICLE_ANIMCMD_INT // BYTES: the builder vtable takes Weapon's int-index notifyEventAnimCmd thunk (@72@), as in the original
+#define FT_REL_LINK_EXTERN
+#define SO_NULLABLE_INLINE_CTOR
+#include <wn/wn_module_accesser_builder.h>
+#include <wn/zelda/wn_zelda_lighting_bow.h>
 #include <so/so_value_accesser.h>
 #include <wn/pikmin/wn_kirby_pikmin.h>
 #include <wn/wn_class_info_impl.h>
 #include <wn/wn_kinetic_energy_normal.h>
+#include <so/so_module_accesser.h>
+#include <so/model/so_model_module_impl.h>
+#include <so/status/so_status_module_impl.h>
+#include <gf/gf_task_scheduler.h>
+
+// BYTES: the empty base destructors that sora_melee always expands (they have no out-of-line copy there).
+inline soTeam::~soTeam() { }
+inline soSound3dGeneratorAccesserImpl::~soSound3dGeneratorAccesserImpl() { }
+inline soResourceIdAccesser::~soResourceIdAccesser() { }
 
 // Registers the Kirby's Pikmin article class (kind 150) in the class info table during static initialization.
 wnClassInfoImpl<150, wnKirbyPikmin, wnKirbyPikminData> g_wnKirbyPikminClassInfo;
+
+wnKirbyPikmin::wnKirbyPikmin(s32 articleId, const wnArticleBuildInfo& info, const wnKirbyPikminData* data) :
+    wnWeaponBuilder<wnKirbyPikminModuleAccesserBuildConfig>(
+        "KirbyPikmin", articleId, info,
+        wnModuleAccesserBuildData(150, data, info.getHeapModule()->getInstanceHeap(),
+                                  info.getHeapModule()->getNWModelInstanceHeap(),
+                                  info.getHeapModule()->getNWMotionInstanceHeap(), static_cast<u8>(data->m_resGroupNo), -1,
+                                  &m_paramAccesser, 0, 0, 0, 0, 0, 0, 0)),
+    m_param(data->m_param), m_paramAccesser(data->m_param), m_data(data), m_animCmdTable0(),
+    m_animCmdPack0(&m_animCmdTable0, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull,
+                   (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull),
+    m_animCmdTable1(),
+    m_animCmdPack1(&m_animCmdTable1, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull,
+                   (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull),
+    m_animCmdTable2(),
+    m_animCmdPack2(&m_animCmdTable2, (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull,
+                   (soArrayFixed<const acAnimCmdConv*>*)g_soAnimCmdAddrArrayNull),
+    m_hitStatusTable() {
+    m_moduleAccesser->getAnimCmdModule().unk44(1, &m_animCmdPack0);
+    m_moduleAccesser->getAnimCmdModule().unk44(2, &m_animCmdPack1);
+    m_moduleAccesser->getAnimCmdModule().unk44(3, &m_animCmdPack2);
+    m_moduleAccesser->getVisibilityModule().setStatusDefault(0, 0, true);
+    m_moduleAccesser->getVisibilityModule().setDefaultAll();
+    m_moduleAccesser->getWorkManageModule().setInt(0, 0x10000006);
+    Weapon::deactivate(false);
+}
+
+// BYTES: the original addresses each singleton's destructor-chain record by its own address; with data pooling the
+// records share one hoisted .bss anchor register. The pragma applies where the template is instantiated.
+#pragma push
+#pragma pool_data off
+template soMotionModuleBuilder<
+    wnKirbyPikminModuleAccesserBuildConfig::MotionModuleBuildConfig>::soMotionModuleBuilder(soModuleAccesser*, void*);
+#pragma pop
+
+inline wnKirbyPikminParamAccesser::~wnKirbyPikminParamAccesser() { }
+
+#define WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG wnKirbyPikminModuleAccesserBuildConfig
+#include <wn/zelda/wn_zelda_lighting_bow_builder_ctor.h>
 
 bool wnKirbyPikmin::notifyEventCollisionAttackCheck(u32 flags) {
     if ((flags & 7) != 0) {
@@ -36,43 +104,13 @@ void wnKirbyPikmin::shoot(Vec3f* position, float lr) {
     wnKineticEnergyNormal* movement = dynamic_cast<wnKineticEnergyNormal*>(
         m_moduleAccesser->getKineticModule().getEnergy(0));
     if (movement) {
-        const float* parameters = unk2044->unk70[m_moduleAccesser->getWorkManageModule().getInt(0x10000005)];
+        const float* parameters = m_data->m_speedTable[m_moduleAccesser->getWorkManageModule().getInt(0x10000005)];
         movement->m_speed = Vec2f(parameters[2] * (m_moduleAccesser->getPostureModule().getLr() < 0.0f ? -1 : 1), parameters[4]);
         float speedLimitX = parameters[3];
         movement->m_accel = Vec2f(0.0f, -parameters[0]);
         movement->m_speedLimit = Vec2f(speedLimitX, parameters[1]);
         movement->enable();
     }
-}
-
-// TODO: clean up, give variables real names
-namespace jj_30C42C {
-extern "C" void* fn_27_30C42C(void* self) {
-    return reinterpret_cast<u8*>(self) + 0x7f8;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_30CF94 {
-extern "C" void* fn_27_30CF94(void* self) {
-    return reinterpret_cast<u8*>(self) + 0xd8;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_30CF9C {
-extern "C" void fn_27_30CF9C(void) {}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_30D244 {
-typedef unsigned char u8;
-extern "C" void __ct__22soVisibilityModuleImplFP16soModuleAccesserP16soVisibilityDatai(void* self, int a, int b, int c);
-
-extern "C" void* fn_27_30D244(void* self, int a, int b) {
-    __ct__22soVisibilityModuleImplFP16soModuleAccesserP16soVisibilityDatai(self, a, b, 1);
-    return self;
-}
 }
 
 // TODO: clean up, give variables real names
@@ -265,15 +303,24 @@ extern "C" void fn_27_30F7C8(void* self) {
 }
 }
 
-void operator delete(void* p);
-// TODO: clean up, give variables real names
-namespace jj_30C3EC {
+wnKirbyPikmin::~wnKirbyPikmin() { }
 
-extern "C" void* __dt__26wnKirbyPikminParamAccesserFv(void* p, s32 n) {
-    if (p != nullptr && n > 0) {
-        operator delete(p);
+bool wnKirbyPikmin::reflectRequest(Vec2f* speedMul, Vec2f* accelMul) {
+    m_moduleAccesser->getPostureModule().reverseLr();
+    m_moduleAccesser->getPostureModule().updateRotYLr();
+    int team = m_moduleAccesser->getReflectModule().getTeam();
+    m_moduleAccesser->getTeamModule().setTeam(team, true);
+    m_moduleAccesser->getTeamModule().setHitTeam(team);
+    m_moduleAccesser->getTeamModule().setTeamOwnerId(m_moduleAccesser->getReflectModule().getTaskId());
+    if (speedMul->m_x != 1.0f || speedMul->m_y != 1.0f) {
+        Vec3f mul(speedMul->m_x, speedMul->m_y, 1.0f);
+        soKineticEnergy::AttributeFlag attr(1);
+        m_moduleAccesser->getKineticModule().mulSpeed(&mul, attr);
     }
-    return p;
+    if (accelMul->m_x != 1.0f || accelMul->m_y != 1.0f) {
+        Vec3f mul(accelMul->m_x, accelMul->m_y, 1.0f);
+        soKineticEnergy::AttributeFlag attr(1);
+        m_moduleAccesser->getKineticModule().mulAccel(&mul, attr);
+    }
+    return false;
 }
-}
-
