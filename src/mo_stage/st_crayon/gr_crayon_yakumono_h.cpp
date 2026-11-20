@@ -317,23 +317,23 @@ void grCrayonYakumonoH::progMotion_1(float deltaFrame) {
             callback->m_nodeCallbackDatas->m_pos.m_x += unk178.m_x * deltaFrame;
             float c = static_cast<float>(cos(unk18C * 6.2831855f / period));
             callback->m_nodeCallbackDatas->m_pos.m_y -= deltaFrame * (unk178.m_y * c);
-            if (unk18C >= 0.25f * period) {
+            if (unk18C >= period / 4.0f) {
                 unk184 = 2;
                 unk18C = 0.0f;
             }
             break;
         }
         case 2:
-            if (100.0f <= unk18C) {
+            if (unk18C >= 100.0f) {
                 unk184 = 3;
-                unk18C = 0.25f * period;
+                unk18C = period / 4.0f;
             }
             break;
         case 3: {
             callback->m_nodeCallbackDatas->m_pos.m_x += unk178.m_x * deltaFrame;
             float c = static_cast<float>(cos(unk18C * 6.2831855f / period));
             callback->m_nodeCallbackDatas->m_pos.m_y -= deltaFrame * (unk178.m_y * c);
-            if (unk18C >= 0.5f * period) {
+            if (unk18C >= period / 2.0f) {
                 ReleaseHeihoParam();
             }
             break;

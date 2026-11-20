@@ -88,9 +88,12 @@ void grFzeroAshiba::updateActive(float deltaFrame) {
         }
         break;
     case 7:
-        if (*m_stateWork < 5 && *m_stateWork > 2) {
+        switch (*m_stateWork) {
+        case 3:
+        case 4:
             setMotion(0, false, true, &m_timer2);
             m_state = 8;
+            break;
         }
         break;
     case 8:

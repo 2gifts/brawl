@@ -6,13 +6,14 @@
 // files). Every translation unit of sora_adv_stage carries its own copy of these two tables: the ids are built at
 // static-initialization time from the string literals (`__sinit_*` copies the first word of each literal into the
 // zero-initialized arrays), which is what the original compiler emitted for a header-defined table of this form.
+// The tables are not const: a const table schedules the second array's address load one slot later in __sinit.
 // HYPOTHESIS: the names of the tables and of the helper; the id values and their order are from the binary.
 
 static inline u32 advGimmickId(const char* fourcc) {
     return *reinterpret_cast<const u32*>(fourcc);
 }
 
-static const u32 g_advGimmickIds[73] = {
+static u32 g_advGimmickIds[73] = {
     advGimmickId("GMWA"), advGimmickId("GMWO"), advGimmickId("GET1"), advGimmickId("GET2"), advGimmickId("GFRT"),
     advGimmickId("GFT2"), advGimmickId("GITR"), advGimmickId("GTRR"), advGimmickId("GEPT"), advGimmickId("GEG1"),
     advGimmickId("GFG1"), advGimmickId("GFSR"), advGimmickId("GCAM"), advGimmickId("GITM"), advGimmickId("GRIM"),
@@ -30,7 +31,7 @@ static const u32 g_advGimmickIds[73] = {
     advGimmickId("GFIN"), advGimmickId("EPBM"), advGimmickId("EPSP"),
 };
 
-static const u32 g_advBlockIds[2] = {
+static u32 g_advBlockIds[2] = {
     advGimmickId("BLOC"),
     advGimmickId("ADSJ"),
 };
