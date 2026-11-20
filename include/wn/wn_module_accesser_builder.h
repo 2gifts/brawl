@@ -843,16 +843,26 @@ template <>
 class soCollisionAttackModuleBuilder<soCollisionAttackModuleBuildConfig<soCollision::Category_Fighter, 7, 0, soCollisionAttackModuleImpl, 1, false, true> > {
     soArrayVector<soCollisionAttackPart, 7> m_attackPartArrayVector;
     soArrayVector<soCollisionGroup, 7> m_collisionGroupArrayVector;
+#ifdef WN_POKE_TRAINER_FINAL_UNIT // the article unit builds the (empty) absolute array; the fighter never tears it down
+    soArrayNull<soCollisionAttackAbsolute> m_attackAbsoluteArray;
+#else
     u32 m_attackAbsolutePad;
+#endif
     soCollisionAttackModuleImpl m_attackModule;
 public:
     soCollisionAttackModuleBuilder(soModuleAccesser* moduleAccesser, int taskId, u8 taskCategory,
                                    soEventObserverRegistrationDesc* registrationDesc) :
         m_attackPartArrayVector(7, soCollisionAttackPart(soCollision::Category_Fighter, false), 0),
         m_collisionGroupArrayVector(7, 0),
+#ifdef WN_POKE_TRAINER_FINAL_UNIT
+        m_attackAbsoluteArray(0, soCollisionAttackAbsolute()),
+        m_attackModule(moduleAccesser, taskId, (gfTask::Category)taskCategory, &m_attackPartArrayVector, &m_collisionGroupArrayVector,
+                       &m_attackAbsoluteArray, registrationDesc, true) { }
+#else
         m_attackAbsolutePad(0),
         m_attackModule(moduleAccesser, taskId, (gfTask::Category)taskCategory, &m_attackPartArrayVector, &m_collisionGroupArrayVector,
                        (soArray<soCollisionAttackAbsolute>*)0, registrationDesc, true) { }
+#endif
     ~soCollisionAttackModuleBuilder() __attribute__((never_inline));
     soCollisionAttackModule* getModule() { return &m_attackModule; }
 };
