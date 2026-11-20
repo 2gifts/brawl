@@ -38,9 +38,16 @@ public:
     void ref_log_group(soCollisionAttackModule* attack);
     void unref_log_group(soCollisionAttackModule* attack);
     void set_pikachu_pos(float y);
+    // Called by the bolts (wn_pikachu_thunder.cpp); signatures are HYPOTHESES.
+    void change_head_thunder(class wnPikachuThunder* next);
+    void notify_reflect(int taskId, int team);
+    bool isDropGround();
+    void call_pikachu_hit_effect();
+    void call_ground_hit_effect(Vec3f* position);
 };
 static_assert(sizeof(wnPikachuCloud) == 0xA5FC, "wnPikachuCloud layout is wrong!");
 
+#ifndef WN_PIKACHU_THUNDER_UNIT // the bolt's own unit defines the full class (wn/pikachu/wn_pikachu_thunder.h)
 // The Thunder bolt (the class is in sora_melee). Opaque shell for the same reason.
 class wnPikachuThunder : public Weapon {
     u8 m_unreconstructed[0x1FC4 - sizeof(Weapon)];
@@ -87,3 +94,4 @@ FT_DOL_ARRAY_VECTOR(soArticle*, 5);
 
 typedef wnArticleManageModuleBuilder<ftPikachuArticleMediator, 5> ftPikachuArticleManageModuleBuilder;
 static_assert(sizeof(ftPikachuArticleManageModuleBuilder) == 0x22AE8, "Pikachu article manage builder layout is wrong!");
+#endif // WN_PIKACHU_THUNDER_UNIT

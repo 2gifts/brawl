@@ -1028,6 +1028,10 @@ public:
         soArrayVectorCalculator::postInitialize(*this, size, C);
     }
 #endif
+#ifdef WN_PIKACHU_THUNDER_ARRAY_CTOR
+    // MATCH-ONLY: the element constructor lives in sora_melee; this unit only calls it.
+    soArrayVector(s32 size, const T& element, s32);
+#else
 #if defined(YK_STAGE_INLINE) || defined(WN_MARIO_FIREBALL_UNIT)
     soArrayVector(s32 size, const T& element, s32) : m_topIndex(0), m_lastIndex(0), m_size(0), m_isFull(false) {
 #else
@@ -1046,6 +1050,7 @@ public:
             this->push(element);
         }
     }
+#endif
     T& atFast(s32 idx) const {
         s32 i = m_topIndex + idx;
         if (i >= C)
