@@ -10,6 +10,9 @@ inline
 #else
 // BYTES: the sora_melee constructor calls every module getter and member builder out of line.
 #pragma dont_inline on
+#ifdef WN_ZELDA_BUILDER_CTOR_WEAK // BYTES: a weak copy of the unit, kept out of line (the original names it only by its address)
+__declspec(weak)
+#endif
 #endif
 soModuleAccesserBuilder<WN_ZELDA_LIGHTING_BOW_BUILDER_CONFIG>::soModuleAccesserBuilder(
     StageObject* owner, const wnModuleAccesserBuildData& bd) :

@@ -1,3 +1,5 @@
+#define SO_STATUS_KINETIC_SLOT
+#define WN_FOX_LAND_MASTER_SHELL_FULL
 #define FT_MODULE_BUILDER
 #define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructors expand the empty param customize module destructor
 #define WN_PARAM_ACCESSER_INLINE_DTOR // BYTES: the article destructor expands the empty soParamAccesser base destructor
@@ -26,6 +28,7 @@
 #define WN_ANIMCMD_STACK_PTR
 #define WN_ACCESSER_CTOR_INLINE
 #include <wn/wn_module_accesser_builder.h>
+#include <wn/fox/wn_fox_blaster.h>
 #include <wn/fox/wn_fox_land_master.h>
 #include <wn/wn_extend_param_accesser.h>
 #include <so/so_module_accesser.h>
@@ -45,6 +48,8 @@
 #include <wn/wn_activate_desc.h>
 #include <so/controller/so_controller_module_impl.h>
 #include <types.h>
+
+
 
 // BYTES: the article destructor expands the damage observer base (it deregisters from the event manager).
 static inline void removeDamageObserver(soEventObserver<soDamageEventObserver>* observer, s16 manageId) {
