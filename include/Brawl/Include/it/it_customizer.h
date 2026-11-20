@@ -510,6 +510,10 @@ static_assert(sizeof(itLittlemacCustomizer) == 12, "Class is wrong size!");
 class itMetroidCustomizer : public itCustomizer<itMetroidCustomizer> {
     virtual ~itMetroidCustomizer();
     virtual void onProcessFixPosition(BaseItem* item);
+#ifdef IT_CUSTOMIZER_UNIT
+    virtual bool onHave(BaseItem* item, int);
+    virtual bool isReferenceControlerHave(BaseItem* item);
+#endif
 };
 static_assert(sizeof(itMetroidCustomizer) == 12, "Class is wrong size!");
 
@@ -521,6 +525,10 @@ class itNintendogsHiCustomizer : public itCustomizer<itNintendogsHiCustomizer> {
     virtual bool onNotifyEventCollisionSearchCheck(BaseItem* item, int searchHitTaskId, u8 searchHitCollisionIndex, Vec3f* searchHitPos);
     virtual bool onHave(BaseItem* item, int);
     virtual bool isReferenceControlerHave(BaseItem* item);
+#ifdef IT_CUSTOMIZER_UNIT
+    virtual bool isUseScaleZ(BaseItem* item);
+    virtual bool isSafe(BaseItem* item);
+#endif
 };
 static_assert(sizeof(itNintendogsHiCustomizer) == 12, "Class is wrong size!");
 
