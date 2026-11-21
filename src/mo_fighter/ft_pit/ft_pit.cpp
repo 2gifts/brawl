@@ -350,6 +350,7 @@ ftKineticEnergyController::~ftKineticEnergyController() { }
 #pragma dont_inline on
 ftVirtualNodeMatrixPool::~ftVirtualNodeMatrixPool() { }
 soTeam::~soTeam() { }
+soResourceIdAccesser::~soResourceIdAccesser() { }
 soParamAccesser::~soParamAccesser() { }
 #pragma dont_inline off
 soArticleMediator::~soArticleMediator() { }

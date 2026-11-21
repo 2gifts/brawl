@@ -19,6 +19,10 @@
 #define SO_KINETIC_ENERGY_3F_FULL // BYTES: the builder holds the full 3f energy (size 0x48); its dtor is then expanded in this unit
 #endif
 #define WN_KINETIC_GENERIC_BUILDER
+#define WN_KINETIC_POOL_SUB_LOOPS // BYTES: link order, the per-energy update loop belongs to the sub-pool
+#define SO_LINE_INVERT_HIERARCHY_CLEAR_SPEED // BYTES: link order, every pool level forwards clearSpeed itself
+#define WN_KINETIC_MEDIATOR_LATE // BYTES: link order, the mediator template is declared after the accesser and builder templates
+#define SO_LINE_INVERT_HIERARCHY_IMPLICIT_DTOR // BYTES: the upper pool levels have no destructor of their own
 #define WN_KINETIC_MEDIATOR_OUT_OF_CLASS // BYTES: link order, the mediator and its pools are instantiated at the end of the unit
 #define WN_BUILD_DATA_INLINE_DTOR // BYTES: the build data temporary's weak destructor comes right after getHeapModule
 #define SO_KINETIC_ENERGY_3F_DEFAULT_CTOR // BYTES: the Ikarus pool constructs its 3f energy here (five Vec3f defaults)
@@ -37,6 +41,7 @@
 #include <so/team/so_team_impl.h>
 #include <so/damage/so_damage_transactor_null.h>
 #include <so/damage/so_damage_effector_null.h>
+#include <so/kinetic/so_kinetic_energy_null.h>
 #include <so/article/so_article_mediator_null.h>
 #include <so/param/so_param_customize_module_impl.h>
 #include <wn/wn_module_accesser_builder.h>

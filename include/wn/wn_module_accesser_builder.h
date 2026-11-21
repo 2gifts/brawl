@@ -16,7 +16,9 @@
 #include <ft/ft_fighter_builder.h>
 #include <wn/weapon.h>
 #include <wn/wn_kinetic_energy_normal.h>
+#ifndef WN_KINETIC_ENERGY_GRAVITY_LATE
 #include <wn/wn_kinetic_energy_gravity.h>
+#endif
 #include <so/so_kinetic_energy_rot_normal.h>
 #include <so/posture/so_posture_module_impl.h>
 #include <so/visibility/so_visibility_module_simple.h>

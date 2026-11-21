@@ -2,6 +2,7 @@
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
 #define WN_WEAPON_BUILDER
 #define WN_DAMAGE_ACTOR_INTERFACE
+#define WN_KINETIC_ENERGY_GRAVITY_LATE // the gravity energy class is defined after the parameter accesser (wn_ness_pk_fire.h)
 #define SO_KINETIC_ENERGY_ABSTRACT // the base vtable (empty pure slots) and its friction switches are weak copies here
 #define SO_DAMAGE_EFFECTOR_NULL_IMPLICIT_DTOR
 #define WN_DAMAGE_TRANSACTOR_NULL_ACCESSOR
@@ -21,6 +22,7 @@
 // The input and kinetic energy classes come before ft_dol_array_list.h, which would define the resource id accesser first.
 #include <ip/ip_null.h>
 #include <so/kinetic/so_kinetic_energy.h>
+#include <wn/wn_kinetic_energy_normal.h>
 #include <ft/builder/ft_dol_array_list.h>
 #include <so/damage/so_damage_event_presenter.h>
 #include <so/team/so_team.h>
@@ -28,6 +30,7 @@
 #include <so/team/so_team_impl.h>
 #include <so/damage/so_damage_transactor_null.h>
 #include <so/damage/so_damage_effector_null.h>
+#include <so/kinetic/so_kinetic_energy_null.h>
 #include <so/kinetic/so_kinetic_mediator_null.h>
 #include <so/article/so_article_mediator_null.h>
 #include <so/param/so_param_customize_module_impl.h>

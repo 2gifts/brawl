@@ -26,6 +26,8 @@ public:
 #include <wn/wn_kinetic_energy_normal.h>
 #include <wn/wn_kinetic_mediator_impl.h>
 #include <wn/wn_kinetic_transactor.h>
+// The mediator template itself: here it follows the accesser and builder templates (wn_pit_ikarus.h includes them first).
+#include <wn/wn_kinetic_mediator.h>
 
 // Four energies: a free 3f energy (mode 0x20), a rotation energy (mode 0x21), a normal and a gravity energy.
 // Certain from the map names: the soTypeList / soInstancePoolInfo / soKineticEnergyInitInfo<0..3, ...> chain.

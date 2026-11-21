@@ -20,7 +20,7 @@ void ftNessStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAccess
         soKineticModule& kinetic = moduleAccesser->getKineticModule();
         void** extendedParams = static_cast<ftNess*>(moduleAccesser->m_stageObject)->getExtendParam();
         const float* params = static_cast<const float*>(extendedParams[3]);
-        soKineticEnergyNormal& stopEnergy = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(3));
+        ftKineticEnergyStop& stopEnergy = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
         Vec2f adjustedSpeed = stopEnergy.getSpeed();
         adjustedSpeed.m_x *= params[3];
         stopEnergy.m_speed = adjustedSpeed;

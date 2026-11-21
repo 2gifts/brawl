@@ -2186,7 +2186,7 @@ config.libs = [
         "cflags": cflags_fighter,
         "host": False,
         "objects": [
-            Object(NonMatching, "mo_fighter/ft_ness/wn_ness_pk_fire.cpp"),
+            Object(Matching, "mo_fighter/ft_ness/wn_ness_pk_fire.cpp"),
             Object(Matching, "mo_fighter/ft_ness/wn_ness_pk_fire_status_uniq_process_shoot.cpp"),
             Object(Matching, "mo_fighter/ft_ness/wn_ness_pk_fire_status_uniq_process_pillar.cpp"),
             Object(NonMatching, "mo_fighter/ft_ness/wn_ness_pk_thunder.cpp"),
@@ -2293,7 +2293,7 @@ config.libs = [
         "cflags": cflags_fighter,
         "host": False,
         "objects": [
-            Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus.cpp"),
+            Object(Matching, "mo_fighter/ft_pit/wn_pit_ikarus.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_kinetic_transactor.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_entry.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_turn.cpp"),
