@@ -254,6 +254,10 @@ void* fn_101_5D54(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_101_5D94(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
 soParamAccesser::~soParamAccesser() { }
+#pragma dont_inline on
+soTeam::~soTeam() { }
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
 
 // ---- the article holders --------------------------------------------------------------------------------------------
 // Articles borrow the owner's kind record and heap while their constructors run.

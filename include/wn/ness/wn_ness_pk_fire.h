@@ -41,6 +41,8 @@ public:
 };
 static_assert(sizeof(wnNessPKFireParamAccesser) == 0x44, "PK Fire parameter accesser size");
 
+#include <wn/wn_kinetic_energy_gravity.h>
+
 class wnNessPKFireModuleAccesserBuildConfig : public wnCommonBuildConfig {
 public:
     typedef soInsideEventManageModuleBuildConfig<16, 32, 4, 2, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 1, 1, 0, 0, 0, wnInsideEventManageModuleTypes>

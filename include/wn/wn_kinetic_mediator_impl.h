@@ -56,6 +56,19 @@ public:
     soInstancePoolSub(soModuleAccesser* acc) : m_holder(acc) { }
     // HYPOTHESIS: direct access to the sole energy in this pool.
     typename Info::Type* getEnergy() { return m_holder.getEnergy(); }
+#ifdef WN_KINETIC_POOL_SUB_LOOPS
+    // WN_KINETIC_POOL_SUB_LOOPS (opt-in): the update loop over the energies of one pool is a member of the sub-pool.
+    // BYTES, link order: the transactor's updateEnergy<Energy> is then instantiated with this sub-pool's functions
+    // (updateEnergy<E>, getInstanceAt, forEachHolderModuleAccesser per energy, as in the original Ikarus unit) instead
+    // of all four ahead of them.
+    template <typename T> void updateEnergy(soModuleAccesser* acc) {
+        for (int i = 0; i < Info::Count; i++) {
+            typename Info::Type* energy = getInstanceAt(i);
+            if (energy->isEnable() == true && !energy->isSuspend())
+                T::updateEnergy(energy, acc);
+        }
+    }
+#endif
     // MATCH-ONLY: native mediator loops call this per-energy lookup separately.
     typename Info::Type* getInstanceAt(int index) __attribute__((never_inline)) {
         if (index == 0) return m_holder.getEnergy();
@@ -98,11 +111,15 @@ public:
         Parent::clearSpeed();
     }
     template <typename T> void updateEnergy(soModuleAccesser* acc) {
+#ifdef WN_KINETIC_POOL_SUB_LOOPS
+        m_sub.template updateEnergy<T>(acc);
+#else
         for (int i = 0; i < Info::Count; i++) {
             typename Info::Type* energy = m_sub.getInstanceAt(i);
             if (energy->isEnable() == true && !energy->isSuspend())
                 T::updateEnergy(energy, acc);
         }
+#endif
         Parent::template updateEnergy<T>(acc);
     }
     template <typename Helper> void updateEnergy1(const Helper& helper, soModuleAccesser* acc) {
@@ -112,75 +129,8 @@ public:
 };
 #endif
 
-template <typename Change, typename Update, typename Speed, typename Helper>
-struct soKineticTransactorInfo {
-    typedef Change ChangeType;
-    typedef Update UpdateType;
-    typedef Speed SpeedType;
-    typedef Helper HelperType;
-};
-
-template <typename List, typename Transactors>
-class soKineticMediatorImpl : public soKineticMediator {
-    typedef soLineInvertHierarchy<List, soInstancePool, soInstancePoolRoot> Pools;
-    Pools m_pools;
-public:
-#ifdef WN_KINETIC_MEDIATOR_OUT_OF_CLASS
-    // BYTES: link order (see the definitions below the class).
-    soKineticMediatorImpl(soModuleAccesser* acc);
-    ~soKineticMediatorImpl();
-#else
-    soKineticMediatorImpl(soModuleAccesser* acc) : m_pools(acc) { }
-    ~soKineticMediatorImpl() { }
-#endif
-    virtual void changeKinetic(int mode, soModuleAccesser* acc) {
-        Transactors::ChangeType::changeKinetic(mode, &m_pools, acc);
-        m_pools.clearSpeed();
-    }
-    virtual void updateEnergy(soModuleAccesser* acc) {
-#ifdef WN_KINETIC_UPDATE_TRANSACTOR
-        m_pools.template updateEnergy<WN_KINETIC_UPDATE_TRANSACTOR>(acc);
-#else
-        m_pools.template updateEnergy<typename Transactors::UpdateType>(acc);
-#endif
-    }
-    virtual void updateEnergy1(soModuleAccesser* acc, soKineticAttributeMask flag) {
-#ifdef WN_KINETIC_UPDATE_TRANSACTOR
-        soKineticUpdateEnergyHolderHelper<WN_KINETIC_UPDATE_TRANSACTOR> helper(flag);
-#else
-        soKineticUpdateEnergyHolderHelper<typename Transactors::UpdateType> helper(flag);
-#endif
-        m_pools.updateEnergy1(helper, acc);
-    }
-    virtual void updateEnergy2(soArray<soKineticEnergy**>* energies, soModuleAccesser* acc) {
-        for (int i = 0; i < energies->size(); i++) {
-            soKineticEnergy* energy = **&energies->at(i);
-            if (energy->isEnable() != false && energy->isSuspend() != true) {
-                if (energy->isEnable() == true && energy->isSuspend() == false) {
-                    if (energy->isEnable() == true && energy->isSuspend() == false)
-                        energy->updateEnergy(acc);
-                }
-            }
-        }
-    }
-    virtual void postUpdateEnergy() { }
-    virtual void addSpeed(void* speed, soModuleAccesser* acc) {
-        Transactors::SpeedType::addSpeed(speed, &m_pools, acc);
-    }
-    virtual void addSpeedOutside(int type, void* speed, soModuleAccesser* acc) {
-        Transactors::SpeedType::addSpeedOutside(type, speed, &m_pools, acc);
-    }
-    virtual void notifyEventChangeStatus(void*, void*, void*, void*) { }
-    virtual int getMediateNum() { return soTypeListLength<List>::value; }
-};
-
-#ifdef WN_KINETIC_MEDIATOR_OUT_OF_CLASS
-// BYTES: link order. A member function of a class template that is defined outside the class (not inline) is
-// instantiated only at the end of the unit, after the weak virtual functions of the non-template classes. The pool
-// vtables and every function the constructor references (the energy constructor, the holder / pool destructors, in
-// construction order) are then emitted there, as in the original article units with their own mediator.
-template <typename List, typename Transactors>
-soKineticMediatorImpl<List, Transactors>::soKineticMediatorImpl(soModuleAccesser* acc) : m_pools(acc) { }
-template <typename List, typename Transactors>
-soKineticMediatorImpl<List, Transactors>::~soKineticMediatorImpl() { }
+// WN_KINETIC_MEDIATOR_LATE (opt-in): the unit includes wn_kinetic_mediator.h itself, after the other class templates of its
+// article (BYTES, link order: see that header).
+#ifndef WN_KINETIC_MEDIATOR_LATE
+#include <wn/wn_kinetic_mediator.h>
 #endif

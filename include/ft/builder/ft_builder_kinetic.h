@@ -270,7 +270,17 @@ class soLineInvertHierarchy : public Unit<typename wnKineticListAt<List, Index>:
         soLineInvertHierarchy<typename wnKineticListPrefix<List, Index>::Type, Unit, Root, Next, Index - 1>, Next, Index> Base;
 public:
     soLineInvertHierarchy(soModuleAccesser* acc) : Base(acc) { }
+#ifndef SO_LINE_INVERT_HIERARCHY_IMPLICIT_DTOR
     ~soLineInvertHierarchy() { }
+#endif
+    // SO_LINE_INVERT_HIERARCHY_IMPLICIT_DTOR (opt-in): the upper levels have no destructor of their own. BYTES: the
+    // owner's destructor then calls the top level's implicit one, which MWCC emits after the pool destructors, and the
+    // levels in between leave no weak copy (Pit's Ikarus).
+#ifdef SO_LINE_INVERT_HIERARCHY_CLEAR_SPEED
+    // BYTES, link order: with the level's own clearSpeed the mediator reaches every pool through one more inline level,
+    // so the energy lookup of the top pool is instantiated with the other pools' ones, not ahead of them.
+    void clearSpeed() { Base::clearSpeed(); }
+#endif
 };
 
 template <typename H, template <typename, typename, typename, int> class Unit, typename Root, typename Next>
