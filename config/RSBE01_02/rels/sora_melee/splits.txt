@@ -1468,6 +1468,7 @@ mo_melee/sora_melee/so/so_array_base_soArrayVectorAbstract_PP15soKineticEnergy_8
 mo_melee/sora_melee/so/so_kinetic_utility.cpp:
 	.text       start:0x000895B4 end:0x0008A098
 	.rodata     start:0x00000B90 end:0x00000BA8
+	.data       start:0x000135B8 end:0x00013608
 
 mo_melee/sora_melee/so/so_kinetic_energy_normal.cpp:
 	.text       start:0x0008A098 end:0x0008A674
@@ -1858,7 +1859,7 @@ mo_melee/sora_melee/so/so_kinetic_energy_wind_normal.cpp:
 mo_melee/sora_melee/so/so_kinetic_energy_jostle.cpp:
 	.text       start:0x000B7B54 end:0x000B7E20
 	.rodata     start:0x00000E58 end:0x00000E60
-	.data       start:0x000174A0 end:0x000174E4
+	.data       start:0x000174A0 end:0x00017528
 
 mo_melee/sora_melee/so/item/so_item_manage_module_impl.cpp:
 	.text       start:0x000B7E20 end:0x000BE550
