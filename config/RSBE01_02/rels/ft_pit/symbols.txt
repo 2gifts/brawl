@@ -60,7 +60,7 @@ __dt__127wnArticlePool<8wnPitBow,1,98wnArticleHierarchy<13wnPitBowArrow,4,58wnAr
 __dt__29wnArticleSubPool<8wnPitBow,1>Fv = .text:0x00003424; // type:function size:0x60
 __dt__26wnArticleHolder<8wnPitBow>Fv = .text:0x00003484; // type:function size:0x60
 __dt__8wnPitBowFv = .text:0x000034E4; // type:function size:0x1B4
-__dt__108soArraySelectHolder<1,42soArrayVector<23soInterpolation<5Vec3f>,1>,38soArrayNull<23soInterpolation<5Vec3f>>>Fv = .text:0x00003698; // type:function size:0x5C
+__dt__77soReflectModuleBuilder<51soReflectModuleBuildConfig<0,19soReflectModuleImpl>>Fv = .text:0x00003698; // type:function size:0x5C scope:weak
 __dt__68soSlowModuleBuilder<45soSlowModuleBuildConfig<18soSlowModuleSimple>>Fv = .text:0x000036F4; // type:function size:0x5C
 __dt__83soEffectModuleBuilder<58wnEffectModuleBuildConfig<1,1,0,1,-1,18soEffectModuleImpl>>Fv = .text:0x00003750; // type:function size:0x8C
 __dt__55soGeneralWorkBuilder<31soGeneralWorkBuildConfig<7,6,1>>Fv = .text:0x000037DC; // type:function size:0x60
@@ -81,7 +81,7 @@ __dt__16soTransitionInfoFv = .text:0x00003D28; // type:function size:0x40
 __dt__73soModelModuleBuilder<49soModelModuleBuildConfig<5,0,17soModelModuleImpl>>Fv = .text:0x00003D68; // type:function size:0x6C
 __dt__107soResourceModuleBuilder<80soResourceModuleBuildConfig<0,24soResourceIdAccesserImpl,20soResourceModuleImpl>>Fv = .text:0x00003DD4; // type:function size:0x78
 __dt__18ftFighterBuildDataFv = .text:0x00003E4C; // type:function size:0x40 scope:weak
-__dt__46soArrayFixed<30soInstanceUnit<P11soEventUnit>>Fv = .text:0x00003E8C; // type:function size:0x40 scope:weak
+__dt__96soParamCustomizeModuleBuilder<63soParamCustomizeModuleBuildConfig<26soParamCustomizeModuleImpl>>Fv = .text:0x00003E8C; // type:function size:0x40 scope:weak
 __dt__66soHeapModuleBuilder<43soHeapModuleBuildConfig<16soHeapModuleImpl>>Fv = .text:0x00003ECC; // type:function size:0x5C
 __dt__180soInsideEventManageModuleBuilder<110soInsideEventManageModuleBuildConfig<16,32,4,2,4,4,4,4,2,4,4,4,4,4,1,1,0,0,0,30wnInsideEventManageModuleTypes>,30wnInsideEventManageModuleTypes>Fv = .text:0x00003F28; // type:function size:0x12C
 __dt__93wnArticlePool<13wnPitBowArrow,4,58wnArticleHierarchy<13wnPitParthena,1,18soInstancePoolRoot>>Fv = .text:0x00004054; // type:function size:0x74

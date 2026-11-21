@@ -2294,6 +2294,7 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_kinetic_transactor.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_entry.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_turn.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_attack.cpp"),

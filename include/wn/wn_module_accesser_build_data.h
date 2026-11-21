@@ -36,6 +36,11 @@ public:
     wnModuleAccesserBuildData(s32 kind, const void* data, Heaps::HeapType instHeap, Heaps::HeapType nwModelInstHeap,
                               Heaps::HeapType nwMotionInstHeap, u8 resGroupNo, s32 unk10, soParamAccesser* paramAccesser,
                               s32 unk18, s32 unk1C, s32 unk2C, s32 unk30, s32 unk34, s32 unk38, s32 unk3C);
+#ifdef WN_BUILD_DATA_INLINE_DTOR
+    // BYTES: a declared (empty) destructor: its weak copy comes out where the article constructor first destroys the
+    // build data temporary; the implicit one is only generated after the constructor's other weak copies.
+    virtual ~wnModuleAccesserBuildData() { }
+#endif
 
     virtual u32 getMdlResId() const;
     virtual u32 getAnmResId() const;
