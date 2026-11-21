@@ -103,16 +103,14 @@ void ftStatusUniqProcessGuardFunc::checkHitStopDelayFlick(soModuleAccesser* modu
         if ((float)controller->getFlickX() < limit) {
             float stickX = moduleAccesser->getControllerModule().getStickX();
             double wideX = __fabs(stickX);
-        float absX = wideX;
+            float absX = wideX;
             if (absX >= soValueAccesser::getConstantFloat(moduleAccesser, 0xc65, 0)) {
                 Vec3f position = moduleAccesser->getPostureModule().getPos();
                 soWorkManageModule* work = &moduleAccesser->getWorkManageModule();
-                float scaleB = soValueAccesser::getConstantFloat(moduleAccesser, 0xc68, 0);
-                float scaleA = soValueAccesser::getConstantFloat(moduleAccesser, 0xc66, 0);
-                float partial = stickX * scaleA;
-                float push = partial * scaleB;
-                float strength = work->getFloat(0x21000006);
-                position.m_x = position.m_x + strength * push;
+                // One expression: the native keeps the partial products in back-end temporaries.
+                position.m_x += work->getFloat(0x21000006) *
+                                (stickX * soValueAccesser::getConstantFloat(moduleAccesser, 0xc66, 0) *
+                                 soValueAccesser::getConstantFloat(moduleAccesser, 0xc68, 0));
                 moduleAccesser->getPostureModule().setPos(&position);
                 moduleAccesser->getControllerModule().resetFlickX();
             }
