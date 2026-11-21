@@ -82,28 +82,28 @@ public:
     // The class is abstract in some article units: its vtable (with empty pure-virtual slots) and the empty
     // ground-friction switches below are emitted there as weak copies.
     virtual void updateEnergy(soModuleAccesser* moduleAccesser) = 0;
-    virtual Vec2f getSpeed() = 0;
-    virtual Vec3f getSpeed3f();
-    virtual Vec3f getRotation() = 0;
+    virtual Vec2f getSpeed() const = 0;
+    virtual Vec3f getSpeed3f() const;
+    virtual Vec3f getRotation() const = 0;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser* moduleAccesser) = 0;
     virtual void clearSpeed() = 0;
     virtual void clearRotSpeed() = 0;
     virtual void mulSpeed(Vec3f* speed) = 0;
     virtual void mulAccel(Vec3f* accel) = 0;
-    virtual void reflectSpeed(Vec3f* speed) = 0;
-    virtual void reflectAccel(Vec3f* accel) = 0;
+    virtual void reflectSpeed(const Vec3f& speed) = 0;
+    virtual void reflectAccel(const Vec3f& accel) = 0;
 #else
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getSpeed3f();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getSpeed3f() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser* moduleAccesser);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f* speed);
     virtual void mulAccel(Vec3f* accel);
-    virtual void reflectSpeed(Vec3f* speed);
-    virtual void reflectAccel(Vec3f* accel);
+    virtual void reflectSpeed(const Vec3f& speed);
+    virtual void reflectAccel(const Vec3f& accel);
 #endif
 #if defined(WN_WEAPON_BUILDER) || defined(SO_KINETIC_ENERGY_INLINE_VIRTUALS) // inline in the article / enemy RELs (weak copies)
     virtual void onConsiderGroundFriction() { }
@@ -125,7 +125,7 @@ static_assert(sizeof(soKineticEnergy) == 8, "Class is wrong size!");
 
 #if defined(FT_MODULE_BUILDER) || defined(SO_KINETIC_ENERGY_INLINE_VIRTUALS)
 // The default 3D view preserves planar speed and supplies zero depth speed.
-inline Vec3f soKineticEnergy::getSpeed3f() {
+inline Vec3f soKineticEnergy::getSpeed3f() const {
     return Vec3f(getSpeed(), 0.0f);
 }
 #endif

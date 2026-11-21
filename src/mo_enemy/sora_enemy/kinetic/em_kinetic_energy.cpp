@@ -153,7 +153,7 @@ int emKineticEnergy::getEnergyTypeToGroup(int kind) {
     return s_energyTypeToGroup[kind];
 }
 
-bool emKineticEnergy::isInvalidEnergy() {
+bool emKineticEnergy::isInvalidEnergy() const {
     return m_param.m_kind == -1;
 }
 
@@ -739,7 +739,7 @@ void emKineticEnergy::initCompTransEnergy(Vec2f* speed, float angle) {
     setAngle(angle);
 }
 
-bool emKineticEnergy::isEnergyEnd() {
+bool emKineticEnergy::isEnergyEnd() const {
     if (isInvalidEnergy() == true) {
         return true;
     }
@@ -1336,7 +1336,7 @@ void emKineticEnergy::updateEnergyPre(soModuleAccesser* moduleAccesser) {
     }
 }
 
-Vec2f emKineticEnergy::getSpeed() {
+Vec2f emKineticEnergy::getSpeed() const {
     if (isInvalidEnergy() == true) {
         return Vec2f(0.0f, 0.0f);
     }
@@ -1352,7 +1352,7 @@ Vec2f emKineticEnergy::getSpeed() {
     return Vec2f(0.0f, 0.0f);
 }
 
-Vec3f emKineticEnergy::getRotation() {
+Vec3f emKineticEnergy::getRotation() const {
     if (isInvalidEnergy() == true) {
         return Vec3f(0.0f, 0.0f, 0.0f);
     }

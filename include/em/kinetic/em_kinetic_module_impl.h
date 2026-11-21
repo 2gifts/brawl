@@ -174,21 +174,21 @@ public:
 
     emKineticEnergy();
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*) { }
     virtual void clearSpeed() { }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f*) { }
     virtual void mulAccel(Vec3f*) { }
-    virtual void reflectSpeed(Vec3f*) { }
-    virtual void reflectAccel(Vec3f*) { }
+    virtual void reflectSpeed(const Vec3f&) { }
+    virtual void reflectAccel(const Vec3f&) { }
     virtual ~emKineticEnergy();
 
     static bool isInvalidEnergyType(int kind);
     static int getEnergyTypeToGroup(int kind);
     // BYTES: never_inline: the energy unit calls it out of line where -ipa file would inline it.
-    bool isInvalidEnergy() __attribute__((never_inline));
+    bool isInvalidEnergy() const __attribute__((never_inline));
     static void loopReverseEnergyParam(emKineticEnergyParam* param);
     void loopReverseEnergy();
     static float startEnergySubAngleAxis(int kind, float angle, int nodeId);
@@ -210,7 +210,7 @@ public:
     void initProjectEnergy(Vec2f* speed, float angle);
     bool compTransEnergyPre(soModuleAccesser* moduleAccesser);
     void initCompTransEnergy(Vec2f* speed, float angle);
-    bool isEnergyEnd();
+    bool isEnergyEnd() const;
     bool isEnergyStop();
     bool isEnergyLimitMax();
     bool isEnergyLimitMin();

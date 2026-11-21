@@ -73,11 +73,11 @@ public:
     virtual void updateEnergy(soModuleAccesser*);
     virtual void mulSpeed(Vec3f*);
     virtual void mulAccel(Vec3f*);
-    virtual void reflectSpeed(Vec3f*);
-    virtual void reflectAccel(Vec3f*);
+    virtual void reflectSpeed(const Vec3f&);
+    virtual void reflectAccel(const Vec3f&);
     virtual void clearRotSpeed();
-    virtual Vec3f getRotation();
-    virtual Vec2f getSpeed();
+    virtual Vec3f getRotation() const;
+    virtual Vec2f getSpeed() const;
 
     s32 m_resetType;
     // Verified by ftKineticEnergyGravity::getSpeed: vertical speed at 0xC.
@@ -121,15 +121,15 @@ public:
     virtual ~soKineticEnergyGroundMovement() { }
 #endif
     virtual void updateEnergy(soModuleAccesser*);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f*);
     virtual void mulAccel(Vec3f*);
-    virtual void reflectSpeed(Vec3f*);
-    virtual void reflectAccel(Vec3f*);
+    virtual void reflectSpeed(const Vec3f&);
+    virtual void reflectAccel(const Vec3f&);
     void enableRot(Vec2f* normal);
 
     // HYPOTHESIS: names of the per-frame external movement inputs, cleared after update.
@@ -154,16 +154,16 @@ public:
     virtual ~soKineticEnergyJostle() { }
 #endif
     virtual void updateEnergy(soModuleAccesser*);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getSpeed3f();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getSpeed3f() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f*);
     virtual void mulAccel(Vec3f*);
-    virtual void reflectSpeed(Vec3f*);
-    virtual void reflectAccel(Vec3f*);
+    virtual void reflectSpeed(const Vec3f&);
+    virtual void reflectAccel(const Vec3f&);
 
     Vec3f m_speed; // 0x08: planar push plus correction to the jostle module's depth.
 };

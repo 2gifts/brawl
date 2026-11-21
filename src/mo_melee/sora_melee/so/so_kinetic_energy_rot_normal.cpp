@@ -62,12 +62,12 @@ static inline void reflectVec(Vec3f& out, const Vec3f& v, const Vec3f& n) {
     out = result;
 }
 
-void soKineticEnergyRotNormal::reflectSpeed(Vec3f* normal) {
-    reflectVec(m_rotSpeed, m_rotSpeed, *normal);
+void soKineticEnergyRotNormal::reflectSpeed(const Vec3f& normal) {
+    reflectVec(m_rotSpeed, m_rotSpeed, normal);
 }
 
-void soKineticEnergyRotNormal::reflectAccel(Vec3f* normal) {
-    reflectVec(m_accel, m_accel, *normal);
+void soKineticEnergyRotNormal::reflectAccel(const Vec3f& normal) {
+    reflectVec(m_accel, m_accel, normal);
 }
 
 void soKineticEnergyRotNormal::projectionNormalFollow() { }
@@ -78,11 +78,11 @@ void soKineticEnergyRotNormal::clearRotSpeed() {
 
 void soKineticEnergyRotNormal::clearSpeed() { }
 
-Vec3f soKineticEnergyRotNormal::getRotation() {
+Vec3f soKineticEnergyRotNormal::getRotation() const {
     return m_rotSpeed;
 }
 
-Vec2f soKineticEnergyRotNormal::getSpeed() {
+Vec2f soKineticEnergyRotNormal::getSpeed() const {
     return Vec2f(0.0f, 0.0f);
 }
 

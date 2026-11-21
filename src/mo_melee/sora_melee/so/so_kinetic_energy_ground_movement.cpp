@@ -67,8 +67,8 @@ void soKineticEnergyGroundMovement::enableRot(Vec2f* normal) {
 }
 
 // Ground transport is supplied by the surface, rather than reflected or accelerated.
-void soKineticEnergyGroundMovement::reflectAccel(Vec3f*) { }
-void soKineticEnergyGroundMovement::reflectSpeed(Vec3f*) { }
+void soKineticEnergyGroundMovement::reflectAccel(const Vec3f&) { }
+void soKineticEnergyGroundMovement::reflectSpeed(const Vec3f&) { }
 void soKineticEnergyGroundMovement::mulAccel(Vec3f*) { }
 void soKineticEnergyGroundMovement::mulSpeed(Vec3f*) { }
 void soKineticEnergyGroundMovement::clearRotSpeed() { }
@@ -78,6 +78,6 @@ void soKineticEnergyGroundMovement::clearSpeed() {
     m_rotation = 0.0f;
 }
 void soKineticEnergyGroundMovement::resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*) { }
-Vec3f soKineticEnergyGroundMovement::getRotation() { return Vec3f(m_rotation, 0.0f, 0.0f); }
-Vec2f soKineticEnergyGroundMovement::getSpeed() { return m_speed; }
+Vec3f soKineticEnergyGroundMovement::getRotation() const { return Vec3f(m_rotation, 0.0f, 0.0f); }
+Vec2f soKineticEnergyGroundMovement::getSpeed() const { return m_speed; }
 soKineticEnergyGroundMovement::~soKineticEnergyGroundMovement() { }

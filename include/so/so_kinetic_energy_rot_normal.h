@@ -14,15 +14,15 @@ public:
         m_rotSpeed(rotSpeed), m_accel(accel), m_speedTarget(speedTarget), m_brake(brake), m_speedLimit(speedLimit) { }
 #endif
     virtual void updateEnergy(soModuleAccesser*);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f*);
     virtual void mulAccel(Vec3f*);
-    virtual void reflectSpeed(Vec3f*);
-    virtual void reflectAccel(Vec3f*);
+    virtual void reflectSpeed(const Vec3f&);
+    virtual void reflectAccel(const Vec3f&);
 #if defined(WN_ARTICLE_NATIVE_BUILDERS) && !defined(FT_ROT_ENERGY_DTOR_OUT_OF_LINE) && !defined(FT_ROT_ENERGY_DTOR_OUTLINE)
     virtual ~soKineticEnergyRotNormal() { }
 #else

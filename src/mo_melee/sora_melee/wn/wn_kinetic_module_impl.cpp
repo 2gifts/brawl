@@ -18,14 +18,11 @@ wnKineticEnergyNormal::~wnKineticEnergyNormal() {
 }
 
 void wnKineticEnergyNormal::resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
-    float y = speed.m_y;
-    float x = speed.m_x;
     m_accel = Vec2f(0.0f, 0.0f);
     m_speedTarget = Vec2f(-1.0f, -1.0f);
     m_brake = Vec2f(0.0f, 0.0f);
     m_speedLimit = Vec2f(-1.0f, -1.0f);
-    m_speed.m_x = x;
-    m_speed.m_y = y;
+    m_speed = speed;
     unk34 = mode;
     switch (mode) {
     case 0:
@@ -49,7 +46,8 @@ void wnKineticEnergyNormal::updateEnergy(soModuleAccesser* acc) {
             if (rest < 0.0f) {
                 m_accel = Vec2f(0.0f, 0.0f);
             } else {
-                m_accel = getSpeed() * (rest / speedLen - 1.0f);
+                Vec2f accel = getSpeed() * (rest / speedLen - 1.0f);
+                m_accel = accel;
             }
         }
         break;
@@ -173,16 +171,16 @@ static inline void reflectVec(Vec2f& out, const Vec2f& v, const Vec2f& n) {
     out = v - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y);
 }
 
-void wnKineticEnergyGravity::reflectSpeed(Vec3f* normal) {
+void wnKineticEnergyGravity::reflectSpeed(const Vec3f& normal) {
     Vec2f v(0.0f, m_speedY);
-    Vec2f n(*normal);
+    Vec2f n(normal);
     reflectVec(v, v, n);
     m_speedY = v.m_y;
 }
 
-void wnKineticEnergyGravity::reflectAccel(Vec3f* normal) {
+void wnKineticEnergyGravity::reflectAccel(const Vec3f& normal) {
     Vec2f v(0.0f, m_gravity);
-    Vec2f n(*normal);
+    Vec2f n(normal);
     reflectVec(v, v, n);
     m_gravity = v.m_y;
 }
@@ -202,11 +200,11 @@ void wnKineticEnergyGravity::clearSpeed() {
     m_speedY = 0.0f;
 }
 
-Vec3f wnKineticEnergyGravity::getRotation() {
+Vec3f wnKineticEnergyGravity::getRotation() const {
     return Vec3f(0.0f, 0.0f, 0.0f);
 }
 
-Vec2f wnKineticEnergyGravity::getSpeed() {
+Vec2f wnKineticEnergyGravity::getSpeed() const {
     return Vec2f(0.0f, m_speedY);
 }
 

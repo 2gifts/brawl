@@ -12,15 +12,15 @@ public:
     wnKineticEnergyGravity(float speedY, float gravity, float speedLimit) : m_speedY(speedY), m_gravity(gravity), m_speedLimit(speedLimit) {}
 #endif
     virtual void updateEnergy(soModuleAccesser*);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f*);
     virtual void mulAccel(Vec3f*);
-    virtual void reflectSpeed(Vec3f*);
-    virtual void reflectAccel(Vec3f*);
+    virtual void reflectSpeed(const Vec3f&);
+    virtual void reflectAccel(const Vec3f&);
 #ifdef WN_KINETIC_GRAVITY_INLINE_DTOR
     // BYTES: the Pikmin transactor's temporary calls the base destructor directly and assigns out of line.
     wnKineticEnergyGravity& operator=(const wnKineticEnergyGravity& other) __attribute__((never_inline)) {

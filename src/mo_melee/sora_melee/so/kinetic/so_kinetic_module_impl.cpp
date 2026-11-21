@@ -161,7 +161,7 @@ void soKineticModuleImpl::reflectSpeed(Vec3f* speed, soKineticEnergy::AttributeF
     m_kineticEnergyInstanceManager->getAttributeArray(soAttributeFlag(flag.m_mask), energies);
     int num = energies.size();
     for (int i = 0; i < num; i++) {
-        (*energies.at(i))->reflectSpeed(speed);
+        (*energies.at(i))->reflectSpeed(*speed);
     }
 }
 
@@ -170,7 +170,7 @@ void soKineticModuleImpl::reflectAccel(Vec3f* accel, soKineticEnergy::AttributeF
     m_kineticEnergyInstanceManager->getAttributeArray(soAttributeFlag(flag.m_mask), energies);
     int num = energies.size();
     for (int i = 0; i < num; i++) {
-        (*energies.at(i))->reflectAccel(accel);
+        (*energies.at(i))->reflectAccel(*accel);
     }
 }
 
