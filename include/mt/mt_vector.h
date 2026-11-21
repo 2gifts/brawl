@@ -474,6 +474,26 @@ public:
     // lets the allocator place them (the stages, the item/weapon/model posture code, the camera).
     // MT_VEC3F_SCALE_XY_IN_PLACE scales x/y in place and gives only the z product a fresh register
     // (Link's kinetic transactor).
+#ifdef MT_VEC3F_OPERATOR_MUL_FRESH_REGS
+    // BYTES: operator*'s own paired-single scale, for a unit whose operator* and direct in-place Vec3fScale calls
+    // colour their registers differently (soKineticEnergy3f: reflectSpeed / reflectAccel scale through operator* into
+    // fresh registers, updateEnergy scales accel and brake in place; all 24 orders of one four-variable form were
+    // compiled, each order gives one of the two and never both). The text is the MT_VEC3F_SCALE_FRESH_REGS form.
+    friend void Vec3fScaleOperator(register Vec3f* pOut, register const Vec3f* v, register float c) {
+        register f32 frXY, frZ, frA, frB;
+
+        // clang-format off
+        asm {
+            psq_l    frXY, Vec3f.m_x(v), 0, 0
+            psq_l    frZ, Vec3f.m_z(v), 1, 0
+            ps_muls0 frA, frXY, c
+            ps_muls0 frB, frZ, c
+            psq_st   frA, Vec3f.m_x(pOut), 0, 0
+            psq_st   frB, Vec3f.m_z(pOut), 1, 0
+        }
+        // clang-format on
+    }
+#endif
     friend void Vec3fScale(register Vec3f* pOut, register const Vec3f* v, register float c) {
 #ifdef MT_VEC3F_SCALE_FRESH_REGS
 #ifdef FT_KIRBY_ARTICLE_POOLS
@@ -646,7 +666,11 @@ inline Vec2f::Vec2f(const Vec3f& xyz) { m_x = xyz.m_x; m_y = xyz.m_y; }
 #if defined(MATCHING) && defined(MT_VEC3F_MUL_INLINE)
 inline Vec3f Vec3f::operator*(const float c) const {
     Vec3f result;
+#ifdef MT_VEC3F_OPERATOR_MUL_FRESH_REGS
+    Vec3fScaleOperator(&result, this, c);
+#else
     Vec3fScale(&result, this, c);
+#endif
     return result;
 }
 #endif

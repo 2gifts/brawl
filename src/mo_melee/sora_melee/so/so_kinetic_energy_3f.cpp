@@ -1,5 +1,7 @@
 #define MT_VEC3F_SCALE_XY_IN_PLACE
 #define MT_VEC3F_MUL_INLINE
+#define MT_VEC3F_OPERATOR_MUL_FRESH_REGS
+#define MT_VEC3F_SUB_FRESH_REGS
 #include <mt/mt_vector.h>
 #include <so/kinetic/so_kinetic_energy.h>
 #include <so/so_kinetic_utility.h>

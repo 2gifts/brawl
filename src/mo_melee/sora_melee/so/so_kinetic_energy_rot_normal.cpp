@@ -1,5 +1,7 @@
 #define MT_VEC3F_MUL_INLINE
-#define MT_VEC3F_LENGTH_SQ_INLINE
+#define MT_VEC3F_OPERATOR_MUL_FRESH_REGS
+#define MT_VEC3F_SUB_FRESH_REGS
+#define MT_VEC3F_LENGTH_SQ_PLAIN
 #include <so/so_kinetic_energy_rot_normal.h>
 #include <so/so_kinetic_utility.h>
 #include <so/so_module_accesser.h>
@@ -55,11 +57,7 @@ void soKineticEnergyRotNormal::mulAccel(Vec3f* accel) {
 }
 
 static inline void reflectVec(Vec3f& out, const Vec3f& v, const Vec3f& n) {
-    float dot = n.m_x * v.m_x + n.m_y * v.m_y + n.m_z * v.m_z;
-    Vec3f n2 = n * 2.0f;
-    Vec3f proj = n2 * dot;
-    Vec3f result = out - proj;
-    out = result;
+    out = out - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y + n.m_z * v.m_z);
 }
 
 void soKineticEnergyRotNormal::reflectSpeed(const Vec3f& normal) {
