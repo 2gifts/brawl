@@ -3,6 +3,7 @@
 #define WN_ARTICLE_ANIMCMD_INT
 #define FT_REL_LINK_EXTERN
 #define MT_VEC3F_CTOR_NOINLINE
+#define SO_KINETIC_ENERGY_INLINE_CTOR
 #include <so/anim/so_anim_obj.h>
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/gamewatch/wn_game_watch_oil.h>
