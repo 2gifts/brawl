@@ -130,7 +130,7 @@ public:
     virtual void mulAccel(Vec3f*);
     virtual void reflectSpeed(const Vec3f&);
     virtual void reflectAccel(const Vec3f&);
-    void enableRot(Vec2f* normal);
+    void enableRot(const Vec2f& normal);
 
     // HYPOTHESIS: names of the per-frame external movement inputs, cleared after update.
     Vec2f m_outsideSpeed; // 0x08

@@ -6811,7 +6811,7 @@ addSpeedOutside__26soKineticModuleGenericImplFQ215soKineticEnergy11OutsideTypeP5
 @32@notifyEventChangeStatus__26soKineticModuleGenericImplFiiP12soStatusDataP16soModuleAccesser = .text:0x000B7140; // type:function size:0x8
 __ct__29soKineticEnergyGroundMovementFv = .text:0x000B7148; // type:function size:0x68
 updateEnergy__29soKineticEnergyGroundMovementFP16soModuleAccesser = .text:0x000B71B0; // type:function size:0x398
-enableRot__29soKineticEnergyGroundMovementFP5Vec2f = .text:0x000B7548; // type:function size:0x50
+enableRot__29soKineticEnergyGroundMovementFRC5Vec2f = .text:0x000B7548; // type:function size:0x50
 reflectAccel__29soKineticEnergyGroundMovementFRC5Vec3f = .text:0x000B7598; // type:function size:0x4
 reflectSpeed__29soKineticEnergyGroundMovementFRC5Vec3f = .text:0x000B759C; // type:function size:0x4
 mulAccel__29soKineticEnergyGroundMovementFP5Vec3f = .text:0x000B75A0; // type:function size:0x4

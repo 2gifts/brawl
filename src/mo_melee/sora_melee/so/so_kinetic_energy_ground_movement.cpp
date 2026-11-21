@@ -59,8 +59,8 @@ void soKineticEnergyGroundMovement::updateEnergy(soModuleAccesser* acc) {
     m_outsideRotation = 0.0f;
 }
 
-void soKineticEnergyGroundMovement::enableRot(Vec2f* normal) {
-    float angle = atan2f(normal->m_y, normal->m_x);
+void soKineticEnergyGroundMovement::enableRot(const Vec2f& normal) {
+    float angle = atan2f(normal.m_y, normal.m_x);
     m_rotationEnabled = true;
     m_prevGroundAngle = angle;
     m_rotation = 0.0f;
