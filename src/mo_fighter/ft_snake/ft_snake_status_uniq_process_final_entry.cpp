@@ -7,7 +7,7 @@
 #include <so/so_value_accesser.h>
 #include <so/posture/so_posture_module_impl.h>
 #include <so/work/so_work_manage_module_impl.h>
-extern char lbl_122_data_774[], lbl_122_data_8C98[];
+extern char lbl_122_data_774[], __RTTI__11StageObject[];
 // HYPOTHESIS: the native call ABI sign-extends the final argument from a short.
 extern "C" void* __dynamic_cast(void*, int, void*, void*, short);
 
@@ -15,7 +15,7 @@ ftSnakeStatusUniqProcessFinalEntry g_ftSnakeStatusUniqProcessFinalEntry;
 void ftSnakeStatusUniqProcessFinalEntry::initStatus(soModuleAccesser* acc) {
     acc->getPostureModule().setScale(1.0f);
     void* snake = __dynamic_cast(&acc->getStageObject(), 0x3C,
-        lbl_122_data_774, lbl_122_data_8C98, 0);
+        lbl_122_data_774, __RTTI__11StageObject, 0);
     if (snake) {
         reinterpret_cast<soPhotoCallBack*>(
             reinterpret_cast<unsigned char*>(snake) + 0x2D020)->addCallback();

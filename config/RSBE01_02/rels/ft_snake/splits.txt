@@ -71,12 +71,15 @@ mo_fighter/ft_snake/wn_snake_cypher.cpp:
 
 mo_fighter/ft_snake/wn_snake_mine.cpp:
 	.text       start:0x0001D704 end:0x000206A4
+	.rodata     start:0x00000100 end:0x00000120
+	.data       start:0x0000EDE0 end:0x0000F560
+	.bss        start:0x00000338 end:0x000003D8
 
 mo_fighter/ft_snake/wn_snake_nikita.cpp:
 	.text       start:0x000206A4 end:0x00023B40
 	.rodata     start:0x00000120 end:0x00000130
 	.data       start:0x0000F560 end:0x000101E0
-	.bss        start:0x00000244 end:0x000004D8
+	.bss        start:0x000003D8 end:0x000004D8
 
 mo_fighter/ft_snake/wn_snake_nikita_missile.cpp:
 	.text       start:0x00023B40 end:0x000272CC

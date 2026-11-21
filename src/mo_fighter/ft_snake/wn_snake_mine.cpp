@@ -1,6 +1,7 @@
 #define SO_EVENT_OBSERVER_CTOR_EXTERN // BYTES: the observer bases call the sora_melee constructor and initialize
 #define SO_COLLISION_SEARCH_OBSERVER_INLINE_CTOR // BYTES: the search observer's (manage id, priority) constructor is expanded in this unit
 #define WN_WEAPON_BUILDER
+#define WN_DAMAGE_ACTOR_INTERFACE
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1
 #define WN_ARTICLE_ANIMCMD_INT
@@ -8,6 +9,10 @@
 #define MT_VEC3F_CTOR_NOINLINE
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
 #define MT_VEC2F_ASSIGN_NOINLINE
+#define SO_DAMAGE_EFFECTOR_NULL_IMPLICIT_DTOR
+#define WN_DAMAGE_TRANSACTOR_NULL_ACCESSOR
+#define SO_DAMAGE_EFFECTOR_PRIVATE_NULL_BASE
+#define SO_COLLISION_SEARCH_BUILDER_BYTE_CATEGORY
 #include <wn/wn_module_accesser_builder.h>
 #include <ft/ft_kinetic_energy.h>
 #include <wn/snake/wn_snake_mine.h>
