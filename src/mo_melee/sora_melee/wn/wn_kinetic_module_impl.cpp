@@ -18,14 +18,11 @@ wnKineticEnergyNormal::~wnKineticEnergyNormal() {
 }
 
 void wnKineticEnergyNormal::resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
-    float y = speed.m_y;
-    float x = speed.m_x;
     m_accel = Vec2f(0.0f, 0.0f);
     m_speedTarget = Vec2f(-1.0f, -1.0f);
     m_brake = Vec2f(0.0f, 0.0f);
     m_speedLimit = Vec2f(-1.0f, -1.0f);
-    m_speed.m_x = x;
-    m_speed.m_y = y;
+    m_speed = speed;
     unk34 = mode;
     switch (mode) {
     case 0:
@@ -49,7 +46,8 @@ void wnKineticEnergyNormal::updateEnergy(soModuleAccesser* acc) {
             if (rest < 0.0f) {
                 m_accel = Vec2f(0.0f, 0.0f);
             } else {
-                m_accel = getSpeed() * (rest / speedLen - 1.0f);
+                Vec2f accel = getSpeed() * (rest / speedLen - 1.0f);
+                m_accel = accel;
             }
         }
         break;

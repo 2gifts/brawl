@@ -35,12 +35,8 @@ public:
     bool unk45;
 };
 
-void soKineticEnergy3f::resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
-    m_speed3f = Vec3f(speed.m_x, speed.m_y, 0.0f);
-    m_accel3f = Vec3f(0.0f, 0.0f, 0.0f);
-    m_targetSpeed3f = Vec3f(0.0f, 0.0f, 0.0f);
-    m_brake3f = Vec3f(0.0f, 0.0f, 0.0f);
-    m_limit3f = Vec3f(-1.0f, -1.0f, -1.0f);
+void soKineticEnergy3f::resetEnergy(int type, const Vec2f& speed, const Vec3f& rot, soModuleAccesser* acc) {
+    soKineticEnergy3f::resetEnergy(type, Vec3f(speed.m_x, speed.m_y, 0.0f), rot, acc);
 }
 
 void soKineticEnergy3f::resetEnergy(int, const Vec3f& speed, const Vec3f&, soModuleAccesser*) {
@@ -165,9 +161,7 @@ void soKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
                     }
                     if (unk44 == true) {
                         Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
-                        Vec2f flat(accel);
-                        Vec2f projected;
-                        projected = soKineticUtility::projectionNormalFollow(&flat, &normal);
+                        Vec2f projected = soKineticUtility::projectionNormalFollow(&Vec2f(accel), &normal);
                         accel.m_x = projected.m_x;
                         accel.m_y = projected.m_y;
                     }
