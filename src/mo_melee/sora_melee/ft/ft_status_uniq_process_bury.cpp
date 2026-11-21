@@ -44,32 +44,29 @@ static inline void buryChangeMotion(soModuleAccesser* moduleAccesser, int kind, 
 // Getting buried: the motion is picked from a 4x3 table by the hit level and a common constant (the motion is frozen at
 // rate 0 and driven by work float 0x21000004, the burial depth per frame), the controller rumbles like a heavy hit, and
 // the dig effect (0x45) is spawned at the touched surface turned along its normal.
+static inline int buryReqEffect(soModuleAccesser* moduleAccesser, const Vec2f& touchPos, float angle) {
+    Vec3f effectRot(0.0f, 0.0f, -angle);
+    float y = touchPos.m_y;
+    float x = touchPos.m_x;
+    Vec3f effectPos(x, y, 0.0f);
+    return moduleAccesser->getEffectModule().req(static_cast<EfID>(0x45), &effectPos, &effectRot, 1.0f, 0, -1);
+}
+
 void ftStatusUniqProcessBury::initStatus(soModuleAccesser* moduleAccesser) {
     // HYPOTHESIS: rows are the damage level, columns the common constant 0x59f3 (the last row is unused).
     int motionTable[4][3] = { { 0x9e, 0x9b, 0x98 }, { 0x9f, 0x9c, 0x99 }, { 0xa0, 0x9d, 0x9a }, { 0, 0, 0 } };
     soDamageLog* damageLog = moduleAccesser->getDamageModule().getDamageLog();
-    buryChangeMotion(moduleAccesser, motionTable[damageLog->m_level][soValueAccesser::getConstantInt(moduleAccesser, 0x59f3, 0)], 0.0f, 0.0f);
+    int column = soValueAccesser::getConstantInt(moduleAccesser, 0x59f3, 0);
+    buryChangeMotion(moduleAccesser, motionTable[damageLog->m_level][column], 0.0f, 0.0f);
     soDamageModule* damageModule = &moduleAccesser->getDamageModule();
-    float level = (float)(3 - soValueAccesser::getConstantInt(moduleAccesser, 0x5a88, 0));
-    float cD00 = soValueAccesser::getConstantFloat(moduleAccesser, 0xd00, 0);
-    float rumble = cD00 * level;
-    float tmp = soValueAccesser::getConstantFloat(moduleAccesser, 0xdb2, 0);
-    float cD01 = soValueAccesser::getConstantFloat(moduleAccesser, 0xd01, 0);
-    tmp = cD01 * tmp;
-    float cCff = soValueAccesser::getConstantFloat(moduleAccesser, 0xcff, 0);
-    float sum = cCff + tmp;
-    sum = sum + rumble;
-    float cD02 = soValueAccesser::getConstantFloat(moduleAccesser, 0xd02, 0);
-    float reactionPart = damageLog->m_reaction * cD02;
-    sum = reactionPart + sum;
-    float damage = damageModule->getDamage(0);
-    float cD03 = soValueAccesser::getConstantFloat(moduleAccesser, 0xd03, 0);
-    float damagePart = cD03 * damage;
-    sum = damagePart + sum;
+    // The clatter (mash-out) time: base + per-level, per-reaction and per-damage parts.
+    float clatterTime = soValueAccesser::getConstantFloat(moduleAccesser, 0xd03, 0) * damageModule->getDamage(0)
+        + (damageLog->m_reaction * soValueAccesser::getConstantFloat(moduleAccesser, 0xd02, 0)
+            + ((soValueAccesser::getConstantFloat(moduleAccesser, 0xcff, 0)
+                    + soValueAccesser::getConstantFloat(moduleAccesser, 0xd01, 0) * soValueAccesser::getConstantFloat(moduleAccesser, 0xdb2, 0))
+                + soValueAccesser::getConstantFloat(moduleAccesser, 0xd00, 0) * (float)(3 - soValueAccesser::getConstantInt(moduleAccesser, 0x5a88, 0))));
     soControllerModule* controller = &moduleAccesser->getControllerModule();
-    float c5 = soValueAccesser::getConstantFloat(moduleAccesser, 0xd05, 0);
-    float c4 = soValueAccesser::getConstantFloat(moduleAccesser, 0xd04, 0);
-    reinterpret_cast<ftControllerClatterView*>(controller)->startClatter(sum, c4, c5, 0, -1, 0, false);
+    reinterpret_cast<ftControllerClatterView*>(controller)->startClatter(clatterTime, soValueAccesser::getConstantFloat(moduleAccesser, 0xd04, 0), soValueAccesser::getConstantFloat(moduleAccesser, 0xd05, 0), 0, -1, 0, false);
     // The burial depth per frame: the distance between the root node and the node 0x12d, divided by the frames of the burial.
     int node = moduleAccesser->getModelModule().getCorrectNodeId(0x12d);
     Vec3f rootPos = moduleAccesser->getModelModule().getNodeGlobalPosition(0, false);
@@ -79,12 +76,10 @@ void ftStatusUniqProcessBury::initStatus(soModuleAccesser* moduleAccesser) {
     {
         Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
         float normalX = normal.m_x;
-    float normalY = normal.m_y;
-    float angle = (float)atan2(normalX, normalY);
+        float normalY = normal.m_y;
+        float angle = (float)atan2(normalX, normalY);
         Vec2f touchPos = moduleAccesser->getGroundModule().getTouchPos(8, 0);
-        Vec3f effectPos(touchPos.m_x, touchPos.m_y, 0.0f);
-        Vec3f effectRot(0.0f, 0.0f, -angle);
-        int effectHandle = moduleAccesser->getEffectModule().req(static_cast<EfID>(0x45), &effectPos, &effectRot, 1.0f, 0, -1);
+        int effectHandle = buryReqEffect(moduleAccesser, touchPos, angle);
         moduleAccesser->getWorkManageModule().setInt(effectHandle, 0x20000001);
     }
 }
