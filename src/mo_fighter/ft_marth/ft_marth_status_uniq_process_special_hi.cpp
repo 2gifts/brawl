@@ -36,17 +36,6 @@ void ftMarthStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAcces
 static float absValue(float value);
 #pragma dont_inline off
 
-static inline void resetGravity(ftKineticEnergyGravity& gravity, float speedY, soModuleAccesser* moduleAccesser) {
-    Vec2f speed(0.0f, speedY);
-    gravity.resetEnergy(0, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
-}
-static inline void resetController(ftKineticEnergyController& controller, int mode, float speedX, soModuleAccesser* moduleAccesser) {
-    Vec2f speed(speedX, 0.0f);
-    controller.resetEnergy(mode, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
-}
-// MATCH-ONLY: retain the reset mode across Vec3f construction; the inline helpers
-// keep the speed vectors in the original temporary slots.
-#pragma opt_propagation off
 void ftMarthStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesser) {
     ftKineticEnergyMotion& motion = dynamic_cast<ftKineticEnergyMotion&>(*moduleAccesser->getKineticModule().getEnergy(0));
     float stickMagnitude = absValue(moduleAccesser->getControllerModule().getStickX());
@@ -81,15 +70,15 @@ void ftMarthStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAcces
         } else {
             if (moduleAccesser->getKineticModule().getEnergy(1)->isEnable() == 0) {
                 ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-                resetGravity(gravity, sumSpeed.m_y, moduleAccesser);
+                gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 gravity.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_Gravity, 0);
                 gravity.m_fallSpeedMax = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_FallSpeedMax, 0);
                 gravity.enable();
             }
             if (moduleAccesser->getKineticModule().getEnergy(2)->isEnable() == 0) {
                 ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-                int resetType = 0xb;
-                resetController(controller, resetType, sumSpeed.m_x, moduleAccesser);
+                ftKineticEnergyController::ResetType resetType = ftKineticEnergyController::ResetType_11;
+                controller.resetEnergy(resetType, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 controller.mulXAccelMul(soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_ControlXRatio, 0));
                 controller.mulXSpeedMax(soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_ControlXRatio, 0));
                 controller.enable();
@@ -104,7 +93,6 @@ void ftMarthStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAcces
     }
 }
 
-#pragma opt_propagation reset
 #pragma dont_inline on
 static float absValue(float value) { return __fabsf(value); }
 #pragma dont_inline off

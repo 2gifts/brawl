@@ -35,17 +35,7 @@ static inline void sendLinkEvent(soModuleAccesser* moduleAccesser, const soLinkE
     moduleAccesser->getLinkModule().sendEventNodes(1, args, 0);
 }
 
-static inline void resetController(ftKineticEnergyController& controller, int mode, Vec3f* accel, const Vec2f& speed, soModuleAccesser* moduleAccesser) {
-    controller.resetEnergy(mode, const_cast<Vec2f*>(&speed), accel, moduleAccesser);
-}
-
-// MATCH-ONLY: retain the reset mode across the sum-speed query, as in the native register lifetime.
-#pragma push
-#pragma opt_propagation off
 void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* moduleAccesser) {
-    // MATCH-ONLY: declared at function scope so the saved-register numbering (energy r29, reset mode r28, work module r30)
-    // follows the native allocation.
-    soWorkManageModule* chargeWork;
     int status = moduleAccesser->getStatusModule().getStatusKind();
     switch (status) {
     case 0x115: {
@@ -67,14 +57,14 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
     case 0x130: {
         ftKineticEnergyController& energy = dynamic_cast<ftKineticEnergyController&>(
             *moduleAccesser->getKineticModule().getEnergy(2));
-        int resetKind = 0xB;
+        ftKineticEnergyController::ResetType resetKind = ftKineticEnergyController::ResetType_11;
         Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         float speedLimit = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC0, 0);
         if (speed.m_x > speedLimit) {
             speed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC0, 0);
         }
         Vec3f rotation(0.0f, 0.0f, 0.0f);
-        resetController(energy, resetKind, &rotation, Vec2f(speed.m_x, 0.0f), moduleAccesser);
+        energy.resetEnergy(resetKind, &Vec2f(speed.m_x, 0.0f), &rotation, moduleAccesser);
         energy.m_accelMul = 1.0f;
         energy.m_unk40 = 0.0f;
         energy.enable();
@@ -82,7 +72,7 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
     }
     case 0x137:
         if (!moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
-            chargeWork = &moduleAccesser->getWorkManageModule();
+            soWorkManageModule* chargeWork = &moduleAccesser->getWorkManageModule();
             float powerScale = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC1, 0);
             float charge = static_cast<float>(chargeWork->getInt(0x20000001));
             float powerAdd = charge * powerScale;
@@ -98,7 +88,6 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
     }
 }
 
-#pragma pop
 
 void ftDededeStatusUniqProcessSpecialJetHammer::execStatus(soModuleAccesser* moduleAccesser) {
     if (moduleAccesser->getStatusModule().getStatusKind() == 0x137) {

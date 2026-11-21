@@ -74,18 +74,6 @@ void ftIkeStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAccesse
     }
 }
 
-// MATCH-ONLY: these helpers and the propagation pragma keep the reset mode in a saved register and the speed
-// temporaries in their original slots and argument order.
-static inline void resetController(ftKineticEnergyController& controller, int mode, const Vec2f& speed, soModuleAccesser* moduleAccesser) {
-    controller.resetEnergy(mode, const_cast<Vec2f*>(&speed), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
-}
-
-static inline void setTargetSpeed(ftKineticEnergyController& controller, const Vec2f& speed) {
-    controller.m_speedTarget = speed;
-}
-
-#pragma push
-#pragma opt_propagation off
 void ftIkeStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesser) {
     moduleAccesser->getControllerModule().getStickX();
     Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
@@ -98,14 +86,14 @@ void ftIkeStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesse
             ftIkeSpecialHiParam* param = reinterpret_cast<ftIkeSpecialHiParam*>(g_ftCommonDataAccesser.getParam(ike.getFtKind()));
             ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
             if (moduleAccesser->getSituationModule().getKind() == 0) {
-                resetController(controller, 0xb, Vec2f(sumSpeed.m_x, 0.0f), moduleAccesser);
+                controller.resetEnergy(0xb, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 moduleAccesser->getWorkManageModule().setInt(0, 0x20000000);
             } else {
-                resetController(controller, 0, Vec2f(sumSpeed.m_x, 0.0f), moduleAccesser);
+                controller.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 moduleAccesser->getWorkManageModule().setInt(2, 0x20000000);
             }
             controller.mulXSpeedMax(param->unk74 * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb3, 0));
-            setTargetSpeed(controller, Vec2f(param->unk7c, 100.0f));
+            controller.m_speedTarget = Vec2f(param->unk7c, 100.0f);
             controller.enable();
         }
         break;
@@ -123,10 +111,10 @@ void ftIkeStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesse
             ftIke& ike = dynamic_cast<ftIke&>(moduleAccesser->getStageObject());
             ftIkeSpecialHiParam* param = reinterpret_cast<ftIkeSpecialHiParam*>(g_ftCommonDataAccesser.getParam(ike.getFtKind()));
             ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-            int mode = 0;
-            resetController(controller, mode, Vec2f(0.0f, 0.0f), moduleAccesser);
+            ftKineticEnergyController::ResetType mode = ftKineticEnergyController::ResetType_0;
+            controller.resetEnergy(mode, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             controller.mulXSpeedMax(param->unk74 * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb3, 0));
-            setTargetSpeed(controller, Vec2f(param->unk7c, 100.0f));
+            controller.m_speedTarget = Vec2f(param->unk7c, 100.0f);
             controller.enable();
             moduleAccesser->getWorkManageModule().offFlag(0x22000012);
         }
@@ -134,7 +122,6 @@ void ftIkeStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesse
     }
 }
 
-#pragma pop
 
 void ftIkeStatusUniqProcessSpecialHi::execStop(soModuleAccesser* moduleAccesser) {
 }

@@ -136,14 +136,16 @@ void ftKirbyStatusUniqProcessSpecialNEat::exitStatus(soModuleAccesser* moduleAcc
 
 // HYPOTHESIS: the jump into the inhale: the horizontal speed follows the current speed and the stick, the vertical one the
 // jump parameters.
-// TODO(match): 97%. The original saves r26-r31 and keeps 0 in r27 for the controller reset, adds the speed in the
-// other operand order and rounds (frsp) the scaled speed plus acceleration; swapping operands in source changes nothing.
+// TODO(match): 99.77%. Left: the original adds and multiplies with the saved float (stick acceleration, rise) as the
+// SECOND operand (`fadds f0, f0, f30`; ours `fadds f0, f30, f0`) and rounds the x sum (`frsp`). Tried: operand order in
+// source, compound assignments, a double cast, separate rise variables (no change or worse).
 void ftKirbyStatusUniqProcessSpecialNEat::initInhaleJump(soModuleAccesser* moduleAccesser) {
     Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
     float scale = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa3, 0);
     float accel = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc4, 0);
     accel *= moduleAccesser->getControllerModule().getStickX();
-    speed.m_x = (speed.m_x * soValueAccesser::getConstantFloat(moduleAccesser, 0xbc6, 0) + accel) * scale;
+    speed.m_x = speed.m_x * soValueAccesser::getConstantFloat(moduleAccesser, 0xbc6, 0) + accel;
+    speed.m_x *= scale;
     float speedMax = soValueAccesser::getConstantFloat(moduleAccesser, 0xbc7, 0);
     if (__fabs(speed.m_x) > speedMax) {
         if (speed.m_x < 0.0f) {
@@ -165,7 +167,8 @@ void ftKirbyStatusUniqProcessSpecialNEat::initInhaleJump(soModuleAccesser* modul
     speed.m_y *= scale;
     ftKineticEnergyController& controller =
         dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-    controller.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    ftKineticEnergyController::ResetType resetType = ftKineticEnergyController::ResetType_0;
+    controller.resetEnergy(resetType, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_accelMul = scale;
     controller.enable();
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
