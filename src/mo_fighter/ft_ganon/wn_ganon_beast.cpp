@@ -2,7 +2,8 @@
 #define IP_INPUT_BUTTON_RAW // BYTES: IpNull::getButton returns the raw button mask (8 bytes, not a struct copy)
 #define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR // the two-entry status process vector is default-constructed
 #define WN_WEAPON_BUILDER
-#define SO_PARAM_ACCESSER_DTOR_NEVER_INLINE // this article owns the weak copy of the empty accesser base destructor
+#define WN_PARAM_ACCESSER_INLINE_DTOR
+#define SO_PARAM_ACCESSER_DTOR_NEVER_INLINE // this article owns the weak copy of the empty accesser base destructor, emitted with its first user
 #define WN_DAMAGE_ACTOR_INTERFACE
 #define SO_DAMAGE_EFFECTOR_NULL_IMPLICIT_DTOR
 #define WN_DAMAGE_TRANSACTOR_NULL_ACCESSOR
