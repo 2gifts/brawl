@@ -153,7 +153,7 @@ int emKineticEnergy::getEnergyTypeToGroup(int kind) {
     return s_energyTypeToGroup[kind];
 }
 
-bool emKineticEnergy::isInvalidEnergy() {
+bool emKineticEnergy::isInvalidEnergy() const {
     return m_param.m_kind == -1;
 }
 
@@ -739,7 +739,7 @@ void emKineticEnergy::initCompTransEnergy(Vec2f* speed, float angle) {
     setAngle(angle);
 }
 
-bool emKineticEnergy::isEnergyEnd() {
+bool emKineticEnergy::isEnergyEnd() const {
     if (isInvalidEnergy() == true) {
         return true;
     }
