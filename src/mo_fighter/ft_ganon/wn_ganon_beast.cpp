@@ -2,10 +2,30 @@
 #define IP_INPUT_BUTTON_RAW // BYTES: IpNull::getButton returns the raw button mask (8 bytes, not a struct copy)
 #define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR // the two-entry status process vector is default-constructed
 #define WN_WEAPON_BUILDER
+#define SO_PARAM_ACCESSER_DTOR_NEVER_INLINE // this article owns the weak copy of the empty accesser base destructor
+#define WN_DAMAGE_ACTOR_INTERFACE
+#define SO_DAMAGE_EFFECTOR_NULL_IMPLICIT_DTOR
+#define WN_DAMAGE_TRANSACTOR_NULL_ACCESSOR
+#define SO_DAMAGE_EFFECTOR_PRIVATE_NULL_BASE
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1
 #define WN_ARTICLE_ANIMCMD_INT
 #define FT_REL_LINK_EXTERN
+// BYTES: link order. MWCC emits the weak vtables (and with them their inline virtual functions) in reverse order of the
+// class definitions; these headers come first, in the order the original defines the classes (as in the G&W rescue).
+#define SO_PARAM_CUSTOMIZE_IMPL_LATE
+#define SO_KINETIC_MEDIATOR_NULL_UPDATE_REVERSED
+#define SO_ARTICLE_LOG_HELPER_LATE
+#include <ip/ip_null.h>
+#include <so/damage/so_damage_event_presenter.h>
+#include <so/team/so_team.h>
+#include <so/resource/so_resource_id_accesser.h>
+#include <so/team/so_team_impl.h>
+#include <so/damage/so_damage_transactor_null.h>
+#include <so/damage/so_damage_effector_null.h>
+#include <so/kinetic/so_kinetic_mediator_null.h>
+#include <so/article/so_article_mediator_null.h>
+#include <so/param/so_param_customize_module_impl.h>
 #include <wn/wn_module_accesser_builder.h>
 // The status process vector and the attack part vector are built by their sora_melee constructors.
 WN_STATUS_PROC_VECTOR_ARG_CTOR(2);
@@ -23,12 +43,6 @@ FT_DOL_ARRAY_VECTOR(soCollisionAttackPart, 4);
 #include <so/so_value_accesser.h>
 #include <types.h>
 #include <wn/ganon/wn_ganon_beast.h>
-
-// This article owns the out-of-line copy of the parameter accesser interface's empty teardown.
-#pragma push
-#pragma dont_inline on
-soParamAccesser::~soParamAccesser() { }
-#pragma pop
 
 inline soDamageEventObserver::~soDamageEventObserver() { }
 inline void soDamageEventObserver::notifyEventOnDamage(soDamage*, bool, soModuleAccesser*) { }
@@ -59,18 +73,6 @@ wnGanonBeast::wnGanonBeast(s32 articleId, const wnArticleBuildInfo& info, const 
     Weapon::deactivate(false);
 }
 
-bool wnGanonBeast::notifyEventCollisionAttackCheck(u32) { return false; }
-
-// HYPOTHESIS: a hit that sends the beast flying while it is not already stopped adds a hit stop and raises its work flag.
-void wnGanonBeast::notifyEventOnDamage(soDamage* damage, bool, soModuleAccesser* moduleAccesser) {
-    soStopModule* stop = &moduleAccesser->getStopModule();
-    if (damage->m_reaction > 0.0f && !stop->isStop()) {
-        int frames = soStopModuleImpl::calcHitStopFrame(damage->m_powerMax, 0.3846154f, 5.0f, 1.0f, 30.0f);
-        moduleAccesser->getStopModule().setHitStopFrame(frames, true);
-        moduleAccesser->getWorkManageModule().onFlag(0x12000005);
-    }
-}
-
 void wnGanonBeast::activate(s32 founderTaskId, s32 resourceId, s32 team, const Vec3f* pos, float lr) {
     soModuleAccesser* accesser = m_moduleAccesser;
     wnActivateDesc desc(founderTaskId, resourceId, resourceId, resourceId, -1, -1, 0, 0, *pos, lr, team, 0, 2, 0x80, 0, 0x35F, 0);
@@ -89,3 +91,16 @@ void wnGanonBeast::activate(s32 founderTaskId, s32 resourceId, s32 team, const V
     }
     visibility.setDefaultAll();
 }
+
+bool wnGanonBeast::notifyEventCollisionAttackCheck(u32) { return false; }
+
+// HYPOTHESIS: a hit that sends the beast flying while it is not already stopped adds a hit stop and raises its work flag.
+void wnGanonBeast::notifyEventOnDamage(soDamage* damage, bool, soModuleAccesser* moduleAccesser) {
+    soStopModule* stop = &moduleAccesser->getStopModule();
+    if (damage->m_reaction > 0.0f && !stop->isStop()) {
+        int frames = soStopModuleImpl::calcHitStopFrame(damage->m_powerMax, 0.3846154f, 5.0f, 1.0f, 30.0f);
+        moduleAccesser->getStopModule().setHitStopFrame(frames, true);
+        moduleAccesser->getWorkManageModule().onFlag(0x12000005);
+    }
+}
+

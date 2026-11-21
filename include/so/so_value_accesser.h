@@ -13,7 +13,11 @@ public:
     soParamAccesser() : soNullable(false) { }
 #endif
 // The Fox bullet's empty parameter base destructor is inlined in sora_melee.
-#if (defined(WN_WEAPON_BUILDER) && !defined(WN_PARAM_ACCESSER_INLINE_DTOR)) || defined(FT_PARAM_ACCESSER_TYPED_DTOR)
+#if defined(SO_PARAM_ACCESSER_DTOR_NEVER_INLINE)
+    // Opt-in (Ganon's beast): the article owns the weak copy, emitted with its first user (the article's accesser
+    // destructor), which calls it.
+    virtual ~soParamAccesser() __attribute__((never_inline)) { }
+#elif (defined(WN_WEAPON_BUILDER) && !defined(WN_PARAM_ACCESSER_INLINE_DTOR)) || defined(FT_PARAM_ACCESSER_TYPED_DTOR)
     virtual ~soParamAccesser(); // out of line in the fighter RELs
 #else
     virtual ~soParamAccesser() { }
