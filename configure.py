@@ -1953,7 +1953,7 @@ config.libs = [
         "cflags": cflags_fighter,
         "host": False,
         "objects": [
-            Object(NonMatching, "mo_fighter/ft_ganon/wn_ganon_beast.cpp"),
+            Object(Matching, "mo_fighter/ft_ganon/wn_ganon_beast.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/wn_ganon_beast_status_uniq_process.cpp"),
             Object(NonMatching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_cling.cpp"),
             Object(Matching, "mo_fighter/ft_ganon/ft_ganon_status_uniq_process_special_hi_throw.cpp"),
@@ -2294,6 +2294,7 @@ config.libs = [
         "host": False,
         "objects": [
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus.cpp"),
+            Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_kinetic_transactor.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_entry.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_turn.cpp"),
             Object(NonMatching, "mo_fighter/ft_pit/wn_pit_ikarus_status_uniq_process_attack.cpp"),

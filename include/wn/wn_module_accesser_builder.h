@@ -1489,6 +1489,12 @@ public:
         m_moduleAccesser->getKineticModule().addEnergy(energyNormal, 0, soKineticEnergy::AttributeFlag(1), -1);
         m_moduleAccesser->getKineticModule().addEnergy(energyRot, 1, soKineticEnergy::AttributeFlag(1), -1);
     }
+#elif defined(WN_WEAPON_BUILDER_CTOR_NO_FLAG) // the Ikarus builder: no weapon flag parameter, no common energies
+    wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd) :
+        Weapon(name, bd.m_kind, bd.m_data, articleId, &info, this->m_modules.getModuleAccesser(), true),
+        m_modules(this, bd) {
+        Weapon::initialize();
+    }
 #else
     wnWeaponBuilder(const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd,
                     bool weaponFlag = true) :

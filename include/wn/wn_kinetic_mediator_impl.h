@@ -125,8 +125,14 @@ class soKineticMediatorImpl : public soKineticMediator {
     typedef soLineInvertHierarchy<List, soInstancePool, soInstancePoolRoot> Pools;
     Pools m_pools;
 public:
+#ifdef WN_KINETIC_MEDIATOR_OUT_OF_CLASS
+    // BYTES: link order (see the definitions below the class).
+    soKineticMediatorImpl(soModuleAccesser* acc);
+    ~soKineticMediatorImpl();
+#else
     soKineticMediatorImpl(soModuleAccesser* acc) : m_pools(acc) { }
     ~soKineticMediatorImpl() { }
+#endif
     virtual void changeKinetic(int mode, soModuleAccesser* acc) {
         Transactors::ChangeType::changeKinetic(mode, &m_pools, acc);
         m_pools.clearSpeed();
@@ -167,3 +173,14 @@ public:
     virtual void notifyEventChangeStatus(void*, void*, void*, void*) { }
     virtual int getMediateNum() { return soTypeListLength<List>::value; }
 };
+
+#ifdef WN_KINETIC_MEDIATOR_OUT_OF_CLASS
+// BYTES: link order. A member function of a class template that is defined outside the class (not inline) is
+// instantiated only at the end of the unit, after the weak virtual functions of the non-template classes. The pool
+// vtables and every function the constructor references (the energy constructor, the holder / pool destructors, in
+// construction order) are then emitted there, as in the original article units with their own mediator.
+template <typename List, typename Transactors>
+soKineticMediatorImpl<List, Transactors>::soKineticMediatorImpl(soModuleAccesser* acc) : m_pools(acc) { }
+template <typename List, typename Transactors>
+soKineticMediatorImpl<List, Transactors>::~soKineticMediatorImpl() { }
+#endif

@@ -1,6 +1,11 @@
 #define IP_INPUT_BUTTON_RAW
 #define MT_VEC3F_IMPLICIT_ASSIGN // BYTES: this unit copies Vec3f as an aggregate (word moves), see mt_vector.h
 #define WN_WEAPON_BUILDER
+#define WN_DAMAGE_ACTOR_INTERFACE
+#define SO_KINETIC_ENERGY_ABSTRACT // the base vtable (empty pure slots) and its friction switches are weak copies here
+#define SO_DAMAGE_EFFECTOR_NULL_IMPLICIT_DTOR
+#define WN_DAMAGE_TRANSACTOR_NULL_ACCESSOR
+#define SO_DAMAGE_EFFECTOR_PRIVATE_NULL_BASE
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1
 #define WN_ARTICLE_ANIMCMD_INT
@@ -8,6 +13,24 @@
 #define FT_REL_LINK_EXTERN
 #define MT_VEC2F_ASSIGN_NOINLINE
 #define MT_VEC3F_CTOR_NOINLINE
+// BYTES: link order. MWCC emits the weak vtables (and with them their inline virtual functions) in reverse order of the
+// class definitions; these headers come first, in the order the original defines the classes (as in the G&W rescue).
+#define SO_PARAM_CUSTOMIZE_IMPL_LATE
+#define SO_KINETIC_MEDIATOR_NULL_UPDATE_REVERSED
+#define SO_ARTICLE_LOG_HELPER_LATE
+// The input and kinetic energy classes come before ft_dol_array_list.h, which would define the resource id accesser first.
+#include <ip/ip_null.h>
+#include <so/kinetic/so_kinetic_energy.h>
+#include <ft/builder/ft_dol_array_list.h>
+#include <so/damage/so_damage_event_presenter.h>
+#include <so/team/so_team.h>
+#include <so/resource/so_resource_id_accesser.h>
+#include <so/team/so_team_impl.h>
+#include <so/damage/so_damage_transactor_null.h>
+#include <so/damage/so_damage_effector_null.h>
+#include <so/kinetic/so_kinetic_mediator_null.h>
+#include <so/article/so_article_mediator_null.h>
+#include <so/param/so_param_customize_module_impl.h>
 #include <wn/wn_module_accesser_builder.h>
 #include <wn/ness/wn_ness_pk_fire.h>
 #include <wn/wn_activate_desc.h>
@@ -101,15 +124,5 @@ void wnNessPKFire::notifyEventCollisionHit(float power, soCollisionAttackData* a
         }
         moduleAccesser->getWorkManageModule().setInt(life, Weapon::Instance::Work::Int_Life);
     }
-}
-
-// TODO: clean up, give variables real names
-namespace jj_15F64 {
-extern "C" void fn_101_15F64(void) {}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_15F68 {
-extern "C" void fn_101_15F68(void) {}
 }
 
