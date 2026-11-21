@@ -73,6 +73,7 @@ Vec3f soKineticUtility::limitSpeed(const Vec3f& speed, const Vec3f& limit) {
     return result;
 }
 
+// HYPOTHESIS: original inline helper (name unknown). The stack slots put its unit vector below the result temporary.
 static inline Vec2f projectOnto(const Vec2f& vec, const Vec2f& direction) {
     Vec2f unit = direction;
     unit.normalize();
@@ -87,7 +88,9 @@ Vec2f soKineticUtility::projectionNormalFollow(const Vec2f& speed, const Vec2f& 
     return projectOnto(speed, rotated);
 }
 
+// BYTES: the ground module is numbered above the report helper's parameters (saved register r31).
 static inline soGroundModule& groundOf(soModuleAccesser* acc) { soGroundModule* const p = &acc->getGroundModule(); return *p; }
+// HYPOTHESIS: original inline debug report (name unknown): status is evaluated before the task name.
 static inline void reportNoGround(const char* taskName, soStatusModule* status) {
     OSReport(lbl_27_data_13590, taskName, status->getPrevStatusKind(0), status->getStatusKind());
 }
@@ -121,11 +124,14 @@ void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* acc) {
     acc->getKineticModule().getEnergy(index)->disable();
 }
 
+// HYPOTHESIS: original by-value helper (name unknown); the native code keeps the three components in registers.
 static inline void addOutside(soKineticEnergyGroundMovement* ground, float x, float y, float z) {
     ground->m_outsideSpeed.m_x += x;
     ground->m_outsideSpeed.m_y += y;
     ground->m_rotation += z;
 }
+// HYPOTHESIS: original inline overload for the cast energy (name unknown): the native code repeats the guard and
+// lays this body's locals out in reverse order.
 static inline void addSpeedOutsideGroundMovement(soKineticEnergyGroundMovement* ground, Vec3f* speed,
                                                  soModuleAccesser* acc) {
     if (ground == NULL || !ground->isEnable() || speed->lengthSq() == 0.0f) return;
