@@ -22,7 +22,7 @@ void itKineticEnergy::updateEnergy(soModuleAccesser* moduleAccesser) {
                 }
                 if (m_isFollowGroundNormal == true) {
                     Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
-                    accel = soKineticUtility::projectionNormalFollow(&accel, &normal);
+                    accel = soKineticUtility::projectionNormalFollow(accel, normal);
                 }
             }
         }
@@ -156,7 +156,7 @@ void itKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
                 if (m_isFollowGroundNormal == true) {
                     Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
                     Vec2f planar(accel.m_x, accel.m_y);
-                    Vec2f follow = soKineticUtility::projectionNormalFollow(&planar, &normal);
+                    Vec2f follow = soKineticUtility::projectionNormalFollow(planar, normal);
                     accel.m_x = follow.m_x;
                     accel.m_y = follow.m_y;
                 }

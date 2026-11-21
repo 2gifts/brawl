@@ -603,7 +603,7 @@ bool emKineticModuleImpl::isEnergyProject(int index) {
     if (dotProduct(&speed, &normal) >= 0.0f) {
         return false;
     }
-    projected = soKineticUtility::projectionNormalFollow(&speed, &normal);
+    projected = soKineticUtility::projectionNormalFollow(speed, normal);
     return !vec2fEqual(&speed, &projected);
 }
 
@@ -662,7 +662,7 @@ void emKineticModuleImpl::projectEnergy(int index, int paramId, int energyIndex,
         param->m_speed.m_base != emKineticValue_CurrentY) {
         return;
     }
-    projected = soKineticUtility::projectionNormalFollow(&speed, &normal);
+    projected = soKineticUtility::projectionNormalFollow(speed, normal);
     float angle = param->m_angle;
     if (angle == emKineticValue_CurrentX) {
         float lr = m_accesser->getPostureModule().getLr();

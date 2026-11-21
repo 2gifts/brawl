@@ -1,5 +1,7 @@
 #define MT_VEC3F_SCALE_XY_IN_PLACE
 #define MT_VEC3F_MUL_INLINE
+#define MT_VEC3F_OPERATOR_MUL_FRESH_REGS
+#define MT_VEC3F_SUB_FRESH_REGS
 #include <mt/mt_vector.h>
 #include <so/kinetic/so_kinetic_energy.h>
 #include <so/so_kinetic_utility.h>
@@ -157,7 +159,7 @@ void soKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
                     }
                     if (unk44 == true) {
                         Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
-                        Vec2f projected = soKineticUtility::projectionNormalFollow(&Vec2f(accel), &normal);
+                        Vec2f projected = soKineticUtility::projectionNormalFollow(Vec2f(accel), normal);
                         accel.m_x = projected.m_x;
                         accel.m_y = projected.m_y;
                     }

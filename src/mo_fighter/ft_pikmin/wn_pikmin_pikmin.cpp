@@ -1319,7 +1319,7 @@ void wnPikminPikminKineticTransactor::addSpeedOutside(int type, float* speed, vo
             Vec2f along;
             along.m_x = speed[0];
             along.m_y = 0.0f;
-            result = soKineticUtility::projectionNormalFollow(&along, &normal);
+            result = soKineticUtility::projectionNormalFollow(along, normal);
         }
         if (result.m_x != 0.0f || result.m_y != 0.0f) {
             soKineticEnergyGroundMovement* ground = pkGetEnergy(pools, soIntToType<2>());
@@ -2376,7 +2376,7 @@ void wnPikminPikminKineticTransactor::updateEnergy7(soKineticEnergyNormal* energ
         move.m_x = move.m_z * acc->getPostureModule().getLr();
         soGroundModule* ground = &acc->getGroundModule();
         if (ground->isTouch(8, 0) == true) {
-            Vec2f result = soKineticUtility::projectionNormalFollow(&Vec2f(move.m_x, move.m_y), &ground->getTouchNormal(8, 0));
+            Vec2f result = soKineticUtility::projectionNormalFollow(Vec2f(move.m_x, move.m_y), ground->getTouchNormal(8, 0));
             move.m_x = result.m_x;
             move.m_y = result.m_y;
         }

@@ -195,8 +195,8 @@ void ftStatusUniqProcessGlide::execStatus(soModuleAccesser* moduleAccesser) {
             Vec2f limit(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd8, 0), airSpeedYStable);
             Vec2f accel(0.0f, -soValueAccesser::getConstantFloat(moduleAccesser, 0xbcf, 0));
             Vec2f brake(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd6, 0), 0.0f);
-            Vec2f delta = soKineticUtility::brakeSpeed(&energy->getSpeed(), &accel, &target, &brake);
-            Vec2f limited = soKineticUtility::limitSpeed(&(energy->getSpeed() + delta), &limit);
+            Vec2f delta = soKineticUtility::brakeSpeed(energy->getSpeed(), accel, target, brake);
+            Vec2f limited = soKineticUtility::limitSpeed(energy->getSpeed() + delta, limit);
             energy->m_speed = limited;
             if (angle < param->m_stallRecoverAngle) {
                 float currentLen = calcLength(energy->getSpeed());

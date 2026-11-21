@@ -1,4 +1,5 @@
-#define MT_VEC3F_LENGTH_SQ_INLINE
+#define MT_VEC3F_LENGTH_SQ_PLAIN
+#define MT_VEC2F_LENGTH_SQ_CONST
 #include <so/so_kinetic_utility.h>
 #include <ft/ft_kinetic_energy.h>
 #include <math.h>
@@ -12,18 +13,18 @@ float soKineticUtility::brakeSpeed(float speed, float accel, float target, float
     return brakeSpeedSub(speed, accel, target, brake);
 }
 
-Vec2f soKineticUtility::brakeSpeed(Vec2f* speed, Vec2f* accel, Vec2f* target, Vec2f* brake) {
-    Vec2f result = *speed;
-    result.m_x = brakeSpeedSub(speed->m_x, accel->m_x, target->m_x, brake->m_x);
-    result.m_y = brakeSpeedSub(speed->m_y, accel->m_y, target->m_y, brake->m_y);
+Vec2f soKineticUtility::brakeSpeed(const Vec2f& speed, const Vec2f& accel, const Vec2f& target, const Vec2f& brake) {
+    Vec2f result = speed;
+    result.m_x = brakeSpeedSub(speed.m_x, accel.m_x, target.m_x, brake.m_x);
+    result.m_y = brakeSpeedSub(speed.m_y, accel.m_y, target.m_y, brake.m_y);
     return result;
 }
 
-Vec3f soKineticUtility::brakeSpeed(Vec3f* speed, Vec3f* accel, Vec3f* target, Vec3f* brake) {
-    Vec3f result = *speed;
-    result.m_x = brakeSpeedSub(speed->m_x, accel->m_x, target->m_x, brake->m_x);
-    result.m_y = brakeSpeedSub(speed->m_y, accel->m_y, target->m_y, brake->m_y);
-    result.m_z = brakeSpeedSub(speed->m_z, accel->m_z, target->m_z, brake->m_z);
+Vec3f soKineticUtility::brakeSpeed(const Vec3f& speed, const Vec3f& accel, const Vec3f& target, const Vec3f& brake) {
+    Vec3f result = speed;
+    result.m_x = brakeSpeedSub(speed.m_x, accel.m_x, target.m_x, brake.m_x);
+    result.m_y = brakeSpeedSub(speed.m_y, accel.m_y, target.m_y, brake.m_y);
+    result.m_z = brakeSpeedSub(speed.m_z, accel.m_z, target.m_z, brake.m_z);
     return result;
 }
 
@@ -57,44 +58,50 @@ float soKineticUtility::limitSpeed(float speed, float limit) {
     return speed;
 }
 
-Vec2f soKineticUtility::limitSpeed(Vec2f* speed, Vec2f* limit) {
-    Vec2f result = *speed;
-    result.m_x = limitSpeed(speed->m_x, limit->m_x);
-    result.m_y = limitSpeed(speed->m_y, limit->m_y);
+Vec2f soKineticUtility::limitSpeed(const Vec2f& speed, const Vec2f& limit) {
+    Vec2f result = speed;
+    result.m_x = limitSpeed(speed.m_x, limit.m_x);
+    result.m_y = limitSpeed(speed.m_y, limit.m_y);
     return result;
 }
 
-Vec3f soKineticUtility::limitSpeed(Vec3f* speed, Vec3f* limit) {
-    Vec3f result = *speed;
-    result.m_x = limitSpeed(speed->m_x, limit->m_x);
-    result.m_y = limitSpeed(speed->m_y, limit->m_y);
-    result.m_z = limitSpeed(speed->m_z, limit->m_z);
+Vec3f soKineticUtility::limitSpeed(const Vec3f& speed, const Vec3f& limit) {
+    Vec3f result = speed;
+    result.m_x = limitSpeed(speed.m_x, limit.m_x);
+    result.m_y = limitSpeed(speed.m_y, limit.m_y);
+    result.m_z = limitSpeed(speed.m_z, limit.m_z);
     return result;
 }
 
-Vec2f soKineticUtility::projectionNormalFollow(Vec2f* speed, Vec2f* normal) {
-    if (speed->lengthSq() == 0.0f || normal->lengthSq() == 0.0f) return *speed;
-    Vec2f rotated = *normal;
+// HYPOTHESIS: original inline helper (name unknown). The stack slots put its unit vector below the result temporary.
+static inline Vec2f projectOnto(const Vec2f& vec, const Vec2f& direction) {
+    Vec2f unit = direction;
+    unit.normalize();
+    float along = vec.m_x * unit.m_x + vec.m_y * unit.m_y;
+    return Vec2f(along * unit.m_x, along * unit.m_y);
+}
+
+Vec2f soKineticUtility::projectionNormalFollow(const Vec2f& speed, const Vec2f& normal) {
+    if (speed.lengthSq() == 0.0f || normal.lengthSq() == 0.0f) return speed;
+    Vec2f rotated = normal;
     rotated.rot(1.5707964f, &rotated);
-    Vec2f tangent = rotated;
-    tangent.normalize();
-    float along = speed->m_x * tangent.m_x + speed->m_y * tangent.m_y;
-    return Vec2f(along * tangent.m_x, along * tangent.m_y);
+    return projectOnto(speed, rotated);
 }
 
-Vec2f soKineticUtility::projectionGroundSpeed(Vec2f* speed, soModuleAccesser* acc) {
-    Vec2f result = *speed;
+// BYTES: the ground module is numbered above the report helper's parameters (saved register r31).
+static inline soGroundModule& groundOf(soModuleAccesser* acc) { soGroundModule* const p = &acc->getGroundModule(); return *p; }
+// HYPOTHESIS: original inline debug report (name unknown): status is evaluated before the task name.
+static inline void reportNoGround(const char* taskName, soStatusModule* status) {
+    OSReport(lbl_27_data_13590, taskName, status->getPrevStatusKind(0), status->getStatusKind());
+}
+Vec2f soKineticUtility::projectionGroundSpeed(const Vec2f& speed, soModuleAccesser* acc) {
+    Vec2f result = speed;
     if (result.m_y != 0.0f) {
-        soGroundModule& ground = acc->getGroundModule();
+        soGroundModule& ground = groundOf(acc);
         if (!ground.isTouch(8, 0)) {
-            soStatusModule& status = acc->getStatusModule();
-            const char* taskName = acc->getStageObject().m_taskName;
-            int current = status.getStatusKind();
-            int previous = status.getPrevStatusKind(0);
-            OSReport(lbl_27_data_13590, taskName, previous, current);
+            reportNoGround(acc->getStageObject().m_taskName, &acc->getStatusModule());
         } else {
-            Vec2f normal = ground.getTouchNormal(8, 0);
-            result = projectionNormalFollow(&result, &normal);
+            result = projectionNormalFollow(result, ground.getTouchNormal(8, 0));
         }
         // Ground energies store signed speed along the surface in X, rather than world XY.
         float length = result.length();
@@ -117,23 +124,29 @@ void ftKineticEnergyDisableAndClear(int index, soModuleAccesser* acc) {
     acc->getKineticModule().getEnergy(index)->disable();
 }
 
-void soKineticUtility::addSpeedOutsideMovementGround(soKineticEnergy* energy, Vec3f* speed,
-                                                   soModuleAccesser* acc) {
-    if (!energy->isEnable() || speed->lengthSq() == 0.0f) return;
-    soKineticEnergyGroundMovement* ground = dynamic_cast<soKineticEnergyGroundMovement*>(energy);
+// HYPOTHESIS: original by-value helper (name unknown); the native code keeps the three components in registers.
+static inline void addOutside(soKineticEnergyGroundMovement* ground, float x, float y, float z) {
+    ground->m_outsideSpeed.m_x += x;
+    ground->m_outsideSpeed.m_y += y;
+    ground->m_rotation += z;
+}
+// HYPOTHESIS: original inline overload for the cast energy (name unknown): the native code repeats the guard and
+// lays this body's locals out in reverse order.
+static inline void addSpeedOutsideGroundMovement(soKineticEnergyGroundMovement* ground, Vec3f* speed,
+                                                 soModuleAccesser* acc) {
     if (ground == NULL || !ground->isEnable() || speed->lengthSq() == 0.0f) return;
     if (acc->getSituationModule().getKind() != Situation_Ground) return;
 
     Vec2f planar(0.0f, 0.0f);
     Vec2f normal = acc->getGroundModule().getTouchNormal(8, 0);
-    Vec2f horizontal(speed->m_x, 0.0f);
-    Vec2f projected = projectionNormalFollow(&horizontal, &normal);
-    planar = projected;
-    Vec3f transport(planar, 0.0f);
+    planar = soKineticUtility::projectionNormalFollow(Vec2f(speed->m_x, 0.0f), normal);
     if (planar.lengthSq() != 0.0f) {
-        ground->m_outsideSpeed.m_x += transport.m_x;
-        ground->m_outsideSpeed.m_y += transport.m_y;
-        // The native accumulation also adds the transport's zero third component.
-        ground->m_rotation += transport.m_z;
+        addOutside(ground, planar.m_x, planar.m_y, 0.0f);
     }
+}
+
+void soKineticUtility::addSpeedOutsideMovementGround(soKineticEnergy* energy, Vec3f* speed,
+                                                   soModuleAccesser* acc) {
+    if (!energy->isEnable() || speed->lengthSq() == 0.0f) return;
+    addSpeedOutsideGroundMovement(dynamic_cast<soKineticEnergyGroundMovement*>(energy), speed, acc);
 }
