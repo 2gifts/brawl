@@ -12,8 +12,7 @@ ftWolfTransactor::ftWolfTransactor() { }
 ftWolfTransactor::~ftWolfTransactor() { }
 
 bool ftWolfTransactor::activeArticle1(wnWolfBlaster* weapon, soModuleAccesser* acc, u32 mdlResId, u32 texResId, bool unk1, bool unk2) {
-    int founderTaskId = acc->getStageObject().m_taskId;
-    weapon->activate(founderTaskId, mdlResId, texResId, unk1, unk2, acc->getTeamModule().getTeam()->getNo());
+    weapon->activate(acc->getStageObject().getTaskId(), mdlResId, texResId, unk1, unk2, acc->getTeamModule().getTeam()->getNo());
     return true;
 }
 
@@ -25,8 +24,7 @@ bool ftWolfTransactor::activeArticle2(wnWolfBlasterBullet* weapon, soModuleAcces
         Vec3f offset(0.0f, acc->getConstantFloatKirby(0xfa3), offsetZ);
         Vec3f pos = acc->getModelModule().getNodeGlobalPosition(nodeId, &offset, false, false);
         pos.m_z = 0.0f;
-        int founderTaskId = acc->getStageObject().m_taskId;
-        weapon->activate(founderTaskId, etcResId, acc->getTeamModule().getTeam()->getNo(), &pos, 0,
+        weapon->activate(acc->getStageObject().getTaskId(), etcResId, acc->getTeamModule().getTeam()->getNo(), &pos, 0,
                          static_cast<EfID>(effectId), acc->getPostureModule().getLr(), acc->getConstantFloatKirby(0xfa5),
                          acc->getConstantFloatKirby(0xfa4));
     } else {
@@ -34,8 +32,7 @@ bool ftWolfTransactor::activeArticle2(wnWolfBlasterBullet* weapon, soModuleAcces
         Vec3f offset(0.0f, acc->getConstantFloatKirby(0xfa1), offsetZ);
         Vec3f pos = acc->getModelModule().getNodeGlobalPosition(nodeId, &offset, false, false);
         pos.m_z = 0.0f;
-        int founderTaskId = acc->getStageObject().m_taskId;
-        weapon->activate(founderTaskId, etcResId, acc->getTeamModule().getTeam()->getNo(), &pos, 0,
+        weapon->activate(acc->getStageObject().getTaskId(), etcResId, acc->getTeamModule().getTeam()->getNo(), &pos, 0,
                          static_cast<EfID>(effectId), acc->getPostureModule().getLr(), acc->getConstantFloatKirby(0xfa5),
                          acc->getConstantFloatKirby(0xfa4));
     }
