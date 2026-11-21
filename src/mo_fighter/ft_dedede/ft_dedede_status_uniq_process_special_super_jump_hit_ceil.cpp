@@ -45,7 +45,7 @@ void ftDededeStatusUniqProcessSpecialSuperJumpHitCeil::execStatus(soModuleAccess
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         Vec3f accel(0.0f, 0.0f, 0.0f);
         Vec2f speed(0.0f, 0.0f);
-        gravity.resetEnergy(0, &speed, &accel, moduleAccesser);
+        gravity.resetEnergy(0, speed, accel, moduleAccesser);
         gravity.enable();
     }
 }

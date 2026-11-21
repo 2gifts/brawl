@@ -56,14 +56,14 @@ void ftCaptainStatusUniqProcessFalconKickEnd::initStatus(soModuleAccesser* modul
     if (variant == 0 && situation == 0) {
         Vec2f sumSpeed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
         soKineticEnergy* stop = kinetic.getEnergy(3);
-        stop->resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop->resetEnergy(0, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     } else if (variant == 2 && situation == 2) {
         Vec2f sumSpeed = kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1));
         kinetic.unableEnergyAll();
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
         soKineticEnergy* stop = kinetic.getEnergy(3);
-        gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
-        stop->resetEnergy(9, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop->resetEnergy(9, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         stop->enable();
     }

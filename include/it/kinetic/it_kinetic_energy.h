@@ -14,7 +14,7 @@ public:
     virtual void updateEnergy(soModuleAccesser* moduleAccesser) = 0;
     virtual Vec2f getSpeed() = 0;
     virtual Vec3f getRotation() = 0;
-    virtual void resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser* moduleAccesser) = 0;
+    virtual void resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser* moduleAccesser) = 0;
     virtual void clearSpeed() = 0;
     virtual void clearRotSpeed() = 0;
     virtual void mulSpeed(Vec3f* speed) = 0;
@@ -55,9 +55,9 @@ public:
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
     virtual Vec2f getSpeed() { return m_speed; }
     virtual Vec3f getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
-    virtual void resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*) {
-        m_speed.m_x = speed->m_x;
-        m_speed.m_y = speed->m_y;
+    virtual void resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
+        m_speed.m_x = speed.m_x;
+        m_speed.m_y = speed.m_y;
     }
     virtual void clearSpeed() { m_speed = Vec2f(0.0f, 0.0f); }
     virtual void clearRotSpeed() { }
@@ -88,7 +88,7 @@ public:
     virtual Vec2f getSpeed() { return Vec2f(m_speed.m_x, m_speed.m_y); }
     virtual Vec3f getSpeed3f() { return m_speed; }
     virtual Vec3f getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
-    virtual void resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*);
+    virtual void resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed() { m_speed = Vec3f(0.0f, 0.0f, 0.0f); }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f* speed);
@@ -117,7 +117,7 @@ public:
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
     virtual Vec2f getSpeed() { return Vec2f(0.0f, m_speed); }
     virtual Vec3f getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
-    virtual void resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*) { m_speed = speed->m_y; }
+    virtual void resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*) { m_speed = speed.m_y; }
     virtual void clearSpeed() { m_speed = 0.0f; }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f* speed);
@@ -143,7 +143,7 @@ class itKineticEnergyStop : public itKineticEnergy {
 public:
     itKineticEnergyStop();
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual void resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser* moduleAccesser);
+    virtual void resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser* moduleAccesser);
     virtual ~itKineticEnergyStop() { }
     virtual void updateEnergy(soModuleAccesser* moduleAccesser, float rate) {
         itKineticEnergy::updateEnergy(moduleAccesser, rate);

@@ -66,7 +66,7 @@ void ftDededeStatusUniqProcessSpecialNEat::initStatus(soModuleAccesser* moduleAc
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         Vec2f speed(0.0f, 0.0f);
         speed.m_y = moduleAccesser->getConstantFloatKirby(0xfa3);
-        gravity.resetEnergy(0, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, speed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         break;
     }
@@ -98,7 +98,7 @@ void ftDededeStatusUniqProcessSpecialNEat::initStatus(soModuleAccesser* moduleAc
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         Vec2f speed(0.0f, 0.0f);
         speed.m_y = -moduleAccesser->getConstantFloatKirby(0xfa3);
-        gravity.resetEnergy(0, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, speed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         break;
     }
@@ -198,11 +198,11 @@ void ftDededeStatusUniqProcessSpecialNEat::setJump(soModuleAccesser* moduleAcces
     speed.m_y *= scale;
     ftKineticEnergyController& controller =
         dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-    controller.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    controller.resetEnergy(0, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_accelMul = scale;
     controller.enable();
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-    gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.enable();
 }
 
@@ -236,7 +236,7 @@ void ftDededeStatusUniqProcessSpecialNEat::execFixPosWait(soModuleAccesser* modu
                 float direction = (float)(stickX < 0.0f ? -1 : 1);
                 float speed = moduleAccesser->getConstantFloatKirby(0xfa3);
                 brake.m_x = speed * direction;
-                stop.resetEnergy(0, &brake, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(0, brake, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 stop.enable();
             }
         }

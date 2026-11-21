@@ -108,7 +108,7 @@ void ftStatusUniqProcessIkeFinalDamageFly::initStatus(soModuleAccesser* moduleAc
     ftKineticEnergyDisableAndClear(4, moduleAccesser);
     ftKineticEnergyDisableAndClear(0, moduleAccesser);
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-    stop.resetEnergy(0x16, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    stop.resetEnergy(0x16, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     stop.enable();
 }
 

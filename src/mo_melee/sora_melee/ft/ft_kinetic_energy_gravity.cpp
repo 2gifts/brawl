@@ -11,15 +11,14 @@ ftKineticEnergyGravity::ftKineticEnergyGravity() :
     m_resetType(-1), m_speedY(0.0f), m_gravity(0.0f),
     m_fallSpeedMax(-1.0f), unk18(-1.0f), unk1C(-1.0f), m_gravityMul(1.0f), m_limitMode(-1) { }
 
-void ftKineticEnergyGravity::resetEnergy(int type, Vec2f* speed, Vec3f*, soModuleAccesser* acc) {
+void ftKineticEnergyGravity::resetEnergy(int type, const Vec2f& speed, const Vec3f&, soModuleAccesser* acc) {
     clearSpeed();
     m_resetType = type;
     m_limitMode = -1;
     int entryId = acc->getWorkManageModule().getInt(0x10000000);
     float gravityMul = ftManager::getInstance()->getOwner(entryId)->getGravity();
-    float initialSpeedY = speed->m_y;
     m_gravityMul = gravityMul;
-    m_speedY = initialSpeedY;
+    m_speedY = speed.m_y;
     switch (m_resetType) {
     case 0:
         m_gravity = -soValueAccesser::getConstantFloat(acc, 3023, 0);

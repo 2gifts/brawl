@@ -237,10 +237,10 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackEnd::initStatus(soModuleAccesse
         Vec2f speedCopy = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::ATTRIBUTE_MASK_MAIN);
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
         speedCopy *= param->unk48;
-        stop.resetEnergy(7, &Vec2f(speedCopy.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(7, Vec2f(speedCopy.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, speedCopy.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speedCopy.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2)).clearSpeed();
         moduleAccesser->getKineticModule().getEnergy(2)->disable();
@@ -250,10 +250,10 @@ void ftPikachuStatusUniqProcessSpecialQuickAttackEnd::initStatus(soModuleAccesse
         speed.m_y = 0.0f;
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
         speed *= param->unk48;
-        stop.resetEnergy(7, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(7, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2)).clearSpeed();
         moduleAccesser->getKineticModule().getEnergy(2)->disable();

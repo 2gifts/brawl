@@ -58,7 +58,7 @@ void wnSamusCShotStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesser)
         velocity.m_x = lr * (speed * (float)cos(angle));
         velocity.m_y = speed * (float)sin(angle);
         wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
-        energy.resetEnergy(0, &velocity, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        energy.resetEnergy(0, velocity, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         energy.m_speedTarget = Vec2f(3.4028235e38f, 3.4028235e38f);
         energy.enable();
         moduleAccesser->getCollisionAttackModule().setSpeed(&energy.getSpeed());

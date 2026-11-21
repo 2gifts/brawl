@@ -39,7 +39,7 @@ void soKineticEnergyJostle::clearSpeed() {
     m_speed.m_y = 0.0f;
     m_speed.m_z = 0.0f;
 }
-void soKineticEnergyJostle::resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*) { }
+void soKineticEnergyJostle::resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*) { }
 Vec3f soKineticEnergyJostle::getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
 Vec3f soKineticEnergyJostle::getSpeed3f() { return m_speed; }
 Vec2f soKineticEnergyJostle::getSpeed() { return Vec2f(m_speed.m_x, m_speed.m_y); }

@@ -59,7 +59,7 @@ void ftSamusStatusUniqProcessFinal::initStatus(soModuleAccesser* moduleAccesser)
         float speedY = rising ? param->startSpeedY : 0.0f;
         moduleAccesser->getKineticModule().clearSpeedAll();
         moduleAccesser->getKineticModule().unableEnergyAll();
-        gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = -param->gravity;
         gravity.m_fallSpeedMax = param->fallSpeedMax;
         gravity.unk1C = param->fallSpeedMax;

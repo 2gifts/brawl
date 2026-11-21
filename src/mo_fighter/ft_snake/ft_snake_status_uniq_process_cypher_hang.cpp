@@ -44,7 +44,7 @@ void ftSnakeStatusUniqProcessCypherHang::initStatus(soModuleAccesser* moduleAcce
     gravity.enable();
     if (speed.m_y < -param->m_hangFallSpeedLimit)
         speed.m_y = -param->m_hangFallSpeedLimit;
-    gravity.resetEnergy(1, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(1, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.m_gravity = param->m_hangGravity;
     gravity.m_fallSpeedMax = param->m_hangFallSpeedMax;
     gravity.unk1C = param->m_hangGravityUnk1C;
@@ -54,7 +54,7 @@ void ftSnakeStatusUniqProcessCypherHang::initStatus(soModuleAccesser* moduleAcce
         dynamic_cast<ftKineticEnergyController&>(
             *moduleAccesser->getKineticModule().getEnergy(2));
     controller.enable();
-    controller.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    controller.resetEnergy(0, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_accelMul = param->m_hangAirAccelMul;
     controller.m_speedTarget = Vec2f(param->m_hangAirSpeedTarget, 0.0f);
     controller.m_speedLimit = Vec2f(param->m_hangAirSpeedLimit, 0.0f);

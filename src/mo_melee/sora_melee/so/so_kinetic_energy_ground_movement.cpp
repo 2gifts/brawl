@@ -77,7 +77,7 @@ void soKineticEnergyGroundMovement::clearSpeed() {
     m_speed.m_y = 0.0f;
     m_rotation = 0.0f;
 }
-void soKineticEnergyGroundMovement::resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*) { }
+void soKineticEnergyGroundMovement::resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*) { }
 Vec3f soKineticEnergyGroundMovement::getRotation() { return Vec3f(m_rotation, 0.0f, 0.0f); }
 Vec2f soKineticEnergyGroundMovement::getSpeed() { return m_speed; }
 soKineticEnergyGroundMovement::~soKineticEnergyGroundMovement() { }

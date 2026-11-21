@@ -21,7 +21,7 @@ void ftRobotStatusUniqProcessSpecialBurner::initStatus(soModuleAccesser* moduleA
     if (speed.m_x > soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0)) {
         speed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0);
     }
-    controller.resetEnergy(mode, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    controller.resetEnergy(mode, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_speed = Vec2f(speed.m_x, 0.0f);
     controller.m_unk40 = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc7, 0);
     controller.m_speedTarget = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xfc8, 0), 0.0f);

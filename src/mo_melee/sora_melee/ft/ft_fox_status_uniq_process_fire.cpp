@@ -28,7 +28,7 @@ void ftFoxStatusUniqProcessFire::initStatus(soModuleAccesser* moduleAccesser) {
         soKineticEnergyNormal& stop = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(3));
         Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         sumSpeed.m_x /= soValueAccesser::getConstantFloat(moduleAccesser, 0xfaf, 0);
-        stop.resetEnergy(6, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(6, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         gravity.m_speedY = 0.0f;
@@ -179,7 +179,7 @@ void ftFoxStatusUniqProcessFire::execStatus(soModuleAccesser* moduleAccesser) {
         if (moduleAccesser->getSituationModule().getKind() == 2) {
             soKineticEnergy* energy = moduleAccesser->getKineticModule().getEnergy(0);
             if (!energy->isEnable()) {
-                energy->resetEnergy(6, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                energy->resetEnergy(6, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 energy->enable();
             }
         } else {

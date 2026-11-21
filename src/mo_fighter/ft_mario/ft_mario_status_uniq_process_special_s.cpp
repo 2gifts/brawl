@@ -33,11 +33,11 @@ void ftMarioStatusUniqProcessSpecialS::initStatus(soModuleAccesser* moduleAccess
         Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         soKineticEnergyNormal& stop = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(3));
         speed.m_x /= soValueAccesser::getConstantFloat(moduleAccesser, 4008, 0);
-        stop.resetEnergy(6, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(6, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.m_brake = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 4009, 0), 0.0f);
         stop.enable();
         soKineticEnergy* gravity = moduleAccesser->getKineticModule().getEnergy(1);
-        gravity->resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity->resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity->enable();
         ftKineticEnergyDisableAndClear(2, moduleAccesser);
         ftKineticEnergyDisableAndClear(0, moduleAccesser);

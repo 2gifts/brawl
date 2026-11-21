@@ -85,7 +85,7 @@ public:
     virtual Vec2f getSpeed() = 0;
     virtual Vec3f getSpeed3f();
     virtual Vec3f getRotation() = 0;
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser* moduleAccesser) = 0;
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser* moduleAccesser) = 0;
     virtual void clearSpeed() = 0;
     virtual void clearRotSpeed() = 0;
     virtual void mulSpeed(Vec3f* speed) = 0;
@@ -97,7 +97,7 @@ public:
     virtual Vec2f getSpeed();
     virtual Vec3f getSpeed3f();
     virtual Vec3f getRotation();
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser* moduleAccesser);
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser* moduleAccesser);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f* speed);

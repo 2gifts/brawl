@@ -21,13 +21,13 @@ void ftMarthStatusUniqProcessSpecialS::initStatus(soModuleAccesser* moduleAccess
         if (moduleAccesser->getSituationModule().getKind() == 2) {
             speedX *= soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialS_AirSpeedXRatio, 0);
             float initialSpeedY = speedY < 0.0f ? 0.0f : soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialS_RiseSpeedY, 0);
-            stop.resetEnergy(6, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.enable();
-            gravity.resetEnergy(0, &Vec2f(0.0f, initialSpeedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, initialSpeedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             gravity.enable();
             ftKineticEnergyDisableAndClear(2, moduleAccesser);
         } else {
-            motion.resetEnergy(3, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            motion.resetEnergy(3, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             motion.enable();
             ftKineticEnergyDisableAndClear(3, moduleAccesser);
             ftKineticEnergyDisableAndClear(1, moduleAccesser);
@@ -37,9 +37,9 @@ void ftMarthStatusUniqProcessSpecialS::initStatus(soModuleAccesser* moduleAccess
         break;
     case ftMarthStatus::SpecialS2:
         if (moduleAccesser->getSituationModule().getKind() == 2) {
-            stop.resetEnergy(6, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.enable();
-            gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             gravity.enable();
             ftKineticEnergyDisableAndClear(2, moduleAccesser);
         } else {
@@ -51,12 +51,12 @@ void ftMarthStatusUniqProcessSpecialS::initStatus(soModuleAccesser* moduleAccess
         break;
     case ftMarthStatus::SpecialS3:
         if (moduleAccesser->getSituationModule().getKind() == 2) {
-            stop.resetEnergy(6, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.enable();
-            gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             gravity.enable();
         } else {
-            motion.resetEnergy(3, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            motion.resetEnergy(3, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             motion.enable();
             ftKineticEnergyDisableAndClear(3, moduleAccesser);
             ftKineticEnergyDisableAndClear(1, moduleAccesser);
@@ -65,12 +65,12 @@ void ftMarthStatusUniqProcessSpecialS::initStatus(soModuleAccesser* moduleAccess
         break;
     case ftMarthStatus::SpecialS4:
         if (moduleAccesser->getSituationModule().getKind() == 2) {
-            stop.resetEnergy(6, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.enable();
-            gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             gravity.enable();
         } else {
-            motion.resetEnergy(3, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            motion.resetEnergy(3, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             motion.enable();
             ftKineticEnergyDisableAndClear(3, moduleAccesser);
             ftKineticEnergyDisableAndClear(1, moduleAccesser);
@@ -94,12 +94,12 @@ void ftMarthStatusUniqProcessSpecialS::execStatus(soModuleAccesser* moduleAccess
         switch (moduleAccesser->getStatusModule().getStatusKind()) {
         case ftMarthStatus::SpecialS:
             if (moduleAccesser->getSituationModule().getKind() == 2) {
-                stop.resetEnergy(6, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(6, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 stop.enable();
-                gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                gravity.resetEnergy(0, Vec2f(0.0f, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 gravity.enable();
             } else {
-                motion.resetEnergy(3, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                motion.resetEnergy(3, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 motion.enable();
                 ftKineticEnergyDisableAndClear(3, moduleAccesser);
                 ftKineticEnergyDisableAndClear(1, moduleAccesser);
@@ -107,9 +107,9 @@ void ftMarthStatusUniqProcessSpecialS::execStatus(soModuleAccesser* moduleAccess
             break;
         case ftMarthStatus::SpecialS2:
             if (moduleAccesser->getSituationModule().getKind() == 2) {
-                stop.resetEnergy(6, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(6, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 stop.enable();
-                gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                gravity.resetEnergy(0, Vec2f(0.0f, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 gravity.enable();
                 ftKineticEnergyDisableAndClear(2, moduleAccesser);
             } else {
@@ -120,12 +120,12 @@ void ftMarthStatusUniqProcessSpecialS::execStatus(soModuleAccesser* moduleAccess
             break;
         case ftMarthStatus::SpecialS3:
             if (moduleAccesser->getSituationModule().getKind() == 2) {
-                stop.resetEnergy(6, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(6, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 stop.enable();
-                gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                gravity.resetEnergy(0, Vec2f(0.0f, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 gravity.enable();
             } else {
-                motion.resetEnergy(3, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                motion.resetEnergy(3, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 motion.enable();
                 ftKineticEnergyDisableAndClear(3, moduleAccesser);
                 ftKineticEnergyDisableAndClear(1, moduleAccesser);
@@ -133,12 +133,12 @@ void ftMarthStatusUniqProcessSpecialS::execStatus(soModuleAccesser* moduleAccess
             break;
         case ftMarthStatus::SpecialS4:
             if (moduleAccesser->getSituationModule().getKind() == 2) {
-                stop.resetEnergy(6, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(6, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 stop.enable();
-                gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                gravity.resetEnergy(0, Vec2f(0.0f, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 gravity.enable();
             } else {
-                motion.resetEnergy(3, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                motion.resetEnergy(3, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 motion.enable();
                 ftKineticEnergyDisableAndClear(3, moduleAccesser);
                 ftKineticEnergyDisableAndClear(1, moduleAccesser);

@@ -17,7 +17,7 @@ public:
 
     ftKineticEnergyController();
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual void resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser* moduleAccesser);
+    virtual void resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser* moduleAccesser);
     virtual ~ftKineticEnergyController();
 
     void mulXSpeedMax(float mul);

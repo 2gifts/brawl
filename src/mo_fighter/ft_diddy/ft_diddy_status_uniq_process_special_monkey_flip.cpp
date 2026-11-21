@@ -34,12 +34,12 @@ void ftDiddyStatusUniqProcessSpecialMonkeyFlip::initStatus(soModuleAccesser* mod
         }
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         Vec2f gravitySpeed(0.0f, airSpeedX);
-        gravity.resetEnergy(0, &gravitySpeed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, gravitySpeed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
 
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
         Vec2f stopSpeed(airSpeedY * lr, 0.0f);
-        stop.resetEnergy(6, &stopSpeed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(6, stopSpeed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
     }
     }

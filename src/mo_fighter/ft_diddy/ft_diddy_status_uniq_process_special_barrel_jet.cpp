@@ -59,10 +59,10 @@ void ftDiddyStatusUniqProcessSpecialBarrelJet::initStatus(soModuleAccesser* modu
         speed.m_x *= soValueAccesser::getConstantFloat(moduleAccesser, 0xfb7, 0);
         speed.m_y *= soValueAccesser::getConstantFloat(moduleAccesser, 0xfb7, 0);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y + bounceY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y + bounceY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-        stop.resetEnergy(6, &Vec2f(speed.m_x + bounceX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(6, Vec2f(speed.m_x + bounceX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
         break;
     }
@@ -101,14 +101,14 @@ void ftDiddyStatusUniqProcessSpecialBarrelJet::changeKineticAir(soModuleAccesser
     Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
     ftDiddyAirParam param = *reinterpret_cast<ftDiddyAirParam*>(g_ftCommonDataAccesser.getParam(Fighter_Diddy));
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-    gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.enable();
     gravity.m_gravity = -param.unk64;
     gravity.m_fallSpeedMax = param.unk68;
     gravity.unk18 = param.unk6C;
     gravity.unk1C = param.unk70;
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-    stop.resetEnergy(6, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    stop.resetEnergy(6, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     stop.enable();
     ftKineticEnergyDisableAndClear(2, moduleAccesser);
     ftKineticEnergyDisableAndClear(0, moduleAccesser);

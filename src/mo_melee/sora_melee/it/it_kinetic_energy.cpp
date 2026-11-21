@@ -361,10 +361,10 @@ void itKineticEnergyGravity::reflectAccel(Vec3f* normal) {
     m_accel = reflected.m_y;
 }
 
-void itKineticEnergy3f::resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*) {
+void itKineticEnergy3f::resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
     float y;
-    float x = speed->m_x;
-    y = speed->m_y;
+    float x = speed.m_x;
+    y = speed.m_y;
     m_speed.m_x = x;
     m_speed.m_y = y;
 }

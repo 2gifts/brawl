@@ -80,7 +80,7 @@ void ftKirbyStatusUniqProcessFinalCutter::initStatus(soModuleAccesser* moduleAcc
     ftKirbyFinalCutterExtend* extend = reinterpret_cast<ftKirbyFinalCutterExtend*>(kirby.getExtendParam());
     controller.enable();
     Vec2f speed(0.0f, 0.0f);
-    controller.resetEnergy(4, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    controller.resetEnergy(4, speed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.mulXSpeedMax(param->unk74 * extend->unk8[1]);
     Vec2f stableSpeed(param->unk7c, 100.0f);
     controller.setStableSpeed(&stableSpeed);
@@ -112,7 +112,7 @@ void ftKirbyStatusUniqProcessFinalCutterJump::initStatus(soModuleAccesser* modul
     ftKirbyFinalCutterExtend* extend = reinterpret_cast<ftKirbyFinalCutterExtend*>(kirby.getExtendParam());
     controller.enable();
     Vec2f speed(0.0f, 0.0f);
-    controller.resetEnergy(4, &speed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    controller.resetEnergy(4, speed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.mulXSpeedMax(param->unk74 * extend->unk8[1]);
     Vec2f stableSpeed(param->unk7c, 100.0f);
     controller.setStableSpeed(&stableSpeed);

@@ -50,7 +50,7 @@ void ftStatusUniqProcessGuardDamage::initStatus(soModuleAccesser* moduleAccesser
     rot.m_x = 0.0f;
     rot.m_y = 0.0f;
     rot.m_z = 0.0f;
-    energy->resetEnergy(0xb, &speed, &rot, moduleAccesser);
+    energy->resetEnergy(0xb, speed, rot, moduleAccesser);
     energy->enable();
 
     m_guardFunc->setShieldScale(moduleAccesser);

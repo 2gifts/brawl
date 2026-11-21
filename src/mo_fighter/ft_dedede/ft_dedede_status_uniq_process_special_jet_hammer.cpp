@@ -64,7 +64,7 @@ void ftDededeStatusUniqProcessSpecialJetHammer::initStatus(soModuleAccesser* mod
             speed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC0, 0);
         }
         Vec3f rotation(0.0f, 0.0f, 0.0f);
-        energy.resetEnergy(resetKind, &Vec2f(speed.m_x, 0.0f), &rotation, moduleAccesser);
+        energy.resetEnergy(resetKind, Vec2f(speed.m_x, 0.0f), rotation, moduleAccesser);
         energy.m_accelMul = 1.0f;
         energy.m_unk40 = 0.0f;
         energy.enable();

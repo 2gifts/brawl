@@ -17,9 +17,9 @@ wnKineticEnergyNormal::wnKineticEnergyNormal() : unk34(-1) {
 wnKineticEnergyNormal::~wnKineticEnergyNormal() {
 }
 
-void wnKineticEnergyNormal::resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser*) {
-    float y = speed->m_y;
-    float x = speed->m_x;
+void wnKineticEnergyNormal::resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
+    float y = speed.m_y;
+    float x = speed.m_x;
     m_accel = Vec2f(0.0f, 0.0f);
     m_speedTarget = Vec2f(-1.0f, -1.0f);
     m_brake = Vec2f(0.0f, 0.0f);
@@ -100,9 +100,9 @@ void wnKineticModuleImpl::initializeNormal(int kineticType, soModuleAccesser* ac
     if (kineticType == 0) {
         Vec2f speed = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         Vec3f zero3(0.0f, 0.0f, 0.0f);
-        main->resetEnergy(0, &speed, &zero3, acc);
+        main->resetEnergy(0, speed, zero3, acc);
         Vec3f zeroRot(0.0f, 0.0f, 0.0f);
-        sub->resetEnergy(-1, &Vec2f(0.0f, 0.0f), &zeroRot, acc);
+        sub->resetEnergy(-1, Vec2f(0.0f, 0.0f), zeroRot, acc);
     }
     main->enable();
     sub->enable();
@@ -115,9 +115,9 @@ void wnKineticModuleImpl::initializeStop(int kineticType, soModuleAccesser* acc)
     if (kineticType == 0) {
         Vec2f speed = acc->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         Vec3f zero3(0.0f, 0.0f, 0.0f);
-        main->resetEnergy(1, &speed, &zero3, acc);
+        main->resetEnergy(1, speed, zero3, acc);
         Vec3f zeroRot(0.0f, 0.0f, 0.0f);
-        sub->resetEnergy(-1, &Vec2f(0.0f, 0.0f), &zeroRot, acc);
+        sub->resetEnergy(-1, Vec2f(0.0f, 0.0f), zeroRot, acc);
     }
     main->enable();
     sub->enable();
@@ -153,8 +153,8 @@ void wnKineticModuleImpl::addSpeedOutside(soKineticEnergy::OutsideType type, Vec
 void wnKineticModuleImpl::addSpeed(Vec3f*, soModuleAccesser*) {
 }
 
-void wnKineticEnergyGravity::resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*) {
-    m_speedY = speed->m_y;
+void wnKineticEnergyGravity::resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
+    m_speedY = speed.m_y;
 }
 
 void wnKineticEnergyGravity::updateEnergy(soModuleAccesser*) {

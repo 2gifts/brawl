@@ -46,7 +46,7 @@ void ftPikachuKineticTransactor::changeKineticSub(bool*, void*, soModuleAccesser
     kinetic.unableEnergyAll();
     kinetic.clearSpeedAll();
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*kinetic.getEnergy(2));
-    controller.resetEnergy(0xb, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), acc);
+    controller.resetEnergy(0xb, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), acc);
     controller.m_accel = Vec2f(0.0f, 0.0f);
     controller.enable();
 }

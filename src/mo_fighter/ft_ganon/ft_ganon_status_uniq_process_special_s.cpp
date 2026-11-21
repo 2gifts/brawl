@@ -269,7 +269,7 @@ static void setFallParams(soModuleAccesser* moduleAccesser, float gravityAccel, 
     speed = gravity.getSpeed();
     Vec3f rotation;
     rotation = gravity.getRotation();
-    gravity.resetEnergy(0, &speed, &rotation, moduleAccesser);
+    gravity.resetEnergy(0, speed, rotation, moduleAccesser);
     gravity.m_gravity = -gravityAccel;
     gravity.unk1C = fallSpeedMax;
     gravity.m_fallSpeedMax = fallSpeedMax;

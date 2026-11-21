@@ -107,14 +107,14 @@ void ftGKoopaStatusUniqProcessSpecialSJump::initStatus(soModuleAccesser* moduleA
     moduleAccesser->getGroundModule().setCorrect(soGroundShapeImpl::Correct_Air, 0);
     ftKineticEnergyUnable(moduleAccesser);
     ftKineticEnergyMotion& motion = dynamic_cast<ftKineticEnergyMotion&>(*moduleAccesser->getKineticModule().getEnergy(0));
-    motion.resetEnergy(6, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    motion.resetEnergy(6, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     motion.enable();
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
     float stick = moduleAccesser->getControllerModule().getStickX();
     float lr = moduleAccesser->getPostureModule().getLr();
     float lrSpeed = param->unk0 * lr;
     float stickSpeed = param->unk4 * stick;
-    stop.resetEnergy(0x16, &Vec2f(stickSpeed + lrSpeed, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    stop.resetEnergy(0x16, Vec2f(stickSpeed + lrSpeed, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     stop.m_speedTarget = Vec2f(param->unk24, 0.0f);
     stop.m_speedLimit = Vec2f(param->unk24, 0.0f);
     stop.enable();
@@ -184,7 +184,7 @@ void ftGKoopaStatusUniqProcessSpecialSFall::initStatus(soModuleAccesser* moduleA
     ftKoopaSpecialSParam* param = getKoopaSpecialSParam(Fighter_GKoopa, 4);
     ftKineticEnergyUnable(moduleAccesser);
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-    gravity.resetEnergy(0, &Vec2f(0.0f, -param->unk28), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(0, Vec2f(0.0f, -param->unk28), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.m_gravity = 0.0f;
     gravity.enable();
     moduleAccesser->getWorkManageModule().onFlag(0x12000001);
@@ -234,11 +234,11 @@ void ftGKoopaStatusUniqProcessSpecialSLanding::execStatus(soModuleAccesser* modu
         }
         ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, param->unk30), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, param->unk30), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
         float lr = moduleAccesser->getPostureModule().getLr();
-        stop.resetEnergy(6, &Vec2f(param->unk2C * lr, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(6, Vec2f(param->unk2C * lr, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
         work.offFlag(0x22000010);
     }

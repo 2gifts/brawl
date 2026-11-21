@@ -176,7 +176,7 @@ public:
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
     virtual Vec2f getSpeed();
     virtual Vec3f getRotation();
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*) { }
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*) { }
     virtual void clearSpeed() { }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f*) { }

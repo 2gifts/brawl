@@ -55,7 +55,7 @@ bool ftStatusUniqProcessCapturePulled::checkPullHeight(soModuleAccesser* moduleA
 // grab's capture level) and the near/far capture status is stored in work int 0x20000000.
 void ftStatusUniqProcessCapturePulled::initStatus(soModuleAccesser* moduleAccesser) {
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-    stop.resetEnergy(0x16, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    stop.resetEnergy(0x16, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     stop.m_speedTarget.m_x = -1.0f;
     stop.m_speedTarget.m_y = -1.0f;
     Vec2f target(-1.0f, -1.0f);

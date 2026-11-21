@@ -162,7 +162,7 @@ void ftLuigiKineticTransactor::changeKineticSub5(bool*, void*, Vec2f* speed, soM
     Vec2f initialSpeed = *speed;
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(
         *moduleAccesser->getKineticModule().getEnergy(2));
-    controller.resetEnergy(0x11, &initialSpeed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    controller.resetEnergy(0x11, initialSpeed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_accelMul = soValueAccesser::getConstantFloat(moduleAccesser, 0xFBF, 0);
     controller.m_speedTarget = Vec2f(-1.0f, -1.0f);
     controller.m_brake = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xBBC, 0), 0.0f);
@@ -174,7 +174,7 @@ void ftLuigiKineticTransactor::changeKineticSub6(bool*, void*, Vec2f* speed, soM
     Vec2f initialSpeed = *speed;
     ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(
         *moduleAccesser->getKineticModule().getEnergy(2));
-    controller.resetEnergy(0x12, &initialSpeed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    controller.resetEnergy(0x12, initialSpeed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_accelMul = soValueAccesser::getConstantFloat(moduleAccesser, 0xFC4, 0);
     controller.m_speedTarget = Vec2f(-1.0f, -1.0f);
     controller.m_brake = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xBD6, 0), 0.0f);

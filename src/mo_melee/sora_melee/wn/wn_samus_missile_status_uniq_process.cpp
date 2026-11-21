@@ -33,7 +33,7 @@ void wnSamusMissileStatusUniqProcess::initStatus(soModuleAccesser* moduleAccesse
         float lr = moduleAccesser->getPostureModule().getLr();
         int life = param->unk4;
         wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
-        energy.resetEnergy(0, &Vec2f(param->unkC * lr, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        energy.resetEnergy(0, Vec2f(param->unkC * lr, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         energy.enable();
         moduleAccesser->getCollisionAttackModule().setSpeed(&energy.getSpeed());
         moduleAccesser->getWorkManageModule().setInt(0, 0x10000006);

@@ -34,9 +34,9 @@ void ftMarthStatusUniqProcessFinal::initStatus(soModuleAccesser* moduleAccesser)
         factor *= lr;
         float speed = factor;
         if (moduleAccesser->getSituationModule().getKind() == 2) {
-            stop.resetEnergy(6, &Vec2f(speed, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, Vec2f(speed, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         } else {
-            stop.resetEnergy(0, &Vec2f(speed, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(0, Vec2f(speed, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         }
         stop.m_brake = Vec2f(0.0f, 0.0f);
         stop.m_speedLimit = Vec2f(-1.0f, 0.0f);
@@ -73,9 +73,9 @@ void ftMarthStatusUniqProcessFinal::execStatus(soModuleAccesser* moduleAccesser)
         // This routine compares against the saved situation without updating that snapshot.
         if (moduleAccesser->getSituationModule().getKind() != moduleAccesser->getWorkManageModule().getInt(ftMarthWork::Final_Situation)) {
             if (moduleAccesser->getSituationModule().getKind() == 2) {
-                stop.resetEnergy(6, &Vec2f(speed, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(6, Vec2f(speed, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             } else {
-                stop.resetEnergy(0, &Vec2f(speed, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(0, Vec2f(speed, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             }
             stop.m_brake = Vec2f(0.0f, 0.0f);
             stop.m_speedLimit = Vec2f(-1.0f, 0.0f);

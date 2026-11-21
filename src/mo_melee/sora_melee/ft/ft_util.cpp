@@ -872,7 +872,7 @@ void ftUtil::setShieldSetoffSpeed(soModuleAccesser* acc, float power, float lr) 
     soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*acc->getKineticModule().getEnergy(4));
     Vec2f velocity(speed * -lr, 0.0f);
     Vec3f rotation(0.0f, 0.0f, 0.0f);
-    energy.resetEnergy(0xB, &velocity, &rotation, acc);
+    energy.resetEnergy(0xB, velocity, rotation, acc);
     energy.enable();
 }
 

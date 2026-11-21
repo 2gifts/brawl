@@ -293,11 +293,11 @@ void ftStatusUniqProcessSwallowedCancel::initStatus(soModuleAccesser* moduleAcce
     speed.m_x = -linkValue * (radius * cosf(angle));
     speed.m_y = radius * sinf(angle);
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-    stop.resetEnergy(6, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    stop.resetEnergy(6, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     stop.enable();
 
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-    gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.enable();
 
     float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xd5e, 0);

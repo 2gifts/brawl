@@ -18,7 +18,7 @@ public:
 #elif defined(FT_MODULE_BUILDER)
     virtual ~ftKineticEnergyMotion() { }
 #endif
-    virtual void resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser*);
+    virtual void resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser*);
     virtual void updateEnergy(soModuleAccesser*);
 
     int m_motionMode; // +0x34
@@ -44,7 +44,7 @@ public:
 #elif defined(FT_MODULE_BUILDER)
     virtual ~ftKineticEnergyStop() { }
 #endif
-    virtual void resetEnergy(int type, Vec2f* speed, Vec3f*, soModuleAccesser*);
+    virtual void resetEnergy(int type, const Vec2f& speed, const Vec3f&, soModuleAccesser*);
     virtual void updateEnergy(soModuleAccesser*);
 
     s32 m_resetType; // +0x34; constructor/reset use -1 as the inactive mode.
@@ -68,7 +68,7 @@ class ftKineticEnergyGravity : public soKineticEnergy {
 public:
     ftKineticEnergyGravity(); // sora_melee
     virtual ~ftKineticEnergyGravity() { }
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*);
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void updateEnergy(soModuleAccesser*);
     virtual void mulSpeed(Vec3f*);
@@ -123,7 +123,7 @@ public:
     virtual void updateEnergy(soModuleAccesser*);
     virtual Vec2f getSpeed();
     virtual Vec3f getRotation();
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*);
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f*);
@@ -157,7 +157,7 @@ public:
     virtual Vec2f getSpeed();
     virtual Vec3f getSpeed3f();
     virtual Vec3f getRotation();
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*);
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f*);

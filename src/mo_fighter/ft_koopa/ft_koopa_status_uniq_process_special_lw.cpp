@@ -86,20 +86,20 @@ void ftKoopaStatusUniqProcessSpecialLwA::initStatus(soModuleAccesser* moduleAcce
         speed.m_y *= param->m_airSpeedYMul;
         ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = param->m_gravity;
         gravity.m_fallSpeedMax = param->m_fallSpeedMax;
         gravity.unk1C = param->m_fallSpeedMax;
         gravity.enable();
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-        stop.resetEnergy(9, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(9, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.m_brake = Vec2f(param->m_brakeX, 0.0f);
         stop.enable();
     } else {
         speed.m_y = param->m_dropSpeedY;
         ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, param->m_dropSpeedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, param->m_dropSpeedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = 0.0f;
         gravity.enable();
         work.onFlag(0x22000011);
@@ -112,7 +112,7 @@ void ftKoopaStatusUniqProcessSpecialLwA::execStatus(soModuleAccesser* moduleAcce
     if (!work.isFlag(0x22000011) && moduleAccesser->getMotionModule().isEnd()) {
         ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, param->m_dropSpeedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, param->m_dropSpeedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = 0.0f;
         gravity.enable();
         work.onFlag(0x22000011);

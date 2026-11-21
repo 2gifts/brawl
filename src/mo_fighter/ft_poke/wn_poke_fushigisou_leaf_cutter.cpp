@@ -66,7 +66,7 @@ void wnPokeFushigisouLeafCutter::activate(int founderTaskId, int resourceId, int
     float brake = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA0, 0);
     wnKineticEnergyNormal& normal =
         dynamic_cast<wnKineticEnergyNormal&>(*m_moduleAccesser->getKineticModule().getEnergy(0));
-    normal.resetEnergy(1, &velocity, &Vec3f(0.0f, 0.0f, 0.0f), m_moduleAccesser);
+    normal.resetEnergy(1, velocity, Vec3f(0.0f, 0.0f, 0.0f), m_moduleAccesser);
     Vec2f braking;
     braking.m_x = brake;
     braking.m_y = 0.0f;

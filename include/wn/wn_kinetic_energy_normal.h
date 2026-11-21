@@ -9,6 +9,6 @@ public:
     wnKineticEnergyNormal();
     virtual ~wnKineticEnergyNormal();
     virtual void updateEnergy(soModuleAccesser*);
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*);
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
 };
 static_assert(sizeof(wnKineticEnergyNormal) == 0x38, "Weapon normal energy layout");

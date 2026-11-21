@@ -43,7 +43,7 @@ void ftLucarioStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAcc
     Vec2f speed;
     Vec2f::copy(speed, kinetic.getSumSpeed(soKineticEnergy::AttributeFlag(1)));
     speed.m_x *= soValueAccesser::getConstantFloat(moduleAccesser, 0xfc5, 0);
-    stop.resetEnergy(6, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    stop.resetEnergy(6, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     stop.enable();
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*kinetic.getEnergy(1));
     gravity.m_speedY = 0.0f;

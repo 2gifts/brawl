@@ -40,13 +40,13 @@ void ftYoshiStatusUniqProcessSpecialSStart::initStatus(soModuleAccesser* acc) {
     Vec2f velocity;
     velocity.m_x = 0.0f;
     velocity.m_y = param->startVerticalSpeed;
-    gravity.resetEnergy(0, &velocity, &rotation, acc);
+    gravity.resetEnergy(0, velocity, rotation, acc);
     gravity.m_gravity = -param->gravity;
     gravity.enable();
     velocity.m_x = speed * lr;
     velocity.m_y = 0.0f;
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
-    stop.resetEnergy(6, &velocity, &rotation, acc);
+    stop.resetEnergy(6, velocity, rotation, acc);
     stop.suspend();
 }
 void ftYoshiStatusUniqProcessSpecialSStart::execStatus(soModuleAccesser* acc) {
