@@ -138,22 +138,20 @@ static inline void reflectVec(Vec2f& out, const Vec2f& v, const Vec2f& n) {
     out = v - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y);
 }
 
-void ftKineticEnergyGravity::reflectSpeed(Vec3f* normal) {
-    Vec2f n(*normal);
-    Vec2f speed(0.0f, m_speedY);
-    Vec2f reflected;
-    reflectVec(reflected, speed, n);
-    m_speedY = reflected.m_y;
+void ftKineticEnergyGravity::reflectSpeed(const Vec3f& normal) {
+    Vec2f v(0.0f, m_speedY);
+    Vec2f n(normal);
+    reflectVec(v, v, n);
+    m_speedY = v.m_y;
 }
 
-void ftKineticEnergyGravity::reflectAccel(Vec3f* normal) {
-    Vec2f n(*normal);
-    Vec2f accel(0.0f, m_gravity);
-    Vec2f reflected;
-    reflectVec(reflected, accel, n);
-    m_gravity = reflected.m_y;
+void ftKineticEnergyGravity::reflectAccel(const Vec3f& normal) {
+    Vec2f v(0.0f, m_gravity);
+    Vec2f n(normal);
+    reflectVec(v, v, n);
+    m_gravity = v.m_y;
 }
 
 void ftKineticEnergyGravity::clearRotSpeed() { }
-Vec3f ftKineticEnergyGravity::getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
-Vec2f ftKineticEnergyGravity::getSpeed() { return Vec2f(0.0f, m_speedY); }
+Vec3f ftKineticEnergyGravity::getRotation() const { return Vec3f(0.0f, 0.0f, 0.0f); }
+Vec2f ftKineticEnergyGravity::getSpeed() const { return Vec2f(0.0f, m_speedY); }

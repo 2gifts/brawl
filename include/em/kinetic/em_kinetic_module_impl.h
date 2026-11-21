@@ -174,15 +174,15 @@ public:
 
     emKineticEnergy();
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*) { }
     virtual void clearSpeed() { }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f*) { }
     virtual void mulAccel(Vec3f*) { }
-    virtual void reflectSpeed(Vec3f*) { }
-    virtual void reflectAccel(Vec3f*) { }
+    virtual void reflectSpeed(const Vec3f&) { }
+    virtual void reflectAccel(const Vec3f&) { }
     virtual ~emKineticEnergy();
 
     static bool isInvalidEnergyType(int kind);

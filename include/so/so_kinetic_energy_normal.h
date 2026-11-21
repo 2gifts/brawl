@@ -84,8 +84,8 @@ public:
     }
 
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getRotation()
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getRotation() const
 #ifdef SO_KINETIC_ROTATION_FIELDWISE_ZERO
         __attribute__((never_inline))
 #endif
@@ -95,8 +95,8 @@ public:
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f* speed);
     virtual void mulAccel(Vec3f* accel);
-    virtual void reflectSpeed(Vec3f* speed);
-    virtual void reflectAccel(Vec3f* accel);
+    virtual void reflectSpeed(const Vec3f& speed);
+    virtual void reflectAccel(const Vec3f& accel);
     virtual void onConsiderGroundFriction();
     virtual void offConsiderGroundFriction();
     virtual ~soKineticEnergyNormal() { }
@@ -149,7 +149,7 @@ inline void soKineticEnergyNormal::onConsiderGroundFriction() {
 #else
 #pragma dont_inline on
 #endif
-inline Vec3f soKineticEnergyNormal::getRotation() {
+inline Vec3f soKineticEnergyNormal::getRotation() const {
 #ifdef SO_KINETIC_ROTATION_FIELDWISE_ZERO
     // BYTES: this weak copy writes the returned rotation with floating-point stores.
     Vec3f rotation;
@@ -163,7 +163,7 @@ inline Vec3f soKineticEnergyNormal::getRotation() {
 }
 #pragma dont_inline off
 
-inline Vec2f soKineticEnergyNormal::getSpeed() {
+inline Vec2f soKineticEnergyNormal::getSpeed() const {
     return m_speed;
 }
 #endif

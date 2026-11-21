@@ -60,13 +60,13 @@ static inline void reflectVec(Vec2f& out, const Vec2f& v, const Vec2f& n) {
     out = v - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y);
 }
 
-void soKineticEnergyNormal::reflectSpeed(Vec3f* normal) {
-    Vec2f n(*normal);
+void soKineticEnergyNormal::reflectSpeed(const Vec3f& normal) {
+    Vec2f n(normal);
     reflectVec(m_speed, m_speed, n);
 }
 
-void soKineticEnergyNormal::reflectAccel(Vec3f* normal) {
-    Vec2f n(*normal);
+void soKineticEnergyNormal::reflectAccel(const Vec3f& normal) {
+    Vec2f n(normal);
     reflectVec(m_accel, m_accel, n);
 }
 
@@ -107,11 +107,11 @@ void soKineticEnergyNormal::onConsiderGroundFriction() {
     m_considerGroundFriction = true;
 }
 
-Vec3f soKineticEnergyNormal::getRotation() {
+Vec3f soKineticEnergyNormal::getRotation() const {
     return Vec3f(0.0f, 0.0f, 0.0f);
 }
 
-Vec2f soKineticEnergyNormal::getSpeed() {
+Vec2f soKineticEnergyNormal::getSpeed() const {
     return m_speed;
 }
 

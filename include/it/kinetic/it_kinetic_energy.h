@@ -12,15 +12,15 @@ class soModuleAccesser;
 class itKineticEnergyInterface : public soKineticEnergy {
 public:
     virtual void updateEnergy(soModuleAccesser* moduleAccesser) = 0;
-    virtual Vec2f getSpeed() = 0;
-    virtual Vec3f getRotation() = 0;
+    virtual Vec2f getSpeed() const = 0;
+    virtual Vec3f getRotation() const = 0;
     virtual void resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser* moduleAccesser) = 0;
     virtual void clearSpeed() = 0;
     virtual void clearRotSpeed() = 0;
     virtual void mulSpeed(Vec3f* speed) = 0;
     virtual void mulAccel(Vec3f* accel) = 0;
-    virtual void reflectSpeed(Vec3f* normal) = 0;
-    virtual void reflectAccel(Vec3f* normal) = 0;
+    virtual void reflectSpeed(const Vec3f& normal) = 0;
+    virtual void reflectAccel(const Vec3f& normal) = 0;
     virtual ~itKineticEnergyInterface() { }
 };
 
@@ -53,8 +53,8 @@ public:
     }
 
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed() { return m_speed; }
-    virtual Vec3f getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
+    virtual Vec2f getSpeed() const { return m_speed; }
+    virtual Vec3f getRotation() const { return Vec3f(0.0f, 0.0f, 0.0f); }
     virtual void resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
         m_speed.m_x = speed.m_x;
         m_speed.m_y = speed.m_y;
@@ -63,8 +63,8 @@ public:
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f* speed);
     virtual void mulAccel(Vec3f* accel);
-    virtual void reflectSpeed(Vec3f* normal);
-    virtual void reflectAccel(Vec3f* normal);
+    virtual void reflectSpeed(const Vec3f& normal);
+    virtual void reflectAccel(const Vec3f& normal);
     virtual void onConsiderGroundFriction() { m_considerGroundFriction = true; }
     virtual void offConsiderGroundFriction() { m_considerGroundFriction = false; }
     virtual ~itKineticEnergy() { }
@@ -85,16 +85,16 @@ static_assert(sizeof(itKineticEnergy) == 0x38, "Class is wrong size!");
 class itKineticEnergy3f : public itKineticEnergyInterface {
 public:
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed() { return Vec2f(m_speed.m_x, m_speed.m_y); }
-    virtual Vec3f getSpeed3f() { return m_speed; }
-    virtual Vec3f getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
+    virtual Vec2f getSpeed() const { return Vec2f(m_speed.m_x, m_speed.m_y); }
+    virtual Vec3f getSpeed3f() const { return m_speed; }
+    virtual Vec3f getRotation() const { return Vec3f(0.0f, 0.0f, 0.0f); }
     virtual void resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed() { m_speed = Vec3f(0.0f, 0.0f, 0.0f); }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f* speed);
     virtual void mulAccel(Vec3f* accel);
-    virtual void reflectSpeed(Vec3f* normal);
-    virtual void reflectAccel(Vec3f* normal);
+    virtual void reflectSpeed(const Vec3f& normal);
+    virtual void reflectAccel(const Vec3f& normal);
     virtual void onConsiderGroundFriction() { m_considerGroundFriction = true; }
     virtual void offConsiderGroundFriction() { m_considerGroundFriction = false; }
     virtual ~itKineticEnergy3f() { }
@@ -115,15 +115,15 @@ static_assert(sizeof(itKineticEnergy3f) == 0x4C, "Class is wrong size!");
 class itKineticEnergyGravity : public itKineticEnergyInterface {
 public:
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed() { return Vec2f(0.0f, m_speed); }
-    virtual Vec3f getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
+    virtual Vec2f getSpeed() const { return Vec2f(0.0f, m_speed); }
+    virtual Vec3f getRotation() const { return Vec3f(0.0f, 0.0f, 0.0f); }
     virtual void resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*) { m_speed = speed.m_y; }
     virtual void clearSpeed() { m_speed = 0.0f; }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f* speed);
     virtual void mulAccel(Vec3f* accel);
-    virtual void reflectSpeed(Vec3f* normal);
-    virtual void reflectAccel(Vec3f* normal);
+    virtual void reflectSpeed(const Vec3f& normal);
+    virtual void reflectAccel(const Vec3f& normal);
     virtual ~itKineticEnergyGravity() { }
     // HYPOTHESIS: the only argument is the new vertical speed (stored as is).
     virtual void resetEnergy(float speed) { m_speed = speed; }

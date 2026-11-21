@@ -12,16 +12,16 @@
 class soKineticEnergy3f : public soKineticEnergy {
 public:
     virtual void updateEnergy(soModuleAccesser*);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getSpeed3f();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getSpeed3f() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f*);
     virtual void mulAccel(Vec3f*);
-    virtual void reflectSpeed(Vec3f*);
-    virtual void reflectAccel(Vec3f*);
+    virtual void reflectSpeed(const Vec3f&);
+    virtual void reflectAccel(const Vec3f&);
     virtual void onConsiderGroundFriction();
     virtual void offConsiderGroundFriction();
     virtual ~soKineticEnergy3f();
@@ -74,19 +74,15 @@ void soKineticEnergy3f::mulAccel(Vec3f* accel) {
 }
 
 static inline void reflectVec(Vec3f& out, const Vec3f& v, const Vec3f& n) {
-    float dot = n.m_x * v.m_x + n.m_y * v.m_y + n.m_z * v.m_z;
-    Vec3f n2 = n * 2.0f;
-    Vec3f proj = n2 * dot;
-    Vec3f result = out - proj;
-    out = result;
+    out = out - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y + n.m_z * v.m_z);
 }
 
-void soKineticEnergy3f::reflectSpeed(Vec3f* normal) {
-    reflectVec(m_speed3f, m_speed3f, *normal);
+void soKineticEnergy3f::reflectSpeed(const Vec3f& normal) {
+    reflectVec(m_speed3f, m_speed3f, normal);
 }
 
-void soKineticEnergy3f::reflectAccel(Vec3f* normal) {
-    reflectVec(m_accel3f, m_accel3f, *normal);
+void soKineticEnergy3f::reflectAccel(const Vec3f& normal) {
+    reflectVec(m_accel3f, m_accel3f, normal);
 }
 
 void soKineticEnergy3f::onConsiderGroundFriction() {
@@ -105,15 +101,15 @@ void soKineticEnergy3f::clearSpeed() {
     m_speed3f.m_x = 0.0f;
 }
 
-Vec3f soKineticEnergy3f::getRotation() {
+Vec3f soKineticEnergy3f::getRotation() const {
     return Vec3f(0.0f, 0.0f, 0.0f);
 }
 
-Vec3f soKineticEnergy3f::getSpeed3f() {
+Vec3f soKineticEnergy3f::getSpeed3f() const {
     return m_speed3f;
 }
 
-Vec2f soKineticEnergy3f::getSpeed() {
+Vec2f soKineticEnergy3f::getSpeed() const {
     return Vec2f(m_speed3f.m_x, m_speed3f.m_y);
 }
 

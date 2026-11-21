@@ -11,7 +11,7 @@ public:
                                const Vec2f& brake, const Vec2f& limit, bool unk30);
 #ifdef SO_KINETIC_LOCAL_NORMAL_IMPL
     // Defined by the sora_melee unit (the other units see the base slots).
-    virtual Vec2f getSpeed();
+    virtual Vec2f getSpeed() const;
     virtual ~soKineticEnergyLocalNormal();
 #endif
     float unk34;

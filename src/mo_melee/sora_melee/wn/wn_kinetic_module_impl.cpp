@@ -171,16 +171,16 @@ static inline void reflectVec(Vec2f& out, const Vec2f& v, const Vec2f& n) {
     out = v - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y);
 }
 
-void wnKineticEnergyGravity::reflectSpeed(Vec3f* normal) {
+void wnKineticEnergyGravity::reflectSpeed(const Vec3f& normal) {
     Vec2f v(0.0f, m_speedY);
-    Vec2f n(*normal);
+    Vec2f n(normal);
     reflectVec(v, v, n);
     m_speedY = v.m_y;
 }
 
-void wnKineticEnergyGravity::reflectAccel(Vec3f* normal) {
+void wnKineticEnergyGravity::reflectAccel(const Vec3f& normal) {
     Vec2f v(0.0f, m_gravity);
-    Vec2f n(*normal);
+    Vec2f n(normal);
     reflectVec(v, v, n);
     m_gravity = v.m_y;
 }
@@ -200,11 +200,11 @@ void wnKineticEnergyGravity::clearSpeed() {
     m_speedY = 0.0f;
 }
 
-Vec3f wnKineticEnergyGravity::getRotation() {
+Vec3f wnKineticEnergyGravity::getRotation() const {
     return Vec3f(0.0f, 0.0f, 0.0f);
 }
 
-Vec2f wnKineticEnergyGravity::getSpeed() {
+Vec2f wnKineticEnergyGravity::getSpeed() const {
     return Vec2f(0.0f, m_speedY);
 }
 

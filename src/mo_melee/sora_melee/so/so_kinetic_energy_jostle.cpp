@@ -29,8 +29,8 @@ void soKineticEnergyJostle::updateEnergy(soModuleAccesser* acc) {
 }
 
 // Jostling is recomputed from collision separation every frame.
-void soKineticEnergyJostle::reflectAccel(Vec3f*) { }
-void soKineticEnergyJostle::reflectSpeed(Vec3f*) { }
+void soKineticEnergyJostle::reflectAccel(const Vec3f&) { }
+void soKineticEnergyJostle::reflectSpeed(const Vec3f&) { }
 void soKineticEnergyJostle::mulAccel(Vec3f*) { }
 void soKineticEnergyJostle::mulSpeed(Vec3f*) { }
 void soKineticEnergyJostle::clearRotSpeed() { }
@@ -40,7 +40,7 @@ void soKineticEnergyJostle::clearSpeed() {
     m_speed.m_z = 0.0f;
 }
 void soKineticEnergyJostle::resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*) { }
-Vec3f soKineticEnergyJostle::getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
-Vec3f soKineticEnergyJostle::getSpeed3f() { return m_speed; }
-Vec2f soKineticEnergyJostle::getSpeed() { return Vec2f(m_speed.m_x, m_speed.m_y); }
+Vec3f soKineticEnergyJostle::getRotation() const { return Vec3f(0.0f, 0.0f, 0.0f); }
+Vec3f soKineticEnergyJostle::getSpeed3f() const { return m_speed; }
+Vec2f soKineticEnergyJostle::getSpeed() const { return Vec2f(m_speed.m_x, m_speed.m_y); }
 soKineticEnergyJostle::~soKineticEnergyJostle() { }

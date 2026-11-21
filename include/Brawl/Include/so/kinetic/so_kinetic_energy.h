@@ -66,16 +66,16 @@ public:
     };
 
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getSpeed3f();
-    virtual Vec3f getRotation();
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getSpeed3f() const;
+    virtual Vec3f getRotation() const;
     virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser* moduleAccesser);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f* speed);
     virtual void mulAccel(Vec3f* accel);
-    virtual void reflectSpeed(Vec3f* speed);
-    virtual void reflectAccel(Vec3f* accel);
+    virtual void reflectSpeed(const Vec3f& speed);
+    virtual void reflectAccel(const Vec3f& accel);
     virtual void onConsiderGroundFriction();
     virtual void offConsiderGroundFriction();
     virtual ~soKineticEnergy();
