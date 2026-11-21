@@ -11,6 +11,9 @@
 #include <wn/wn_extend_param_accesser.h>
 #include <wn/sonic/wn_sonic_super_sonic_kinetic_transactor.h>
 #include <so/controller/so_controller_module_link_ref.h>
+#ifdef WN_KINETIC_MEDIATOR_LATE // BYTES: link order, the mediator template follows the accesser and builder templates
+#include <wn/wn_kinetic_mediator.h>
+#endif
 
 #ifndef WN_STATUS_PROC_VECTOR_4_DECLARED // the fighter unit declares it before the spring
 WN_STATUS_PROC_VECTOR_DEFAULT_CTOR(4);
@@ -124,7 +127,7 @@ struct wnSonicSuperSonicModuleAccesserBuildConfig : public wnCommonBuildConfig {
     typedef soLinkModuleBuildConfigCap<5, soLinkModuleImpl> LinkModuleBuildConfig;
     typedef wnControllerModuleBuildConfig<soControllerModuleLinkRef, 0, 0> ControllerModuleBuildConfig;
     typedef soCameraModuleBuildConfig<soCameraModuleImpl> CameraModuleBuildConfig;
-    typedef wnStatusModuleBuildConfig<4, soGeneralWorkBuildConfig<2, 2, 1>, 2,
+    typedef wnStatusModuleBuildConfig<4, soGeneralWorkBuildConfig<2, 2, 1>, 4,
         soTransitionModuleBuildConfig<wnStatusTransitionTypeList> > StatusModuleBuildConfig;
     typedef wnSonicSuperSonicAnimCmdModuleSubBuildConfig AnimCmdModuleSubBuildConfig;
     typedef wnEffectModuleBuildConfig<1, 1, 0, 1, 5, soEffectModuleImpl> EffectModuleBuildConfig;
@@ -133,6 +136,9 @@ struct wnSonicSuperSonicModuleAccesserBuildConfig : public wnCommonBuildConfig {
     typedef soGlowModuleBuildConfigNull GlowModuleBuildConfig;
 };
 
+// WN_SONIC_SUPER_SONIC_GENERIC_BUILDER (opt-in, the article unit): BYTES, the generic wnWeaponBuilder<BC> template
+// (WN_WEAPON_NO_COMMON_ENERGIES, WN_WEAPON_BUILDER_CTOR_NO_FLAG); this explicit specialization hoists a .bss anchor.
+#ifndef WN_SONIC_SUPER_SONIC_GENERIC_BUILDER
 // The native builder constructor is out of line (the article constructor calls it).
 template <>
 class wnWeaponBuilder<wnSonicSuperSonicModuleAccesserBuildConfig> : public Weapon {
@@ -154,6 +160,7 @@ public:
         soSingletonHolder<soArticleMediatorNull>::getInstance()->deactivate();
     }
 };
+#endif
 static_assert(sizeof(wnWeaponBuilder<wnSonicSuperSonicModuleAccesserBuildConfig>) == 0x2CD4, "Sonic weapon builder size");
 
 #else
