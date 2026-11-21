@@ -18,15 +18,16 @@
 #define SO_PARAM_CUSTOMIZE_IMPL_LATE
 #define SO_KINETIC_MEDIATOR_NULL_UPDATE_REVERSED
 #define SO_ARTICLE_LOG_HELPER_LATE
-#include <ft/builder/ft_dol_array_list.h>
+// The input and kinetic energy classes come before ft_dol_array_list.h, which would define the resource id accesser first.
 #include <ip/ip_null.h>
+#include <so/kinetic/so_kinetic_energy.h>
+#include <ft/builder/ft_dol_array_list.h>
 #include <so/damage/so_damage_event_presenter.h>
 #include <so/team/so_team.h>
 #include <so/resource/so_resource_id_accesser.h>
 #include <so/team/so_team_impl.h>
 #include <so/damage/so_damage_transactor_null.h>
 #include <so/damage/so_damage_effector_null.h>
-#include <so/kinetic/so_kinetic_energy.h>
 #include <so/kinetic/so_kinetic_mediator_null.h>
 #include <so/article/so_article_mediator_null.h>
 #include <so/param/so_param_customize_module_impl.h>

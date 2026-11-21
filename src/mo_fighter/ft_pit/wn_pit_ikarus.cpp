@@ -1,5 +1,8 @@
 #define WN_PIT_IKARUS_FULL_BUILDER // the complete Ikarus builder (see the header)
+#define WN_PIT_IKARUS_GENERIC_BUILDER // this unit instantiates the generic weapon builder template (see the header)
 #define WN_WEAPON_BUILDER
+#define WN_WEAPON_NO_COMMON_ENERGIES // the Ikarus builder holds no common energies (its mediator owns all four)
+#define WN_WEAPON_BUILDER_CTOR_NO_FLAG
 #define WN_DAMAGE_ACTOR_INTERFACE
 #define SO_KINETIC_ENERGY_ABSTRACT // the base vtable (empty pure slots) and its friction switches are weak copies here
 #define SO_DAMAGE_EFFECTOR_NULL_IMPLICIT_DTOR
@@ -16,21 +19,24 @@
 #define SO_KINETIC_ENERGY_3F_FULL // BYTES: the builder holds the full 3f energy (size 0x48); its dtor is then expanded in this unit
 #endif
 #define WN_KINETIC_GENERIC_BUILDER
+#define WN_KINETIC_MEDIATOR_OUT_OF_CLASS // BYTES: link order, the mediator and its pools are instantiated at the end of the unit
 #define WN_BUILD_DATA_INLINE_DTOR // BYTES: the build data temporary's weak destructor comes right after getHeapModule
 #define SO_KINETIC_ENERGY_3F_DEFAULT_CTOR // BYTES: the Ikarus pool constructs its 3f energy here (five Vec3f defaults)
 // BYTES: link order. MWCC emits the weak vtables (and with them their inline virtual functions) in reverse order of the
 // class definitions; these headers come first, in the order the original defines the classes (as in the G&W rescue).
+// The input, kinetic energy and damage observer classes come before ft_dol_array_list.h, which would define the
+// resource id accesser ahead of them.
 #define SO_PARAM_CUSTOMIZE_IMPL_LATE
 #define SO_ARTICLE_LOG_HELPER_LATE
-#include <ft/builder/ft_dol_array_list.h>
 #include <ip/ip_null.h>
+#include <so/kinetic/so_kinetic_energy.h>
 #include <so/damage/so_damage_event_presenter.h>
+#include <ft/builder/ft_dol_array_list.h>
 #include <so/team/so_team.h>
 #include <so/resource/so_resource_id_accesser.h>
 #include <so/team/so_team_impl.h>
 #include <so/damage/so_damage_transactor_null.h>
 #include <so/damage/so_damage_effector_null.h>
-#include <so/kinetic/so_kinetic_energy.h>
 #include <so/article/so_article_mediator_null.h>
 #include <so/param/so_param_customize_module_impl.h>
 #include <wn/wn_module_accesser_builder.h>
@@ -125,12 +131,6 @@ wnPitIkarus::wnPitIkarus(s32 articleId, const wnArticleBuildInfo& info, const wn
     Weapon::deactivate(false);
 }
 #pragma dont_inline reset
-
-wnWeaponBuilder<wnPitIkarusModuleAccesserBuildConfig>::wnWeaponBuilder(
-    const char* name, s32 articleId, const wnArticleBuildInfo& info, const wnModuleAccesserBuildData& bd) :
-    Weapon(name, bd.m_kind, bd.m_data, articleId, &info, m_modules.getModuleAccesser(), true), m_modules(this, bd) {
-    Weapon::initialize();
-}
 
 void wnPitIkarus::activate(u32 founderTaskId, u32 resourceId, int team, const Vec3f& pos, float unk1, float unk2) {
     wnActivateDesc desc(founderTaskId, resourceId, resourceId, resourceId, -1, -1, 0, 0,
