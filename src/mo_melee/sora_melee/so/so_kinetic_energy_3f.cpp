@@ -49,74 +49,6 @@ void soKineticEnergy3f::resetEnergy(int, const Vec3f& speed, const Vec3f&, soMod
     m_limit3f = Vec3f(-1.0f, -1.0f, -1.0f);
 }
 
-// TODO: clean up -- hand-written paired-single multiply; should be a shared Vec3f helper.
-// MATCH-ONLY: componentwise product in paired singles (the same style as Vec3fAdd).
-static inline void Vec3fMul(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
-    register f32 fr3, fr2, fr1, fr0;
-    // clang-format off
-    asm {
-        psq_l  fr3, Vec3f.m_x(lhs), 0, 0
-        psq_l  fr1, Vec3f.m_x(rhs), 0, 0
-        psq_l  fr2, Vec3f.m_z(lhs), 1, 0
-        psq_l  fr0, Vec3f.m_z(rhs), 1, 0
-        ps_mul fr1, fr3, fr1
-        ps_mul fr0, fr2, fr0
-        psq_st fr1, Vec3f.m_x(pOut), 0, 0
-        psq_st fr0, Vec3f.m_z(pOut), 1, 0
-    }
-    // clang-format on
-}
-
-void soKineticEnergy3f::mulSpeed(Vec3f* speed) {
-    Vec3fMul(&m_speed3f, &m_speed3f, speed);
-}
-
-void soKineticEnergy3f::mulAccel(Vec3f* accel) {
-    Vec3fMul(&m_accel3f, &m_accel3f, accel);
-}
-
-static inline void reflectVec(Vec3f& out, const Vec3f& v, const Vec3f& n) {
-    out = out - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y + n.m_z * v.m_z);
-}
-
-void soKineticEnergy3f::reflectSpeed(const Vec3f& normal) {
-    reflectVec(m_speed3f, m_speed3f, normal);
-}
-
-void soKineticEnergy3f::reflectAccel(const Vec3f& normal) {
-    reflectVec(m_accel3f, m_accel3f, normal);
-}
-
-void soKineticEnergy3f::onConsiderGroundFriction() {
-    unk45 = true;
-}
-
-void soKineticEnergy3f::offConsiderGroundFriction() {
-    unk45 = false;
-}
-
-void soKineticEnergy3f::clearRotSpeed() { }
-
-void soKineticEnergy3f::clearSpeed() {
-    m_speed3f.m_z = 0.0f;
-    m_speed3f.m_y = 0.0f;
-    m_speed3f.m_x = 0.0f;
-}
-
-Vec3f soKineticEnergy3f::getRotation() const {
-    return Vec3f(0.0f, 0.0f, 0.0f);
-}
-
-Vec3f soKineticEnergy3f::getSpeed3f() const {
-    return m_speed3f;
-}
-
-Vec2f soKineticEnergy3f::getSpeed() const {
-    return Vec2f(m_speed3f.m_x, m_speed3f.m_y);
-}
-
-soKineticEnergy3f::~soKineticEnergy3f() { }
-
 // TODO: clean up -- MATCH-ONLY paired-single add with the original register assignment; should be Vec3f::operator+= once
 // the shared Vec3fAdd helper has a variant with these register lifetimes.
 static inline void Vec3fAddLocal(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
@@ -219,3 +151,72 @@ void soKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
         }
     }
 }
+
+// TODO: clean up -- hand-written paired-single multiply; should be a shared Vec3f helper.
+// MATCH-ONLY: componentwise product in paired singles (the same style as Vec3fAdd).
+static inline void Vec3fMul(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
+    register f32 fr3, fr2, fr1, fr0;
+    // clang-format off
+    asm {
+        psq_l  fr3, Vec3f.m_x(lhs), 0, 0
+        psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+        psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+        psq_l  fr0, Vec3f.m_z(rhs), 1, 0
+        ps_mul fr1, fr3, fr1
+        ps_mul fr0, fr2, fr0
+        psq_st fr1, Vec3f.m_x(pOut), 0, 0
+        psq_st fr0, Vec3f.m_z(pOut), 1, 0
+    }
+    // clang-format on
+}
+
+void soKineticEnergy3f::mulSpeed(Vec3f* speed) {
+    Vec3fMul(&m_speed3f, &m_speed3f, speed);
+}
+
+void soKineticEnergy3f::mulAccel(Vec3f* accel) {
+    Vec3fMul(&m_accel3f, &m_accel3f, accel);
+}
+
+static inline void reflectVec(Vec3f& out, const Vec3f& v, const Vec3f& n) {
+    out = out - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y + n.m_z * v.m_z);
+}
+
+void soKineticEnergy3f::reflectSpeed(const Vec3f& normal) {
+    reflectVec(m_speed3f, m_speed3f, normal);
+}
+
+void soKineticEnergy3f::reflectAccel(const Vec3f& normal) {
+    reflectVec(m_accel3f, m_accel3f, normal);
+}
+
+void soKineticEnergy3f::offConsiderGroundFriction() {
+    unk45 = false;
+}
+
+void soKineticEnergy3f::onConsiderGroundFriction() {
+    unk45 = true;
+}
+
+void soKineticEnergy3f::clearRotSpeed() { }
+
+void soKineticEnergy3f::clearSpeed() {
+    m_speed3f.m_z = 0.0f;
+    m_speed3f.m_y = 0.0f;
+    m_speed3f.m_x = 0.0f;
+}
+
+Vec3f soKineticEnergy3f::getRotation() const {
+    return Vec3f(0.0f, 0.0f, 0.0f);
+}
+
+Vec3f soKineticEnergy3f::getSpeed3f() const {
+    return m_speed3f;
+}
+
+Vec2f soKineticEnergy3f::getSpeed() const {
+    return Vec2f(m_speed3f.m_x, m_speed3f.m_y);
+}
+
+soKineticEnergy3f::~soKineticEnergy3f() { }
+

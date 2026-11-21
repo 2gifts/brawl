@@ -1,11 +1,12 @@
 #define WN_ARTICLE_NATIVE_BUILDERS
+#define SO_KINETIC_MODULE_IMPL_CTOR_2
 #include <mt/mt_vector.h>
 #include <so/so_kinetic_utility.h>
 #include <so/so_module_accesser.h>
 #include <wn/wn_kinetic_energy_gravity.h>
 #include <so/event/so_event_system.h>
-#include <wn/wn_kinetic_energy_normal.h>
 #include <wn/wn_kinetic_module_impl.h>
+#include <wn/wn_kinetic_energy_normal.h>
 #include <types.h>
 
 // Kinetic classes of the generic article (Weapon): the planar energy the shots fly with, the vertical-only energy of
@@ -57,7 +58,7 @@ void wnKineticEnergyNormal::updateEnergy(soModuleAccesser* acc) {
 }
 
 wnKineticModuleImpl::wnKineticModuleImpl(soModuleAccesser* acc, soInstanceManagerFullProperty<soKineticEnergy*>* energies, soKineticMediator* mediator) :
-    soKineticModuleImpl(acc, energies, mediator),
+    soKineticModuleImpl(acc, energies),
     soStatusEventObserver(static_cast<soEventManager&>(acc->getEventManageModule()).getManageId(), -1),
     m_outsideGroundEnergyId(-1) {
 }
