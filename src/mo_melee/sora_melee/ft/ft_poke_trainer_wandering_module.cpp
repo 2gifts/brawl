@@ -3,6 +3,8 @@
 // (adding or removing an unused #ifdef name flips it). This unused name keeps the unit compiling; change it if the ICE returns.
 #ifdef FT_POKETRAINER_ICE_DODGE_0
 #endif
+#ifdef FT_POKETRAINER_ICE_DODGE_WAND_X0
+#endif
 #define FT_FIGHTER_ANIMCMD_LONG
 #define FT_POKETRAINER_DISGUISE_PUSH_RANGE
 #define FT_POKETRAINER_ARTICLE_POOLS

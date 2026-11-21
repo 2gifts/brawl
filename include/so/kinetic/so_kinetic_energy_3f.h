@@ -12,16 +12,16 @@ public:
     // The overrides are defined in sora_melee (so_kinetic_energy_3f), which owns the vtable; declaring them keeps an
     // inline constructor from emitting a weak vtable that points at the base's pure slots.
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);
-    virtual Vec2f getSpeed();
-    virtual Vec3f getSpeed3f();
-    virtual Vec3f getRotation();
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser* moduleAccesser);
+    virtual Vec2f getSpeed() const;
+    virtual Vec3f getSpeed3f() const;
+    virtual Vec3f getRotation() const;
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser* moduleAccesser);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f* speed);
     virtual void mulAccel(Vec3f* accel);
-    virtual void reflectSpeed(Vec3f* speed);
-    virtual void reflectAccel(Vec3f* accel);
+    virtual void reflectSpeed(const Vec3f& speed);
+    virtual void reflectAccel(const Vec3f& accel);
     virtual void onConsiderGroundFriction();
     virtual void offConsiderGroundFriction();
     // Opt-in per unit (default off): a unit that owns an article with this energy as a member (Snake's RGB6 bullet)

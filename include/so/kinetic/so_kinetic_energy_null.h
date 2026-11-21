@@ -11,14 +11,14 @@ public:
     // HYPOTHESIS: the constructor (no caller decompiled yet); the base takes the null flag.
     soKineticEnergyNull() : soKineticEnergy(true) { }
     virtual void updateEnergy(soModuleAccesser*) { }
-    virtual Vec2f getSpeed() { return Vec2f(0.0f, 0.0f); }
-    virtual Vec3f getRotation() { return Vec3f(0.0f, 0.0f, 0.0f); }
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*) { }
+    virtual Vec2f getSpeed() const { return Vec2f(0.0f, 0.0f); }
+    virtual Vec3f getRotation() const { return Vec3f(0.0f, 0.0f, 0.0f); }
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*) { }
     virtual void clearSpeed() { }
     virtual void clearRotSpeed() { }
     virtual void mulSpeed(Vec3f*) { }
     virtual void mulAccel(Vec3f*) { }
-    virtual void reflectSpeed(Vec3f*) { }
-    virtual void reflectAccel(Vec3f*) { }
+    virtual void reflectSpeed(const Vec3f&) { }
+    virtual void reflectAccel(const Vec3f&) { }
     virtual ~soKineticEnergyNull() { }
 };
