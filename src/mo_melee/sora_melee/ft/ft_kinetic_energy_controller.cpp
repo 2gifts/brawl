@@ -154,7 +154,7 @@ void ftKineticEnergyController::resetEnergy(int mode, const Vec2f& speed, const 
     case 3:
         if (mode != 1) {
             Vec2f v(getSpeed().m_x + getSpeed().m_y, 0.0f);
-            v = soKineticUtility::limitSpeed(&v, &Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0), -1.0f));
+            v = soKineticUtility::limitSpeed(v, Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0), -1.0f));
             m_speed = v;
         }
         if (mode == 2) {
@@ -174,7 +174,7 @@ void ftKineticEnergyController::resetEnergy(int mode, const Vec2f& speed, const 
         if (param != 0) {
             float a = soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0);
             Vec2f v(getSpeed().m_x + getSpeed().m_y, 0.0f);
-            v = soKineticUtility::limitSpeed(&v, &Vec2f(a * param[3], -1.0f));
+            v = soKineticUtility::limitSpeed(v, Vec2f(a * param[3], -1.0f));
             m_speed = v;
             m_speedTarget = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd5, 0), -1.0f);
             m_brake = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xbd6, 0), 0.0f);
@@ -314,7 +314,7 @@ void ftKineticEnergyController::resetEnergy(int mode, const Vec2f& speed, const 
         break;
     }
     case 17: {
-        Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), moduleAccesser);
+        Vec2f projected = soKineticUtility::projectionGroundSpeed(getSpeed(), moduleAccesser);
         m_speed = projected;
         break;
     }

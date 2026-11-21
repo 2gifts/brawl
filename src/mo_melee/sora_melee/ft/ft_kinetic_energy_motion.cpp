@@ -49,7 +49,7 @@ void ftKineticEnergyMotion::resetEnergy(int mode, const Vec2f& speed, const Vec3
     case 2:
     case 3:
         if (mode != 3) {
-            Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), acc);
+            Vec2f projected = soKineticUtility::projectionGroundSpeed(getSpeed(), acc);
             m_speed = projected;
         }
         m_brake = Vec2f(soValueAccesser::getConstantFloat(acc, 0xBBC, 0), 0.0f);
@@ -132,7 +132,7 @@ void ftKineticEnergyMotion::updateEnergy(soModuleAccesser* acc) {
             break;
         }
         case 2:
-            desired = soKineticUtility::projectionGroundSpeed(&desired, acc);
+            desired = soKineticUtility::projectionGroundSpeed(desired, acc);
             groundTracking = true;
             break;
         case 3:

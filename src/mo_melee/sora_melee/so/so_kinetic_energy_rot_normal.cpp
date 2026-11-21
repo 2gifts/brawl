@@ -18,11 +18,11 @@ inline float Vec3f::length() {
 
 void soKineticEnergyRotNormal::updateEnergy(soModuleAccesser*) {
     Vec3f accel = m_accel;
-    accel = soKineticUtility::brakeSpeed(&m_rotSpeed, &accel, &m_speedTarget, &m_brake);
+    accel = soKineticUtility::brakeSpeed(m_rotSpeed, accel, m_speedTarget, m_brake);
     if (accel.length() != 0.0f) {
         Vec3fAdd(&m_rotSpeed, &m_rotSpeed, &accel);
     }
-    m_rotSpeed = soKineticUtility::limitSpeed(&m_rotSpeed, &m_speedLimit);
+    m_rotSpeed = soKineticUtility::limitSpeed(m_rotSpeed, m_speedLimit);
 }
 
 void soKineticEnergyRotNormal::resetEnergy(int, const Vec2f&, const Vec3f& rotation, soModuleAccesser*) {

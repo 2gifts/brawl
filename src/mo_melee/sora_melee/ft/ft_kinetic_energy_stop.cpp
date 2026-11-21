@@ -36,7 +36,7 @@ void ftKineticEnergyStop::resetEnergy(int type, const Vec2f& speed, const Vec3f&
     case 14:
     case 15: {
         // Ground braking follows the surface rather than preserving world X/Y.
-        Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), acc);
+        Vec2f projected = soKineticUtility::projectionGroundSpeed(getSpeed(), acc);
         m_speed = projected;
         float brake = soValueAccesser::getConstantFloat(acc, 0xBBC, 0);
         if (type == 13) brake *= soValueAccesser::getConstantFloat(acc, 0xCC4, 0);
@@ -51,13 +51,13 @@ void ftKineticEnergyStop::resetEnergy(int type, const Vec2f& speed, const Vec3f&
         break;
     }
     case 17: {
-        Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), acc);
+        Vec2f projected = soKineticUtility::projectionGroundSpeed(getSpeed(), acc);
         m_speed = projected;
         m_speedLimit = Vec2f(soValueAccesser::getConstantFloat(acc, 0xBC2, 0), 0.0f);
         break;
     }
     case 18: {
-        Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), acc);
+        Vec2f projected = soKineticUtility::projectionGroundSpeed(getSpeed(), acc);
         m_speed = projected;
         float mul = soValueAccesser::getConstantFloat(acc, 0xC38, 0);
         float baseBrake = soValueAccesser::getConstantFloat(acc, 0xBBC, 0);
@@ -69,7 +69,7 @@ void ftKineticEnergyStop::resetEnergy(int type, const Vec2f& speed, const Vec3f&
     case 11:
     case 23: {
         if (type != 23) {
-            Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), acc);
+            Vec2f projected = soKineticUtility::projectionGroundSpeed(getSpeed(), acc);
             m_speed = projected;
         }
         float mul = soValueAccesser::getConstantFloat(acc, 0xCDD, 0);
@@ -79,7 +79,7 @@ void ftKineticEnergyStop::resetEnergy(int type, const Vec2f& speed, const Vec3f&
         break;
     }
     case 21: {
-        Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), acc);
+        Vec2f projected = soKineticUtility::projectionGroundSpeed(getSpeed(), acc);
         m_speed = projected;
         float mul = soValueAccesser::getConstantFloat(acc, 0xCB7, 0);
         float baseBrake = soValueAccesser::getConstantFloat(acc, 0xBBC, 0);
@@ -113,7 +113,7 @@ void ftKineticEnergyStop::resetEnergy(int type, const Vec2f& speed, const Vec3f&
         m_brake = Vec2f(soValueAccesser::getConstantFloat(acc, 0xC15, 0), 0.0f);
         break;
     case 20: {
-        Vec2f projected = soKineticUtility::projectionGroundSpeed(&getSpeed(), acc);
+        Vec2f projected = soKineticUtility::projectionGroundSpeed(getSpeed(), acc);
         m_speed = projected;
         float mul = soValueAccesser::getConstantFloat(acc, 0xCBA, 0);
         float baseBrake = soValueAccesser::getConstantFloat(acc, 0xBBC, 0);

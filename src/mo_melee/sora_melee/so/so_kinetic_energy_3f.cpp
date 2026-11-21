@@ -157,7 +157,7 @@ void soKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
                     }
                     if (unk44 == true) {
                         Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
-                        Vec2f projected = soKineticUtility::projectionNormalFollow(&Vec2f(accel), &normal);
+                        Vec2f projected = soKineticUtility::projectionNormalFollow(Vec2f(accel), normal);
                         accel.m_x = projected.m_x;
                         accel.m_y = projected.m_y;
                     }

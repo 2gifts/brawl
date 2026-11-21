@@ -28,18 +28,18 @@ void soKineticEnergyNormal::updateEnergy(soModuleAccesser* moduleAccesser) {
                     if (m_unk30 == true) {
                         if (accel.lengthSq() != 0.0f) {
                             Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
-                            accel = soKineticUtility::projectionNormalFollow(&accel, &normal);
+                            accel = soKineticUtility::projectionNormalFollow(accel, normal);
                         }
                     }
                 }
             }
         }
-        accel = soKineticUtility::brakeSpeed(&m_speed, &accel, &m_speedTarget, &brake);
+        accel = soKineticUtility::brakeSpeed(m_speed, accel, m_speedTarget, brake);
         if (accel.lengthSq() != 0.0f) {
             m_speed.m_x += accel.m_x;
             m_speed.m_y += accel.m_y;
         }
-        m_speed = soKineticUtility::limitSpeed(&m_speed, &m_speedLimit);
+        m_speed = soKineticUtility::limitSpeed(m_speed, m_speedLimit);
     }
 }
 

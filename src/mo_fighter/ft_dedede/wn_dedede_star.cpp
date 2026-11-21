@@ -136,7 +136,7 @@ void wnDededeFollowerKineticTransactor::addSpeedOutside(int type, void* speedDat
         switch (moduleAccesser->getSituationModule().getKind()) {
         case Situation_Ground: {
             Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
-            outside = soKineticUtility::projectionNormalFollow(&InlineVec2f(speed->m_x, 0.0f), &normal);
+            outside = soKineticUtility::projectionNormalFollow(InlineVec2f(speed->m_x, 0.0f), normal);
             break;
         }
         }
