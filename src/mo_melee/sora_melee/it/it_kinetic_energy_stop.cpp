@@ -8,11 +8,11 @@ itKineticEnergyStop::itKineticEnergyStop() : m_mode(-1) {
     onConsiderGroundFriction();
 }
 
-void itKineticEnergyStop::resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser*) {
+void itKineticEnergyStop::resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
     clearSpeed();
     m_mode = -1;
-    float x = speed->m_x;
-    float y = speed->m_y;
+    float x = speed.m_x;
+    float y = speed.m_y;
     m_accel = Vec2f(0.0f, 0.0f);
     m_stableSpeed = Vec2f(0.0f, 0.0f);
     m_brake = Vec2f(0.0f, 0.0f);

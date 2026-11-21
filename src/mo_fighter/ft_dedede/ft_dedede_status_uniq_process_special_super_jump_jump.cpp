@@ -44,13 +44,13 @@ void ftDededeStatusUniqProcessSpecialSuperJumpJump::initStatus(soModuleAccesser*
 
     ftKineticEnergyGravity& vertical = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     Vec2f verticalInitial(0.0f, verticalSpeed);
-    vertical.resetEnergy(0, &verticalInitial, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    vertical.resetEnergy(0, verticalInitial, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     vertical.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, 0xfbb, 0);
     vertical.enable();
 
     ftKineticEnergyStop& horizontal = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
     Vec2f horizontalInitial(horizontalSpeed, 0.0f);
-    horizontal.resetEnergy(0x16, &horizontalInitial, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    horizontal.resetEnergy(0x16, horizontalInitial, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     horizontal.m_accel = Vec2f(0.0f, 0.0f);
     horizontal.m_speedTarget = Vec2f(horizontalSpeed, 0.0f);
     horizontal.m_brake = Vec2f(0.0f, 0.0f);
@@ -83,7 +83,7 @@ void ftDededeStatusUniqProcessSpecialSuperJumpJump::execStatus(soModuleAccesser*
         if (moduleAccesser->getWorkManageModule().getInt(0x20000001) > soValueAccesser::getConstantInt(moduleAccesser, 0x5dc4, 0)) {
             Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
             ftKineticEnergyGravity& vertical = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-            vertical.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            vertical.resetEnergy(0, Vec2f(0.0f, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             vertical.enable();
             moduleAccesser->getWorkManageModule().offFlag(0x22000011);
             moduleAccesser->getWorkManageModule().onFlag(0x22000015);

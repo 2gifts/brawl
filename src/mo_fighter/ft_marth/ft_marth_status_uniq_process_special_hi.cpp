@@ -14,17 +14,17 @@ void ftMarthStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAcces
     if (moduleAccesser->getSituationModule().getKind() == 2) {
         speedX *= soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_AirSpeedXRatio, 0);
         float zero = 0.0f;
-        stop.resetEnergy(6, &Vec2f(speedX, zero), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(6, Vec2f(speedX, zero), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
-        gravity.resetEnergy(0, &Vec2f(0.0f, zero), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, zero), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         soKineticEnergyNormal& motion = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
-        motion.resetEnergy(5, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        motion.resetEnergy(5, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         motion.enable();
         ftKineticEnergyDisableAndClear(2, moduleAccesser);
     } else {
         soKineticEnergyNormal& motion = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
-        motion.resetEnergy(3, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        motion.resetEnergy(3, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         motion.enable();
         ftKineticEnergyDisableAndClear(3, moduleAccesser);
         ftKineticEnergyDisableAndClear(1, moduleAccesser);
@@ -70,7 +70,7 @@ void ftMarthStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAcces
         } else {
             if (moduleAccesser->getKineticModule().getEnergy(1)->isEnable() == 0) {
                 ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-                gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                gravity.resetEnergy(0, Vec2f(0.0f, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 gravity.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_Gravity, 0);
                 gravity.m_fallSpeedMax = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_FallSpeedMax, 0);
                 gravity.enable();
@@ -78,7 +78,7 @@ void ftMarthStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAcces
             if (moduleAccesser->getKineticModule().getEnergy(2)->isEnable() == 0) {
                 ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
                 ftKineticEnergyController::ResetType resetType = ftKineticEnergyController::ResetType_11;
-                controller.resetEnergy(resetType, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                controller.resetEnergy(resetType, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 controller.mulXAccelMul(soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_ControlXRatio, 0));
                 controller.mulXSpeedMax(soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialHi_ControlXRatio, 0));
                 controller.enable();

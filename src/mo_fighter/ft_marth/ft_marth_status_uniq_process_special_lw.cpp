@@ -19,10 +19,10 @@ void ftMarthStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAcces
         if (moduleAccesser->getSituationModule().getKind() == 2) {
             speedX *= soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialLw_AirSpeedXRatio, 0);
             float zero = 0.0f;
-            stop.resetEnergy(6, &Vec2f(speedX, zero), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, Vec2f(speedX, zero), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.soKineticEnergyNormal::setBrake(&Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialLw_AirBrakeX, 0), 0.0f));
             stop.enable();
-            gravity.resetEnergy(0, &Vec2f(0.0f, zero), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, zero), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             gravity.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialLw_Gravity, 0);
             gravity.m_fallSpeedMax = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialLw_FallSpeedMax, 0);
             gravity.enable();
@@ -71,10 +71,10 @@ void ftMarthStatusUniqProcessSpecialLw::execStatus(soModuleAccesser* moduleAcces
                 float speedX = sumSpeed.m_x;
                 float speedY = sumSpeed.m_y;
                 if (moduleAccesser->getSituationModule().getKind() == 2) {
-                    stop.resetEnergy(6, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                    stop.resetEnergy(6, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                     stop.soKineticEnergyNormal::setBrake(&Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialLw_AirBrakeX, 0), 0.0f));
                     stop.enable();
-                    gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                    gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                     gravity.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialLw_Gravity, 0);
                     gravity.m_fallSpeedMax = soValueAccesser::getConstantFloat(moduleAccesser, ftMarthParam::SpecialLw_FallSpeedMax, 0);
                     gravity.enable();

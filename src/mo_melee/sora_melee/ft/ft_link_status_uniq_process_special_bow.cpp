@@ -60,7 +60,7 @@ void ftLinkStatusUniqProcessSpecialBow::execFixPos(soModuleAccesser* acc) {
     rot.m_z = zero;
     speed.m_x = zero;
     speed.m_y = zero;
-    motion.resetEnergy(kind, &speed, &rot, acc);
+    motion.resetEnergy(kind, speed, rot, acc);
 }
 
 void ftLinkStatusUniqProcessSpecialBow::exitStatus(soModuleAccesser* acc, int) {

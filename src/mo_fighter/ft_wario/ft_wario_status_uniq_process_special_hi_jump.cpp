@@ -50,7 +50,7 @@ void ftWarioStatusUniqProcessSpecialHiJump::exitStatus(soModuleAccesser* a, int 
         kinetic.changeKinetic(0x32, a);
         ftKineticEnergyStop& horizontal = dynamic_cast<ftKineticEnergyStop&>(*kinetic.getEnergy(3));
         Vec3f zero(0.0f, 0.0f, 0.0f);
-        horizontal.resetEnergy(0x16, &speed, &zero, a);
+        horizontal.resetEnergy(0x16, speed, zero, a);
         horizontal.enable();
     }
 }

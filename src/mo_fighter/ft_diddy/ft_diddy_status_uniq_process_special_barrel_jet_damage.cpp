@@ -42,10 +42,10 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::initStatus(soModuleAccesser
         break;
     }
 
-    damage.resetEnergy(2, &Vec2f(sumSpeed.m_x, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    damage.resetEnergy(2, Vec2f(sumSpeed.m_x, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     damage.enable();
 
-    gravity.resetEnergy(0, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(0, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.enable();
 }
 
@@ -61,7 +61,7 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetDamage::execStatus(soModuleAccesser
                     dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
                 ftKineticEnergyController::ResetType resetType = ftKineticEnergyController::ResetType_0;
                 Vec2f sumSpeed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
-                controller.resetEnergy(resetType, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                controller.resetEnergy(resetType, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 controller.enable();
                 ftKineticEnergyDisableAndClear(4, moduleAccesser);
             }

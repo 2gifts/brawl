@@ -146,7 +146,7 @@ void ftYoshiKineticTransactor::changeKineticSub2(bool*, void*, Vec2f* speed, soM
     zero.m_x = 0.0f;
     zero.m_y = 0.0f;
     Vec3f rotation(0.0f, 0.0f, 0.0f);
-    stop.resetEnergy(0x16, &stopSpeed, &rotation, acc);
+    stop.resetEnergy(0x16, stopSpeed, rotation, acc);
     stop.m_accel = zero;
     Vec2f target;
     target.m_x = param->unk00;
@@ -157,12 +157,12 @@ void ftYoshiKineticTransactor::changeKineticSub2(bool*, void*, Vec2f* speed, soM
     limit.m_y = 0.0f;
     stop.m_speedLimit = limit;
     stop.m_brake = zero;
-    gravity.resetEnergy(0, &gravitySpeed, &rotation, acc);
+    gravity.resetEnergy(0, gravitySpeed, rotation, acc);
     gravity.m_gravity = -param->unk1C;
     gravity.m_fallSpeedMax = param->unk20;
     gravity.unk1C = param->unk20;
     gravity.unk18 = 0.0f;
-    controller.resetEnergy(0x0B, &zero, &rotation, acc);
+    controller.resetEnergy(0x0B, zero, rotation, acc);
     controller.m_speed = controllerSpeed;
     controller.m_accelMul = param->unk04;
     float neutral = 0.0f;
@@ -210,12 +210,12 @@ void ftYoshiKineticTransactor::changeKineticSub3(bool*, void*, Vec2f* speed, soM
     zero.m_x = 0.0f;
     zero.m_y = 0.0f;
     Vec3f rotation(0.0f, 0.0f, 0.0f);
-    gravity.resetEnergy(0, &gravitySpeed, &rotation, acc);
+    gravity.resetEnergy(0, gravitySpeed, rotation, acc);
     gravity.m_gravity = -param->unk1C;
     gravity.m_fallSpeedMax = param->unk20;
     gravity.unk1C = param->unk20;
     gravity.unk18 = 0.0f;
-    controller.resetEnergy(0x0B, &zero, &rotation, acc);
+    controller.resetEnergy(0x0B, zero, rotation, acc);
     controller.m_speed = controllerSpeed;
     controller.m_accelMul = param->unk04;
     float neutral = 0.0f;
@@ -249,7 +249,7 @@ void ftYoshiKineticTransactor::changeKineticSub4(bool*, void*, Vec2f* speed, soM
     Vec2f stopSpeed;
     stopSpeed.m_x = speed->m_x;
     stopSpeed.m_y = 0.0f;
-    stop.resetEnergy(0x16, &stopSpeed, &rotation, acc);
+    stop.resetEnergy(0x16, stopSpeed, rotation, acc);
     Vec2f acceleration;
     acceleration.m_x = param->unk04 * lr;
     acceleration.m_y = 0.0f;
@@ -271,7 +271,7 @@ void ftYoshiKineticTransactor::changeKineticSub4(bool*, void*, Vec2f* speed, soM
     float verticalSpeed = speed->m_y;
     gravitySpeed.m_x = 0.0f;
     gravitySpeed.m_y = verticalSpeed;
-    gravity.resetEnergy(0, &gravitySpeed, &rotation, acc);
+    gravity.resetEnergy(0, gravitySpeed, rotation, acc);
     gravity.m_gravity = -param->unk18;
     gravity.m_fallSpeedMax = param->unk20;
     gravity.unk1C = param->unk14;

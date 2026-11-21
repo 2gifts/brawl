@@ -107,7 +107,7 @@ void wnSonicGimmickJump::notifyEventChangeStatus(int kind, int prevKind, soStatu
         speed.m_x = 0.0f;
         speed.m_y = speedY;
         Vec3f rotation(0.0f, 0.0f, 0.0f);
-        normal.resetEnergy(0, &speed, &rotation, ownAcc);
+        normal.resetEnergy(0, speed, rotation, ownAcc);
         float accelerationY = soValueAccesser::getConstantFloat(acc, 0xFA5, 0);
         Vec2f acceleration;
         acceleration.m_x = 0.0f;
@@ -144,7 +144,7 @@ void wnSonicGimmickJump::notifyEventChangeStatus(int kind, int prevKind, soStatu
         speed.m_x = 0.0f;
         speed.m_y = speedY;
         Vec3f rotation(0.0f, 0.0f, 0.0f);
-        normal.resetEnergy(0, &speed, &rotation, ownAcc);
+        normal.resetEnergy(0, speed, rotation, ownAcc);
         float accelerationY = soValueAccesser::getConstantFloat(acc, 0xFA5, 0);
         Vec2f acceleration;
         acceleration.m_x = 0.0f;

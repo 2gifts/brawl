@@ -21,17 +21,14 @@ ftKineticEnergyStop::ftKineticEnergyStop() :
         Vec2f(0.0f, 0.0f), Vec2f(0.0f, 0.0f), Vec2f(-1.0f, -1.0f), false, false),
     m_resetType(-1), unk38(false), unk39(false) { }
 
-void ftKineticEnergyStop::resetEnergy(int type, Vec2f* speed, Vec3f*, soModuleAccesser* acc) {
+void ftKineticEnergyStop::resetEnergy(int type, const Vec2f& speed, const Vec3f&, soModuleAccesser* acc) {
     clearSpeed();
     m_resetType = -1;
-    float initialX = speed->m_x;
-    float initialY = speed->m_y;
     m_accel = Vec2f(0.0f, 0.0f);
     m_speedTarget = Vec2f(0.0f, 0.0f);
     m_brake = Vec2f(0.0f, 0.0f);
     m_speedLimit = Vec2f(-1.0f, -1.0f);
-    m_speed.m_x = initialX;
-    m_speed.m_y = initialY;
+    m_speed = speed;
     m_resetType = type;
     switch (type) {
     case 0:

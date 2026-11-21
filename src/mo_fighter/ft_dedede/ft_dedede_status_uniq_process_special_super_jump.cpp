@@ -27,7 +27,7 @@ void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* mod
     if (sumSpeed.m_x > soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0)) {
         sumSpeed.m_x = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb4, 0);
     }
-    controller.resetEnergy(mode, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    controller.resetEnergy(mode, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     controller.m_accelMul = 1.0f;
     controller.m_unk40 = 0.0f;
     controller.enable();
@@ -35,7 +35,7 @@ void ftDededeStatusUniqProcessSpecialSuperJump::initStatus(soModuleAccesser* mod
     ftKineticEnergyGravity& energy = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
     float a = -1.0f * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb5, 0);
     float b = -1.0f * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb6, 0);
-    energy.resetEnergy(0, &Vec2f(0.0f, a), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    energy.resetEnergy(0, Vec2f(0.0f, a), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     energy.m_gravity = b;
     if (moduleAccesser->getSituationModule().getKind() == 2) {
         energy.enable();

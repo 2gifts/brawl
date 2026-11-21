@@ -240,7 +240,7 @@ void set_recoil(soModuleAccesser* acc, int chargeLevel) {
         recoil = acc->getConstantFloatKirby(0xfa1);
     }
     speed.m_x = -lr * (recoil * chargeLevel);
-    stop.resetEnergy(mode, &speed, &stop.getRotation(), acc);
+    stop.resetEnergy(mode, speed, stop.getRotation(), acc);
     stop.m_speedLimit = speed;
     if (situation != 0) {
         stop.m_brake = Vec2f(acc->getConstantFloatKirby(0xfa2), 0.0f);

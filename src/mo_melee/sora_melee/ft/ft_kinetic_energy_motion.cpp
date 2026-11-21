@@ -31,10 +31,8 @@ ftKineticEnergyMotion::ftKineticEnergyMotion() :
     m_motionMode(-1), m_facing(1.0f), m_prevMotionSpeed(0.0f, 0.0f),
     m_hasPrevMotionSpeed(false) { }
 
-void ftKineticEnergyMotion::resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser* acc) {
+void ftKineticEnergyMotion::resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser* acc) {
     clearSpeed();
-    float initialX = speed->m_x;
-    float initialY = speed->m_y;
     m_accel = Vec2f(0.0f, 0.0f);
     m_speedTarget = Vec2f(-1.0f, -1.0f);
     m_brake = Vec2f(0.0f, 0.0f);
@@ -42,8 +40,7 @@ void ftKineticEnergyMotion::resetEnergy(int mode, Vec2f* speed, Vec3f*, soModule
     m_facing = 1.0f;
     m_rotation = 0.0f;
     m_speedMul = 1.0f;
-    m_speed.m_x = initialX;
-    m_speed.m_y = initialY;
+    m_speed = speed;
     m_motionMode = mode;
     m_facing = acc->getPostureModule().getLr();
     switch (mode) {
@@ -70,7 +67,7 @@ void ftKineticEnergyMotion::resetEnergy(int mode, Vec2f* speed, Vec3f*, soModule
     default:
         return;
     }
-    m_prevMotionSpeed = *speed;
+    m_prevMotionSpeed = speed;
     m_hasPrevMotionSpeed = false;
 }
 

@@ -15,7 +15,7 @@ public:
     virtual Vec2f getSpeed();
     virtual Vec3f getSpeed3f();
     virtual Vec3f getRotation();
-    virtual void resetEnergy(int, Vec2f*, Vec3f*, soModuleAccesser*);
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f&, soModuleAccesser*);
     virtual void clearSpeed();
     virtual void clearRotSpeed();
     virtual void mulSpeed(Vec3f*);
@@ -25,7 +25,7 @@ public:
     virtual void onConsiderGroundFriction();
     virtual void offConsiderGroundFriction();
     virtual ~soKineticEnergy3f();
-    void resetEnergy(int, Vec3f*, Vec3f*, soModuleAccesser*);
+    void resetEnergy(int, const Vec3f&, const Vec3f&, soModuleAccesser*);
     Vec3f m_speed3f;
     Vec3f m_accel3f;
     Vec3f m_targetSpeed3f;
@@ -35,16 +35,16 @@ public:
     bool unk45;
 };
 
-void soKineticEnergy3f::resetEnergy(int, Vec2f* speed, Vec3f*, soModuleAccesser*) {
-    m_speed3f = Vec3f(speed->m_x, speed->m_y, 0.0f);
+void soKineticEnergy3f::resetEnergy(int, const Vec2f& speed, const Vec3f&, soModuleAccesser*) {
+    m_speed3f = Vec3f(speed.m_x, speed.m_y, 0.0f);
     m_accel3f = Vec3f(0.0f, 0.0f, 0.0f);
     m_targetSpeed3f = Vec3f(0.0f, 0.0f, 0.0f);
     m_brake3f = Vec3f(0.0f, 0.0f, 0.0f);
     m_limit3f = Vec3f(-1.0f, -1.0f, -1.0f);
 }
 
-void soKineticEnergy3f::resetEnergy(int, Vec3f* speed, Vec3f*, soModuleAccesser*) {
-    m_speed3f = *speed;
+void soKineticEnergy3f::resetEnergy(int, const Vec3f& speed, const Vec3f&, soModuleAccesser*) {
+    m_speed3f = speed;
     m_accel3f = Vec3f(0.0f, 0.0f, 0.0f);
     m_targetSpeed3f = Vec3f(0.0f, 0.0f, 0.0f);
     m_brake3f = Vec3f(0.0f, 0.0f, 0.0f);

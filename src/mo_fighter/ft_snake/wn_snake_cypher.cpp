@@ -74,7 +74,7 @@ void wnSnakeCypher::shoot(const float* speedX) {
         m_moduleAccesser->getWorkManageModule().setInt(m_param->unk30, 0x10000005);
         m_moduleAccesser->getStatusModule().changeStatusForce(2, m_moduleAccesser);
         wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*m_moduleAccesser->getKineticModule().getEnergy(0));
-        energy.resetEnergy(0, &Vec2f(*speedX, m_param->unk24), &Vec3f(0.0f, 0.0f, 0.0f), m_moduleAccesser);
+        energy.resetEnergy(0, Vec2f(*speedX, m_param->unk24), Vec3f(0.0f, 0.0f, 0.0f), m_moduleAccesser);
         energy.m_accel = Vec2f(0.0f, m_param->unk28);
         energy.m_speedTarget = Vec2f(0.0f, m_param->unk2C);
         m_moduleAccesser->getWorkManageModule().offFlag(0x12000000);

@@ -131,10 +131,10 @@ void ftStatusUniqProcessSwallowedThrown::initStatus(soModuleAccesser* moduleAcce
         velocity.m_y = stored.m_y;
     }
     ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-    stop.resetEnergy(6, &Vec2f(velocity.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    stop.resetEnergy(6, Vec2f(velocity.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     stop.enable();
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-    gravity.resetEnergy(0, &Vec2f(0.0f, velocity.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(0, Vec2f(0.0f, velocity.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.enable();
     reinterpret_cast<ftControllerClatterView*>(moduleAccesser->m_enumerationStart->m_controllerModule)->startClatter(clatterTime, clatterP2, clatterP3, 0, -1, 0, false);
 }

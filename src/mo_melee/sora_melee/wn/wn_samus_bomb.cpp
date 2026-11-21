@@ -113,7 +113,7 @@ void wnSamusBomb::activate(int founderTaskId, int etcResourceId, int team) {
     soModuleAccesser* acc = m_moduleAccesser;
     Vec3f rot(0.0f, 0.0f, 0.0f);
     Vec2f speed(0.0f, 0.0f);
-    normal.resetEnergy(0, &speed, &rot, acc);
+    normal.resetEnergy(0, speed, rot, acc);
     normal.enable();
     wnKineticEnergyGravity& gravity = dynamic_cast<wnKineticEnergyGravity&>(*m_moduleAccesser->getKineticModule().getEnergy(2));
     gravity.m_speedY = m_param->m_fallSpeed;

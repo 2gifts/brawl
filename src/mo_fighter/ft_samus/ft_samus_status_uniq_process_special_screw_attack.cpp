@@ -27,15 +27,15 @@ void ftSamusStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAcces
     if (situation != 2) {
         moduleAccesser->getWorkManageModule().onFlag(ftSamusWork::SpecialHi_Grounded);
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-        stop.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(0, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
     } else {
         sumSpeed.m_y = param->riseSpeedY;
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, sumSpeed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, sumSpeed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-        controller.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        controller.resetEnergy(0, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_accelMul = param->controlAccelMul;
         controller.m_unk40 = 0.0f;
         setVec2f(controller.m_speedTarget, Vec2f(param->controlSpeedXMax, controller.m_speedTarget.m_y));
@@ -49,10 +49,10 @@ void ftSamusStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAcces
     if (moduleAccesser->getWorkManageModule().isFlag(ftSamusWork::SpecialHi_Launched)) {
         moduleAccesser->getWorkManageModule().offFlag(ftSamusWork::SpecialHi_Launched);
         soKineticEnergyNormal& motion = dynamic_cast<soKineticEnergyNormal&>(*moduleAccesser->getKineticModule().getEnergy(0));
-        motion.resetEnergy(4, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        motion.resetEnergy(4, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         motion.enable();
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-        controller.resetEnergy(0, &Vec2f(param->riseSpeedX * moduleAccesser->getPostureModule().getLr(), 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        controller.resetEnergy(0, Vec2f(param->riseSpeedX * moduleAccesser->getPostureModule().getLr(), 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_unk40 = 0.0f;
         controller.enable();
         ftKineticEnergyDisableAndClear(3, moduleAccesser);

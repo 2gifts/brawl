@@ -193,7 +193,7 @@ static inline const wnKineticEnergyNormal* getEnergy(const void* pools, const so
 void wnPitIkarusKineticTransactor::changeKineticSub(void* pools, soModuleAccesser* moduleAccesser) {
     moduleAccesser->getKineticModule().unableEnergyAll();
     soKineticEnergy3f* energy = getEnergy(pools, soIntToType<0>());
-    energy->resetEnergy(-1, &Vec3f(0.0f, 0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    energy->resetEnergy(-1, Vec3f(0.0f, 0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     energy->enable();
 }
 

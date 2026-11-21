@@ -79,15 +79,15 @@ void ftRobotStatusUniqProcessSpecialArmSpin::initStatus(soModuleAccesser* module
     }
     case 0x117:
         if (moduleAccesser->getSituationModule().getKind() == 2) {
-            stop.resetEnergy(6, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.enable();
             if (speedY < -soValueAccesser::getConstantFloat(moduleAccesser, 0xfb0, 0)) {
                 speedY = -soValueAccesser::getConstantFloat(moduleAccesser, 0xfb0, 0);
             }
-            gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             gravity.enable();
         } else {
-            stop.resetEnergy(0, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(0, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.enable();
             ftKineticEnergyDisableAndClear(1, moduleAccesser);
         }
@@ -134,15 +134,15 @@ void ftRobotStatusUniqProcessSpecialArmSpin::execStatus(soModuleAccesser* module
                 ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
                 ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
                 ftKineticEnergyController::ResetType resetMode = ftKineticEnergyController::ResetType_0;
-                controller.resetEnergy(resetMode, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                controller.resetEnergy(resetMode, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 controller.m_speedTarget = Vec2f(topSpeed, 0.0f);
                 controller.enable();
-                gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 gravity.enable();
                 ftKineticEnergyDisableAndClear(3, moduleAccesser);
             } else {
                 ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-                stop.resetEnergy(0, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(0, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 stop.enable();
                 ftKineticEnergyDisableAndClear(1, moduleAccesser);
                 ftKineticEnergyDisableAndClear(2, moduleAccesser);

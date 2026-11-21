@@ -42,7 +42,7 @@ void ftKirbyStatusUniqProcessHammer::initStatus(soModuleAccesser* moduleAccesser
     kinetic.changeKinetic(0, moduleAccesser);
     float speedY = soValueAccesser::getConstantFloat(moduleAccesser, 0xfac, 0);
     gravity.enable();
-    gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     switch (soValueAccesser::getConstantInt(moduleAccesser, 0x5dc2, 0)) {
     case 0: // HYPOTHESIS: an explicit no-carry case (the bytes test 1 before >= 1, a two-case switch)
         break;
@@ -54,7 +54,7 @@ void ftKirbyStatusUniqProcessHammer::initStatus(soModuleAccesser* moduleAccesser
         Vec2f brake = controller.m_brake;
         controller.disable();
         stop.enable();
-        stop.resetEnergy(9, &Vec2f(), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(9, Vec2f(), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.m_speed = carried;
         stop.m_speedLimit = limit;
         stop.m_speedTarget = target;

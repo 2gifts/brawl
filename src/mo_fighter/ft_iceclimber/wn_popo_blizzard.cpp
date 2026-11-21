@@ -82,7 +82,7 @@ void wnPopoBlizzard::activate(int founderTaskId, int team, const Vec3f* position
         soModuleAccesser* accesser = m_moduleAccesser;
         float sine = sin(angle);
         float cosine = cos(angle);
-        energy->resetEnergy(0, &Vec2f(speed * cosine, speed * sine), &Vec3f(0.0f, 0.0f, 0.0f), accesser);
+        energy->resetEnergy(0, Vec2f(speed * cosine, speed * sine), Vec3f(0.0f, 0.0f, 0.0f), accesser);
         float accel = soValueAccesser::getConstantFloat(m_moduleAccesser, 0xFA1, 0);
         accelVec.m_x = 0.0f;
         accelVec.m_y = accel;

@@ -42,10 +42,10 @@ void ftIkeStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAccesse
         ftIkeSpecialHiParam* param = reinterpret_cast<ftIkeSpecialHiParam*>(g_ftCommonDataAccesser.getParam(ike.getFtKind()));
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
         if (moduleAccesser->getSituationModule().getKind() == 0) {
-            controller.resetEnergy(0xb, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            controller.resetEnergy(0xb, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             moduleAccesser->getWorkManageModule().setInt(0, 0x20000000);
         } else {
-            controller.resetEnergy(0, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            controller.resetEnergy(0, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             moduleAccesser->getWorkManageModule().setInt(2, 0x20000000);
         }
         controller.mulXSpeedMax(param->unk74 * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb3, 0));
@@ -58,9 +58,9 @@ void ftIkeStatusUniqProcessSpecialHi::initStatus(soModuleAccesser* moduleAccesse
     }
     case 0x11e:
         if (moduleAccesser->getSituationModule().getKind() == 0) {
-            motion.resetEnergy(3, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            motion.resetEnergy(3, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         } else {
-            motion.resetEnergy(5, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            motion.resetEnergy(5, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         }
         motion.enable();
         ftKineticEnergyDisableAndClear(3, moduleAccesser);
@@ -86,10 +86,10 @@ void ftIkeStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesse
             ftIkeSpecialHiParam* param = reinterpret_cast<ftIkeSpecialHiParam*>(g_ftCommonDataAccesser.getParam(ike.getFtKind()));
             ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
             if (moduleAccesser->getSituationModule().getKind() == 0) {
-                controller.resetEnergy(0xb, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                controller.resetEnergy(0xb, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 moduleAccesser->getWorkManageModule().setInt(0, 0x20000000);
             } else {
-                controller.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                controller.resetEnergy(0, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 moduleAccesser->getWorkManageModule().setInt(2, 0x20000000);
             }
             controller.mulXSpeedMax(param->unk74 * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb3, 0));
@@ -112,7 +112,7 @@ void ftIkeStatusUniqProcessSpecialHi::execStatus(soModuleAccesser* moduleAccesse
             ftIkeSpecialHiParam* param = reinterpret_cast<ftIkeSpecialHiParam*>(g_ftCommonDataAccesser.getParam(ike.getFtKind()));
             ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
             ftKineticEnergyController::ResetType mode = ftKineticEnergyController::ResetType_0;
-            controller.resetEnergy(mode, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            controller.resetEnergy(mode, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             controller.mulXSpeedMax(param->unk74 * soValueAccesser::getConstantFloat(moduleAccesser, 0xfb3, 0));
             controller.m_speedTarget = Vec2f(param->unk7c, 100.0f);
             controller.enable();

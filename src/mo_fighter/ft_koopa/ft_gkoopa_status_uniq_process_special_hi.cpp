@@ -50,13 +50,13 @@ static void initStatusCommon(soModuleAccesser* moduleAccesser) {
         speed.m_y = param->m_airSpeedY;
         ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = -param->m_gravity;
         gravity.m_fallSpeedMax = param->m_fallSpeedMax;
         gravity.unk1C = param->m_fallSpeedMax;
         gravity.enable();
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-        controller.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        controller.resetEnergy(0, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_accelMul = param->m_airAccelMul;
         setControllerVec(controller.m_speedTarget, Vec2f(param->m_airSpeedX, controller.m_speedTarget.m_y));
         setControllerVec(controller.m_speedLimit, Vec2f(param->m_airSpeedX, controller.m_speedLimit.m_y));
@@ -97,14 +97,14 @@ void ftGKoopaStatusUniqProcessSpecialHiG::initStatus(soModuleAccesser* moduleAcc
     ftKineticEnergyUnable(moduleAccesser);
     if (!work.isFlag(0x22000010)) {
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-        controller.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        controller.resetEnergy(0, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_accelMul = param->m_groundAccelMul;
         setControllerVec(controller.m_speedTarget, Vec2f(param->m_groundSpeedX, controller.m_speedTarget.m_y));
         setControllerVec(controller.m_speedLimit, Vec2f(param->m_groundSpeedX, controller.m_speedLimit.m_y));
         controller.enable();
     } else {
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-        stop.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(0, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
     }
     if (work.isFlag(0x22000015)) {
@@ -140,7 +140,7 @@ void ftGKoopaStatusUniqProcessSpecialHiG::execStatus(soModuleAccesser* moduleAcc
         moduleAccesser->getKineticModule().clearSpeedAll();
         ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-        stop.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(0, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
         work.onFlag(0x22000011);
     }
@@ -176,13 +176,13 @@ void ftGKoopaStatusUniqProcessSpecialHiA::initStatus(soModuleAccesser* moduleAcc
         Vec2f speed = moduleAccesser->getKineticModule().getSumSpeed(soKineticEnergy::AttributeFlag(1));
         ftKineticEnergyUnable(moduleAccesser);
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-        gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.m_gravity = -param->m_gravity;
         gravity.m_fallSpeedMax = param->m_fallSpeedMax;
         gravity.unk1C = param->m_fallSpeedMax;
         gravity.enable();
         ftKineticEnergyController& controller = dynamic_cast<ftKineticEnergyController&>(*moduleAccesser->getKineticModule().getEnergy(2));
-        controller.resetEnergy(0, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        controller.resetEnergy(0, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_accelMul = param->m_airAccelMul;
         setControllerVec(controller.m_speedTarget, Vec2f(param->m_airSpeedX, controller.m_speedTarget.m_y));
         setControllerVec(controller.m_speedLimit, Vec2f(param->m_airSpeedX, controller.m_speedLimit.m_y));

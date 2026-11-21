@@ -108,7 +108,7 @@ Vec2f soKineticUtility::projectionGroundSpeed(Vec2f* speed, soModuleAccesser* ac
 
 void soKineticUtility::resetEnableEnergy(int index, soModuleAccesser* acc, int mode,
                                        Vec2f* speed, Vec3f* rotation) {
-    acc->getKineticModule().getEnergy(index)->resetEnergy(mode, speed, rotation, acc);
+    acc->getKineticModule().getEnergy(index)->resetEnergy(mode, *speed, *rotation, acc);
     acc->getKineticModule().getEnergy(index)->enable();
 }
 

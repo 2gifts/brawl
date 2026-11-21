@@ -107,9 +107,9 @@ void ftStatusUniqProcessClungDiddy::execStatus(soModuleAccesser* moduleAccesser)
     }
     if (shaken) {
         if (moduleAccesser->getSituationModule().getKind() == 2) {
-            stop.resetEnergy(6, &push, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, push, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         } else {
-            stop.resetEnergy(0, &push, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(0, push, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         }
     }
 }

@@ -29,7 +29,7 @@ void ftPikachuStatusUniqProcessSpecialSkullBash::initStatus(soModuleAccesser* mo
         soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(3));
         float divisor = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa9, 0);
         float accel = soValueAccesser::getConstantFloat(moduleAccesser, 0xfaa, 0);
-        energy.resetEnergy(6, &Vec2f(speed.m_x / divisor, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        energy.resetEnergy(6, Vec2f(speed.m_x / divisor, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         energy.m_accel = Vec2f(accel, 0.0f);
         energy.enable();
     } else {
@@ -90,13 +90,13 @@ void ftPikachuStatusUniqProcessSpecialSkullBashAttack::initStatus(soModuleAccess
     soKineticEnergy* dash = kinetic.getEnergy(3);
     base += factor * frames;
     base *= moduleAccesser->getPostureModule().getLr();
-    dash->resetEnergy(0x16, &Vec2f(base, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    dash->resetEnergy(0x16, Vec2f(base, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     dash->enable();
     soKineticEnergy* rise = kinetic.getEnergy(1);
     float riseBase = soValueAccesser::getConstantFloat(moduleAccesser, 0xfae, 0);
     float longest = soValueAccesser::getConstantFloat(moduleAccesser, 0xfa6, 0);
     float riseY = 0.5f * riseBase + riseBase * (0.5f * frames / longest);
-    rise->resetEnergy(0, &Vec2f(0.0f, riseY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    rise->resetEnergy(0, Vec2f(0.0f, riseY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     rise->enable();
     kinetic.getEnergy(2)->disable();
     kinetic.getEnergy(0)->disable();
@@ -147,7 +147,7 @@ void ftPikachuStatusUniqProcessSpecialSkullBashEnd::initStatus(soModuleAccesser*
     Vec2f speed = kinetic.getSumSpeed(soKineticEnergy::ATTRIBUTE_MASK_MAIN);
     soKineticEnergyNormal& energy = dynamic_cast<soKineticEnergyNormal&>(*kinetic.getEnergy(3));
     float divisor = soValueAccesser::getConstantFloat(moduleAccesser, 0xfb1, 0);
-    energy.resetEnergy(6, &Vec2f(speed.m_x / divisor, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    energy.resetEnergy(6, Vec2f(speed.m_x / divisor, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     energy.enable();
     kinetic.getEnergy(2)->disable();
 }

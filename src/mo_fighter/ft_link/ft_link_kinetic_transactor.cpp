@@ -140,7 +140,7 @@ void ftLinkKineticTransactor::changeKineticSub2(void* pools, Vec2f* prevSpeed, s
     ftKineticTransactor::changeKineticImpl(0x11, pools, prevSpeed, moduleAccesser);
     ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(
         *moduleAccesser->getKineticModule().getEnergy(1));
-    gravity.resetEnergy(1, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+    gravity.resetEnergy(1, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
     gravity.m_speedY = soValueAccesser::getConstantFloat(moduleAccesser, 0xFAF, 0);
     gravity.m_gravity = 0.0f;
     gravity.enable();

@@ -32,7 +32,7 @@ void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* mo
         } else if (speed.m_y < 0.0f) {
             speed.m_y += soValueAccesser::getConstantFloat(moduleAccesser, 0xfc1, 0);
         }
-        gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         controllerMode = ftKineticEnergyController::ResetType_11;
         if (absValue(speed.m_x) > soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0)) {
@@ -41,7 +41,7 @@ void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* mo
             float limitX = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc2, 0);
             speed.m_x = limitX * signF;
         }
-        controller.resetEnergy(controllerMode, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        controller.resetEnergy(controllerMode, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_speed = Vec2f(speed.m_x, 0.0f);
         controller.m_unk40 = soValueAccesser::getConstantFloat(moduleAccesser, 0xfc7, 0);
         controller.m_speedTarget = Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, 0xfc8, 0), 0.0f);
@@ -55,9 +55,9 @@ void ftRobotStatusUniqProcessSpecialBurnerStart::initStatus(soModuleAccesser* mo
     } else {
         // Out of fuel: no lift, the fighter keeps its speed.
         controllerMode = ftKineticEnergyController::ResetType_11;
-        controller.resetEnergy(controllerMode, &Vec2f(speed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        controller.resetEnergy(controllerMode, Vec2f(speed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         controller.m_speed = Vec2f(speed.m_x, 0.0f);
-        gravity.resetEnergy(0, &Vec2f(0.0f, speed.m_y), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, Vec2f(0.0f, speed.m_y), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
     }
     moduleAccesser->getMotionModule().removePartialAnimChr(2);

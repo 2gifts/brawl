@@ -48,7 +48,7 @@ void ftIkeStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAccesse
     switch (moduleAccesser->getStatusModule().getStatusKind()) {
     case IkeStatus_SpecialLw:
         if (moduleAccesser->getSituationModule().getKind() == 0) {
-            stop.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(0, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.enable();
             ftKineticEnergyDisableAndClear(1, moduleAccesser);
             ftKineticEnergyDisableAndClear(2, moduleAccesser);
@@ -56,10 +56,10 @@ void ftIkeStatusUniqProcessSpecialLw::initStatus(soModuleAccesser* moduleAccesse
         } else {
             speedX *= soValueAccesser::getConstantFloat(moduleAccesser, IkeParam_SpecialLw_AirSpeedXRatio, 0);
             float zero = 0.0f;
-            stop.resetEnergy(6, &Vec2f(speedX, zero), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(6, Vec2f(speedX, zero), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.soKineticEnergyNormal::setBrake(&Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, IkeParam_SpecialLw_AirBrakeX, 0), 0.0f));
             stop.enable();
-            gravity.resetEnergy(0, &Vec2f(0.0f, zero), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, zero), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             gravity.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, IkeParam_SpecialLw_Gravity, 0);
             gravity.m_fallSpeedMax = soValueAccesser::getConstantFloat(moduleAccesser, IkeParam_SpecialLw_FallSpeedMax, 0);
             gravity.enable();
@@ -106,16 +106,16 @@ void ftIkeStatusUniqProcessSpecialLw::execStatus(soModuleAccesser* moduleAccesse
                 float speedX = sumSpeed.m_x;
                 float speedY = sumSpeed.m_y;
                 if (moduleAccesser->getSituationModule().getKind() == 0) {
-                    stop.resetEnergy(0, &Vec2f(sumSpeed.m_x, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                    stop.resetEnergy(0, Vec2f(sumSpeed.m_x, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                     stop.enable();
                     ftKineticEnergyDisableAndClear(1, moduleAccesser);
                     ftKineticEnergyDisableAndClear(2, moduleAccesser);
                     moduleAccesser->getWorkManageModule().setInt(0, IkeWork_SpecialLw_Situation);
                 } else {
-                    stop.resetEnergy(6, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                    stop.resetEnergy(6, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                     stop.soKineticEnergyNormal::setBrake(&Vec2f(soValueAccesser::getConstantFloat(moduleAccesser, IkeParam_SpecialLw_AirBrakeX, 0), 0.0f));
                     stop.enable();
-                    gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                    gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                     gravity.m_gravity = -soValueAccesser::getConstantFloat(moduleAccesser, IkeParam_SpecialLw_Gravity, 0);
                     gravity.m_fallSpeedMax = soValueAccesser::getConstantFloat(moduleAccesser, IkeParam_SpecialLw_FallSpeedMax, 0);
                     gravity.enable();

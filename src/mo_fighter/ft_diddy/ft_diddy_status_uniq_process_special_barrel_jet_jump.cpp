@@ -62,7 +62,7 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetJump::initStatus(soModuleAccesser* 
 
         ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
         Vec2f gravitySpeed(0.0f, velocity.m_y);
-        gravity.resetEnergy(0, &gravitySpeed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        gravity.resetEnergy(0, gravitySpeed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         gravity.enable();
         ftDiddyAirParam param = *reinterpret_cast<ftDiddyAirParam*>(g_ftCommonDataAccesser.getParam(Fighter_Diddy));
         gravity.m_gravity = -param.unk64;
@@ -72,7 +72,7 @@ void ftDiddyStatusUniqProcessSpecialBarrelJetJump::initStatus(soModuleAccesser* 
 
         ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
         Vec2f stopSpeed(velocity.m_x, 0.0f);
-        stop.resetEnergy(6, &stopSpeed, &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+        stop.resetEnergy(6, stopSpeed, Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
         stop.enable();
         float rotation = setBodyRotationMoveDir(moduleAccesser, s_rotationParam[0]);
         moduleAccesser->getWorkManageModule().setFloat(rotation, 0x2100000d);

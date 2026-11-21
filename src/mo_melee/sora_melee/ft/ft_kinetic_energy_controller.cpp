@@ -134,16 +134,13 @@ void ftKineticEnergyController::updateEnergy(soModuleAccesser* moduleAccesser) {
     m_speedTarget.m_y = savedTarget.m_y;
 }
 
-void ftKineticEnergyController::resetEnergy(int mode, Vec2f* speed, Vec3f*, soModuleAccesser* moduleAccesser) {
+void ftKineticEnergyController::resetEnergy(int mode, const Vec2f& speed, const Vec3f&, soModuleAccesser* moduleAccesser) {
     clearSpeed();
-    float sx = speed->m_x;
-    float sy = speed->m_y;
     m_accel = Vec2f(0.0f, 0.0f);
     m_speedTarget = Vec2f(0.0f, 0.0f);
     m_brake = Vec2f(0.0f, 0.0f);
     m_speedLimit = Vec2f(-1.0f, -1.0f);
-    m_speed.m_x = sx;
-    m_speed.m_y = sy;
+    m_speed = speed;
     m_mode = mode;
     m_unk38 = moduleAccesser->getPostureModule().getLr();
     m_unk40 = 0.0f;

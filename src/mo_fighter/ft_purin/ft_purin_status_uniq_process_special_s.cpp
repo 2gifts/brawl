@@ -33,7 +33,7 @@ void ftPurinStatusUniqProcessSpecialS::execStatus(soModuleAccesser* moduleAccess
             float speedX = speed.m_x * soValueAccesser::getConstantFloat(moduleAccesser, 0xFCC, 0);
             float speedY = speed.m_y * soValueAccesser::getConstantFloat(moduleAccesser, 0xFCC, 0);
             if (moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
-                stop.resetEnergy(0x16, &Vec2f(speedX, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+                stop.resetEnergy(0x16, Vec2f(speedX, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
                 gravity.m_gravity = 0.0f;
                 gravity.m_speedY = speedY;
                 gravity.unk18 = 0.0f;

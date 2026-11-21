@@ -25,8 +25,8 @@ void soKineticEnergyRotNormal::updateEnergy(soModuleAccesser*) {
     m_rotSpeed = soKineticUtility::limitSpeed(&m_rotSpeed, &m_speedLimit);
 }
 
-void soKineticEnergyRotNormal::resetEnergy(int, Vec2f*, Vec3f* rotation, soModuleAccesser*) {
-    m_rotSpeed = *rotation;
+void soKineticEnergyRotNormal::resetEnergy(int, const Vec2f&, const Vec3f& rotation, soModuleAccesser*) {
+    m_rotSpeed = rotation;
 }
 
 // MATCH-ONLY: componentwise product in paired singles (the same style as Vec3fAdd).

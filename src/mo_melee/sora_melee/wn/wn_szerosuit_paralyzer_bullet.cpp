@@ -85,7 +85,7 @@ void wnSZerosuitParalyzerBullet::activate(int founderTaskId, int team, const Vec
     wnKineticEnergyNormal& energy = dynamic_cast<wnKineticEnergyNormal&>(*kinetic.getEnergy(0));
     soModuleAccesser* moduleAccesser = m_moduleAccesser;
     Vec3f rotation(0.0f, 0.0f, 0.0f);
-    energy.resetEnergy(0, &speed, &rotation, moduleAccesser);
+    energy.resetEnergy(0, speed, rotation, moduleAccesser);
     energy.m_accel = accel;
     energy.m_speedLimit = speed;
     energy.m_speedTarget = speed;

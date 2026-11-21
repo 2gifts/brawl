@@ -15,7 +15,7 @@ public:
 #else
     virtual ~soKineticEnergy3f();
 #endif
-    void resetEnergy(int, Vec3f*, Vec3f*, soModuleAccesser*);
+    void resetEnergy(int, const Vec3f&, const Vec3f&, soModuleAccesser*);
     Vec3f m_speed3f; // +0x08
 #ifdef SO_KINETIC_ENERGY_3F_FULL
     // HYPOTHESIS: the 3D counterpart of soKineticEnergyNormal (the RGB6 bullet constructor fills four more vectors and

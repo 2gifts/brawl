@@ -92,14 +92,14 @@ void ftDiddyStatusUniqProcessFinal::execStatus(soModuleAccesser* moduleAccesser)
     case 0x116:
         if (moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
             ftKineticEnergyStop& stop = dynamic_cast<ftKineticEnergyStop&>(*moduleAccesser->getKineticModule().getEnergy(3));
-            stop.resetEnergy(0x16, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            stop.resetEnergy(0x16, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             stop.m_accel = Vec2f(0.0f, 0.0f);
             stop.m_speedTarget = Vec2f(0.0f, 0.0f);
             stop.m_brake = Vec2f(0.0f, 0.0f);
             stop.m_speedLimit = Vec2f(-1.0f, 0.0f);
             stop.enable();
             ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-            gravity.resetEnergy(0, &Vec2f(0.0f, 0.0f), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             gravity.m_fallSpeedMax = soValueAccesser::getConstantFloat(moduleAccesser, 0xfbd, 0);
             gravity.unk1C = soValueAccesser::getConstantFloat(moduleAccesser, 0xfbd, 0);
             gravity.enable();
@@ -129,7 +129,7 @@ void ftDiddyStatusUniqProcessFinal::execStatus(soModuleAccesser* moduleAccesser)
         if (moduleAccesser->getWorkManageModule().isFlag(0x22000012)) {
             float speedY = soValueAccesser::getConstantFloat(moduleAccesser, 0xfce, 0);
             ftKineticEnergyGravity& gravity = dynamic_cast<ftKineticEnergyGravity&>(*moduleAccesser->getKineticModule().getEnergy(1));
-            gravity.resetEnergy(0, &Vec2f(0.0f, speedY), &Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
+            gravity.resetEnergy(0, Vec2f(0.0f, speedY), Vec3f(0.0f, 0.0f, 0.0f), moduleAccesser);
             moduleAccesser->getWorkManageModule().offFlag(0x22000012);
         }
         break;
