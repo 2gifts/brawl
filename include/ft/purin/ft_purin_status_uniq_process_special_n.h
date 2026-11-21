@@ -1,5 +1,7 @@
 #pragma once
-#include <so/status/so_status_module_impl.h>
+class soModuleAccesser;
+class Vec2f;
+#include <so/status/so_status_uniq_process.h>
 
 // Shared by Purin and Kirby's copied Rollout. The native singleton initializer
 // associates each four-byte object with the corresponding status vtable.
@@ -97,7 +99,7 @@ public:
     // HYPOTHESIS: source utility methods are static; both native callers use
     // only the module accesser. Bodies confirm hit response and reversal.
     static bool ftProcHitSpecialNPurin(soModuleAccesser*);
-    static void ftProcHitWallSpecialNPurin(float, soModuleAccesser*, Vec2f*);
+    static void ftProcHitWallSpecialNPurin(float, soModuleAccesser*, const Vec2f&);
     static void ftSetPowerPurinSpecialN(soModuleAccesser*);
     static void ftPurinSpecialNInit(soModuleAccesser*);
     static void ftProcDamageTurnPurinSpecialN(soModuleAccesser*);
