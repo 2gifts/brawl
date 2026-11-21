@@ -2090,7 +2090,7 @@ config.libs = [
         "cflags": cflags_fighter,
         "host": False,
         "objects": [
-            Object(NonMatching, "mo_fighter/ft_lucas/wn_lucas_pk_fire.cpp"),
+            Object(Matching, "mo_fighter/ft_lucas/wn_lucas_pk_fire.cpp"),
             Object(Matching, "mo_fighter/ft_lucas/wn_lucas_pk_fire_status_uniq_process_shoot.cpp"),
             Object(Matching, "mo_fighter/ft_lucas/wn_lucas_pk_fire_status_uniq_process_pillar.cpp"),
             Object(NonMatching, "mo_fighter/ft_lucas/wn_lucas_pk_thunder.cpp"),
