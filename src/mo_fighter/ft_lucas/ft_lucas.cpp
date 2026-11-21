@@ -1,3 +1,4 @@
+#define WN_PARAM_CUSTOMIZE_INLINE_DTOR // BYTES: the builder destructor expands the empty param customize module destructor (0x4A00)
 // TODO: clean up - raw offset accesses into fighter/module structs; add named fields to the fighter class (or a local struct) instead of *(T*)(p + 0x..)
 #define FT_KINETIC_IMPL_DTOR_OUT_OF_LINE
 #define WN_STATUS_PROC_VECTOR2_DEFAULT_CTOR
@@ -226,6 +227,12 @@ void* fn_114_5B0C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator de
 void* fn_114_5B4C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 void* fn_114_5B8C(void* p, s16 flags) { if (p != 0 && flags > 0) { ::operator delete(p); } return p; }
 } // extern "C"
+#pragma dont_inline on
+soParamAccesser::~soParamAccesser() { }
+soTeam::~soTeam() { }
+soResourceIdAccesser::~soResourceIdAccesser() { }
+#pragma dont_inline off
+ftKineticEnergyController::~ftKineticEnergyController() { }
 
 // Small helpers of this unit; the native callers reach them with a call.
 #pragma dont_inline on
@@ -989,4 +996,3 @@ extern "C" void* fn_114_4380(void* object, short deleting) {
     return object;
 }
 }
-
