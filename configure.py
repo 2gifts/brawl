@@ -1924,7 +1924,7 @@ config.libs = [
             Object(NonMatching, "mo_fighter/ft_gamewatch/wn_game_watch_rescue.cpp"),
             Object(NonMatching, "mo_fighter/ft_gamewatch/wn_game_watch_parachute.cpp"),
             Object(NonMatching, "mo_fighter/ft_gamewatch/wn_game_watch_panel.cpp"),
-            Object(NonMatching, "mo_fighter/ft_gamewatch/wn_game_watch_oil.cpp"),
+            Object(Matching, "mo_fighter/ft_gamewatch/wn_game_watch_oil.cpp"),
             Object(NonMatching, "mo_fighter/ft_gamewatch/wn_game_watch_octopus.cpp"),
             Object(NonMatching, "mo_fighter/ft_gamewatch/wn_game_watch_octopus_link_event_collision.cpp"),
             Object(Matching, "mo_fighter/ft_gamewatch/wn_game_watch_octopus_status_uniq_process_common.cpp"),
