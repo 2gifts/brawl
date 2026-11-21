@@ -70,7 +70,9 @@ public:
         Outside_Damage_Reserved = 0x3
     };
 
-#if defined(WN_ARTICLE_NATIVE_BUILDERS) || defined(FT_KINETIC_STOP_IMPLEMENTATION)
+// SO_KINETIC_ENERGY_INLINE_CTOR (opt-in): an article unit that builds its kinetic energies inline (wn_game_watch_oil: the
+// rot-normal energy calls soNullable directly) although it uses the weapon builder.
+#if defined(WN_ARTICLE_NATIVE_BUILDERS) || defined(FT_KINETIC_STOP_IMPLEMENTATION) || defined(SO_KINETIC_ENERGY_INLINE_CTOR)
     soKineticEnergy(bool isNull = false) : soNullable(isNull), soEnable(!isNull) { }
 #elif defined(WN_WEAPON_BUILDER) || defined(WN_KINETIC_GENERIC_BUILDER)
     // BYTES: the article RELs call this constructor out of line (weak copy in the unit).
