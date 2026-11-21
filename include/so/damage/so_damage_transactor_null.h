@@ -164,7 +164,7 @@ public:
     #else
     virtual int checkDownDamage(float, float, soModuleAccesser*) { return 0; }
     #endif
-#if !defined(YK_STAGE_FULL) && !defined(WN_OCTOPUS_ARRAYS)
+#if !defined(YK_STAGE_FULL) && !defined(WN_OCTOPUS_ARRAYS) && !defined(WN_DAMAGE_ACTOR_INTERFACE)
     // HYPOTHESIS: the module maps show no copies of these for the null transactor; they only complete the interface here.
     virtual bool isBindStatus(soModuleAccesser*) { return false; }
     virtual bool isBuryStatus(soModuleAccesser*) { return false; }

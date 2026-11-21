@@ -301,7 +301,11 @@ class soCollisionSearchModuleBuilder {
     soArrayVector<soCollisionGroup, 1> m_groups;
     typename BC::ModuleType m_searchModule;
 public:
+#ifdef SO_COLLISION_SEARCH_BUILDER_BYTE_CATEGORY // BYTES: an article's builder hands the category on as a byte (wn_snake_mine)
+    soCollisionSearchModuleBuilder(soModuleAccesser* acc, int taskId, u8 category) :
+#else
     soCollisionSearchModuleBuilder(soModuleAccesser* acc, int taskId, gfTask::Category category) :
+#endif
         m_parts(1, soCollisionSearchPart(soCollision::Category_Fighter), 0),
         m_groups(1, 0), m_searchModule(acc, taskId, category, &m_parts, true) { }
     typename BC::ModuleType* getModule() { return &m_searchModule; }

@@ -14,7 +14,7 @@
 #include <so/so_world.h>
 #include <math.h>
 
-extern char lbl_122_data_774[], lbl_122_data_8C98[];
+extern char lbl_122_data_774[], __RTTI__11StageObject[];
 extern float lbl_27_rodata_EF8; // Shared 30-degree reference camera angle.
 // HYPOTHESIS: the native call ABI sign-extends the final argument from a short.
 extern "C" void* __dynamic_cast(void*, int, void*, void*, short);
@@ -46,7 +46,7 @@ void ftSnakeStatusUniqProcessFinalCommon::exitStatusCommon(
     model.resetLayerType(spycloak == true
         ? gfSceneRoot::Layer_Effect_Fighter : gfSceneRoot::Layer_Ground_And_Chara);
     void* snake = __dynamic_cast(&acc->getStageObject(), 0x3C,
-        lbl_122_data_774, lbl_122_data_8C98, 0);
+        lbl_122_data_774, __RTTI__11StageObject, 0);
     if (snake) {
         // Native Snake owns its Final Smash photo callback at this offset.
         reinterpret_cast<soPhotoCallBack*>(
