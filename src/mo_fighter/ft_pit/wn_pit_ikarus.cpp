@@ -1,5 +1,10 @@
 #define WN_PIT_IKARUS_FULL_BUILDER // the complete Ikarus builder (see the header)
 #define WN_WEAPON_BUILDER
+#define WN_DAMAGE_ACTOR_INTERFACE
+#define SO_KINETIC_ENERGY_ABSTRACT // the base vtable (empty pure slots) and its friction switches are weak copies here
+#define SO_DAMAGE_EFFECTOR_NULL_IMPLICIT_DTOR
+#define WN_DAMAGE_TRANSACTOR_NULL_ACCESSOR
+#define SO_DAMAGE_EFFECTOR_PRIVATE_NULL_BASE
 #define IP_INPUT_BUTTON_RAW // BYTES: IpNull::getButton returns the raw button mask (8 bytes, not a struct copy)
 #define WN_ARTICLE_NATIVE_BUILDERS
 #define WN_SHARED_ARRAYS_1
