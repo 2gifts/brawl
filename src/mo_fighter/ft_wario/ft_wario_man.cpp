@@ -6,6 +6,7 @@
 #define SO_ARRAY_SPLIT_VECTOR_CTOR
 #define FT_NOINLINE_SEARCH_BUILDER
 #include <ft/builder/ft_dol_array_list.h>
+#include <ft/ft_manager.h>
 #include <ft/ft_class_info_impl.h>
 #include <ft/wario/ft_wario_man_builder.h>
 #include <so/so_kinetic_utility.h>
@@ -92,12 +93,6 @@ static ftWarioUnk8 s_unkTag0(0xff, 0);
 static ftWarioUnk8 s_unkTag1(0xff, 1);
 ftClassInfoImpl<Fighter_WarioMan, ftWarioMan> g_ftClassInfoWarioMan;
 
-// MATCH-ONLY: the fighter manager header cannot coexist with the builder headers; only the rumble request is needed.
-class ftManager {
-public:
-    void setControllerRumble(int entryId, int unk1, int unk2, u32 isOn, int unk3);
-};
-extern ftManager* g_ftManager;
 
 // Wario-Man (the Final Smash form of Wario). The fighter overrides forward to the
 // Waft gauge / bike code that Wario shares with it (ftWarioCommon, in the melee module).
@@ -109,12 +104,9 @@ enum {
     Work_Flag_FormEnding = 0x1200003E,
 };
 
-// MATCH-ONLY: the kinetic dispatcher calls the getter out of line.
-#pragma dont_inline on
 ftWarioExtendParam* ftWarioMan::getExtendParam() {
     return &m_extendParam->m_param;
 }
-#pragma dont_inline reset
 
 void ftWarioMan::onActivate() {
     g_ftWarioCommon.onActivate(m_moduleAccesser, &m_animObj, m_extendParam->m_param.bikeRider->remountCooldownFrames);
