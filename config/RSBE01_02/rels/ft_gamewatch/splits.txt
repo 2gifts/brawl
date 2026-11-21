@@ -121,13 +121,19 @@ mo_fighter/ft_gamewatch/ft_gamewatch_status_uniq_process_final_swim.cpp:
 
 mo_fighter/ft_gamewatch/wn_game_watch_rescue.cpp:
 	.text       start:0x000145EC end:0x00016BB4
-	.rodata     start:0x000000D0 end:0x00000120
+	.rodata     start:0x000000D0 end:0x000000E8
 
 mo_fighter/ft_gamewatch/wn_game_watch_parachute.cpp:
 	.text       start:0x00016BB4 end:0x00018C7C
+	.rodata     start:0x000000E8 end:0x00000100
+	.data       start:0x00009F58 end:0x0000A4B8
+	.bss        start:0x000002D8 end:0x00000320
 
 mo_fighter/ft_gamewatch/wn_game_watch_panel.cpp:
 	.text       start:0x00018C7C end:0x0001AF80
+	.rodata     start:0x00000100 end:0x00000120
+	.data       start:0x0000A4B8 end:0x0000AA10
+	.bss        start:0x00000320 end:0x00000368
 
 mo_fighter/ft_gamewatch/wn_game_watch_oil.cpp:
 	.text       start:0x0001AF80 end:0x0001CD90
@@ -149,6 +155,9 @@ mo_fighter/ft_gamewatch/wn_game_watch_octopus_status_uniq_process_common.cpp:
 
 mo_fighter/ft_gamewatch/wn_game_watch_normal_weapon.cpp:
 	.text       start:0x0001FC84 end:0x00021D7C
+	.rodata     start:0x00000170 end:0x00000188
+	.data       start:0x0000B740 end:0x0000BCA8
+	.bss        start:0x00000438 end:0x00000480
 
 mo_fighter/mo_fighter.cpp:
 	.text       start:0x00021D7C end:0x00021E18
