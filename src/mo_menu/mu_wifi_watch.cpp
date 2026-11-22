@@ -730,7 +730,7 @@ struct Entry {
 extern "C" int exchangeMuSelchkind2GmCharacterKind__6muMenuFiii(int);
 extern "C" int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
 extern "C" int getNumCharColor__6muMenuFiii(int);
-extern "C" int getFighterColorFileNo__6muMenuFiii(int, int);
+extern "C" int getFighterColorFileNo__6muMenuFii(int, int);
 extern "C" void fn_1_379C(int, int, int);
 
 inline int colorCount(int kind) {
@@ -740,7 +740,7 @@ inline int colorCount(int kind) {
 
 inline int colorFile(int kind, int col) {
     int m = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(kind);
-    return m == 0x28 ? 0 : getFighterColorFileNo__6muMenuFiii(m, col);
+    return m == 0x28 ? 0 : getFighterColorFileNo__6muMenuFii(m, col);
 }
 
 extern "C" void preLoadFightersByReplayDataProperty__15muWifiWatchTaskFv(unsigned char* self, unsigned char* p) {

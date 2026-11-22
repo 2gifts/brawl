@@ -381,7 +381,7 @@ int getAssignedPlayerKind__19muWifiInterfaceTaskFi(Wifi*, int);
 int fn_800CB4AC(Wifi*, int);
 u8 fn_800CB568(Wifi*, int);
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(unsigned int);
-int getFighterColorFileNo__6muMenuFiii(int, int);
+int getFighterColorFileNo__6muMenuFii(int, int);
 int fn_800CB8F0(Wifi*, int);
 int getAssignedPlayerContNum__19muWifiInterfaceTaskFi(Wifi*, int);
 void getLocalPlayersOnamae__19muWifiInterfaceTaskFiPwPUc(Wifi*, int, u16*, u8*);
@@ -427,7 +427,7 @@ void fn_1_39F9C(Scene* self) {
             if (kind == 0x28) {
                 file = 0;
             } else {
-                file = getFighterColorFileNo__6muMenuFiii(kind, (int)next);
+                file = getFighterColorFileNo__6muMenuFii(kind, (int)next);
             }
 
             cursor->players[0].colorFile = file;

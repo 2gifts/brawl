@@ -22,7 +22,14 @@ public:
     virtual void photoExit() = 0;
 #else
     virtual void photoMoved();
+#ifdef SO_PHOTO_CALL_BACK_EXIT_ARG
+    // HYPOTHESIS: the controller passes a flag to photoExit (the item callback shows its item again only when it is
+    // set); the fighters' overrides ignore it.
+    // TODO: clean up: declare the argument for every user once the fighter overrides are renamed with it.
+    virtual void photoExit(const bool* show);
+#else
     virtual void photoExit();
+#endif
 #endif
 };
 

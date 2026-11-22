@@ -13,8 +13,8 @@
 #include <types.h>
 #include <mt/mt_ps_minmax.h>
 
-extern "C" void fn_80110A40(grCollision* collision);
-extern "C" void fn_80110F7C(grCollision* collision);
+extern "C" void setDisableForce__11grCollisionFv(grCollision* collision);
+extern "C" void updateLineStatus__11grCollisionFv(grCollision* collision);
 extern "C" void fn_8011135C(grCollision* collision, grCollision* target);
 
 // HYPOTHESIS: g_grCollisionList links grCollision through m_next (0x30); g_grCollStatusList at 0x8049E594.
@@ -68,7 +68,7 @@ void grCollisionManager::collisionUpdate(bool dynamic) {
             if (m_flags.m_useClipRange) {
                 collision->updateClippingRange(&range);
             }
-            fn_80110F7C(collision);
+            updateLineStatus__11grCollisionFv(collision);
         }
     }
     for (grCollisionNodeList::Iterator it = list.GetBeginIter(); it != list.GetEndIter(); it++) {
@@ -168,7 +168,7 @@ void grCollisionManager::processPreMapCorrection() {
                 grCollision* collision = status->m_unk104;
                 if (collision != NULL) {
                     collision->update();
-                    fn_80110F7C(collision);
+                    updateLineStatus__11grCollisionFv(collision);
                 }
             }
         }
@@ -192,7 +192,7 @@ void grCollisionManager::processFixPosition() {
         grCollisionNodeList& list = (grCollisionNodeList&)g_grCollisionList;
         for (grCollisionNodeList::Iterator it = list.GetBeginIter(); it != list.GetEndIter(); it++) {
             if (it->m_disablePending) {
-                fn_80110A40(&*it);
+                setDisableForce__11grCollisionFv(&*it);
                 it->m_disablePending = false;
             }
         }

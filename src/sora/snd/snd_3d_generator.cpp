@@ -17,6 +17,13 @@ static inline int isFinite(float f) {
     return res;
 }
 
+snd3DGenerator::~snd3DGenerator() {
+    if (m_sndActor != NULL) {
+        delete m_sndActor;
+        m_sndActor = NULL;
+    }
+}
+
 void snd3DGenerator::setPos(Vec3f* pos) {
     if (m_sndActor != NULL) {
         if (!(isFinite(pos->m_x) && isFinite(pos->m_y) && isFinite(pos->m_z))) {
@@ -49,6 +56,21 @@ snd3DGenerator::snd3DGenerator() {
     SetPosition__Q34nw4r3snd12Sound3DActorFRCQ34nw4r4math4VEC3(m_sndActor, &pos);
 }
 
+s32 snd3DGenerator::playSE(SndID sndID, int tag, int fadeIn, int group) {
+    if (m_sndActor != NULL) {
+        return g_sndSystem->play3DSE(sndID, m_sndActor, tag, fadeIn, 0, group);
+    }
+    return g_sndSystem->playSE(sndID, tag, fadeIn, 0, group);
+}
+
+s32 snd3DGenerator::prepareSE(SndID sndID, s32 tag) {
+    sndSystem* sys = g_sndSystem;
+    if (m_sndActor != NULL) {
+        return sys->prepare3DSE(sndID, m_sndActor, tag, -1);
+    }
+    return sys->prepareSE(sndID, tag, -1);
+}
+
 void snd3DGenerator::stopGroupId(int tag, SndID sndID, int fade) {
     g_sndSystem->stopGroupId(tag, sndID, fade);
 }
@@ -66,6 +88,14 @@ void isPreparedSE__14snd3DGeneratorFl(void) {
 }
 
 }
+}
+
+void snd3DGenerator::startSE(s32 handleId, s32 fadeIn) {
+    g_sndSystem->startSE(handleId, fadeIn, 0);
+}
+
+void snd3DGenerator::stopSE(s32 handleId, s32 fade) {
+    g_sndSystem->stopSE(handleId, fade);
 }
 
 // TODO: clean up, give variables real names

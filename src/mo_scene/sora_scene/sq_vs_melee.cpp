@@ -40,7 +40,7 @@ void gmSetRuleToGlobalModeMelee__17gmGlobalModeMeleeFv(void*);
 void fn_80055760(u32, s32);
 gmItSwitch* gmGetItemSwitchData_NormalStage__Fi(u32);
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
-int getFighterColorFileNo__6muMenuFiii(int, int);
+int getFighterColorFileNo__6muMenuFii(int, int);
 void fn_8010F960(u16, void*, void*, int);
 }
 
@@ -113,7 +113,7 @@ extern "C" void fn_1_21940(void*, int stage) {
             output->players[0].team = select->players[0].team;
             int costume = select->players[0].file;
             int kind = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(character);
-            output->players[0].file = kind == 0x28 ? 0 : getFighterColorFileNo__6muMenuFiii(kind, costume);
+            output->players[0].file = kind == 0x28 ? 0 : getFighterColorFileNo__6muMenuFii(kind, costume);
             output->players[0].color = select->players[0].file;
             output->players[0].id = i;
             output->players[0].start = mode->count;

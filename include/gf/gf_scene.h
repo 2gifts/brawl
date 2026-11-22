@@ -60,6 +60,8 @@ public:
     s32 registSequence(gfSequence* sequence);
     gfScene* searchScene(const char* sceneName);
     gfSequence* searchSequence(const char* sequenceName);
+    gfSceneManager();
+    static gfSceneManager* create();
     static gfSceneManager* getInstance();
 };
 static_assert(sizeof(gfSceneManager) == 800, "Class is wrong size!");

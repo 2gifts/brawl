@@ -175,6 +175,8 @@ public:
     void setDrawPrio(int prio);
     u32 setEffect(EfID effectID);
     u32 setEffect(EfID effectID, Vec3f* pos);
+    // HYPOTHESIS: unnamed overload at 0x8005F7CC (position + rotation, no scale); constness of the vectors unknown.
+    u32 setEffect(EfID effectID, Vec3f* pos, Vec3f* rot);
     u32 setEffect(EfID effectID, const Vec3f* pos);
     u32 setEffect(EfID effectID, u32 resourceId, const Vec3f* pos, const Vec3f* rot, const Vec3f* scale);
     u32 setEffect(EfID effectID, const Vec3f* pos, const Vec3f* rot, const Vec3f* scale);

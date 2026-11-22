@@ -269,13 +269,13 @@ void grCollStatus::setIgnoreLine(u32* lineId) {
     grCollision::getLineWork(&id, &m_collLineWorkArray[9]);
 }
 
-extern "C" bool fn_80112DBC(grCollisionManager* manager, grCollStatus* status, const u32& lineId);
+extern "C" bool checkCliffOverlap__18grCollisionManagerFP12grCollStatusRCUl(grCollisionManager* manager, grCollStatus* status, const u32& lineId);
 
 bool grCollStatus::checkCliffEntryOverlap() {
     grCollisionLineWork* work = &m_collLineWorkArray[8];
     grCollisionManager* manager = lbl_805A0360;
     u32 lineId = grCollStatusMakeLineId(work->m_collision, work->m_collisionLine);
-    return fn_80112DBC(manager, this, lineId);
+    return checkCliffOverlap__18grCollisionManagerFP12grCollStatusRCUl(manager, this, lineId);
 }
 
 void grCollStatus::entryCliffHang() {

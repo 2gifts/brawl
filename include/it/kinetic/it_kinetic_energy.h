@@ -112,6 +112,19 @@ public:
 };
 static_assert(sizeof(itKineticEnergy3f) == 0x4C, "Class is wrong size!");
 
+// A rotation energy: it keeps the rotation speed in the speed vector of itKineticEnergy3f and has no translation speed.
+class itKineticRotEnergy3f : public itKineticEnergy3f {
+public:
+    virtual Vec2f getSpeed() const { return Vec2f(0.0f, 0.0f); }
+    virtual Vec3f getSpeed3f() const { return Vec3f(0.0f, 0.0f, 0.0f); }
+    virtual Vec3f getRotation() const { return m_speed; }
+    virtual void resetEnergy(int, const Vec2f&, const Vec3f& rot, soModuleAccesser*) { m_speed = rot; }
+    virtual void clearSpeed() { }
+    virtual void clearRotSpeed() { m_speed = Vec3f(0.0f, 0.0f, 0.0f); }
+    virtual ~itKineticRotEnergy3f() { }
+};
+static_assert(sizeof(itKineticRotEnergy3f) == 0x4C, "Class is wrong size!");
+
 class itKineticEnergyGravity : public itKineticEnergyInterface {
 public:
     virtual void updateEnergy(soModuleAccesser* moduleAccesser);

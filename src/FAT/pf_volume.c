@@ -224,10 +224,11 @@ int pdm_bpb_InitVolumeWithFSINFOSector(PF2_BPB* p_bpb, u8* buf, u32* p_free_coun
 }
 
 // TODO: clean up, give variables real names
-extern void fn_803D797C(void);
+extern s32 pdm_disk_init_disk_manager(void);
 
-void fn_803D72BC(void) {
-    fn_803D797C();
+// HYPOTHESIS: the volume layer initializer (FAInit passes two null arguments, both unused).
+s32 fn_803D72BC(void* config, void* param) {
+    return pdm_disk_init_disk_manager();
 }
 
 // TODO: clean up, give variables real names

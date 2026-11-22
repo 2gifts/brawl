@@ -67,3 +67,15 @@ void* OSAllocFromMEM1ArenaLo(u32 size, u32 alignment) {
     OSSetMEM1ArenaLo(lo);
     return res;
 }
+
+void* OSAllocFromMEM2ArenaLo(u32 size, u32 alignment) {
+    void* res;
+    u8* lo;
+
+    res = OSGetMEM2ArenaLo();
+    lo = res = (void*)ROUND(res, alignment);
+    lo += size;
+    lo = (u8*)ROUND(lo, alignment);
+    OSSetMEM2ArenaLo(lo);
+    return res;
+}

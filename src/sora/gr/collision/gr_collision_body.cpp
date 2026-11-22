@@ -59,8 +59,6 @@ grCollisionTest::grCollisionTest(grCollStatus* status)
 // HYPOTHESIS: grCollStatus::clearTouchLine (0x80134468): forgets the touch line of the given touch id.
 extern "C" void clearTouchLine__12grCollStatusFQ212grCollStatus7TouchId(grCollStatus* status, int touchId);
 
-// HYPOTHESIS: grCollision::getPreSegment1 (main.dol 0x80111AF4): like the four-argument getSegment, for the segment of the previous frame.
-extern "C" void fn_80111AF4(grCollision* collision, grCollSegmentEx* out, grCollisionLine* line, int unk);
 
 static inline int isFinite(float f) {
     int res = 1;
@@ -387,7 +385,7 @@ int grCollisionTest::checkMoveLenXDown(const Vec2f* pos, grCollisionLineWork* li
 // ends by where pos projects onto the previous segment. outPos = pos + outOffset.
 void grCollisionTest::calcOffsetVector(grCollisionLineWork* lineWork, const Vec2f* pos, Vec2f* outPos, Vec2f* outOffset) {
     grCollSegmentEx preSegment;
-    fn_80111AF4(lineWork->m_collision, &preSegment, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getPreSegment1(&preSegment, lineWork->m_collisionLine, 0);
     grCollSegmentEx segment;
     lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
     Vec2f preDir = preSegment.m_segment.m_p1Pos - preSegment.m_segment.m_p0Pos;

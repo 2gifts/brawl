@@ -20,6 +20,7 @@
 //   0x8031574C    48  hkDeallocateStack<9hkVector4>
 //   0x8031577C     4  __ct
 
+#define HK_GSK_OUTLINE_CTOR
 #include <havok/hkGsk.h>
 #include <havok/hkConvexShape.h>
 #include <havok/hk4dGskVertexCollidePointsInput.h>

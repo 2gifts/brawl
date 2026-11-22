@@ -227,7 +227,7 @@ void fn_1_34DB8(void* arg) {
 namespace jj_350F8 {
 extern "C" {
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
-int getFighterColorFileNo__6muMenuFiii(int, int);
+int getFighterColorFileNo__6muMenuFii(int, int);
 void fn_1_350F8() {
     int costume;
     GameGlobal* gg = g_GameGlobal;
@@ -248,7 +248,7 @@ void fn_1_350F8() {
         if (m == 0x28) {
             color = 0;
         } else {
-            color = getFighterColorFileNo__6muMenuFiii(m, costume);
+            color = getFighterColorFileNo__6muMenuFii(m, costume);
         }
         d[0x9d] = color;
         d[0x9e] = src[0xbd];

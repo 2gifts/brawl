@@ -23,14 +23,32 @@ struct hkGsk {
     int unk8;      // 0x08 copied from the cache's unkA
     int unkC;      // 0x0C copied from the cache's unkB
     u8 unk10; // 0x10 cleared by the constructor
-    int unk14; // 0x14 HYPOTHESIS: feature-change flag, written by setFeatureChange
+    // BYTES: mutable (some member of hkGsk is: its const members keep their loads after stores to the outputs).
+    // HYPOTHESIS: this one.
+    mutable int unk14; // 0x14 HYPOTHESIS: feature-change flag, written by setFeatureChange
+    // The simplex vertices fetched from the shapes and two more vector arrays (hkGskBaseAgent's getPenetrations
+    // constructs four arrays of four vectors from 0x20 to 0x120). HYPOTHESIS: the names, and the 0x60 bytes after
+    // them (the object is 0x180 bytes in staticGetPenetrations' frame).
+    hkVector4 m_verticesA[4]; // 0x20
+    hkVector4 unk60[4];       // 0x60
+    hkVector4 unkA0[4];       // 0xA0
+    hkVector4 m_verticesB[4]; // 0xE0
+    u8 unk120[0x60];          // 0x120
 
+    // BYTES: inline (hkGskBaseAgent::staticGetPenetrations inlines it). The out-of-line copy in hkContinuousGsk.o
+    // comes from a call there that is not inlined (hk4dGskCollideCalcToi, not written yet), so until that caller
+    // exists hkContinuousGsk.cpp defines the constructor out of line itself.
+    // TODO: clean up: drop HK_GSK_OUTLINE_CTOR once hk4dGskCollideCalcToi is written.
+#ifdef HK_GSK_OUTLINE_CTOR
     hkGsk() __attribute__((never_inline));
+#else
+    hkGsk() : unk10(0) {}
+#endif
 
     // Takes the simplex of the cache and fetches its vertices from the two shapes (A's at 0x20, B's at 0xE0).
     void init(const hkConvexShape* shapeA, const hkConvexShape* shapeB, const hkGskCache& cache);
-    hkVector4* verticesA() { return (hkVector4*)((char*)this + 0x20); }
-    hkVector4* verticesB() { return (hkVector4*)((char*)this + 0xE0); }
+    hkVector4* verticesA() { return m_verticesA; }
+    hkVector4* verticesB() { return m_verticesB; }
 
     void setFeatureChange(int value);
     // Turns the separating plane of the closest feature into a closest-distance result (see the .cpp).

@@ -16,7 +16,7 @@ struct stRayView {
     stRayView(const Vec2f& pos, const Vec2f& vec) : m_pos(pos), m_vec(vec) { }
 };
 extern "C" {
-bool fn_80138348(grCollisionRaycheck* check, stRayView* ray);
+bool raycheck__19grCollisionRaycheckFP7clRay2D(grCollisionRaycheck* check, stRayView* ray);
 bool fn_8013848C(grCollisionRaycheck* check, stRayView* ray, grCollision* collision);
 }
 
@@ -35,7 +35,7 @@ static inline bool castRay(grCollisionRaycheck& check, Vec3f* pos, Vec3f* dir, b
     if (collision != NULL) {
         return fn_8013848C(&check, &ray, collision);
     }
-    return fn_80138348(&check, &ray);
+    return raycheck__19grCollisionRaycheckFP7clRay2D(&check, &ray);
 }
 
 bool stRayCheck(Vec3f* pos, Vec3f* dir, bool unk41, grCollision* collision, bool unk40, u8 targetMask) {

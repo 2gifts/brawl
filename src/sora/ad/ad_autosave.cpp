@@ -92,3 +92,6 @@ void adAutoSave::processDefault() {
     }
 }
 
+bool adAutoSave::isAlive() {
+    return lbl_805A0468[0] != NULL;
+}

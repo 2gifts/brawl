@@ -511,3 +511,6 @@ extern "C" void fn_8007CB98(int arg) {
 }
 }
 
+void PrepareReady(bool flag) {
+    OSSendMessage(&lbl_805A01F8[0].unk0Typed->unk7A0, (OSMessage)flag, 1); // 1 = OS_MESSAGE_BLOCK
+}

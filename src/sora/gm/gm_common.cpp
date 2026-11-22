@@ -62,7 +62,7 @@ struct gmCharaFlagResult : gmCharaFlagWords {
         m_word1 = other.m_word1;
     }
 };
-extern "C" gmCharaFlagResult fn_80051F28();                                   // gmCharaFlag::setGlobalCharaData
+extern "C" gmCharaFlagResult setGlobalCharaData__11gmCharaFlagFv();                                   // gmCharaFlag::setGlobalCharaData
 
 // HYPOTHESIS: gmAppData flag byte 0x28; bit 7 is a one-shot request that gmInitMeleeDataDefault moves into the melee data.
 struct gmAppDataFlags {
@@ -374,7 +374,7 @@ void gmInitMeleeDataDefault(gmMeleeInitData* melee) {
     melee->m_itSwitch.m_item.m_mask = 0xFFFFFFFFFFFFFFFFULL;
     melee->m_itSwitch.m_pokemon.m_mask = 0xFFFFFFFF;
     melee->m_itSwitch.m_assist.m_mask = 0xFFFFFFFF;
-    melee->m_charaFlags = fn_80051F28();
+    melee->m_charaFlags = setGlobalCharaData__11gmCharaFlagFv();
     melee->m_itemFrequency = gmItSwitch::Frequency_Medium;
     melee->m_0x10 = 0x78;
     melee->m_cameraShakeScale = 1.0f;
