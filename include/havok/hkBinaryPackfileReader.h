@@ -37,7 +37,9 @@ struct hkPackfileSectionHeader {
     int m_virtualFixupsOffset;    // 0x20
     int m_exportsOffset;          // 0x24
     int m_importsOffset;          // 0x28
-    int m_endOffset;              // 0x2C
+    // BYTES: one member is mutable (getExports/getImports keep their loads after the stores to the output array).
+    // HYPOTHESIS: this one.
+    mutable int m_endOffset;      // 0x2C
 
     void getExports(void* sectionData, hkArray<hkPackfileData::Export>& exports) const;
     void getImports(void* sectionData, hkArray<hkPackfileData::Import>& imports) const;
