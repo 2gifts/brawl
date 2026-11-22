@@ -31,6 +31,37 @@
 
 #include <havok/hkCollisionDispatcher.h>
 
+#include <havok/hkCdPoint.h>
+#include <havok/hkShapeRayCastCollector.h>
+#include <havok/hkRotation.h>
+
+// Turns the hits of the swept convex body's ray against the height field into collision points for a cd point
+// collector. HYPOTHESIS: the member names (from their use in addRayHit).
+struct hkHeightFieldRayForwardingCollector : hkShapeRayCastCollector {
+    hkVector4 m_currentFrom;         // 0x10
+    hkReal m_currentRadius;          // 0x20
+    hkVector4 m_path;                // 0x30
+    const hkCdBody* m_convexBody;    // 0x40
+    hkCdPointCollector* m_collector; // 0x44
+
+    virtual void addRayHit(const hkCdBody& body, const hkShapeRayCastOutput& hit);
+};
+
+// The hit point on the ray, moved back by the convex radius along the hit normal (rotated into world space); the
+// normal's w is the hit fraction. The early-out fraction follows the wrapped collector's.
+void hkHeightFieldRayForwardingCollector::addRayHit(const hkCdBody& body, const hkShapeRayCastOutput& hit) {
+    hkCdPoint point;
+    point.m_cdBodyA = m_convexBody;
+    point.m_cdBodyB = &body;
+    point.m_contact.m_position.setAddMul4(m_currentFrom, m_path, hit.m_hitFraction);
+    point.m_contact.m_normal._setRotatedDir(body.getTransform().getRotation(), hit.m_normal);
+    point.m_contact.m_position.setAddMul4(point.m_contact.m_position, point.m_contact.m_normal, -m_currentRadius);
+    point.m_contact.m_normal.w = hit.m_hitFraction;
+    m_collector->addCdPoint(&point);
+    m_earlyOutHitFraction = m_collector->m_earlyOutDistance < m_earlyOutHitFraction ? m_collector->m_earlyOutDistance
+                                                                                     : m_earlyOutHitFraction;
+}
+
 // Height field x convex pairs in both orders (shape types 18 and 21).
 void hkHeightFieldAgent::registerAgent(hkCollisionDispatcher* dispatcher) {
     hkAgentFuncs af;

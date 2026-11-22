@@ -74,13 +74,12 @@ int hkSphereShape::getNumVertices() const {
 }
 
 void hkSphereShape::getAabb(const hkTransform& xf, hkReal expansion, hkAabb& out) const {
-    // HYPOTHESIS: the target also stores r into a dead 16-byte aligned stack vector (an hkVector4 extent splat in
-    // the original, its stores scheduled among the lanes); that vector form (extent, setSub4/setAdd4) compiles to
-    // the same instructions with the extent stores sunk to the end, and scores lower than this scalar form.
     hkReal r = expansion + m_radius;
     const hkVector4& t = xf.m_translation;
-    out.m_min.set(t.x - r, t.y - r, t.z - r, t.w - r);
-    out.m_max.set(t.x + r, t.y + r, t.z + r, t.w + r);
+    hkVector4 extent;
+    extent.setAll3(r);
+    out.m_min.setSub4(t, extent);
+    out.m_max.setAdd4(t, extent);
 }
 
 void hkSphereShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {
@@ -88,14 +87,12 @@ void hkSphereShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {
     out->m_flag = 1;
 }
 
-#pragma scheduling off
 hkVector4* hkSphereShape::getCollisionSpheres(hkVector4* out) const {
     hkVector4 sphere;
     sphere.set(0.0f, 0.0f, 0.0f, m_radius);
     *out = sphere;
     return out;
 }
-#pragma scheduling reset
 
 // Ray against the sphere around the origin: solves |from + t * dir|^2 = r^2 for the first t in [0, hitFraction).
 // A start point far away (B^2 > 1000 A r^2) is first moved onto the closest point of the ray, for precision.

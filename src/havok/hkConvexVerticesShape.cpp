@@ -50,10 +50,9 @@ int hkConvexVerticesShape::getType() const {
 }
 
 void hkConvexVerticesShape::getFirstVertex(hkVector4& out) const {
-    const hkConvexVerticesShapeFourVectors* v = (const hkConvexVerticesShapeFourVectors*)m_rotatedVertices.m_data;
-    out.x = v->m_x.x;
-    out.y = v->m_y.x;
-    out.z = v->m_z.x;
+    out.x = m_rotatedVertices.begin()[0].m_x.x;
+    out.y = m_rotatedVertices.begin()[0].m_y.x;
+    out.z = m_rotatedVertices.begin()[0].m_z.x;
     out.w = 1.0f;
 }
 
@@ -138,11 +137,59 @@ void hkConvexVerticesShape::calcStatistics(hkStatisticsCollector* collector) con
     c->endObject();
 }
 
+// One sphere of the convex radius per vertex; the vertices are stored four to a block, one lane each.
+hkVector4* hkConvexVerticesShape::getCollisionSpheres(hkVector4* out) const {
+    hkVector4* sphere = out;
+    const hkConvexVerticesShapeFourVectors* fv = m_rotatedVertices.begin();
+    int i = m_numVertices - 1;
+    for (; i >= 3; i -= 4) {
+        hkVector4 v;
+        v.set(fv->m_x.x, fv->m_y.x, fv->m_z.x, m_radius);
+        sphere[0] = v;
+        v.set(fv->m_x.y, fv->m_y.y, fv->m_z.y, m_radius);
+        sphere[1] = v;
+        v.set(fv->m_x.z, fv->m_y.z, fv->m_z.z, m_radius);
+        sphere[2] = v;
+        v.set(fv->m_x.w, fv->m_y.w, fv->m_z.w, m_radius);
+        sphere[3] = v;
+        sphere += 4;
+        fv++;
+    }
+    if (i >= 0) {
+        hkVector4 v;
+        v.set(fv->m_x.x, fv->m_y.x, fv->m_z.x, m_radius);
+        *sphere = v;
+        sphere++;
+    }
+    if (i >= 1) {
+        hkVector4 v;
+        v.set(fv->m_x.y, fv->m_y.y, fv->m_z.y, m_radius);
+        *sphere = v;
+        sphere++;
+    }
+    if (i >= 2) {
+        hkVector4 v;
+        v.set(fv->m_x.z, fv->m_y.z, fv->m_z.z, m_radius);
+        *sphere = v;
+    }
+    return out;
+}
+
+// Vertex id = block index * 4 + lane; w keeps the id.
+void hkConvexVerticesShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
+    for (int i = 0; i <= numIds - 1; i++) {
+        int id = ids[i];
+        const hkReal* lane = &m_rotatedVertices.begin()[id >> 2].m_x.x + (id & 3);
+        out[i].x = lane[0];
+        out[i].y = lane[4];
+        out[i].z = lane[8];
+        out[i].setIntW(id);
+    }
+}
+
 // Not yet decompiled in this unit:
-//   0x802D1708   452  getCollisionSpheres
 //   0x802D18CC  1004  getAabb
 //   0x802D1CB8   800  getSupportingVertex
-//   0x802D1FD8   324  convertVertexIdsToVertices
 
 static hkStaticTypeInfo hkConvexVerticesShapeTypeInfo("hkConvexVerticesShape", hkConvexVerticesShape::finishLoadedObjecthkConvexVerticesShape, hkConvexVerticesShape::cleanupLoadedObjecthkConvexVerticesShape,
                                       hkConvexVerticesShape::getVtablehkConvexVerticesShape());

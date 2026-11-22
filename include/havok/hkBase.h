@@ -46,7 +46,11 @@ struct hkBaseObject {
 
 struct hkReferencedObject : hkBaseObject {
     u16 m_memSizeAndFlags; // 0x04
-    s16 m_referenceCount;  // 0x06
+    // BYTES: mutable, as in Havok (addReference/removeReference are const there). A mutable member also stops
+    // CodeWarrior from assuming that the object of a const member function is not written by other stores: without
+    // it, const members of every derived class move member loads above stores to their outputs (or keep them in
+    // registers across those stores), which the image never does.
+    mutable s16 m_referenceCount; // 0x06
 
     hkReferencedObject() : m_referenceCount(1) {}
     virtual ~hkReferencedObject() {}

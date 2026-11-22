@@ -68,14 +68,12 @@ void hkCapsuleShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVe
     }
 }
 
-#pragma scheduling off
 void hkCapsuleShape::getFirstVertex(hkVector4& out) const {
     out.x = m_vertexB.x;
     out.y = m_vertexB.y;
     out.z = m_vertexB.z;
     out.w = m_vertexB.w;
 }
-#pragma scheduling reset
 
 int hkCapsuleShape::getNumVertices() const {
     return 2;
@@ -87,14 +85,12 @@ void hkCapsuleShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const 
 }
 
 // The two capsule end points, copied in order.
-#pragma scheduling off
 hkVector4* hkCapsuleShape::getCollisionSpheres(hkVector4* out) const {
     hkVector4* result = out;
     out[0] = m_vertexA;
     out[1] = m_vertexB;
     return result;
 }
-#pragma scheduling reset
 
 int hkCapsuleShape::getType() const {
     return HK_SHAPE_CAPSULE;

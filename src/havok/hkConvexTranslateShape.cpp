@@ -92,12 +92,11 @@ void hkConvexTranslateShape::castRayWithCollector(const hkShapeRayCastInput& inp
     hkShapeRayCastInput localInput = input;
     localInput.m_from.setSub4(input.m_from, m_translation);
     localInput.m_to.setSub4(input.m_to, m_translation);
-    hkCdBody localBody;
-    localBody.m_shape = m_childShape.m_childShape;
+    hkCdBody localBody(&body);
+    const hkShape* child = m_childShape.m_childShape;
+    localBody.m_shape = (hkShape*)child;
     localBody.m_shapeKey = 0;
-    localBody.m_motion = body.m_motion;
-    localBody.m_parent = const_cast<hkCdBody*>(&body);
-    m_childShape.m_childShape->castRayWithCollector(localInput, localBody, collector);
+    child->castRayWithCollector(localInput, localBody, collector);
 }
 
 void hkConvexTranslateShape::getSupportingVertex(const hkVector4& direction, hkVector4& out) const {
@@ -109,11 +108,11 @@ void hkConvexTranslateShape::getSupportingVertex(const hkVector4& direction, hkV
 
 void hkConvexTranslateShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector4* out) const {
     static_cast<hkConvexShape*>(m_childShape.m_childShape)->convertVertexIdsToVertices(ids, numIds, out);
+    // TODO: clean up: draft; the target unrolls the outer loop four times with an index register.
     for (int i = 0; i < numIds; i++) {
-        out->x += m_translation.x;
-        out->y += m_translation.y;
-        out->z += m_translation.z;
-        out++;
+        for (int j = 0; j < 3; j++) {
+            out[i](j) += m_translation(j);
+        }
     }
 }
 
@@ -134,10 +133,13 @@ void hkConvexTranslateShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out
 
 hkVector4* hkConvexTranslateShape::getCollisionSpheres(hkVector4* out) const {
     hkVector4* spheres = static_cast<hkSphereRepShape*>(m_childShape.m_childShape)->getCollisionSpheres(out);
+    hkVector4* sphere = out;
     hkCollisionSpheresInfo info;
     static_cast<hkSphereRepShape*>(m_childShape.m_childShape)->getCollisionSpheresInfo(&info);
     for (int i = 0; i < info.m_numSpheres; i++) {
-        out[i].setAdd4(spheres[i], m_translation);
+        sphere->setAdd4(*spheres, m_translation);
+        sphere++;
+        spheres++;
     }
     return out;
 }

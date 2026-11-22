@@ -95,9 +95,34 @@ void hkBoxShape::convertVertexIdsToVertices(const u16* ids, int numIds, hkVector
     }
 }
 
+// The eight corners of the box, each a sphere of the convex radius.
+hkVector4* hkBoxShape::getCollisionSpheres(hkVector4* out) const {
+    static const hkReal s_cornerSigns[8][4] = {
+        {1.0f, 1.0f, 1.0f, 1.0f},   {-1.0f, 1.0f, 1.0f, 1.0f},   {1.0f, -1.0f, 1.0f, 1.0f},   {-1.0f, -1.0f, 1.0f, 1.0f},
+        {1.0f, 1.0f, -1.0f, 1.0f},  {-1.0f, 1.0f, -1.0f, 1.0f},  {1.0f, -1.0f, -1.0f, 1.0f},  {-1.0f, -1.0f, -1.0f, 1.0f},
+    };
+    hkVector4 extents;
+    extents.x = m_halfExtents.x;
+    extents.y = m_halfExtents.y;
+    extents.z = m_halfExtents.z;
+    extents.w = m_radius;
+    hkVector4* sphere = out;
+    const hkVector4* sign = (const hkVector4*)s_cornerSigns;
+    for (int i = 0; i < 4; i++) {
+        hkVector4 a;
+        a.setMul4(extents, sign[0]);
+        sphere[0] = a;
+        hkVector4 b;
+        b.setMul4(extents, sign[1]);
+        sphere[1] = b;
+        sphere += 2;
+        sign += 2;
+    }
+    return out;
+}
+
 // Not yet decompiled in this unit:
 //   0x802CD9DC   748  getAabb
-//   0x802CDED4   448  getCollisionSpheres
 //   0x802CE094  1184  castRay
 
 static hkStaticTypeInfo hkBoxShapeTypeInfo("hkBoxShape", hkBoxShape::finishLoadedObjecthkBoxShape, hkBoxShape::cleanupLoadedObjecthkBoxShape,
