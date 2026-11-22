@@ -1,3 +1,7 @@
+#define MT_VEC3F_SCALE_XY_IN_PLACE
+#define MT_VEC3F_MUL_INLINE
+#define MT_VEC3F_OPERATOR_MUL_FRESH_REGS
+#define MT_VEC3F_SUB_FRESH_REGS
 #include <it/kinetic/it_kinetic_energy.h>
 #include <mt/mt_vector.h>
 #include <so/so_kinetic_utility.h>
@@ -138,6 +142,24 @@ void itKineticEnergy::reflectAccel(const Vec3f& normal) {
     reflectVec(m_accel, m_accel, n);
 }
 
+// TODO: clean up -- MATCH-ONLY paired-single add with the original register assignment (copied from
+// so_kinetic_energy_3f.cpp); should be Vec3f::operator+= once the shared Vec3fAdd helper has this variant.
+static inline void Vec3fAddLocal(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
+    register f32 rxy, lxy, sxy, rz, lz, sz;
+    // clang-format off
+    asm {
+        psq_l  lxy, Vec3f.m_x(lhs), 0, 0
+        psq_l  rxy, Vec3f.m_x(rhs), 0, 0
+        ps_add sxy, lxy, rxy
+        psq_l  lz, Vec3f.m_z(lhs), 1, 0
+        psq_l  rz, Vec3f.m_z(rhs), 1, 0
+        ps_add sz, lz, rz
+        psq_st sxy, Vec3f.m_x(pOut), 0, 0
+        psq_st sz, Vec3f.m_z(pOut), 1, 0
+    }
+    // clang-format on
+}
+
 // HYPOTHESIS: draft of the 3D energy (the original scales, adds and multiplies the vectors with paired-single
 // helpers); itKineticEnergy with a third axis.
 void itKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
@@ -149,23 +171,20 @@ void itKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
                 if (m_considerGroundFriction == true) {
                     float friction = moduleAccesser->getGroundModule().getDownFriction(0);
                     if (friction != 1.0f) {
-                        accel.scale(friction);
-                        brake.scale(friction);
+                        Vec3fScale(&accel, &accel, friction);
+                        Vec3fScale(&brake, &brake, friction);
                     }
                 }
                 if (m_isFollowGroundNormal == true) {
                     Vec2f normal = moduleAccesser->getGroundModule().getTouchNormal(8, 0);
-                    Vec2f planar(accel.m_x, accel.m_y);
-                    Vec2f follow = soKineticUtility::projectionNormalFollow(planar, normal);
+                    Vec2f follow = soKineticUtility::projectionNormalFollow(Vec2f(accel), normal);
                     accel.m_x = follow.m_x;
                     accel.m_y = follow.m_y;
                 }
             }
         }
     }
-    m_speed.m_x += accel.m_x;
-    m_speed.m_y += accel.m_y;
-    m_speed.m_z += accel.m_z;
+    Vec3fAddLocal(&m_speed, &m_speed, &accel);
     Vec3f stableSpeed = m_stableSpeed;
     if (stableSpeed.m_x < 0.0f) {
         stableSpeed.m_x = 0.0f;
@@ -227,7 +246,7 @@ void itKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser) {
                     m_speed.m_x = m_speed.m_y = m_speed.m_z = 0.0f;
                 } else {
                     m_speed.normalize();
-                    m_speed.scale(limit);
+                    Vec3fScale(&m_speed, &m_speed, limit);
                 }
             }
         }
@@ -260,8 +279,8 @@ void itKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser, float rat
     if (rate != 1.0f) {
         Vec3f accel = m_accel;
         Vec3f brake = m_brake;
-        m_accel.scale(rate);
-        m_brake.scale(rate);
+        Vec3fScale(&m_accel, &m_accel, rate);
+        Vec3fScale(&m_brake, &m_brake, rate);
         updateEnergy(moduleAccesser);
         m_accel = accel;
         m_brake = brake;
@@ -270,30 +289,43 @@ void itKineticEnergy3f::updateEnergy(soModuleAccesser* moduleAccesser, float rat
     }
 }
 
+// TODO: clean up -- hand-written paired-single multiply (as in so_kinetic_energy_3f.cpp); should be a shared Vec3f
+// helper.
+// MATCH-ONLY: componentwise product in paired singles (the same style as Vec3fAdd).
+static inline void Vec3fMul(register Vec3f* pOut, register const Vec3f* lhs, register const Vec3f* rhs) {
+    register f32 fr3, fr2, fr1, fr0;
+    // clang-format off
+    asm {
+        psq_l  fr3, Vec3f.m_x(lhs), 0, 0
+        psq_l  fr1, Vec3f.m_x(rhs), 0, 0
+        psq_l  fr2, Vec3f.m_z(lhs), 1, 0
+        psq_l  fr0, Vec3f.m_z(rhs), 1, 0
+        ps_mul fr1, fr3, fr1
+        ps_mul fr0, fr2, fr0
+        psq_st fr1, Vec3f.m_x(pOut), 0, 0
+        psq_st fr0, Vec3f.m_z(pOut), 1, 0
+    }
+    // clang-format on
+}
+
 void itKineticEnergy3f::mulSpeed(Vec3f* speed) {
-    m_speed.m_x *= speed->m_x;
-    m_speed.m_y *= speed->m_y;
-    m_speed.m_z *= speed->m_z;
+    Vec3fMul(&m_speed, &m_speed, speed);
 }
 
 void itKineticEnergy3f::mulAccel(Vec3f* accel) {
-    m_accel.m_x *= accel->m_x;
-    m_accel.m_y *= accel->m_y;
-    m_accel.m_z *= accel->m_z;
+    Vec3fMul(&m_accel, &m_accel, accel);
+}
+
+static inline void reflectVec3(Vec3f& out, const Vec3f& v, const Vec3f& n) {
+    out = out - n * 2.0f * (n.m_x * v.m_x + n.m_y * v.m_y + n.m_z * v.m_z);
 }
 
 void itKineticEnergy3f::reflectSpeed(const Vec3f& normal) {
-    float dot = normal.m_x * m_speed.m_x + normal.m_y * m_speed.m_y + normal.m_z * m_speed.m_z;
-    m_speed.m_x -= normal.m_x * 2.0f * dot;
-    m_speed.m_y -= normal.m_y * 2.0f * dot;
-    m_speed.m_z -= normal.m_z * 2.0f * dot;
+    reflectVec3(m_speed, m_speed, normal);
 }
 
 void itKineticEnergy3f::reflectAccel(const Vec3f& normal) {
-    float dot = normal.m_x * m_accel.m_x + normal.m_y * m_accel.m_y + normal.m_z * m_accel.m_z;
-    m_accel.m_x -= normal.m_x * 2.0f * dot;
-    m_accel.m_y -= normal.m_y * 2.0f * dot;
-    m_accel.m_z -= normal.m_z * 2.0f * dot;
+    reflectVec3(m_accel, m_accel, normal);
 }
 
 void itKineticEnergyGravity::updateEnergy(soModuleAccesser*) {
@@ -365,121 +397,5 @@ void itKineticEnergy3f::resetEnergy(int, const Vec2f& speed, const Vec3f&, soMod
     y = speed.m_y;
     m_speed.m_x = x;
     m_speed.m_y = y;
-}
-
-// TODO: clean up, give variables real names
-namespace jj_2BE510 {
-typedef struct {
-    float x;
-    float y;
-} Vec2;
-
-typedef struct {
-    int pad[2];
-    Vec2 v;
-} Obj;
-
-extern const float lbl_27_rodata_5FBC;
-
-extern "C" void fn_27_2BE510(Obj* obj, const Vec2* v)
-{
-    Vec2 tmp;
-    Vec2 f;
-    Vec2 c;
-    Vec2 a;
-
-    tmp.x = v->x;
-    tmp.y = v->y;
-
-    float d = tmp.x * obj->v.x + tmp.y * obj->v.y;
-
-    a.x = tmp.x * lbl_27_rodata_5FBC;
-    a.y = tmp.y * lbl_27_rodata_5FBC;
-    Vec2 b = a;
-
-    c.x = b.x * d;
-    c.y = b.y * d;
-    Vec2 e = c;
-
-    f.x = obj->v.x - e.x;
-    f.y = obj->v.y - e.y;
-    Vec2 g = f;
-
-    obj->v = g;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_2BE5C8 {
-typedef struct {
-    float x;
-    float y;
-} Vec2;
-
-typedef struct {
-    char pad[0x10];
-    Vec2 v;
-} Obj;
-
-extern const float lbl_27_rodata_5FBC;
-
-extern "C" void fn_27_2BE5C8(Obj* obj, const Vec2* v)
-{
-    Vec2 tmp;
-    Vec2 f;
-    Vec2 c;
-    Vec2 a;
-
-    tmp.x = v->x;
-    tmp.y = v->y;
-
-    float d = tmp.x * obj->v.x + tmp.y * obj->v.y;
-
-    a.x = tmp.x * lbl_27_rodata_5FBC;
-    a.y = tmp.y * lbl_27_rodata_5FBC;
-    Vec2 b = a;
-
-    c.x = b.x * d;
-    c.y = b.y * d;
-    Vec2 e = c;
-
-    f.x = obj->v.x - e.x;
-    f.y = obj->v.y - e.y;
-    Vec2 g = f;
-
-    obj->v = g;
-}
-}
-
-// TODO: clean up, give variables real names
-namespace jj_2BF030 {
-extern const float lbl_27_rodata_5FB4;
-extern const float lbl_27_rodata_5FBC;
-struct Vec2 { float x, y; };
-struct Obj { char pad[0xC]; float value; };
-extern "C" void fn_27_2BF030(Obj* out, const Vec2* v) {
-    Vec2 r;
-    Vec2 dir;
-    Vec2 g;
-    Vec2 e;
-    Vec2 a;
-    r.y = out->value;
-    r.x = lbl_27_rodata_5FB4;
-    dir.x = v->x;
-    dir.y = v->y;
-    float d = dir.x * r.x + dir.y * r.y;
-    a.x = dir.x * lbl_27_rodata_5FBC;
-    a.y = dir.y * lbl_27_rodata_5FBC;
-    Vec2 b = a;
-    e.x = b.x * d;
-    e.y = b.y * d;
-    Vec2 f = e;
-    g.x = r.x - f.x;
-    g.y = r.y - f.y;
-    Vec2 h = g;
-    r.x = h.x;
-    r.y = h.y;
-    out->value = r.y;
-}
 }
 

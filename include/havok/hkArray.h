@@ -146,6 +146,17 @@ struct hkArray : hkArrayBase {
         reserveSmart(n);
         m_size = n;
     }
+    // Grows with copies of fill (shrinking just drops the size).
+    void setSize(int n, const T& fill) {
+        int oldSize = m_size;
+        if (n > oldSize) {
+            reserveSmart(n);
+            for (int i = oldSize; i < n; i++) {
+                ((T*)m_data)[i] = fill;
+            }
+        }
+        m_size = n;
+    }
     // Opens a gap of numToInsert elements at index (the later elements move up) and returns its first element
     // (contents are not initialised).
     T* expandAt(int index, int numToInsert) {

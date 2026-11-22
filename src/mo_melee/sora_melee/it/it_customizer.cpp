@@ -6,6 +6,8 @@
 #define SO_ARRAY_LIST_EXTERNAL_insertSub
 #define SO_ARRAY_LIST_EXTERNAL_eraseSub
 #include <so/so_array.h>
+#define SO_PHOTO_CALL_BACK_EXIT_ARG // itPhotoCallBack reads the photoExit flag, see so/so_photo_call_back.h
+#define FT_MARTH_PHOTO_CALLBACK_NOINLINE // the item callback destructor calls the base destructor out of line
 #define IT_CUSTOMIZER_BOOL_HOOKS // the hooks below return values, see it/item.h
 #include <it/item.h>
 #include <it/kinetic/it_kinetic_module_impl.h>
@@ -31,12 +33,13 @@
 #include <mt/mt_prng.h>
 #include <so/event/so_gimmick_event_presenter.h>
 #include <so/so_external_value_accesser.h>
+#include <so/so_photo_call_back.h>
 #include <types.h>
 
 // The item customizers (the per-item hooks of BaseItem): this unit holds their overrides and destructors; the hooks that
 // are not decompiled yet are only declared (so the vtables have their slots). The names of the hooks the module map
 // leaves unnamed come from their vtable slots.
-// TODO: the remaining hooks, the non-virtual helpers and itPhotoCallBack with the static initializer.
+// TODO: the remaining hooks and the non-virtual helpers.
 
 class itResetsanCustomizer : public itCustomizer<itResetsanCustomizer> {
 public:
@@ -1065,6 +1068,7 @@ public:
     BaseItem* createItem(Vec3f* safePos, Vec3f* pos, float lr, itKind kind, u32 variation = 0, int createOwnerTaskId = -1,
                          soResourceModule* resourceModule = NULL, u8 groupNo = 0, int brresId = 0xffff,
                          int texResIndex = 0, int texResId = 0xffff);
+    BaseItem* getItemFromKind(int kind);
 };
 
 // HYPOTHESIS: the default layer type depends on the item kind; a few kinds defer to a mode value inside itManager.
@@ -1138,10 +1142,47 @@ void itDragoonSetCustomizer::onRenderDebug(BaseItem* item) {
     }
 }
 
-// TODO: clean up - the photo callbacks of the Nintendogs and Dragoon sight items are statics of the unit (with its
-// static initializer, not decompiled yet); they are reached through their bss labels.
-extern "C" utListNode lbl_27_bss_6460;
-extern "C" utListNode lbl_27_bss_6480;
+// Hides an item kind's items while the photo mode runs (the Nintendogs and the Dragoon sight).
+class itPhotoCallBack : public cmPhotoCallBack {
+public:
+    itPhotoCallBack(itKind kind) : m_kind(kind) { }
+    virtual ~itPhotoCallBack() { }
+    virtual void photoMoved();
+    virtual void photoExit(const bool* show);
+
+    itKind m_kind; // 0xC
+};
+static_assert(sizeof(itPhotoCallBack) == 0x10, "Class is wrong size!");
+
+void itPhotoCallBack::photoExit(const bool* show) {
+    if (*show) {
+        BaseItem* item = itManager::getInstance()->getItemFromKind(m_kind);
+        if (item != NULL) {
+            item->setVisibilityWhole(true);
+        }
+    }
+}
+
+void itPhotoCallBack::photoMoved() {
+    BaseItem* item = itManager::getInstance()->getItemFromKind(m_kind);
+    if (item != NULL) {
+        item->setVisibilityWhole(false);
+    }
+}
+
+// TODO: clean up - placeholder pair type and names (the same static pair pattern as so_sinit_pair_*.cpp); replace with
+// the real static object type once its owner is identified.
+struct itCustomizerSinitPair {
+    s32 m_a;
+    s32 m_b;
+    itCustomizerSinitPair(s32 a, s32 b) : m_a(a), m_b(b) { }
+};
+
+itCustomizerSinitPair lbl_27_bss_6440(0xFF, 0);
+itCustomizerSinitPair lbl_27_bss_6448(0xFF, 1);
+// TODO: clean up - placeholder names of the two photo callbacks (from their bss labels).
+itPhotoCallBack lbl_27_bss_6460(Item_Assist_Nintendogs_Hi);
+itPhotoCallBack lbl_27_bss_6480(Item_Dragoon_Sight);
 
 static inline cmPhotoController* itGetPhotoController() {
     gfCameraController* cm = !CameraController::getInstance() ? 0 :
