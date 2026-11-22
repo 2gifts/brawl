@@ -162,7 +162,7 @@ found:
 
 #include <havok/hkPredGskAgent3.h>
 
-hkResult hkGskManifoldWork::convertPointPoint(const hkGskManifoldEntry& point, hkGskManifoldPointContact& out) const {
+hkResult hkGskManifoldWork::convertPointPoint(hkGskManifoldEntry& point, hkGskManifoldPointContact& out) const {
     int offsetA = point.m_vertexOffsets[0];
     int offsetB = point.m_vertexOffsets[1];
     const hkVector4& a = *(const hkVector4*)((const u8*)m_vertices + offsetA);

@@ -2,6 +2,7 @@
 
 #include <havok/hkIterativeLinearCastAgent.h>
 #include <havok/hkCdBody.h>
+#include <havok/hkGskCache.h>
 
 struct hkContactMgr;
 
@@ -10,7 +11,7 @@ struct hkContactMgr;
 struct hkGskBaseAgent : hkIterativeLinearCastAgent {
     HK_DECLARE_REF_ALLOCATOR(0x1d)
 
-    u8 unkC[0x18 - 0x0C]; // 0x0C GSK cache/state initialised by the constructor (not identified)
+    hkGskCache m_cache;   // 0x0C the simplex of the pair, initialised by the constructor
     float unk18;          // 0x18 HYPOTHESIS: cached time; the invalidated value is the constant stored by invalidateTim
     float unk1C;          // 0x1C set by the constructor to the smaller of the two root body values at 0x20
     // HYPOTHESIS: 0x20..0x2F is Havok's 16-byte aligned separating normal (hkVector4), which gives the class its
@@ -32,6 +33,7 @@ struct hkGskBaseAgent : hkIterativeLinearCastAgent {
 
     virtual void cleanup();
     virtual void processCollision(const hkCdBody& unk0, const hkCdBody& unk1, hkProcessCollisionInput& unk2, void* unk3);
+    virtual void getPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, void* collector);
     // The closest points of the pair from the agent's cached simplex (unkC).
     virtual void getClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input, void* collector);
     virtual void invalidateTim(void* arg);

@@ -12977,6 +12977,7 @@ mo_melee/sora_melee/it/it_item_thunks_297370.cpp:
 mo_melee/sora_melee/it/it_customizer.cpp:
 	.text       start:0x002974B0 end:0x002A0D38
 	.ctors      start:0x0000031C end:0x00000320
+	.bss        start:0x00006440 end:0x00006490
 
 mo_melee/sora_melee/it/it_manager.cpp:
 	.text       start:0x002A0D38 end:0x002AC298
@@ -13104,6 +13105,7 @@ mo_melee/sora_melee/it/it_damage_transactor_impl.cpp:
 
 mo_melee/sora_melee/it/it_kinetic_module_impl.cpp:
 	.text       start:0x002B3A0C end:0x002BB9F0
+	.rodata     start:0x00005EB8 end:0x00005F90
 
 mo_melee/sora_melee/so/so_array_list_members_soInstanceUnitFullProperty_ptr_soKineticEnergy_11_part1.cpp:
 	.text       start:0x002BB9F0 end:0x002BC544

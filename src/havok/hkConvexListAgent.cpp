@@ -223,7 +223,7 @@ hkConvexListAgent::hkConvexListAgent(const hkCdBody& bodyA, const hkCdBody& body
         hkConvexListConvexShape shape(list->m_childInfo, list->m_numChildren, list->m_childInfo[0].m_shape->m_radius);
         hkTransform aTb;
         aTb.setMulInverseMul(*(const hkTransform*)bodyA.m_motion, *(const hkTransform*)bodyB.m_motion);
-        ((hkGskCache*)unkC)->init((const hkConvexShape*)shapeA, (const hkConvexShape*)&shape, aTb);
+        m_cache.init((const hkConvexShape*)shapeA, (const hkConvexShape*)&shape, aTb);
     }
     unk2C = -1.0f;
     unk18 = -1.0f;
