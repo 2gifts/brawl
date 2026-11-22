@@ -3,12 +3,15 @@
 #include <havok/hkCollisionFilter.h>
 #include <havok/hkMemory.h>
 
-// HYPOTHESIS: fifth base of hkConstrainedSystemFilter, a listener for constraint add/remove events. Only the
-// vtable shape (virtual destructor plus the two callbacks) is recovered; the parameter types are not.
+struct hkConstraintInstance;
+
+// HYPOTHESIS: fifth base of hkConstrainedSystemFilter, a listener for constraint add/remove events (virtual
+// destructor plus the two callbacks). The callbacks take a non-const instance: the added callback keeps its loads
+// after its call the way a non-const pointer does.
 struct hkConstraintListenerInterface {
     virtual ~hkConstraintListenerInterface() {}
-    virtual void constraintAddedCallback(const void* constraint) = 0;
-    virtual void constraintRemovedCallback(const void* constraint) = 0;
+    virtual void constraintAddedCallback(hkConstraintInstance* constraint) = 0;
+    virtual void constraintRemovedCallback(hkConstraintInstance* constraint) = 0;
 };
 
 // Collision filter that forwards to a wrapped filter and listens for constraint events (0x20 bytes).
@@ -27,8 +30,8 @@ struct hkConstrainedSystemFilter : hkCollisionFilter, hkConstraintListenerInterf
     static void cleanupLoadedObjecthkConstrainedSystemFilter(void* p);
     static const void* getVtablehkConstrainedSystemFilter();
 
-    virtual void constraintAddedCallback(const void* constraint);
-    virtual void constraintRemovedCallback(const void* constraint);
+    virtual void constraintAddedCallback(hkConstraintInstance* constraint);
+    virtual void constraintRemovedCallback(hkConstraintInstance* constraint);
 
     // Forward to the wrapped filter; true when there is no child.
     virtual hkBool isCollisionEnabled(const hkCollidable& a, const hkCollidable& b) const;

@@ -86,7 +86,7 @@ struct hkContactMgr : hkReferencedObject {
     virtual void removeToi(const hkCollidable& a, const hkCollidable& b, hkContactPointMaterial& material);
     // HYPOTHESIS: the event is the continuous simulation's toi record (entities at 0x04/0x08, separating velocity at
     // 0x0C, contact point at 0x10, properties at 0x20); the other two arguments go to the simple collision response.
-    virtual void processToi(const void* toiEvent, hkReal rotateNormal, void* entitiesOut);
+    virtual void processToi(void* toiEvent, hkReal rotateNormal, void* entitiesOut);
 };
 
 // Makes the contact manager of a new agent (hkCollisionDispatcher holds one per pair of material response types).

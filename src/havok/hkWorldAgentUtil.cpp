@@ -39,7 +39,8 @@ hkAgentNnEntry* hkWorldAgentUtil::addAgent(hkLinkedCollidable* collA, hkLinkedCo
     }
     int agentType;
     int isFlipped;
-    hkAgentNnMachine_GetAgentType(collA, collB, input, &agentType, &isFlipped);
+    hkProcessCollisionInput& in = const_cast<hkProcessCollisionInput&>(input);
+    hkAgentNnMachine_GetAgentType(collA, collB, in, &agentType, &isFlipped);
     if (isFlipped) {
         hkLinkedCollidable* tmp = collA;
         collA = collB;
@@ -48,7 +49,7 @@ hkAgentNnEntry* hkWorldAgentUtil::addAgent(hkLinkedCollidable* collA, hkLinkedCo
     hkContactMgr* mgr = input.m_dispatcher
                             ->m_contactMgrFactory[entityA->m_material.m_responseType][entityB->m_material.m_responseType]
                             ->createContactMgr(*collA, *collB, input);
-    return hkAgentNnMachine_CreateAgent(island->m_agentTrack, collA, collB, agentType, input, mgr);
+    return hkAgentNnMachine_CreateAgent(island->m_agentTrack, collA, collB, agentType, in, mgr);
 }
 
 void hkWorldAgentUtil::removeAgent(hkAgentNnEntry* entry) {

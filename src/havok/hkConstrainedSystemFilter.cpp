@@ -53,8 +53,7 @@ hkConstrainedSystemFilter::~hkConstrainedSystemFilter() {
 }
 
 // A new non-contact constraint removes the agent between its two bodies (and the agent's TOI events).
-void hkConstrainedSystemFilter::constraintAddedCallback(const void* constraint) {
-    hkConstraintInstance* instance = (hkConstraintInstance*)constraint;
+void hkConstrainedSystemFilter::constraintAddedCallback(hkConstraintInstance* instance) {
     if (instance->getData()->getType() != 11) {
         hkAgentNnEntry* entry = hkAgentNnMachine_FindAgent(&instance->m_entities[0]->m_collidable,
                                                            &instance->m_entities[1]->m_collidable);
@@ -64,7 +63,7 @@ void hkConstrainedSystemFilter::constraintAddedCallback(const void* constraint) 
     }
 }
 
-void hkConstrainedSystemFilter::constraintRemovedCallback(const void* constraint) {}
+void hkConstrainedSystemFilter::constraintRemovedCallback(hkConstraintInstance* constraint) {}
 
 // The entity owning a collidable (broad-phase type 1), else null. HYPOTHESIS: the type name.
 static inline hkEntity* hkConstrainedSystemFilter_getEntity(const hkCollidable& c) {

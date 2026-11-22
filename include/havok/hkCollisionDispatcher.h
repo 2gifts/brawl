@@ -159,9 +159,11 @@ struct hkCollisionDispatcher : hkReferencedObject {
 
     // Adds one agent registration for the shape type pair (typeA, typeB); symmetric entries are added when
     // funcs->symmetricB is set.
-    void registerCollisionAgent(const hkAgentFuncs* funcs, int typeA, int typeB);
+    // BYTES: funcs is not const here and in registerAgent3: the copies keep every load after the previous store
+    // (CodeWarrior moves loads of a const-qualified source above them).
+    void registerCollisionAgent(hkAgentFuncs* funcs, int typeA, int typeB);
     // Adds an agent3 registration for the shape type pair (map name hkCollisionDispatcher::registerAgent3).
-    void registerAgent3(const hkAgent3Funcs& funcs, int typeA, int typeB);
+    void registerAgent3(hkAgent3Funcs& funcs, int typeA, int typeB);
     // HYPOTHESIS: fills the entries of one lookup table for the shape type pair. depth is the recursion level used when
     // a type is -1 (all types).
     void internalRegisterCollisionAgent(u8* table, int value, int typeA, int typeB, int typeA2, int typeB2, void* buffer,

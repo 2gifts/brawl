@@ -41,8 +41,8 @@ static const hkReal HK_INVALID_TIM_TIME = -1.0f;
 // pair has to be swapped for it: an agent registered for the reverse pair only, or a 2-agent bridge whose
 // registration is symmetric.
 void hkAgentNnMachine_GetAgentType(hkLinkedCollidable* collA, hkLinkedCollidable* collB,
-                                   const hkProcessCollisionInput& inputIn, int* agentTypeOut, int* isFlippedOut) {
-    const hkCollisionInput& input = (const hkCollisionInput&)inputIn;
+                                   hkProcessCollisionInput& inputIn, int* agentTypeOut, int* isFlippedOut) {
+    hkCollisionInput& input = inputIn;
     hkCollisionDispatcher* dis = input.m_dispatcher;
     int typeA = collA->getShape()->getType();
     int typeB = collB->getShape()->getType();
@@ -78,7 +78,7 @@ typedef void* (*hkAgent3CreateFunc)(const hkAgent3Input& input, hkAgentNnEntry* 
 // collidables, picks the pair's collision quality and lets the agent3 registration build its agent data.
 hkAgentNnEntry* hkAgentNnMachine_CreateAgent(hkAgentNnTrack& track, hkLinkedCollidable* collA,
                                              hkLinkedCollidable* collB, int agentType,
-                                             const hkProcessCollisionInput& input, hkContactMgr* mgr) {
+                                             hkProcessCollisionInput& input, hkContactMgr* mgr) {
     // MATCH-ONLY: the aligned local turns copy propagation off for the function (the target reloads
     // input.m_dispatcher and keeps its loads in source order).
     hkCollisionDispatcher* dis __attribute__((aligned(16))) = input.m_dispatcher;
@@ -113,7 +113,7 @@ hkAgentNnEntry* hkAgentNnMachine_CreateAgent(hkAgentNnTrack& track, hkLinkedColl
     s8 qualityIndex = input.m_dispatcher->m_collisionQualityIndex[collA->m_broadPhaseHandle.m_objectQualityType]
                                                                   [collB->m_broadPhaseHandle.m_objectQualityType];
     entry->m_collisionQualityIndex = qualityIndex;
-    const_cast<hkProcessCollisionInput&>(input).m_collisionQualityInfo =
+    input.m_collisionQualityInfo =
         input.m_dispatcher->getCollisionQualityInfo(qualityIndex);
     entry->m_agentType = agentType;
 

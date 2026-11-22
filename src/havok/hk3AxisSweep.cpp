@@ -52,13 +52,13 @@
 #include <havok/hkCollidable.h>
 #include <havok/hkMath.h>
 
-void hk3AxisSweep::beginOverlap(const hkBpNode* a, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
+void hk3AxisSweep::beginOverlap(hkBpNode* a, hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
     hkBroadPhaseHandlePair& pair = pairs.expandOne();
     pair.m_a = a->m_handle;
     pair.m_b = b->m_handle;
 }
 
-void hk3AxisSweep::endOverlap(const hkBpNode* a, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
+void hk3AxisSweep::endOverlap(hkBpNode* a, hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
     hkBroadPhaseHandlePair& pair = pairs.expandOne();
     pair.m_a = a->m_handle;
     pair.m_b = b->m_handle;
@@ -74,21 +74,16 @@ static int findCheckMarkerEntry(const hkArray<u16>& list, u16 value) {
     return -1;
 }
 
-void hk3AxisSweep::beginOverlapCheckMarker(hkBpCheckMarker* markers, const hkBpNode* a, u32 value, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
+void hk3AxisSweep::beginOverlapCheckMarker(hkBpCheckMarker* markers, hkBpNode* a, u32 value, hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
     if (((u32)b->m_handle & 1) == 0) {
         beginOverlap(a, b, pairs);
     } else {
-        u16 key = (u16)value;
         hkBpCheckMarker* marker = (hkBpCheckMarker*)((u8*)markers + ((u32)b->m_handle & ~1));
-        hkArray<u16>& list = marker->m_list;
-        if (list.m_size == (list.m_capacityAndFlags & 0x3FFFFFFF)) {
-            hkArrayUtil::_reserveMore(&list, sizeof(u16));
-        }
-        ((u16*)list.m_data)[list.m_size++] = key;
+        marker->m_list.pushBack((u16)value);
     }
 }
 
-void hk3AxisSweep::endOverlapCheckMarker(hkBpCheckMarker* markers, const hkBpNode* a, u32 value, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
+void hk3AxisSweep::endOverlapCheckMarker(hkBpCheckMarker* markers, hkBpNode* a, u32 value, hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs) {
     if (((u32)b->m_handle & 1) == 0) {
         endOverlap(a, b, pairs);
     } else {
@@ -223,7 +218,7 @@ void hk3AxisSweep::hkBpAxis::remove(int minIndex, int maxIndex) {
     }
 }
 
-void hk3AxisSweep::updateNodesAfterInsert(hkBpNode* nodes, int count, const hkBpNode& inserted) {
+void hk3AxisSweep::updateNodesAfterInsert(hkBpNode* nodes, int count, hkBpNode& inserted) {
     // Compare against positions before insertion: min shifted by one, max by two. The bounds are also kept as two
     // aligned nodes on the stack (stored, never read back), as in the original.
     hkBpNode lo __attribute__((aligned(16)));

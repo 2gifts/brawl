@@ -70,7 +70,7 @@ hkCollisionDispatcher::~hkCollisionDispatcher() {
     }
 }
 
-void hkCollisionDispatcher::registerCollisionAgent(const hkAgentFuncs* funcs, int typeA, int typeB) {
+void hkCollisionDispatcher::registerCollisionAgent(hkAgentFuncs* funcs, int typeA, int typeB) {
     m_agentFuncs[m_numAgents] = *funcs;
     internalRegisterCollisionAgent(m_lookupE94, 1, typeA, typeB, typeA, typeB, m_buffers[2], 0);
     internalRegisterCollisionAgent(m_lookup190, m_numAgents, typeA, typeB, typeA, typeB, m_buffers[0], 0);
@@ -334,7 +334,7 @@ void hkCollisionDispatcher::internalRegisterCollisionAgent(u8* table, int value,
 
 // Agent3 registrations use the 0x200-byte agent sectors with 0x80-byte entries. A pair of different types whose
 // agent does not ignore the symmetric version first gets a flipped twin registration for (typeB, typeA).
-void hkCollisionDispatcher::registerAgent3(const hkAgent3Funcs& funcs, int typeA, int typeB) {
+void hkCollisionDispatcher::registerAgent3(hkAgent3Funcs& funcs, int typeA, int typeB) {
     Agent3FuncsIntern f;
     m_agentEntrySize = 0x80;
     m_agentSectorSize = 0x200;

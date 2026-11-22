@@ -39,7 +39,8 @@ struct hkSimpleConstraintContactMgr : hkDynamicsContactMgr {
                        hkProcessCollisionOutput& output, hkReal toi, hkContactPoint& cp, hkReal& projectedVelocity,
                        hkContactPointMaterial& materialOut);
     virtual void removeToi(const hkCollidable& a, const hkCollidable& b, hkContactPointMaterial& material);
-    virtual void processToi(const void* toiEvent, hkReal rotateNormal, void* entitiesOut);
+    // BYTES: the event is not const (its fields are reloaded after each callback).
+    virtual void processToi(void* toiEvent, hkReal rotateNormal, void* entitiesOut);
 
     virtual hkContactPointProperties* getContactPointProperties(hkContactPointId id);
     virtual hkContactPoint* getContactPoint(hkContactPointId id);

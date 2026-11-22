@@ -75,7 +75,7 @@ struct hk3AxisSweep : hkBroadPhase {
     ~hk3AxisSweep();
 
     // Existing node indices shift when the new pair of endpoints is inserted or removed.
-    void updateNodesAfterInsert(hkBpNode* nodes, int count, const hkBpNode& inserted);
+    void updateNodesAfterInsert(hkBpNode* nodes, int count, hkBpNode& inserted);
     void updateNodesAfterDelete(hkBpNode* nodes, int count, const hkBpNode& removed);
     void setBitsBasedOnXInterval(int count, int minKey, const hkBpNode& node, u32 id, u32* bits);
     void reQuerySingleObject(const hkBroadPhaseHandle* handle, hkArray<hkBroadPhaseHandlePair>& pairs);
@@ -86,10 +86,10 @@ struct hk3AxisSweep : hkBroadPhase {
     int getAabbCacheSize() const;
     void getAabbFromNode(const hkBpNode* node, hkAabb& aabb) const;
 
-    static void beginOverlap(const hkBpNode* a, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs);
-    static void endOverlap(const hkBpNode* a, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs);
-    static void beginOverlapCheckMarker(hkBpCheckMarker* markers, const hkBpNode* a, u32 value, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs);
-    static void endOverlapCheckMarker(hkBpCheckMarker* markers, const hkBpNode* a, u32 value, const hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs);
+    static void beginOverlap(hkBpNode* a, hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs);
+    static void endOverlap(hkBpNode* a, hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs);
+    static void beginOverlapCheckMarker(hkBpCheckMarker* markers, hkBpNode* a, u32 value, hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs);
+    static void endOverlapCheckMarker(hkBpCheckMarker* markers, hkBpNode* a, u32 value, hkBpNode* b, hkArray<hkBroadPhaseHandlePair>& pairs);
 };
 
 static_assert(sizeof(hk3AxisSweep) == 0xB0, "Broad-phase object size");

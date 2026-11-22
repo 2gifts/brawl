@@ -237,7 +237,7 @@ static inline bool needsCollisionResponse(hkEntity* a, hkEntity* b) {
     return respond;
 }
 
-void hkSimpleConstraintContactMgr::processToi(const void* toiEvent, hkReal rotateNormal, void* entitiesOut) {
+void hkSimpleConstraintContactMgr::processToi(void* toiEvent, hkReal rotateNormal, void* entitiesOut) {
     const hkSimpleToiEventView& ev = *(const hkSimpleToiEventView*)toiEvent;
     hkEntity* a = ev.m_entities[0];
     hkEntity* b = ev.m_entities[1];

@@ -90,12 +90,14 @@ void hkAgentNnMachine_ProcessTrack(hkSimulationIsland* island, hkAgentNnTrack& t
                                    const hkProcessCollisionInput& input);
 // The agent type for the pair and whether the pair has to be swapped for it (map name).
 // HYPOTHESIS: the parameter types (both outputs are 32-bit stores).
+// BYTES: the input is not const here and in CreateAgent (its fields are reloaded after stores; CreateAgent writes
+// its m_collisionQualityInfo).
 void hkAgentNnMachine_GetAgentType(hkLinkedCollidable* collA, hkLinkedCollidable* collB,
-                                   const hkProcessCollisionInput& input, int* agentTypeOut, int* isFlippedOut);
+                                   hkProcessCollisionInput& input, int* agentTypeOut, int* isFlippedOut);
 // Creates the agent of the pair in the track and returns its entry (map name). HYPOTHESIS: the parameter types.
 hkAgentNnEntry* hkAgentNnMachine_CreateAgent(hkAgentNnTrack& track, hkLinkedCollidable* collA,
                                              hkLinkedCollidable* collB, int agentType,
-                                             const hkProcessCollisionInput& input, hkContactMgr* mgr);
+                                             hkProcessCollisionInput& input, hkContactMgr* mgr);
 // Destroys the entry's agent and frees the entry in the track (map name). HYPOTHESIS: the parameter types.
 void hkAgentNnMachine_DestroyAgent(hkAgentNnTrack& track, hkAgentNnEntry* entry, hkCollisionDispatcher* dispatcher);
 // The agent entry of the pair, or null (map name; called by hkConstrainedSystemFilter::constraintAddedCallback).
