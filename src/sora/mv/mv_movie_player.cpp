@@ -443,3 +443,9 @@ extern "C" int drawFrame__13mvMoviePlayerFiiii(int a1, int a2, int a3, int a4, i
 }
 }
 
+// TODO: clean up - lbl_805A025C is the instance pointer (stored by the constructor)
+extern "C" int lbl_805A025C;
+
+mvMoviePlayer* mvMoviePlayer::getInstance() {
+    return reinterpret_cast<mvMoviePlayer*>(lbl_805A025C);
+}

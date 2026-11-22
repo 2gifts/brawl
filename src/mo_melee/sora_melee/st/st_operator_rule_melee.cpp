@@ -1682,7 +1682,7 @@ struct Menu {
 };
 
 extern "C" int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
-extern "C" int getFighterColorFileNo__6muMenuFiii(int, int);
+extern "C" int getFighterColorFileNo__6muMenuFii(int, int);
 
 extern "C" void fn_27_24CDE4(Menu* self, Object_vptr_3c* obj, s32 kind, s32 costume, s32 arg4, s32 flag)
 {
@@ -1697,7 +1697,7 @@ extern "C" void fn_27_24CDE4(Menu* self, Object_vptr_3c* obj, s32 kind, s32 cost
     if (m == 0x28) {
         color = 0;
     } else {
-        color = getFighterColorFileNo__6muMenuFiii(m, costume);
+        color = getFighterColorFileNo__6muMenuFii(m, costume);
     }
     r->color = (s8)color;
     r->costume = (u8)costume;

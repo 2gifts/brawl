@@ -34,7 +34,7 @@ struct grCollLineDataRaw {
 // Unnamed helpers of grCollisionJoint and grCollStatus that this unit calls (owned by their units).
 extern "C" {
 void fn_80112EBC(grCollisionJoint* joint, grCollision* collision, grCollData::JointData* jointData); // grCollisionJoint::grCollisionJoint
-void fn_80113824(grCollisionJoint* joint); // grCollisionJoint::clearVLink
+void clearVLink__16grCollisionJointFv(grCollisionJoint* joint); // grCollisionJoint::clearVLink
 void fn_801361F0(grCollStatus* status, grCollision* collision); // HYPOTHESIS: the status lets go of a collision that is being disabled
 // nw4r::ut::detail::LinkListImpl::Erase(LinkListNode*) (private in the header)
 void* Erase__Q44nw4r2ut6detail12LinkListImplFPQ34nw4r2ut12LinkListNode(void*, void*);
@@ -233,7 +233,7 @@ void grCollision::update() {
             if (joint->m_0x54_6) {
                 joint->updatePos(firstUpdate);
                 if (joint->m_0x55_6) {
-                    fn_80113824(joint);
+                    clearVLink__16grCollisionJointFv(joint);
                 }
                 activeCount++;
                 if (first) {
@@ -544,8 +544,11 @@ grCollisionJoint* grCollision::getJoint(u32 nodeIndex) {
 
 void grCollision::getSegment(grCollSegmentEx* outSegment, grCollisionLine* line, int unk) {
     grCollVtxPair* pairs = (grCollVtxPair*)m_vtxPositions;
-    Vec2f p0 = pairs[(u16)line->m_point0Index].pos;
-    Vec2f p1 = pairs[(u16)line->m_point1Index].pos;
+    // NONMATCHING: the stack frame setup is scheduled one instruction later in the original
+    Vec2f p0;
+    p0 = pairs[(u16)line->m_point0Index].pos;
+    Vec2f p1;
+    p1 = pairs[(u16)line->m_point1Index].pos;
     outSegment->m_segment.m_p0Pos = p0;
     outSegment->m_segment.m_p1Pos = p1;
     outSegment->m_unk10 = unk;
@@ -606,8 +609,11 @@ void grCollision::getSegmentTrace1(grCollSegmentEx* outSegment, clSegment2D* out
 
 void grCollision::getPreSegment1(grCollSegmentEx* outSegment, grCollisionLine* line, int unk) {
     grCollVtxPair* pairs = (grCollVtxPair*)m_vtxPositions;
-    Vec2f p0 = pairs[(u16)line->m_point0Index].prev;
-    Vec2f p1 = pairs[(u16)line->m_point1Index].prev;
+    // NONMATCHING: the stack frame setup is scheduled one instruction later in the original
+    Vec2f p0;
+    p0 = pairs[(u16)line->m_point0Index].prev;
+    Vec2f p1;
+    p1 = pairs[(u16)line->m_point1Index].prev;
     outSegment->m_segment.m_p0Pos = p0;
     outSegment->m_segment.m_p1Pos = p1;
     outSegment->m_unk10 = unk;

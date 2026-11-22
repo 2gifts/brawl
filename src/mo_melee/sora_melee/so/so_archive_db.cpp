@@ -4,7 +4,7 @@
 // utArchiveManager members of main.dol that symbols.txt has not named yet (sora.map names in the comments).
 extern "C" {
 // utArchiveManager::reqLoad
-u32 fn_800453AC(utArchiveManager* manager, const char* path, Heaps::HeapType heap, u32 mode, int offset, int size, u32 id,
+u32 reqLoad__16utArchiveManagerFPCcQ25Heaps8HeapTypeUliiUlP22utArchiveEventObserverb(utArchiveManager* manager, const char* path, Heaps::HeapType heap, u32 mode, int offset, int size, u32 id,
                 utArchiveEventObserver* observer, bool async);
 // utArchiveManager::addNoManageArchive
 u32 fn_8004570C(utArchiveManager* manager, void* data, int size, Heaps::HeapType heap);
@@ -33,7 +33,7 @@ void soArchiveItem::init() {
 }
 
 void soArchiveItem::reqLoad(const char* path, Heaps::HeapType heap, u32 mode, int offset, int size, u32 id, bool async) {
-    m_resourceId = fn_800453AC(lbl_27_bss_120[m_index], path, heap, mode, offset, size, id, &lbl_805A00C0, async);
+    m_resourceId = reqLoad__16utArchiveManagerFPCcQ25Heaps8HeapTypeUliiUlP22utArchiveEventObserverb(lbl_27_bss_120[m_index], path, heap, mode, offset, size, id, &lbl_805A00C0, async);
 }
 
 void soArchiveItem::add(void* data, int size, Heaps::HeapType heap) {

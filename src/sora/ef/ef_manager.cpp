@@ -674,7 +674,7 @@ extern "C" void* fn_8005C5B0(void* arg0, int arg1) {
 
 namespace jj_8005C5F0 {
 extern "C" void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-extern "C" void* fn_8005AD3C(void*);
+extern "C" void* __ct__9efManagerFv(void*);
 extern "C" void* lbl_805A0110;
 
 // TODO: clean up, give variables real names
@@ -682,7 +682,7 @@ extern "C" void fn_8005C5F0() {
     if (lbl_805A0110 == 0) {
         void* p = __nw__FUlQ25Heaps8HeapType(0x13C, 2);
         if (p != 0) {
-            p = fn_8005AD3C(p);
+            p = __ct__9efManagerFv(p);
         }
         lbl_805A0110 = p;
     }

@@ -302,3 +302,36 @@ extern "C" void fn_8001AE1C(Header* h, const char* name) {
 }
 }
 
+#include <gf/gf_camera.h>
+
+void gfDrawSetupCoord2D() {
+    gfCameraManager::getManager()->getCamera(4)->setGX();
+}
+
+#include <mt/mt_vector.h>
+#include <revolution/GX.h>
+
+// Resets the eight hardware lights to one grey light far up-right of the origin, pointing down along (-1, -1, -1).
+void gfDrawResetLight() {
+    GXLightObj light;
+    GXColor color;
+    color.a = 0x80;
+    color.b = 0x80;
+    color.g = 0x80;
+    color.r = 0x80;
+    GXInitLightColor(&light, color);
+    GXInitLightPos(&light, 1.0f, 100.0f, 1.0f);
+    Vec3f dir(-1.0f, -1.0f, -1.0f);
+    dir.normalize();
+    GXInitLightDir(&light, dir.m_x, dir.m_y, dir.m_z);
+    GXInitLightSpot(&light, 44.9f, GX_SP_OFF);
+    GXInitLightDistAttn(&light, 100.0f, 0.5f, GX_DA_OFF);
+    GXLoadLightObjImm(&light, GX_LIGHT0);
+    GXLoadLightObjImm(&light, GX_LIGHT1);
+    GXLoadLightObjImm(&light, GX_LIGHT2);
+    GXLoadLightObjImm(&light, GX_LIGHT3);
+    GXLoadLightObjImm(&light, GX_LIGHT4);
+    GXLoadLightObjImm(&light, GX_LIGHT5);
+    GXLoadLightObjImm(&light, GX_LIGHT6);
+    GXLoadLightObjImm(&light, GX_LIGHT7);
+}

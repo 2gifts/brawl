@@ -2504,7 +2504,7 @@ extern "C" f32 lbl_805A23E4;
 extern "C" f32 lbl_805A23C0;
 extern "C" int changeAnimN__8MuObjectFiUlbb(void*, int, int, int, int);
 extern "C" void setTrans__8MuObjectFP5Vec3f(MuObject*, const Vec3f*);
-extern "C" void fn_800E1840(void*, u32, int);
+extern "C" void setDamageNumColor__8IfPlayerFUli(void*, u32, int);
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void fn_800E3A90(u8* self) {
  u8* p;
@@ -2537,7 +2537,7 @@ extern "C" void fn_800E3A90(u8* self) {
    i++; p += 4;
   } while (i < 6);
  }
- fn_800E1840(self, *(u32*)(self + 0x18), 0);
+ setDamageNumColor__8IfPlayerFUli(self, *(u32*)(self + 0x18), 0);
 }
 }
 
@@ -2821,7 +2821,7 @@ extern "C" const f32 lbl_805A23C0;
 extern "C" const f32 lbl_805A23F0;
 extern "C" const u8 lbl_805A23E8[8];
 void fn_800E5318(void*);
-void fn_800E1840(void*, u32, s32);
+void setDamageNumColor__8IfPlayerFUli(void*, u32, s32);
 void PushBack__Q34nw4r3g3d12ScnMdlExpandFPQ34nw4r3g3d6ScnObjUl(void*, void*, int);
 void setTrans__8MuObjectFP5Vec3f(MuObject*, const f32*);
 }
@@ -2922,7 +2922,7 @@ extern "C" void fn_800E1588(Self* self, u32 arg1, s32 arg2, s32 arg3) {
         pos[1] = lbl_805A23B0;
         setTrans__8MuObjectFP5Vec3f(o2, pos);
         if (arg2 != 0) {
-            fn_800E1840(self, arg1, arg3);
+            setDamageNumColor__8IfPlayerFUli(self, arg1, arg3);
         }
     }
 }

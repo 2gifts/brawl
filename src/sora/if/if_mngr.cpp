@@ -68,11 +68,11 @@ public:
 // HYPOTHESIS: map names IfMngr::realizeResource, freeResource
 extern "C" void fn_800DBB10(IfMngr* mngr);
 extern "C" void fn_800DBD3C(IfMngr* mngr);
-extern "C" void fn_800E244C(IfPlayer* player);
+extern "C" void main__8IfPlayerFv(IfPlayer* player);
 extern "C" void fn_80108E5C(IfAdvBoss* boss);
 extern "C" int fn_800FBFDC(void* menu);
 // HYPOTHESIS: map names IfPlayer::receiveShareStock, addDragoonParts
-extern "C" void fn_800E1D78(IfPlayer* player, Vec3f* pos);
+extern "C" void receiveShareStock__8IfPlayerFP5Vec3f(IfPlayer* player, Vec3f* pos);
 // HYPOTHESIS: map names IfPhoto::startPause
 extern "C" void fn_800F00D4(void* photo, int arg1, int arg2, int playerNo, bool arg4);
 // HYPOTHESIS: map names IfCenter::dispKumiteKills
@@ -170,7 +170,7 @@ void IfMngr::main() {
         reinterpret_cast<IfCenter*>(m_ifCenter)->main();
         for (int i = 0; i < MAX_PLAYERS; i++) {
             if (m_ifPlayers[i] != NULL) {
-                fn_800E244C(m_ifPlayers[i]);
+                main__8IfPlayerFv(m_ifPlayers[i]);
             }
         }
         IfPlayer::arrowMain(m_ifPlayers, MAX_PLAYERS);
@@ -285,7 +285,7 @@ bool IfMngr::sharePlayerStock(int giver, int receiver) {
     if (!m_ifPlayers[giver]->giveShareStock(&stock)) {
         return false;
     }
-    fn_800E1D78(m_ifPlayers[receiver], &stock);
+    receiveShareStock__8IfPlayerFP5Vec3f(m_ifPlayers[receiver], &stock);
     return true;
 }
 

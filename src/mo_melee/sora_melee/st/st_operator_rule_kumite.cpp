@@ -285,7 +285,7 @@ extern "C" int fn_27_253604(Obj* self, unsigned char* out1, unsigned char* out2)
 // TODO: clean up, give variables real names
 namespace jj_253724 {
 extern "C" int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int kind);
-extern "C" int getFighterColorFileNo__6muMenuFiii(int kind, int costume);
+extern "C" int getFighterColorFileNo__6muMenuFii(int kind, int costume);
 extern "C" s32 randi__Fl(long range);
 extern "C" void createRandomMyCharaList__20stOperatorRuleKumiteFUl(void *self, u32 arg1);
 extern f32 lbl_27_rodata_4104;
@@ -399,7 +399,7 @@ extern "C" void fn_27_253724(MuFnObj *self, Obj *obj, u8 kind, u8 costume, s8 ar
     o->bB = 1;
 
     sel = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(kind);
-    o->b5 = (sel == 0x28) ? 0 : getFighterColorFileNo__6muMenuFiii(sel, costume);
+    o->b5 = (sel == 0x28) ? 0 : getFighterColorFileNo__6muMenuFii(sel, costume);
     o->b6 = costume;
     o->b1E = e->b4;
     o->b1F = e->b3;

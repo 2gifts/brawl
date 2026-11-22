@@ -212,7 +212,7 @@ extern "C" {
 struct GG { int a; int b; Mode* mode; int c; Sel* sel; };
 void gmInitGlobalModeMelee__FP17gmGlobalModeMelee(void*);
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
-int getFighterColorFileNo__6muMenuFiii(int, int);
+int getFighterColorFileNo__6muMenuFii(int, int);
 void sqWriteMetamorphosisHumanFighter__Fv();
 void fn_8010F960(u16, void*, void*, int);
 extern GG* g_GameGlobal;
@@ -251,7 +251,7 @@ void fn_1_347F0(void* arg0) {
             p[0xA3] = 0;
             int color = q[0xBD];
             int kind = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(k);
-            p[0x9D] = kind == 0x28 ? 0 : getFighterColorFileNo__6muMenuFiii(kind, color);
+            p[0x9D] = kind == 0x28 ? 0 : getFighterColorFileNo__6muMenuFii(kind, color);
             ++count;
             p[0x9E] = q[0xBD];
             p[0xB0] = q[0xD0];

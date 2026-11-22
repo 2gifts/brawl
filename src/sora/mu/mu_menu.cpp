@@ -101,7 +101,7 @@ public:
     static int exchangeSelCharVoice2SelCharVoiceLengthJ(int);
     static int getNumCharColor(int charKind, int, int);
     static int getCharColor(int charKind, int costume, int);
-    static int getFighterColorFileNo(int charKind, int costume, int);
+    static int getFighterColorFileNo(int charKind, int costume);
     static int getCharColorNo(int charKind, int fileNo, int);
     static bool isCharLargeSize(int charKind, int, int);
     static int getCpLevelMessageId(int cpLevel, int, int);
@@ -316,7 +316,7 @@ int muMenu::getCharColor(int charKind, int costume, int) {
     return lbl_80455458[charKind].colors[costume * 2];
 }
 
-int muMenu::getFighterColorFileNo(int charKind, int costume, int) {
+int muMenu::getFighterColorFileNo(int charKind, int costume) {
     const u8* c = lbl_80455458[charKind].colors + costume * 2;
     return c[1];
 }

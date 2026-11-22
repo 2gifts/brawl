@@ -1,5 +1,6 @@
 #include <types.h>
 #include <gf/gf_scene.h>
+#include <memory.h>
 
 extern "C" char lbl_80422EB8[];
 extern "C" char lbl_8059C660;
@@ -35,4 +36,16 @@ void gfSceneManager::changeNextScene() {
 }
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
-unsigned char lbl_805A0060[0x8] __attribute__((aligned(4))) = { 0 };
+// HYPOTHESIS: singleton instance pointer; the original .sbss object is 8 bytes, the second word is unused here.
+gfSceneManager* lbl_805A0060[2] = { 0 };
+
+gfSceneManager* gfSceneManager::create() {
+    if (lbl_805A0060[0] == NULL) {
+        lbl_805A0060[0] = new (Heaps::SystemFW) gfSceneManager();
+    }
+    return lbl_805A0060[0];
+}
+
+gfSceneManager* gfSceneManager::getInstance() {
+    return lbl_805A0060[0];
+}

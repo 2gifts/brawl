@@ -1070,7 +1070,7 @@ extern "C" {
 void fn_8001BB1C();
 void fn_8001BB8C();
 void fn_803EC154(int, void (*)(), void (*)());
-void fn_803EBFCC(int);
+int FAInit(void* config);
 void* alloc__13gfHeapManagerFQ25Heaps8HeapTypeUl(int, unsigned long);
 void fn_803EBC54(int, int, int, State*);
 int fn_803EC094(int);
@@ -1086,7 +1086,7 @@ extern const unsigned char lbl_805A14B8[8];
 // TODO: clean up, give variables real names
 void fn_8001BBB8() {
     fn_803EC154(0, fn_8001BB1C, fn_8001BB8C);
-    fn_803EBFCC(0x10000);
+    FAInit((void*)0x10000);
 
     lbl_80494928.value = 0;
     lbl_80494928.work = 0;

@@ -18,7 +18,7 @@ static inline grCollisionNodeList& collisionList() {
 
 extern grCollisionManager* lbl_805A0360;
 // grCollision::createLine (main.dol 0x801107CC); the last argument is passed as the raw halfword here.
-extern "C" grCollisionLine* fn_801107CC(grCollision* collision, u16 count, grCollData::LineData* lineDatas, u16 unk);
+extern "C" grCollisionLine* createLine__11grCollisionFUsPQ210grCollData8LineDatab(grCollision* collision, u16 count, grCollData::LineData* lineDatas, u16 unk);
 
 grCollision* grCollision::create(Stage* stage, void* colData, Ground* ground, int enable) {
     grCollision* collision = new (Heaps::StageInstance) grCollision;
@@ -77,7 +77,7 @@ void grCollision::initialize(grCollData* colData) {
     m_jointLen = colData->m_jointLen;
     m_vtxDatas = colData->m_vtxDatas;
     m_vtxPositions = static_cast<Vec2f*>(gfHeapManager::alloc(Heaps::StageInstance, vtxLen * 16));
-    m_lines = fn_801107CC(this, m_lineLen, colData->m_lineDatas, unk);
+    m_lines = createLine__11grCollisionFUsPQ210grCollData8LineDatab(this, m_lineLen, colData->m_lineDatas, unk);
     m_joints = createJoint(m_jointLen, colData->m_jointDatas);
     m_aabBox.m_unk1 = -10.0f;
     m_aabBox.m_unk2 = -10.0f;

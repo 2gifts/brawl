@@ -472,7 +472,7 @@ extern "C" {
 extern "C" char lbl_80460CF0[];
 extern "C" unsigned char __vt__8NtBuffer[];
 extern "C" char* lbl_805A0434;
-void fn_80025A74(void*);
+void destory__12gfMemoryPoolFP12gfMemoryPool(void*);
 void free__13gfHeapManagerFPv(void*);
 void __dl__FPv(void*);
 
@@ -482,7 +482,7 @@ void* fn_80149BC0(void* self, int flag) {
     if (self) {
         char* p = (char*)self;
         *(void**)p = lbl_80460CF0;
-        fn_80025A74(*(void**)(lbl_805A0434 + 0x353c));
+        destory__12gfMemoryPoolFP12gfMemoryPool(*(void**)(lbl_805A0434 + 0x353c));
         void* b = *(void**)(p + 0x3538);
         if (b) {
             free__13gfHeapManagerFPv(b);

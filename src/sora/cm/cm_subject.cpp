@@ -40,6 +40,41 @@ void cmSubject::setRange(Rect2D* range) {
     m_range.m_down = down;
 }
 
+extern const float lbl_805A1E64;
+extern const float lbl_805A1E68;
+
+// Moves the camera range a step towards the target range (m_60): each edge moves by its whole distance, or by
+// 10% * scale of it when the distance is over 20% * scale; m_76 keeps the remaining distance.
+// NONMATCHING: float register allocation of the fabs temporaries
+void cmSubject::shiftRange(float scale) {
+    float left = m_60.m_left - m_range.m_left;
+    float limit = lbl_805A1E64 * scale;
+    float rate = lbl_805A1E68 * scale;
+    float right = m_60.m_right - m_range.m_right;
+    float up = m_60.m_up - m_range.m_up;
+    float down = m_60.m_down - m_range.m_down;
+    if ((float)fabs(left) > limit) {
+        left *= rate;
+    }
+    if ((float)fabs(right) > limit) {
+        right *= rate;
+    }
+    if ((float)fabs(up) > limit) {
+        up *= rate;
+    }
+    if ((float)fabs(down) > limit) {
+        down *= rate;
+    }
+    m_range.m_left += left;
+    m_range.m_right += right;
+    m_range.m_up += up;
+    m_range.m_down += down;
+    m_76.m_left = m_60.m_left - m_range.m_left;
+    m_76.m_right = m_60.m_right - m_range.m_right;
+    m_76.m_up = m_60.m_up - m_range.m_up;
+    m_76.m_down = m_60.m_down - m_range.m_down;
+}
+
 void cmSubject::regist() {
     if (m_isRegist == 0) {
         lbl_8049DEDC.PushBack(this);
@@ -123,6 +158,11 @@ struct LinkNodeInit {
     union {
         u32 unk8;
         LinkNodeBits bits;
+        struct {
+            u32 pad0 : 12;
+            u32 bit12 : 3;
+            u32 pad15 : 17;
+        } bits2;
     } f8;
     s16 unkC;
     s16 unkE;
@@ -170,6 +210,37 @@ extern const float lbl_805A1E50;
 extern const float lbl_805A1E54;
 
 void Insert__Q44nw4r2ut6detail12LinkListImplFQ54nw4r2ut6detail12LinkListImpl8IteratorPQ34nw4r2ut12LinkListNode(char* list, void** it, void* node);
+
+extern const float lbl_805A1E6C;
+extern const float lbl_805A1E70;
+extern const float lbl_805A1E74;
+
+// TODO: clean up, give variables real names (cmSubject::clear: resets bits 12-14 of +0x8, the positions and the
+// three ranges)
+void clear__9cmSubjectFv(struct LinkNodeInit* self) {
+    self->f8.bits2.bit12 = 0;
+    self->unkC = 0;
+    self->unk18 = lbl_805A1E30;
+    self->unk14 = lbl_805A1E30;
+    self->unk10 = lbl_805A1E30;
+    self->unk24 = lbl_805A1E30;
+    self->unk20 = lbl_805A1E30;
+    self->unk1C = lbl_805A1E30;
+    self->unk28 = lbl_805A1E30;
+    self->unk2C = lbl_805A1E6C;
+    self->unk30 = lbl_805A1E70;
+    self->unk34 = lbl_805A1E74;
+    self->unk38 = lbl_805A1E54;
+    self->unk3C = lbl_805A1E6C;
+    self->unk40 = lbl_805A1E70;
+    self->unk44 = lbl_805A1E74;
+    self->unk48 = lbl_805A1E54;
+    self->unk4C = lbl_805A1E6C;
+    self->unk50 = lbl_805A1E70;
+    self->unk54 = lbl_805A1E74;
+    self->unk58 = lbl_805A1E54;
+    self->unk5C = lbl_805A1E30;
+}
 
 struct LinkNodeInit* __ct__9cmSubjectFii(struct LinkNodeInit* self, s32 arg1, u32 arg2) {
     u32 flags;

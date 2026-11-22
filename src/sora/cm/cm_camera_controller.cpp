@@ -147,6 +147,11 @@ CameraController* CameraController::create()
     return lbl_805A0278[0];
 }
 
+CameraController* CameraController::getInstance()
+{
+    return lbl_805A0278[0];
+}
+
 cmPhotoController::~cmPhotoController()
 {
 }

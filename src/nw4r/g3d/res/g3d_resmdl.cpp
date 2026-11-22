@@ -33,7 +33,7 @@ ResNode ResMdl::GetResNode(u32 idx) const {
     return ResNode(ofs_to_obj<ResDic>(ref().toResNodeDic)[idx]);
 }
 
-u32 ResMdl::GetResNodeNumEntries() const {
+u32 ResMdl::GetResNodeNumEntries() {
     return ofs_to_obj<ResDic>(ref().toResNodeDic).GetNumData();
 }
 

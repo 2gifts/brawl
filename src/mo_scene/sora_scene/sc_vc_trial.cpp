@@ -9,7 +9,7 @@
 #include <types.h>
 
 // Starts a title of the Virtual Console (main module): its identifier and how long the trial lasts.
-extern "C" void fn_8003D4E8(const char* titleId, int playSec);
+extern "C" void VC_launch__FPCci(const char* titleId, int playSec);
 
 // The identifiers of the titles of the vault (the same order as the titles of the menu; the empty ones have no trial).
 static const char* s_titleIds[16] = {"HBDE", "HA9E", "HA8E", "HBIE", "HBAE", "HBCE", "HBEE", "HBGE",
@@ -62,7 +62,7 @@ s32 scVCTrial::process() {
             VISetBlack(1);
             VIFlush();
             VIWaitForRetrace();
-            fn_8003D4E8(s_titleIdTable[title], playSec);
+            VC_launch__FPCci(s_titleIdTable[title], playSec);
         }
     }
     return 0;

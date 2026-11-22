@@ -10,7 +10,7 @@ struct OSImportInfo {
     u32 offset;
 };
 
-extern "C" void fn_801DDC4C(gfModuleHeader* header, void* bss);
+extern "C" void OSLinkFixed(gfModuleHeader* header, void* bss);
 
 gfModule* gfModule::create(void* heap, void* buffer, size_t size) {
     u32 bufSize = static_cast<gfModuleHeader*>(buffer)->bssSize + static_cast<gfModuleHeader*>(buffer)->commandOffset + 0x40;
@@ -40,7 +40,7 @@ gfModule* gfModule::create(void* heap, void* buffer, size_t size) {
         module->m_flags &= ~0xC0;
         module->m_header = header;
         module->m_bssAddr = bss;
-        fn_801DDC4C(header, bss);
+        OSLinkFixed(header, bss);
     }
     header->impOffset = (u32)header + impOffset;
     imp = reinterpret_cast<OSImportInfo*>(header->impOffset);
@@ -221,7 +221,7 @@ void fn_80026CBC(s32 arg0) {
 // TODO: clean up, give variables real names
 namespace jj_80026828 {
 
-extern "C" int fn_801DDC4C(int, int);
+extern "C" int OSLinkFixed(int, int);
 
 struct ModuleImport {
     u32 id;
@@ -253,7 +253,7 @@ extern "C" void* fn_80026828(void* output, gfModuleHeader* source) {
         *(gfModuleHeader**)output = header;
         *((s8*)output + 8) &= ~0xC0;
         *(void**)((u8*)output + 4) = bss;
-        fn_801DDC4C((int)header, (int)bss);
+        OSLinkFixed((int)header, (int)bss);
     }
     header->impOffset = (u32)header + importOffset;
     cur = (ModuleImport*)header->impOffset;
@@ -265,3 +265,31 @@ extern "C" void* fn_80026828(void* output, gfModuleHeader* source) {
 }
 }
 
+// Returns the address of the first executable section (.text): the section table holds absolute addresses once the
+// module is linked (it then lies above the header), offsets from the header before that.
+// NONMATCHING: register allocation of the flag and the address
+u32 gfModuleHeader::getTextSectionAddr() {
+    bool linked = false;
+    u32 offset = sectionInfoOffset;
+    u32 addr = 0;
+    u32 num = numSections;
+    u32* section;
+    if (reinterpret_cast<u32>(this) < offset) {
+        linked = true;
+        section = reinterpret_cast<u32*>(offset);
+    } else {
+        section = reinterpret_cast<u32*>(reinterpret_cast<u8*>(this) + offset);
+    }
+    for (u32 i = 0; i < num; i++) {
+        u32 secOffset = section[0];
+        if (secOffset & 1) {
+            addr = secOffset & ~1;
+            if (!linked) {
+                addr += reinterpret_cast<u32>(this);
+            }
+            break;
+        }
+        section += 2;
+    }
+    return addr;
+}

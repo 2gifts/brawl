@@ -60,7 +60,7 @@ int fn_803EB7A0(FAEntryInfo* dta);                           // pf_fsnext
 int fn_803EB7C4(const char* path, FAStat* st);               // pf_fstat
 u32 fn_803EB824(void* buf, u32 size, u32 count, PF2_FILE* file);  // pf_fwrite
 int fn_803EB84C(s8 drv_char);                                // pf_format
-int fn_803EB874(void);                                       // pf_init_prfile2
+int fn_803EB874(void* config, void* param);                  // pf_init_prfile2 (both arguments unused)
 int fn_803EB8B4(s8 drv_char);                                // pf_mount
 int fn_803EB8F8(const char* path);                           // pf_mkdir
 int fn_803EB948(s8 drv_char);                                // pf_detach
