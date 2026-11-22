@@ -12977,6 +12977,7 @@ mo_melee/sora_melee/it/it_item_thunks_297370.cpp:
 mo_melee/sora_melee/it/it_customizer.cpp:
 	.text       start:0x002974B0 end:0x002A0D38
 	.ctors      start:0x0000031C end:0x00000320
+	.bss        start:0x00006440 end:0x00006490
 
 mo_melee/sora_melee/it/it_manager.cpp:
 	.text       start:0x002A0D38 end:0x002AC298
