@@ -13104,6 +13104,7 @@ mo_melee/sora_melee/it/it_damage_transactor_impl.cpp:
 
 mo_melee/sora_melee/it/it_kinetic_module_impl.cpp:
 	.text       start:0x002B3A0C end:0x002BB9F0
+	.rodata     start:0x00005EB8 end:0x00005F90
 
 mo_melee/sora_melee/so/so_array_list_members_soInstanceUnitFullProperty_ptr_soKineticEnergy_11_part1.cpp:
 	.text       start:0x002BB9F0 end:0x002BC544
