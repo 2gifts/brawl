@@ -681,3 +681,30 @@ void __ct__9hkVector4FRC9hkVector4(float* dst, const float* src) {
 }
 }
 
+// hkQuaternion::estimateAngleToLs: twice the vector part of a * conj(b) (w lane: twice b.w * a.w - a.w * b.w),
+// negated when the two quaternions point into opposite hemispheres.
+// TODO: clean up: hkQuaternion member once the unit's callers are written (map name; weak copy).
+extern "C" void fn_802DB728(const hkVector4* a, const hkVector4* b, hkVector4* out) {
+    hkReal x = a->y * b->z - a->z * b->y;
+    x += b->w * a->x;
+    x -= a->w * b->x;
+    hkReal y = a->z * b->x - a->x * b->z;
+    y += b->w * a->y;
+    y -= a->w * b->y;
+    hkReal z = a->x * b->y - a->y * b->x;
+    z += b->w * a->z;
+    z -= a->w * b->z;
+    hkReal w = 0.0f;
+    w += b->w * a->w;
+    w -= a->w * b->w;
+    out->x = x + x;
+    out->y = y + y;
+    out->z = z + z;
+    out->w = w + w;
+    hkReal dot = b->x * a->x + b->y * a->y + b->z * a->z + b->w * a->w;
+    int mask = dot < 0.0f ? 8 : 0;
+    if (mask) {
+        out->setNeg4(*out);
+    }
+}
+

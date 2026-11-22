@@ -24,7 +24,8 @@ struct hkGskManifoldWork {
 
     // Builds the contact of a point/point feature pair: position = vertex A, the vector from B to A, and the
     // separating normal. Fails when the vertices are further apart than the tolerance.
-    hkResult convertPointPoint(const hkGskManifoldEntry& point, struct hkGskManifoldPointContact& out) const;
+    // BYTES: point is not const (its fields are reloaded after the stores to out).
+    hkResult convertPointPoint(hkGskManifoldEntry& point, struct hkGskManifoldPointContact& out) const;
 } __attribute__((aligned(16)));
 
 // Output of the hkGskManifoldWork feature conversions (0x30 bytes). HYPOTHESIS: the names.
