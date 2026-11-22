@@ -256,9 +256,17 @@ public:
             delete m_next;
         }
     }
+#ifdef ST_OBS_TRIGGER_INLINE
+    // sora_adv_stage st_trigger_observe_adv.o sees these as inline (weak copies).
+    virtual void userProc() = 0;
+    virtual gfArea* getAreaPointer() { return NULL; }
+    virtual bool getAreaID(int* areaID) { return false; }
+    virtual void setAreaSleep(bool isSleep) { }
+#else
     virtual gfArea* getAreaPointer();
     virtual bool getAreaID(int* areaID);
     virtual void setAreaSleep(bool isSleep);
+#endif
 
     void resetTrigger();
 };
@@ -283,11 +291,19 @@ public:
     stObsTriggerArea(bool* flag, bool unkC);
     virtual void userProc();
     virtual ~stObsTriggerArea();
+#ifdef ST_OBS_TRIGGER_INLINE
+    virtual gfArea* getAreaPointer() { return m_area; }
+    virtual bool getAreaID(int* areaID);
+    virtual void setAreaSleep(bool isSleep);
+    virtual stGimmickAreaData* getAreaDataPointer() { return &m_gimmickAreaData; }
+    virtual void setArea(gfArea* area) { m_area = area; }
+#else
     virtual gfArea* getAreaPointer();
     virtual bool getAreaID(int* areaID);
     virtual void setAreaSleep(bool isSleep);
     virtual stGimmickAreaData* getAreaDataPointer();
     virtual void setArea(gfArea* area);
+#endif
 
     void createArea(stGimmickAreaData* areaData, Vec2f pos);
     void setDefaultGimmickAreaData(stSimpleAreaData* simpleAreaData, stGimmickAreaData* gimmickAreaData);
@@ -378,10 +394,25 @@ public:
     virtual ~stObsTriggerPlayerIncludeAreaCB();
 };
 
+// The area event receivers of the key and truck area triggers (sora_adv_stage st_trigger_observe_adv.o): they set the
+// trigger flag when an area of the right group enters.
+class stAreaEventReciverKeyTrigger : public gfAreaEventReciver {
+public:
+    bool* m_flag;                // 0x4
+    stObsTriggerCB* m_owner;     // 0x8
+    virtual void reciveEvent(gfArea* area, gfArea* other);
+};
+
+class stAreaEventReciverTruckTrigger : public gfAreaEventReciver {
+public:
+    bool* m_flag;                // 0x4
+    stObsTriggerCB* m_owner;     // 0x8
+    virtual void reciveEvent(gfArea* area, gfArea* other);
+};
+
 class stObsTriggerKeyArea : public stObsTriggerArea {
 public:
-    // HYPOTHESIS: 0xC bytes of additional state (sizeof 0x48 in stTrigger::setKeyAreaTrigger).
-    u8 unk3C[0xC];
+    stAreaEventReciverKeyTrigger m_reciver; // 0x3C
 
     stObsTriggerKeyArea(bool* flag, bool unkC);
     void createArea(stGimmickAreaData* areaData, Vec2f pos);
@@ -390,8 +421,7 @@ static_assert(sizeof(stObsTriggerKeyArea) == 0x48, "Class is wrong size!");
 
 class stObsTriggerTruckArea : public stObsTriggerArea {
 public:
-    // HYPOTHESIS: 0xC bytes of additional state (sizeof 0x48 in stTrigger::setTruckAreaTrigger).
-    u8 unk3C[0xC];
+    stAreaEventReciverTruckTrigger m_reciver; // 0x3C
 
     stObsTriggerTruckArea(bool* flag, bool unkC);
     void createArea(stGimmickAreaData* areaData, Vec2f pos);
