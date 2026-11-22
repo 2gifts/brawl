@@ -234,6 +234,60 @@ public:
             }
         }
     }
+
+#ifdef SO_EVENT_OBSERVER_CHANGE_MANAGE_ID
+    // HYPOTHESIS: re-registers the observer with a new event manager (ftCancelModuleImpl::postInitialize); like setupObserver
+    // but tests the cached manage ID with >= 0 and checks the manager before erasing.
+    void changeManageId(s16 manageId) {
+        s32 checkID = m_manageID;
+        bool check4 = false;
+        bool check3 = false;
+        bool check1 = false;
+        bool check2 = false;
+        if (checkID >= 0 && m_unitID >= 0) {
+            check1 = true;
+        }
+        if (check1 && m_sendID > -1) {
+            check2 = true;
+        }
+        if (check2 && soEventSystem::getInstance()->m_instanceManager.isContain(checkID) == true) {
+            check3 = true;
+        }
+        if (check3 && soEventSystem::getInstance()->getManager(m_manageID)->getObserverCapacity(m_unitID) == 1) {
+            check4 = true;
+        }
+        if (check4 == true) {
+            s32 removeID = m_manageID;
+            if (soEventSystem::getInstance()->m_instanceManager.isContain(removeID) == true) {
+                soEventSystem::getInstance()->getManager(m_manageID)->eraseObserver(m_unitID, m_sendID);
+            }
+            m_sendID = -1;
+            m_manageID = -1;
+        }
+        if (manageId > -1 && m_unitID > -1) {
+            if (soEventSystem::getInstance()->m_instanceManager.isContain(manageId)) {
+                if (soEventSystem::getInstance()->getManager(manageId)->isNullUnit(m_unitID) != true) {
+                    soEventManager* eventManager = soEventSystem::getInstance()->getManager(manageId);
+                    int sendId;
+                    if (eventManager->getObserverCapacity(m_unitID) == 0) {
+                        sendId = -1;
+                    } else {
+                        soEventUnitWrapper<T>* eventUnit = dynamic_cast<soEventUnitWrapper<T>*>(eventManager->getEventUnit(m_unitID));
+                        if (eventUnit == NULL) {
+                            sendId = -1;
+                        } else {
+                            sendId = eventUnit->addObserverSub(static_cast<T*>(this), -1);
+                        }
+                    }
+                    m_sendID = sendId;
+                    if (m_sendID > -1 && m_sendID > -1) {
+                        m_manageID = manageId;
+                    }
+                }
+            }
+        }
+    }
+#endif
 };
 static_assert(sizeof(soEventObserver<int>) == 0xC, "Class is wrong size!");
 

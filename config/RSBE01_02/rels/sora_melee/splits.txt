@@ -1900,6 +1900,7 @@ mo_melee/sora_melee/so/so_array_vector_calculator.cpp:
 mo_melee/sora_melee/so/so_general_term_manager.cpp:
 	.text       start:0x000C2CA8 end:0x000C2E38
 	.ctors      start:0x00000040 end:0x00000044
+	.bss        start:0x00002BE0 end:0x00002C00
 
 mo_melee/sora_melee/so/glow/so_glow_module_impl.cpp:
 	.text       start:0x000C2E38 end:0x000C319C

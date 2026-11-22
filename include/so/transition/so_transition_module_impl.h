@@ -14,6 +14,11 @@ public:
 
     // BYTES: out-of-line copy constructor (so_general_term.cpp); defined elsewhere in the REL.
     soGeneralTerm(const soGeneralTerm& other);
+#ifdef SO_GENERAL_TERM_MANAGER_IMPL
+    // BYTES: the pool constructs and destroys its terms (so_general_term_manager.cpp); other units only copy them.
+    soGeneralTerm() { }
+    ~soGeneralTerm();
+#endif
 };
 static_assert(sizeof(soGeneralTerm) == 0x10, "Class is wrong size!");
 
@@ -23,11 +28,17 @@ public:
     soGeneralTerm* m_generalTerms;
     s16* m_indices;
     u16 _unk08;
-    u16 m_numGeneralTerms;
+    s16 m_numGeneralTerms;
     // Same as m_generalTerms?
     soGeneralTerm* m_generalTerms2;
     // Same as m_indices?
     s16* m_indices2;
+
+#ifdef SO_GENERAL_TERM_MANAGER_IMPL // needs Heaps (memory.h), which this header does not include
+    soGeneralTermManager() : m_generalTerms(NULL), m_indices(NULL), _unk08(0), m_numGeneralTerms(-1) { }
+    ~soGeneralTermManager() { }
+    void initialize(int num, Heaps::HeapType heapType);
+#endif
 };
 static_assert(sizeof(soGeneralTermManager) == 0x14, "Class is wrong size!");
 extern soGeneralTermManager g_soGeneralTermManager;

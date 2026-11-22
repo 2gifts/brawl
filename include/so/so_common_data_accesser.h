@@ -38,10 +38,12 @@ struct ftVisibilityData : public soVisibilityData { };
 struct wnVisibilityData : public soVisibilityData { };
 
 struct soStatusData {
-#ifdef FT_FIGHTER_FIELDS
+#if defined(FT_FIGHTER_FIELDS) || defined(SO_STATUS_DATA_FIELDS)
     u32 unk0[3];
     s32 m_situationKind : 4; // HYPOTHESIS: status situation kind read by Fighter::notifyEventChangeStatus
-    u32 unkC_rest : 28;
+    u32 unkC_4 : 4;
+    u32 m_cancelKind : 3; // HYPOTHESIS: nonzero lets ftCancelModuleImpl re-enable transition group 10 on status change
+    u32 unkC_rest : 21;
 #endif
 };
 struct ftStatusData : public soStatusData { };

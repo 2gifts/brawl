@@ -100,6 +100,8 @@ struct ftKindData {
     ftParamEtc* ParamEtc;
 };
 
+struct ftCancelData;
+
 struct ftDataCommon {
     soCommonParam* soCommonParams[2];
     ftCommonParam* ftCommonParams[2];
@@ -109,7 +111,7 @@ struct ftDataCommon {
     ftShakeData* shakeData;
     u8 unk20[0x8];
     ftJostleData* jostleData;
-    u8 unk2C[4];
+    ftCancelData* cancelData; // read by ftCancelModuleImpl
     // HYPOTHESIS: size-customize scaling exponents read by ftUtil::getReactionMul for param customizes 0 and 1.
     float* sizeCustomizeScale[2];
     union {

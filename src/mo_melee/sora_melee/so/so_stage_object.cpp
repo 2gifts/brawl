@@ -619,10 +619,10 @@ extern "C" {
 void initialize__7soWorldFv();
 void* __ct__18soCollisionManagerFv(void*);
 void fn_27_4FE14(void*, void*, void*, void*, void*);
-void* fn_27_C152C(void*);
+void* __ct__15soJostleManagerFv(void*);
 void fn_27_C673C();
 void initialize__14soSoundManagerFiQ25Heaps8HeapType(void*, int, int);
-void fn_27_C2CA8(void*, int, int);
+void initialize__20soGeneralTermManagerFiQ25Heaps8HeapType(void*, int, int);
 void* __ct__21soEffectScreenManagerFv(void*);
 void initialize__21soEffectScreenManagerFv(void*);
 void* __ct__14soCatchManagerFv(void*);
@@ -630,9 +630,9 @@ void* __ct__6soSlowFv(void*);
 
 extern void* ms_instance__6soSlow;
 extern void* g_soCollisionManager;
-extern void* lbl_27_bss_2BD8;
+extern void* m_instance__15soJostleManager;
 extern void* lbl_27_bss_D0;
-extern void* lbl_27_bss_2BEC;
+extern void* g_soGeneralTermManager;
 extern void* lbl_27_bss_2B78;
 extern void* lbl_27_bss_F8;
 
@@ -656,16 +656,16 @@ extern "C" void fn_27_3AD0(void* arg0, void* arg1, void* arg2, void* arg3) {
         g_soCollisionManager = ptr;
     }
     fn_27_4FE14(g_soCollisionManager, arg0, arg1, arg2, arg3);
-    if (lbl_27_bss_2BD8 == 0) {
+    if (m_instance__15soJostleManager == 0) {
         void* ptr = __nw__FUlQ25Heaps8HeapType(0xa4, 2);
         if (ptr != 0) {
-            ptr = fn_27_C152C(ptr);
+            ptr = __ct__15soJostleManagerFv(ptr);
         }
-        lbl_27_bss_2BD8 = ptr;
+        m_instance__15soJostleManager = ptr;
     }
     fn_27_C673C();
     initialize__14soSoundManagerFiQ25Heaps8HeapType(&lbl_27_bss_D0, 0x80, 2);
-    fn_27_C2CA8(&lbl_27_bss_2BEC, 0xbb8, 2);
+    initialize__20soGeneralTermManagerFiQ25Heaps8HeapType(&g_soGeneralTermManager, 0xbb8, 2);
     if (lbl_27_bss_2B78 == 0) {
         void* ptr = __nw__FUlQ25Heaps8HeapType(0x140, 2);
         if (ptr != 0) {

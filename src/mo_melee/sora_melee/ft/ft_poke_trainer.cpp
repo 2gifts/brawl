@@ -1,3 +1,15 @@
+// TODO: clean up - MATCH-ONLY (compiler workaround): unused names dodging the MWCC internal compiler error (CTemplateTools.c)
+// in this unit and the wrapper units that include it; change the count if the ICE returns.
+#ifdef FT_POKETRAINER_MAIN_ICE_DODGE_0
+#endif
+#ifdef FT_POKETRAINER_MAIN_ICE_DODGE_1
+#endif
+#ifdef FT_POKETRAINER_MAIN_ICE_DODGE_2
+#endif
+#ifdef FT_POKETRAINER_MAIN_ICE_DODGE_3
+#endif
+#ifdef FT_POKETRAINER_MAIN_ICE_DODGE_4
+#endif
 // The trainer's long animation-command override puts an extra Fighter virtual before getOwner.
 #define FT_FIGHTER_ANIMCMD_LONG
 #define FT_POKETRAINER_DISGUISE_PUSH_RANGE

@@ -251,13 +251,13 @@ void fn_27_C22AC(void* self) {
 namespace jj_C2350 {
 extern "C" {
 
-extern void* lbl_27_bss_2BD8;
+extern void* m_instance__15soJostleManager;
 void* __nw__FUlQ25Heaps8HeapType(unsigned long, int);
-void* fn_27_C152C(void*);
-void fn_27_C164C(void*, void*, s32);
-void fn_27_C16BC(void*, void*, s32);
+void* __ct__15soJostleManagerFv(void*);
+void addCheckList__15soJostleManagerFP8soJostlel(void*, void*, s32);
+void addReferList__15soJostleManagerFP8soJostlel(void*, void*, s32);
 void initLog__8soJostleFv(void*);
-void fn_27_C1E74(void*, int);
+void updatePosZ__8soJostleFP11soJostleLog(void*, int);
 
 class VBase {
     int a, b;
@@ -355,26 +355,26 @@ void fn_27_C2350(u8* self, s32 arg1) {
                 if (self[0x49] == 0) {
                     s32 i;
                     for (i = 0; i < 4; i++) {
-                        if (!lbl_27_bss_2BD8) {
+                        if (!m_instance__15soJostleManager) {
                             void* p = __nw__FUlQ25Heaps8HeapType(0xA4, 2);
                             if (p) {
-                                p = fn_27_C152C(p);
+                                p = __ct__15soJostleManagerFv(p);
                             }
-                            lbl_27_bss_2BD8 = p;
+                            m_instance__15soJostleManager = p;
                         }
-                        fn_27_C164C(lbl_27_bss_2BD8, self + 0x1C, i);
+                        addCheckList__15soJostleManagerFP8soJostlel(m_instance__15soJostleManager, self + 0x1C, i);
                     }
                 } else {
                     s32 i;
                     for (i = 0; i < 4; i++) {
-                        if (!lbl_27_bss_2BD8) {
+                        if (!m_instance__15soJostleManager) {
                             void* p = __nw__FUlQ25Heaps8HeapType(0xA4, 2);
                             if (p) {
-                                p = fn_27_C152C(p);
+                                p = __ct__15soJostleManagerFv(p);
                             }
-                            lbl_27_bss_2BD8 = p;
+                            m_instance__15soJostleManager = p;
                         }
-                        fn_27_C16BC(lbl_27_bss_2BD8, self + 0x1C, i);
+                        addReferList__15soJostleManagerFP8soJostlel(m_instance__15soJostleManager, self + 0x1C, i);
                     }
                 }
                 r29 = 1;
@@ -387,30 +387,30 @@ void fn_27_C2350(u8* self, s32 arg1) {
                     *(void**)(self + 0x30) = vobj->m72(0);
                 }
                 if (self[0x49] == 0) {
-                    if (!lbl_27_bss_2BD8) {
+                    if (!m_instance__15soJostleManager) {
                         void* p = __nw__FUlQ25Heaps8HeapType(0xA4, 2);
                         if (p) {
-                            p = fn_27_C152C(p);
+                            p = __ct__15soJostleManagerFv(p);
                         }
-                        lbl_27_bss_2BD8 = p;
+                        m_instance__15soJostleManager = p;
                     }
-                    fn_27_C164C(lbl_27_bss_2BD8, self + 0x1C, mode);
+                    addCheckList__15soJostleManagerFP8soJostlel(m_instance__15soJostleManager, self + 0x1C, mode);
                 } else {
-                    if (!lbl_27_bss_2BD8) {
+                    if (!m_instance__15soJostleManager) {
                         void* p = __nw__FUlQ25Heaps8HeapType(0xA4, 2);
                         if (p) {
-                            p = fn_27_C152C(p);
+                            p = __ct__15soJostleManagerFv(p);
                         }
-                        lbl_27_bss_2BD8 = p;
+                        m_instance__15soJostleManager = p;
                     }
-                    fn_27_C16BC(lbl_27_bss_2BD8, self + 0x1C, mode);
+                    addReferList__15soJostleManagerFP8soJostlel(m_instance__15soJostleManager, self + 0x1C, mode);
                 }
                 r29 = 1;
             }
             self[0x37] = (u8)arg1;
         }
         if (r29 == 0) {
-            fn_27_C1E74(self + 0x1C, 0);
+            updatePosZ__8soJostleFP11soJostleLog(self + 0x1C, 0);
         }
     }
 }

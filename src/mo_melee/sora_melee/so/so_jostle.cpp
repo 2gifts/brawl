@@ -1,8 +1,17 @@
+#include <gf/gf_area.h>
+#include <mt/mt_vector.h>
+#include <nw4r/math.h>
+#include <nw4r/ut/ut_algorithm.h>
 #include <so/jostle/so_jostle.h>
+#include <st/stage.h>
+#include <stdlib.h>
 #include <types.h>
 
+extern "C" int randi__Fl(long);
+
+
 soJostle::soJostle(u8 priority, s32 arg) {
-    m_0x0 = 0;
+    m_area = NULL;
     m_0x4 = arg;
     m_0x14 = 0xFFFF;
     m_priority = priority;
@@ -36,199 +45,187 @@ bool soJostle::setLogNo(s32 logNo) {
     return false;
 }
 
-void soJostle::setPriority(u8 priority) {
-    m_priority = priority;
-}
+// HYPOTHESIS: speed is the push speed of this entry, otherSpeed/otherWidth the other entry's speed and push width
+// (0 = take the width from the jostle data for this entry's size kind m_0x1B).
+void soJostle::move(float* speed, Vec2f* pos, Vec2f* otherPos, soJostleLog* log, float otherSpeed, float otherWidth) {
+    float moveSpeed = otherSpeed;
+    float width = otherWidth;
 
-#include <nw4r/math.h>
-#include <stdlib.h>
-#include <nw4r/ut/ut_algorithm.h>
-// TODO: clean up, give variables real names
-namespace jj_C1B10 {
-
-extern const float lbl_27_rodata_EC0;
-extern "C" int randi__Fl(long);
-
-struct Entry {
-    int a;
-    float b;
-    int c;
-    float d;
-};
-
-struct Self {
-    int u0;
-    float* arr;
-    float u8;
-    char pad[0x0F];
-    signed char mode;
-    short idx;
-};
-
-extern "C" void fn_27_C1B10(Self* self, float* p4, float* p5, float* p6, Entry* table, float f1, float f2)
-{
-    float f31 = f1;
-    float f30 = f2;
-
-    if (lbl_27_rodata_EC0 == f2) {
-        if (self->mode >= 2) {
-            f30 = *(float*)((char*)self->arr + 4);
+    if (0.0f == otherWidth) {
+        if (m_0x1B >= 2) {
+            width = getData()[1];
         } else {
-            f30 = self->arr[self->mode];
+            width = getData()[m_0x1B];
         }
     }
 
-    if (*p5 == *p6) {
-        if (lbl_27_rodata_EC0 == *p4) {
+    if (pos->m_x == otherPos->m_x) {
+        if (0.0f == *speed) {
             if (randi__Fl(2) == 0) {
-                f30 = f30;
+                width = width;
             } else {
-                f30 = -f30;
+                width = -width;
             }
-            *p4 = f30;
+            *speed = width;
         } else {
-            if (*p4 < lbl_27_rodata_EC0) {
-                f30 = f30;
+            if (*speed < 0.0f) {
+                width = width;
             } else {
-                f30 = -f30;
+                width = -width;
             }
-            *p4 = f30;
+            *speed = width;
         }
-    } else if (*p5 > *p6) {
-        *p4 = f30;
+    } else if (pos->m_x > otherPos->m_x) {
+        *speed = width;
     } else {
-        *p4 = -f30;
+        *speed = -width;
     }
 
-    Entry* e = (Entry*)((char*)table + self->idx * 16);
-    float d = (float)(double)nw4r::math::FAbs(*p6 - *p5);
+    soJostleLog* entry = &log[m_logNo];
+    float dist = (float)(double)nw4r::math::FAbs(otherPos->m_x - pos->m_x);
 
-    if (*p4 > lbl_27_rodata_EC0) {
-        if (e->a == 0 || d < e->b) {
-            if (lbl_27_rodata_EC0 == f31) {
-                e->a = 2;
-            } else if (f31 > lbl_27_rodata_EC0) {
-                e->a = 3;
+    if (*speed > 0.0f) {
+        if (entry->m_front == 0 || dist < entry->m_frontDist) {
+            if (0.0f == moveSpeed) {
+                entry->m_front = 2;
+            } else if (moveSpeed > 0.0f) {
+                entry->m_front = 3;
             } else {
-                e->a = 1;
+                entry->m_front = 1;
             }
-            e->b = d;
+            entry->m_frontDist = dist;
         }
-    } else if (e->c == 0 || d < e->d) {
-        if (lbl_27_rodata_EC0 == f31) {
-            e->c = 2;
-        } else if (f31 > lbl_27_rodata_EC0) {
-            e->c = 3;
+    } else if (entry->m_back == 0 || dist < entry->m_backDist) {
+        if (0.0f == moveSpeed) {
+            entry->m_back = 2;
+        } else if (moveSpeed > 0.0f) {
+            entry->m_back = 3;
         } else {
-            e->c = 1;
+            entry->m_back = 1;
         }
-        e->d = d;
+        entry->m_backDist = dist;
     }
 
-    unsigned int flag = (e->a != 0 && e->c != 0);
-    if (flag == 1) {
-        self->u8 = lbl_27_rodata_EC0;
+    u32 both = (entry->m_front != 0 && entry->m_back != 0);
+    if (both == 1) {
+        m_0x8 = 0.0f;
         return;
     }
-    self->u8 = *p4;
-}
+    m_0x8 = *speed;
 }
 
-// TODO: clean up, give variables real names
-namespace jj_C1E74 {
-struct Stage_base { char pad[0x3c]; };
-class Stage : public Stage_base {
-public:
-virtual void processDefault(); virtual void processBegin(); virtual void processAnim(); virtual void processUpdate();
-virtual void processPreMapCorrection(); virtual void processMapCorrection(); virtual void processFixPosition(); virtual void processPreCollision();
-virtual void processCollision(); virtual void processCatch(); virtual void processHit(); virtual void processCamera();
-virtual void processFixCamera(); virtual void processEffect(); virtual void processGameProc(); virtual void processEnd();
-virtual void renderPre(); virtual void renderOpa(); virtual void renderXlu(); virtual void processDebug();
-virtual void renderDebug(); virtual void init(); virtual ~Stage(); virtual void createObj();
-virtual void createObjPokeTrainer(); virtual void getPokeTrainerPointNum(); virtual void getPokeTrainerPointData(); virtual void getPokeTrainerPositionZ();
-virtual void getPokeTrainerDrawLayer(); virtual void isAdventureStage(); virtual void getItemPac(); virtual void getItemGenPac();
-virtual void getItemPacEnemyFigure(); virtual void getEnemyPac(); virtual void getAdvRadarData(); virtual void initializeStage();
-virtual void closeStage(); virtual void renderDebugPositions(); virtual void loading(); virtual void process();
-virtual void updateStagePositions(); virtual void debugCollision(); virtual void getAIRange(); virtual void getDefaultLightSetIndex();
-virtual void getZoneLightSetIndex(); virtual void getScrollDir(); virtual void clearCameraParam(); virtual void initCameraParam();
-virtual void startLoadLocalData(); virtual void isLoadLocalData(); virtual void entryLocalData(); virtual void removeLocalData();
-virtual void appearanceFighterLocal(); virtual void getFighterStartPos(); virtual void getFighterReStartPos(); virtual void isReStartSamePoint();
-virtual void getPokeTrainerStartPos(); virtual void getItemPosCount(); virtual void getItemPos(); virtual void getRandItemPos();
-virtual void getKirifudaPos(); virtual void getKirifudaAngle(); virtual void getKirifudaScale(); virtual void getKirifudaModelType();
-virtual void getPokeTrainerPosCount(); virtual void getPokeTrainerPos(); virtual void getFighterDeadEffectSizeRate(); virtual void getEnemyDeadEffectSizeRate();
-virtual float getEnableZ();
-};
-extern Stage* g_Stage;
-extern const float lbl_27_rodata_EC0;
-struct Params { char pad[8]; float acceleration; float maximum; };
-struct Self {
-int unk0; Params* params; float position; float unkC; float speed;
-char pad14[5]; signed char previous; signed char overrideMode; char pad1B; short index;
-};
-struct Entry { int first; int unk4; int second; int unkC; };
+void soJostle::check(soJostle* other, soJostleLog* log, bool both) {
+    if (m_area != NULL && m_area->testIntersect(other->m_area) == true) {
+        bool otherMove = false;
+        bool thisMove = false;
+        if ((s8)m_priority == (s8)other->m_priority) {
+            otherMove = true;
+            thisMove = true;
+        } else {
+            if ((s8)m_priority > (s8)other->m_priority) {
+                otherMove = true;
+            }
+            if ((s8)m_priority <= (s8)other->m_priority) {
+                thisMove = true;
+            }
+        }
+        Vec2f pos = m_area->m_pos;
+        Vec2f otherPos = other->m_area->m_pos;
+        float speed = 0.0f;
+        if (thisMove == true) {
+            move(&speed, &pos, &otherPos, log, other->m_0x10, other->m_0xC);
+        }
+        if (both == true && otherMove == true) {
+            other->move(&speed, &otherPos, &pos, log, m_0x10, m_0xC);
+        }
+    }
+}
 
-extern "C" void fn_27_C1E74(Self* self, Entry* entries) {
-    int first;
-    int mode = 2;
-    if (entries != 0) {
-        Entry* entry = &entries[self->index];
-        first = entry->first;
-        unsigned int both = 0;
-        if (first != 0 && entry->second != 0) {
+void soJostle::updatePosZ(soJostleLog* log) {
+    int front;
+    int dir = 2;
+    if (log != NULL) {
+        soJostleLog* entry = &log[m_logNo];
+        front = entry->m_front;
+        u32 both = 0;
+        if (front != 0 && entry->m_back != 0) {
             both = 1;
         }
         if (static_cast<unsigned long>(both) == 1UL) {
-            int second = entry->second;
-            if (first == second) {
-                if (first == 2) mode = self->previous;
-                else if (first == 3) mode = 1;
-                else mode = 3;
-            } else if (__abs(first - second) >= 2) {
-                mode = self->previous;
-            } else if (first == 1 || second == 1) {
-                mode = 3;
+            int back = entry->m_back;
+            if (front == back) {
+                if (front == 2) {
+                    dir = m_0x19;
+                } else if (front == 3) {
+                    dir = 1;
+                } else {
+                    dir = 3;
+                }
+            } else if (__abs(front - back) >= 2) {
+                dir = m_0x19;
+            } else if (front == 1 || back == 1) {
+                dir = 3;
             } else {
-                mode = 1;
+                dir = 1;
             }
         } else {
             int neither = 0;
-            if (first == 0 && entry->second == 0) neither = 1;
+            if (front == 0 && entry->m_back == 0) {
+                neither = 1;
+            }
             if (neither == 0) {
-                if (first == 0) first = entry->second;
-                if (first == 1) mode = 3;
-                else if (first == 3) mode = 1;
-                else if (self->position < lbl_27_rodata_EC0) mode = 1;
-                else mode = 3;
+                if (front == 0) {
+                    front = entry->m_back;
+                }
+                if (front == 1) {
+                    dir = 3;
+                } else if (front == 3) {
+                    dir = 1;
+                } else if (m_0x8 < 0.0f) {
+                    dir = 1;
+                } else {
+                    dir = 3;
+                }
             }
         }
     }
-    int forced = self->overrideMode;
-    float acceleration = self->params->acceleration;
-    float maximum = self->params->maximum;
-    if (forced != 0 && mode != 2) mode = forced;
-    switch (mode) {
-    case 2:
-        if ((float)(double)nw4r::ut::Abs(self->speed) < acceleration) {
-            self->speed = lbl_27_rodata_EC0;
-        } else if (self->speed > lbl_27_rodata_EC0) {
-            self->speed -= acceleration;
-        } else {
-            self->speed += acceleration;
-        }
-        break;
-    case 3:
-        self->speed += acceleration;
-        if (self->speed > maximum) self->speed = maximum;
-        break;
-    case 1:
-        self->speed -= acceleration;
-        if (self->speed < -maximum) self->speed = -maximum;
-        float limit = g_Stage->getEnableZ();
-        if (limit > lbl_27_rodata_EC0) {
-            if (self->speed < -limit) self->speed = -limit;
-        }
-        break;
+    int forced = (s8)m_0x1A;
+    float accel = getData()[2];
+    float maxSpeed = getData()[3];
+    if (forced != 0 && dir != 2) {
+        dir = forced;
+    }
+    switch (dir) {
+        case 2:
+            if ((float)(double)nw4r::ut::Abs(m_0x10) < accel) {
+                m_0x10 = 0.0f;
+            } else if (m_0x10 > 0.0f) {
+                m_0x10 -= accel;
+            } else {
+                m_0x10 += accel;
+            }
+            break;
+        case 3:
+            m_0x10 += accel;
+            if (m_0x10 > maxSpeed) {
+                m_0x10 = maxSpeed;
+            }
+            break;
+        case 1:
+            m_0x10 -= accel;
+            if (m_0x10 < -maxSpeed) {
+                m_0x10 = -maxSpeed;
+            }
+            float limit = g_Stage->getEnableZ();
+            if (limit > 0.0f) {
+                if (m_0x10 < -limit) {
+                    m_0x10 = -limit;
+                }
+            }
+            break;
     }
 }
-}
 
+void soJostle::setPriority(u8 priority) {
+    m_priority = priority;
+}

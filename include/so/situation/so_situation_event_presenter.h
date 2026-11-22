@@ -22,7 +22,7 @@ enum SituationKind {
 class soSituationEventObserver : public soEventObserver<soSituationEventObserver> {
 public:
     soSituationEventObserver(short unitID) : soEventObserver<soSituationEventObserver>(unitID) {};
-#ifdef FT_FIGHTER_FIELDS
+#if defined(FT_FIGHTER_FIELDS) || defined(SO_SITUATION_OBSERVER_CTOR_INLINE)
     soSituationEventObserver(short manageId, s8 priority) : soEventObserver<soSituationEventObserver>(0x8) { initialize(manageId, priority); }
 #else
     soSituationEventObserver(short manageId, s8 priority);

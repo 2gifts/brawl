@@ -10,6 +10,18 @@
 
 class soModuleAccesser;
 
+// HYPOTHESIS: cancel transition groups from the common fighter data (g_ftCommonData + 0x2C).
+struct ftCancelGroup {
+    int m_situationKind;
+    int* m_transitionGroups;
+    int m_numTransitionGroups;
+};
+
+struct ftCancelData {
+    ftCancelGroup* m_groups;
+    int m_numGroups;
+};
+
 class ftCancelModule : public soNullable {
 public:
     ftCancelModule(bool isNull) : soNullable(isNull) { }
@@ -26,10 +38,14 @@ class ftCancelModuleImpl :
     public soAnimCmdEventObserver,
     public soSituationEventObserver {
 
-    // HYPOTHESIS: 0x10 bytes of state (the fighter REL builders place the next member 0x3C bytes after this one); layout unknown.
-    u8 unk2C[0x10];
+    soModuleAccesser* m_moduleAccesser;
+    ftCancelData* m_cancelData;
+    int m_statusKind;
+    bool m_isEnableCancel;
+    bool m_isUnableCancelStatus;
 
     void enableCancelTransitionGroup(SituationKind kind);
+    void unableCancelAll();
 public:
     ftCancelModuleImpl(soModuleAccesser* accsr);
     // UBFIX should have been virtual
