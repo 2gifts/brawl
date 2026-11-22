@@ -246,7 +246,7 @@ void getAIDName__19muWifiInterfaceTaskFUlPw(int,u8,u16*);
 u8 getPlayerArea__19muWifiInterfaceTaskFiPUc(int,int,u8*);
 void OSReport(const char*, ...);
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
-int getFighterColorFileNo__6muMenuFiii(int,int);
+int getFighterColorFileNo__6muMenuFii(int,int);
 void fn_8010F960(u16,void*,void*,int);
 void fn_1_32F8();
 void fn_1_3D2D8();
@@ -331,7 +331,7 @@ extern "C" void fn_1_390F8() {
                 int kind=exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(cursor[0x98]);
                 int file;
                 if (kind==0x28) file=0;
-                else file=getFighterColorFileNo__6muMenuFiii(kind,color);
+                else file=getFighterColorFileNo__6muMenuFii(kind,color);
                 cursor[0x9d]=file;
                 cursor[0x9e]=fn_800CB568(task,i);
                 cursor[0x9a]=fn_800CB8F0(task,i);

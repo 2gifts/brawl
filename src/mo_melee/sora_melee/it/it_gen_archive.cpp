@@ -139,7 +139,7 @@ struct CallOut { s32 a; u32 pad; ItemKey key; };
 struct FooCtx { s32 unk0; ItemKey key; u32 unkC; u8 unk10, unk11, unk12; void* unk14; };
 extern "C" {
 void* fn_800455E0(void*, u32);
-u32 fn_800453AC(void*, s32, s32, s32, s32, s32, s32, void*, s32);
+u32 reqLoad__16utArchiveManagerFPCcQ25Heaps8HeapTypeUliiUlP22utArchiveEventObserverb(void*, s32, s32, s32, s32, s32, s32, void*, s32);
 }
 extern BssLoc lbl_27_bss_7130, lbl_27_bss_7138;
 extern BssArc lbl_27_bss_6A38;
@@ -172,7 +172,7 @@ if(found!=0) { void* mgr=soArchiveDb::getManager(2); self->unkC=(u32)fn_800455E0
 }
 if(self->unkC==0xFFFF) {
 void* mgr=soArchiveDb::getManager(2);
-self->unkC=fn_800453AC(mgr,arg5,8,0,0,0,0xFF,lbl_805A00C0,1);
+self->unkC=reqLoad__16utArchiveManagerFPCcQ25Heaps8HeapTypeUliiUlP22utArchiveEventObserverb(mgr,arg5,8,0,0,0,0xFF,lbl_805A00C0,1);
 }
 return self;
 }

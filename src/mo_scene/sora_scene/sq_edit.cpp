@@ -23,7 +23,7 @@ void setNextScene__14gfSceneManagerFv(void*, const char*, int);
 void setNextSequence__14gfSceneManagerFv(void*, const char*, int);
 void gmInitGlobalModeMelee__FP17gmGlobalModeMelee(void*);
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
-int getFighterColorFileNo__6muMenuFiii(int, int);
+int getFighterColorFileNo__6muMenuFii(int, int);
 extern const unsigned char lbl_1_data_8980[];
 }
 
@@ -128,7 +128,7 @@ extern "C" void fn_1_36744(SceneObj* self) {
             int character = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(0);
             int color = character == 0x28
                 ? 0
-                : getFighterColorFileNo__6muMenuFiii(character, 0);
+                : getFighterColorFileNo__6muMenuFii(character, 0);
             p->b9d = (unsigned char)color;
             p->b9e = 0;
             p->b9a = (unsigned char)i;

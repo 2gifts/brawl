@@ -13,7 +13,7 @@ NW4R_G3D_RTTI_DEF(AnmObjChrRes);
 
 namespace {
 
-u32 GetPartialNodeEndId(const ResMdl mdl, u32 target) {
+u32 GetPartialNodeEndId(ResMdl mdl, u32 target) {
     ResNode targetNode = mdl.GetResNode(target);
     ResNode node = targetNode;
 

@@ -309,7 +309,7 @@ extern int lbl_1_bss_1A60;
 struct Global { char pad[8]; char* dest; char pad2[4]; char* src; };
 extern Global* g_GameGlobal;
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
-int getFighterColorFileNo__6muMenuFiii(int, int);
+int getFighterColorFileNo__6muMenuFii(int, int);
 void getNameUTF16__10GameGlobalFiPw(Global*, int, void*);
 void fn_1_33B24() {
     char* s;
@@ -324,7 +324,7 @@ void fn_1_33B24() {
             u8 kind = *(u8*)(s + 0xb8);
             u8 costume = *(u8*)(s + 0xbd);
             int character = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(kind);
-            int color = character == 0x28 ? 0 : getFighterColorFileNo__6muMenuFiii(character, costume);
+            int color = character == 0x28 ? 0 : getFighterColorFileNo__6muMenuFii(character, costume);
             *(u8*)(d + 0x99) = 0;
             *(u8*)(d + 0x98) = kind;
             *(u8*)(d + 0xa3) = 0;

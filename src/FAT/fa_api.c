@@ -7,9 +7,10 @@
 unsigned char lbl_80597FB0[0x68] __attribute__((aligned(8))) = { 0 };
 unsigned char lbl_80598018[0x68] __attribute__((aligned(8))) = { 0 };
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
-unsigned char lbl_805A1268[0x4] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_805A126C[0x4] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_805A1270[0x8] __attribute__((aligned(4))) = { 0 };
+// HYPOTHESIS: FAInit state flags: PrFile2 initialized, FAInit running, volume layer initialized.
+int lbl_805A1268 = 0;
+int lbl_805A126C = 0;
+int lbl_805A1270[2] = { 0 };
 
 // Function bodies below are derived from https://github.com/jj-link/brawl.
 
@@ -21,6 +22,41 @@ FAHandle* FAFopen(const char* filepath, const char* mode) {
     if (handle == NULL)
         return NULL;
     return handle;
+}
+
+int FAFwrite(void* buffer, size_t size, size_t num, FAHandle* handle) {
+    return fn_803EB824(buffer, size, num, handle);
+}
+
+// HYPOTHESIS: the volume layer initializer of the FA PrFile2 copy (pf_volume.c), called with two null arguments.
+extern int fn_803D72BC(void* config, void* param);
+
+// HYPOTHESIS: name from the FA API order (between FAGetdev and FAIsWriteProtected); initializes the volume layer and
+// PrFile2 once.
+int FAInit(void* config) {
+    int err;
+    if (lbl_805A126C == 1) {
+        return -1;
+    }
+    lbl_805A126C = 1;
+    if (lbl_805A1270[0] == 0) {
+        err = fn_803D72BC(NULL, NULL);
+        lbl_805A1270[0] = err == 0;
+        if (err != 0) {
+            lbl_805A126C = 0;
+            return -1;
+        }
+    }
+    if (lbl_805A1268 == 0) {
+        err = fn_803EB874(config, NULL);
+        lbl_805A1268 = err == 0;
+        if (err == -1) {
+            lbl_805A126C = 0;
+            return -1;
+        }
+    }
+    lbl_805A126C = 0;
+    return 0;
 }
 
 int FAIsWriteProtected(s8 arg0) {
@@ -63,6 +99,10 @@ int FAFclose(FAHandle* handle) {
         return -1;
     }
     return 0;
+}
+
+int FAFread(void* dest, size_t size, size_t num, FAHandle* handle) {
+    return fn_803EB6E0(dest, size, num, handle);
 }
 
 // TODO: clean up, give variables real names

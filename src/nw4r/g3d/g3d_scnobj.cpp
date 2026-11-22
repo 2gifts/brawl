@@ -749,7 +749,7 @@ void ScnObj_DisableCallbackTiming(nw4r::g3d::ScnObj* pObj, u32 flag) {
 namespace jj_801AB6CC {
 extern "C" void* MEMAllocFromAllocator(void* owner, unsigned int size);
 extern "C" void __ct__Q34nw4r3g3d6ScnObjFP12MEMAllocator(void* obj, void* owner);
-extern "C" char lbl_80466270[];
+extern "C" char __vt__Q34nw4r3g3d8ScnGroup[];
 
 // TODO: clean up, replace the raw offset accesses with a struct with named fields and give variables real names
 extern "C" void* fn_801AB6CC(void* owner, unsigned int* outSize, unsigned int count) {
@@ -766,7 +766,7 @@ extern "C" void* fn_801AB6CC(void* owner, unsigned int* outSize, unsigned int co
         }
         if (result != 0) {
             __ct__Q34nw4r3g3d6ScnObjFP12MEMAllocator(result, owner);
-            *(char**)(result + 0x0) = lbl_80466270;
+            *(char**)(result + 0x0) = __vt__Q34nw4r3g3d8ScnGroup;
             *(char**)(result + 0xDC) = result + 0xE8;
             *(unsigned int*)(result + 0xE0) = count;
             *(unsigned int*)(result + 0xE4) = 0;

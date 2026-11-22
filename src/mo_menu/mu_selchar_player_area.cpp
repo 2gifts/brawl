@@ -1497,7 +1497,7 @@ int getCharColorNo__6muMenuFiii(int, int);
 int exchangeMuSelchkind2GmCharacterKind__6muMenuFiii(int);
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
 int getNumCharColor__6muMenuFiii(int);
-int getFighterColorFileNo__6muMenuFiii(int, int);
+int getFighterColorFileNo__6muMenuFii(int, int);
 void fn_800CA498(void*, int, int, int);
 
 struct SelArea {
@@ -1607,7 +1607,7 @@ void sendSystemCharKind__19muSelCharPlayerAreaFv(SelArea* self) {
     int num = (m == 0x28) ? 1 : getNumCharColor__6muMenuFiii(m);
     if (color < num) {
         int m2 = exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(gm);
-        fileNo = (m2 == 0x28) ? 0 : getFighterColorFileNo__6muMenuFiii(m2, color);
+        fileNo = (m2 == 0x28) ? 0 : getFighterColorFileNo__6muMenuFii(m2, color);
     }
     self->f444 = gm;
     self->f445 = fileNo;

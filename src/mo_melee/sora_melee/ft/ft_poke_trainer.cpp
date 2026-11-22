@@ -10,6 +10,8 @@
 #endif
 #ifdef FT_POKETRAINER_MAIN_ICE_DODGE_4
 #endif
+#ifdef FT_POKETRAINER_MAIN_ICE_DODGE_5
+#endif
 // The trainer's long animation-command override puts an extra Fighter virtual before getOwner.
 #define FT_FIGHTER_ANIMCMD_LONG
 #define FT_POKETRAINER_DISGUISE_PUSH_RANGE

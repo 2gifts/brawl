@@ -49,7 +49,7 @@ nw4r::g3d::ScnChoice* fn_801B3440(MEMAllocator* allocator, u32* size, int capaci
 nw4r::g3d::ScnGroup* fn_801AB6CC(MEMAllocator* allocator, u32* size, int capacity);
 void Bind__Q34nw4r3g3d9ResAnmScnFQ34nw4r3g3d9ResAnmScn(nw4r::g3d::ResAnmScn* self, nw4r::g3d::ResAnmScn* anm);
 void fn_800E023C(IfPlayer* player, int arg1, int arg2, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2);
-void fn_800E244C(IfPlayer* player);
+void main__8IfPlayerFv(IfPlayer* player);
 void fn_800E26B8(IfPlayer* player);
 void fn_800DD6E4(IfCenter* center, nw4r::g3d::ResFile* resFile1, nw4r::g3d::ResFile* resFile2, int arg1, int arg2);
 void fn_8010C004(nw4r::g3d::ScnGroup* group);
@@ -555,7 +555,7 @@ s32 IfAdvMngr::main() {
 void IfAdvMngr::meleeMain() {
     for (int i = 0; i < 7; i++) {
         if (m_players[i]) {
-            fn_800E244C(m_players[i]);
+            main__8IfPlayerFv(m_players[i]);
         }
     }
     IfPlayer::arrowMain(m_players, 7);

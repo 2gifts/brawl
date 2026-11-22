@@ -203,7 +203,7 @@ void fn_80055760(u16,u8);
 u8* gmGetItemSwitchData_NormalStage__Fi(u16);
 void fn_8010F960(u16,void*,void*,int);
 int exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(int);
-s8 getFighterColorFileNo__6muMenuFiii(int,int);
+s8 getFighterColorFileNo__6muMenuFii(int,int);
 }
 struct Flags { u8 pad[8]; u8 mode:6, low:2; u8 rule:3, count:3, rest:2; };
 extern "C" void fn_1_24860(int unused, s32 arg) {
@@ -236,7 +236,7 @@ extern "C" void fn_1_24860(int unused, s32 arg) {
    u8 tmp=src[0xbd];
    int m=exchangeGmCharacterKind2MuSelchkind__6muMenuFiii(kind);
    s8 v;
-   if(m==0x28) v=0; else v=getFighterColorFileNo__6muMenuFiii(m,tmp);
+   if(m==0x28) v=0; else v=getFighterColorFileNo__6muMenuFii(m,tmp);
    dst[0x9d]=v;
    dst[0x9e]=src[0xbd];
    dst[0xb0]=src[0xd0];

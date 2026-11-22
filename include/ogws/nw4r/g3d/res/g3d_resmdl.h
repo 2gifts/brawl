@@ -150,7 +150,7 @@ public:
     ResNode GetResNode(const ResName name) const;
     ResNode GetResNode(int idx) const;
     ResNode GetResNode(u32 idx) const;
-    u32 GetResNodeNumEntries() const;
+    u32 GetResNodeNumEntries();
 
     ResVtxPos GetResVtxPos(const ResName name) const;
     ResVtxPos GetResVtxPos(int idx) const;

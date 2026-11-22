@@ -2,12 +2,14 @@
 #include <cm/cm_controller_fig_disp1.h>
 #include <gf/gf_pad_status.h>
 #include <math.h>
+#include <mt/mt_trig.h>
 #include <nw4r/math/math_arithmetic.h>
 #include <types.h>
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
-unsigned char lbl_805A0298[0x4] __attribute__((aligned(4))) = { 0 };
-unsigned char lbl_805A029C[0x4] __attribute__((aligned(4))) = { 0 };
+// TODO: clean up - names unknown; two angles set up by the static initializer
+float lbl_805A0298 = mtConvDegToRad(-23.0f);
+float lbl_805A029C = mtConvDegToRad(-10.0f);
 
 cmFigDisp1Controller::cmFigDisp1Controller() : gfCameraController() {
     unk3C = 0;

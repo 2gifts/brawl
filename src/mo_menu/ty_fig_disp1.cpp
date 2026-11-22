@@ -322,7 +322,7 @@ void fn_1_6ACC(void* a, int b);
 void changeAnimN__8MuObjectFPCc(void* self, const char* name);
 void setUpdateRate__16gfModelAnimationFf(void* self, float f);
 void makeAndPutFigure__14tyFigDisp1TaskFv(void* a, int b, int c, float* d, float* e, void* f, int g);
-void fn_800A97AC(float f);
+void setCamParamByObjWidth__20cmFigDisp1ControllerFf(float f);
 void* setObjScale__8MuObjectFP5Vec3f(void* a, float* b);
 void* getInstance__16CameraControllerFv(void);
 void* __dynamic_cast(void* a, int b, void* c, void* d, int e);
@@ -358,7 +358,7 @@ extern "C" void* fn_2_6DBC(char* self) {
     OSReport(lbl_2_data_D44, local[0], local[1], local[2], k);
     setObjScale__8MuObjectFP5Vec3f(*(void**)(OBJ + 0x156c), local);
     __dynamic_cast(*(void**)((char*)getInstance__16CameraControllerFv() + 0x48), 4, lbl_2_data_D90, __RTTI__18gfCameraController, 0);
-    fn_800A97AC(spC);
+    setCamParamByObjWidth__20cmFigDisp1ControllerFf(spC);
     fn_1_6AE0(*(void**)OBJ, *(int*)(*(char**)(OBJ + 0x118) + 0x10));
     getSysPadStatus__11gfPadSystemFiP11gfPadStatus(g_gfPadSystem, *(int*)(self + 0x6fc), &st);
 

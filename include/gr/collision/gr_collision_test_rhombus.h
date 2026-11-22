@@ -160,8 +160,6 @@ static_assert(offsetof(grCollisionTestRhombus, m_unk47C) == 0x47C, "Class is wro
 // ---------------------------------------------------------------------------------------------------------------------------
 class grCollStatus;
 extern "C" {
-// grCollision::getPreSegment1 (same shape, the line's segment one frame ago). 0x80111AF4
-void fn_80111AF4(grCollision* collision, grCollSegmentEx* out, grCollisionLine* line, int unk);
 // grCollisionLineWork::getPrevNoVLink / getNextNoVLink. 0x80113F88 / 0x80114024
 // grCollisionLineWork::getPosXDownLine / getPosXDownLinePre: float x is in f1 (Ghidra drops it). 0x801150D0 / 0x8011557C
 // grCollisionLineWork::getPosXUpLine / getPosYLeftLine / getPosYRightLine (no float argument). 0x80115A28 / 0x80115E44 / 0x801162F4

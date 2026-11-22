@@ -29,9 +29,9 @@ hkGskBaseAgent::hkGskBaseAgent(const hkCdBody& bodyA, const hkCdBody& bodyB, hkC
     const hkTransform& ta = *(const hkTransform*)bodyA.m_motion;
     relative.setMulInverseMul(ta, tb);
     if (shapeB->getType() == HK_SHAPE_TRIANGLE) {
-        ((hkGskCache*)unkC)->initTriangle((const hkConvexShape*)shapeA, (const hkConvexShape*)shapeB, relative);
+        m_cache.initTriangle((const hkConvexShape*)shapeA, (const hkConvexShape*)shapeB, relative);
     } else {
-        ((hkGskCache*)unkC)->init((const hkConvexShape*)shapeA, (const hkConvexShape*)shapeB, relative);
+        m_cache.init((const hkConvexShape*)shapeA, (const hkConvexShape*)shapeB, relative);
     }
     unk28 = 0.0f;
     unk24 = 0.0f;
@@ -90,7 +90,7 @@ struct Object {
     Matrix* transform;
 };
 
-extern "C" void fn_803198C8(void*, Vec4*, Vec4*, Matrix*, Vec4*);
+extern "C" int fn_803198C8(void*, Vec4*, Vec4*, Matrix*, Vec4*);
 extern "C" const float lbl_805A3F38;
 
 // TODO: cleanup (shape from jj-link/brawl fn_802B1B3C)
@@ -133,6 +133,103 @@ struct hkGskClosestPointInput {
 extern "C" hkResult fn_8031AD90(const hkGskClosestPointInput& input, void* cache, hkVector4& normal,
                                 hkVector4& position);
 
+#include <havok/hkCdBodyPairCollector.h>
+#include <havok/hkConvexShape.h>
+#include <havok/hkGsk.h>
+
+// Penetration test of two convex shapes: the GSK closest feature, then the distance between the surfaces
+// (minus both convex radii). A failed feature search counts as a penetration.
+// TODO: clean up: hkGsk::getClosestFeature (fn_803198C8) is still declared with the jj types above.
+void hkGskBaseAgent::staticGetPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                           void* collector) {
+    HK_TIMER_BEGIN("Gsk");
+    const hkConvexShape* shapeA = (const hkConvexShape*)bodyA.m_shape;
+    const hkConvexShape* shapeB = (const hkConvexShape*)bodyB.m_shape;
+    hkTransform aTb;
+    aTb.setMulInverseMul(bodyA.getTransform(), bodyB.getTransform());
+    hkGskCache cache;
+    if (shapeB->getType() == HK_SHAPE_TRIANGLE) {
+        cache.initTriangle(shapeA, shapeB, aTb);
+    } else {
+        cache.init(shapeA, shapeB, aTb);
+    }
+    hkGsk gsk;
+    gsk.unk10 = 1;
+    gsk.m_dimA = cache.m_dimA;
+    gsk.m_dimB = cache.m_dimB;
+    gsk.unk8 = cache.unkA;
+    gsk.unkC = cache.unkB;
+    gsk.unk14 = 0;
+    shapeA->convertVertexIdsToVertices(&cache.m_vertices[0], gsk.m_dimA, gsk.verticesA());
+    shapeB->convertVertexIdsToVertices(&cache.m_vertices[gsk.m_dimA], gsk.m_dimB, gsk.verticesB());
+    hkVector4 separation;
+    int result = jj_fn_802B1B3C::fn_803198C8(&gsk, (jj_fn_802B1B3C::Vec4*)shapeA, (jj_fn_802B1B3C::Vec4*)shapeB,
+                                                  (jj_fn_802B1B3C::Matrix*)&aTb, (jj_fn_802B1B3C::Vec4*)&separation);
+    HK_TIMER_END();
+    if (result == 0) {
+        hkReal radiusA = shapeA->m_radius;
+        hkReal radiusB = shapeB->m_radius;
+        if (separation.w - radiusA - radiusB < 0.0f) {
+            ((hkCdBodyPairCollector*)collector)->addCdBodyPair(bodyA, bodyB);
+        }
+    } else {
+        ((hkCdBodyPairCollector*)collector)->addCdBodyPair(bodyA, bodyB);
+    }
+}
+
+
+// The penetration test with the agent's cached simplex; the separating normal (rotated into world space, w the
+// distance between the surfaces) is kept for the agent. A failed feature search clears it and counts as a
+// penetration.
+// TODO: clean up: the separating normal (unk20) is still an untyped member.
+void hkGskBaseAgent::getPenetrations(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
+                                     void* collector) {
+    HK_TIMER_BEGIN_LIST("Gsk", "tim");
+    HK_TIMER_SPLIT_LIST("SepNormal");
+    const hkConvexShape* shapeA = (const hkConvexShape*)bodyA.m_shape;
+    const hkConvexShape* shapeB = (const hkConvexShape*)bodyB.m_shape;
+    hkTransform aTb;
+    aTb.setMulInverseMul(bodyA.getTransform(), bodyB.getTransform());
+    hkGsk gsk;
+    gsk.unk10 = 1;
+    gsk.m_dimA = m_cache.m_dimA;
+    gsk.m_dimB = m_cache.m_dimB;
+    gsk.unk8 = m_cache.unkA;
+    gsk.unkC = m_cache.unkB;
+    gsk.unk14 = 0;
+    shapeA->convertVertexIdsToVertices(&m_cache.m_vertices[0], gsk.m_dimA, gsk.verticesA());
+    shapeB->convertVertexIdsToVertices(&m_cache.m_vertices[gsk.m_dimA], gsk.m_dimB, gsk.verticesB());
+    hkVector4 separation;
+    int result = jj_fn_802B1B3C::fn_803198C8(&gsk, (jj_fn_802B1B3C::Vec4*)shapeA, (jj_fn_802B1B3C::Vec4*)shapeB,
+                                             (jj_fn_802B1B3C::Matrix*)&aTb, (jj_fn_802B1B3C::Vec4*)&separation);
+    if (gsk.unk14) {
+        gsk.exitAndExportCacheImpl(&m_cache);
+    }
+    hkVector4& normal = *(hkVector4*)&unk20;
+    if (result == 0) {
+        const hkRotation& r = bodyA.getTransform().getRotation();
+        hkReal vx = separation.x;
+        hkReal vy = separation.y;
+        hkReal vz = separation.z;
+        hkReal radiusA = shapeA->m_radius;
+        hkReal radiusB = shapeB->m_radius;
+        // BYTES: hkSimdReal (the aligned scalar type) turns copy propagation off, as the timer form and the array
+        // constructor loops of the gsk show.
+        hkSimdReal dist = separation.w - radiusA - radiusB;
+        normal.x = vx * r.m_col0.x + vy * r.m_col1.x + vz * r.m_col2.x;
+        normal.y = vx * r.m_col0.y + vy * r.m_col1.y + vz * r.m_col2.y;
+        normal.z = vx * r.m_col0.z + vy * r.m_col1.z + vz * r.m_col2.z;
+        normal.w = dist;
+        if (dist < 0.0f) {
+            ((hkCdBodyPairCollector*)collector)->addCdBodyPair(bodyA, bodyB);
+        }
+    } else {
+        normal.setZero4();
+        ((hkCdBodyPairCollector*)collector)->addCdBodyPair(bodyA, bodyB);
+    }
+    HK_TIMER_END_LIST();
+}
+
 void hkGskBaseAgent::getClosestPoints(const hkCdBody& bodyA, const hkCdBody& bodyB, hkCollisionInput& input,
                                       void* collector) {
     HK_TIMER_BEGIN("Gsk");
@@ -148,7 +245,7 @@ void hkGskBaseAgent::getClosestPoints(const hkCdBody& bodyA, const hkCdBody& bod
     in.m_transformA = (const hkTransform*)bodyA.m_motion;
     in.m_aTb = &aTb;
     in.m_tolerance = input.getTolerance();
-    if (fn_8031AD90(in, unkC, contact.m_normal, contact.m_position) == 0) {
+    if (fn_8031AD90(in, &m_cache, contact.m_normal, contact.m_position) == 0) {
         event.m_cdBodyA = &bodyA;
         event.m_cdBodyB = &bodyB;
         event.m_contact.m_position = contact.m_position;

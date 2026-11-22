@@ -476,7 +476,7 @@ int grCollisionTestRhombus::testStaticCorrection(grCollisionLineWork* lineWork) 
     grCollSegmentEx segment;
     grCollSegmentEx preSegment;
     lineWork->m_collision->getSegment(&segment, lineWork->m_collisionLine, 0);
-    fn_80111AF4(lineWork->m_collision, &preSegment, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getPreSegment1(&preSegment, lineWork->m_collisionLine, 0);
     grCollisionLineWork prev;
     grCollisionLineWork next;
     lineWork->getPrev(&prev);
@@ -799,7 +799,7 @@ int grCollisionTestRhombus::testStaticLeft(grCollisionLineWork* lineWork, u8 fla
         bool hit = false;
         if (m_unk2E4.m_x <= projected.m_x) {
             grCollSegmentEx pre;
-            fn_80111AF4(lineWork->m_collision, &pre, lineWork->m_collisionLine, 0);
+            lineWork->m_collision->getPreSegment1(&pre, lineWork->m_collisionLine, 0);
             if (pre.m_segment.m_p0Pos.m_y < rhombus->m_leftPos.m_y || rhombus->m_leftPos.m_y < pre.m_segment.m_p1Pos.m_y) {
                 if (rhombus->m_leftPos.m_y <= pre.m_segment.m_p0Pos.m_y) {
                     if (pre.m_segment.m_p1Pos.m_x < rhombus->m_leftPos.m_x) {
@@ -985,7 +985,7 @@ int grCollisionTestRhombus::testStaticUp(grCollisionLineWork* lineWork, u8 flags
     Vec2f projected;
     Vec2f push;
     lineWork->m_collision->getSegment(&wall, lineWork->m_collisionLine, 0);
-    fn_80111AF4(lineWork->m_collision, &pre, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getPreSegment1(&pre, lineWork->m_collisionLine, 0);
     if (!m_unkC_6 && m_collStatus->m_setting == grCollStatus::Setting_Air) {
         bool unchanged = false;
         if (wall.m_segment.m_p0Pos.m_x == pre.m_segment.m_p0Pos.m_x && wall.m_segment.m_p0Pos.m_y == pre.m_segment.m_p0Pos.m_y &&
@@ -1067,7 +1067,7 @@ int grCollisionTestRhombus::testStaticDown(grCollisionLineWork* lineWork, u8 fla
     grCollSegmentEx wall;
     grCollSegmentEx pre;
     lineWork->m_collision->getSegment(&wall, lineWork->m_collisionLine, 0);
-    fn_80111AF4(lineWork->m_collision, &pre, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getPreSegment1(&pre, lineWork->m_collisionLine, 0);
     Vec2f projected;
     Vec2f push;
     grCollisionLineWork neighbor;
@@ -1273,7 +1273,7 @@ int grCollisionTestRhombus::testStaticChangeDownLineCheck(grCollisionLineWork* l
     grCollSegmentEx wall;
     grCollSegmentEx pre;
     lineWork->m_collision->getSegment(&wall, lineWork->m_collisionLine, 0);
-    fn_80111AF4(lineWork->m_collision, &pre, lineWork->m_collisionLine, 0);
+    lineWork->m_collision->getPreSegment1(&pre, lineWork->m_collisionLine, 0);
     Vec2f startMove = wall.m_segment.m_p0Pos - pre.m_segment.m_p0Pos;
     Vec2f endMove = wall.m_segment.m_p1Pos - pre.m_segment.m_p1Pos;
     u8 lineMoved = 1.1920929e-07f < startMove.m_x * startMove.m_x + startMove.m_y * startMove.m_y;

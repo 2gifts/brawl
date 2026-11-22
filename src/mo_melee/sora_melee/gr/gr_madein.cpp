@@ -630,7 +630,8 @@ public:
 };
 extern "C" void setAttack__8YakumonoFiiP21soCollisionAttackData(void*, int, int, Attack*);
 #define CALL() self->setAttackGimmickDetails(&a,self->id,&data->pos,data->power,361,100,0,70,lbl_27_rodata_4524,lbl_27_rodata_4524,lbl_27_rodata_4524,0,1023,7,0,15,0,0,0,0,0,0,1,0,0,0,60,0,0,0,0,0,0,0,0,0,0,1)
-extern "C" void fn_27_278720(Ground* self) {
+// TODO: clean up, this is grMadein::createAttackPoint written as an extern "C" function that takes the object explicitly; it should be a real member function.
+extern "C" void createAttackPoint__8grMadeinFv(Ground* self) {
  Attack a;
  if ((self->flags >> 6) & 1) {
   memset(&a,0,0x40);

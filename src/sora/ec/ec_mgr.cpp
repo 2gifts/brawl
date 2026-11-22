@@ -299,6 +299,10 @@ u32 ecMgr::setEffect(EfID effectID, Vec3f* pos) {
     return setEffect(effectID, static_cast<int>(effectID) >> 16, pos, 0, 0);
 }
 
+u32 ecMgr::setEffect(EfID effectID, Vec3f* pos, Vec3f* rot) {
+    return setEffect(effectID, static_cast<int>(effectID) >> 16, pos, rot, 0);
+}
+
 u32 ecMgr::setEffect(EfID effectID, const Vec3f* pos, const Vec3f* rot, const Vec3f* scale) {
     return setEffect(effectID, static_cast<int>(effectID) >> 16, pos, rot, scale);
 }

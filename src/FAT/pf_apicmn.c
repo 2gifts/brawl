@@ -101,7 +101,7 @@ int fn_803EB84C(s8 drv_char) {
 }
 
 // TODO: clean up, give variables real names
-int fn_803EB874(void) {
+int fn_803EB874(void* config, void* param) {
     int err;
 
     err = fn_803E3610();

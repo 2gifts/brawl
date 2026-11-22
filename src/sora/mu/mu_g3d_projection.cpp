@@ -12,7 +12,8 @@ extern nw4r::math::MTX34 lbl_8049E030;
 extern nw4r::math::MTX44 lbl_8049E060;
 
 // HYPOTHESIS: untyped placeholders for the zero-initialized .sbss of this unit, sizes and order from the original layout.
-unsigned char lbl_805A02B0[0x8] __attribute__((aligned(4))) = { 0 };
+// HYPOTHESIS: a camera handle with no data, constructed at startup (the original .sbss slot is 8 bytes).
+nw4r::g3d::Camera lbl_805A02B0(NULL);
 float lbl_805A02B8[2] = { 0 };
 float lbl_805A02C0[2] = { 0 };
 unsigned char lbl_805A02C8[0x8] __attribute__((aligned(4))) = { 0 };

@@ -9,7 +9,7 @@
 
 extern "C" {
 // utArchiveManager::reqLoad
-u32 fn_800453AC(utArchiveManager* manager, const char* path, Heaps::HeapType heap, u32 mode, int offset, int size, u32 id,
+u32 reqLoad__16utArchiveManagerFPCcQ25Heaps8HeapTypeUliiUlP22utArchiveEventObserverb(utArchiveManager* manager, const char* path, Heaps::HeapType heap, u32 mode, int offset, int size, u32 id,
                 utArchiveEventObserver* observer, bool async);
 // HYPOTHESIS: utArchiveManager's registration of an archive; returns its resource id.
 u32 fn_800455E0(utArchiveManager* manager, gfArchive* archive);
@@ -47,7 +47,7 @@ itFigureArchive::itFigureArchive(u32 kind, const char* path) {
         heap = static_cast<Heaps::HeapType>(0x8);
     }
     if (m_resourceId == 0xFFFF) {
-        m_resourceId = fn_800453AC(soArchiveDb::getManager(2), path, heap, 0, 0, 0, 0xFF, &lbl_805A00C0, true);
+        m_resourceId = reqLoad__16utArchiveManagerFPCcQ25Heaps8HeapTypeUliiUlP22utArchiveEventObserverb(soArchiveDb::getManager(2), path, heap, 0, 0, 0, 0xFF, &lbl_805A00C0, true);
     }
 }
 
