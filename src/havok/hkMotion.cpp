@@ -72,10 +72,7 @@ void hkMotion::applyLinearImpulse(const hkVector4& impulse) {
     m_linearVelocity.w = massInv * impulse.w + m_linearVelocity.w;
 }
 
-// HYPOTHESIS: output type; preserve the observed motion-state and velocity range.
-// MATCH-ONLY: native scalar loads/stores alternate; disable scheduling locally
-// instead of making ordinary motion-state storage volatile.
-#pragma scheduling off
+// HYPOTHESIS: output type.
 void hkMotion::getMotionStateAndVelocities(hkMotion* out) const {
     out->m_motionState.m_transform.m_rotation.m_col0.x = m_motionState.m_transform.m_rotation.m_col0.x;
     out->m_motionState.m_transform.m_rotation.m_col0.y = m_motionState.m_transform.m_rotation.m_col0.y;
@@ -134,7 +131,6 @@ void hkMotion::getMotionStateAndVelocities(hkMotion* out) const {
     out->m_angularVelocity.w = m_angularVelocity.w;
 }
 
-#pragma scheduling reset
 
 void hkMotion::setDeactivationClass(int deactivationClass) {
     m_motionState.m_deactivationClass = deactivationClass;

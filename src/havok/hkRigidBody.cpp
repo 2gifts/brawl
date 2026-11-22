@@ -325,10 +325,6 @@ hkRigidBody::hkRigidBody(const hkRigidBodyCinfo& info) : hkEntity(info.m_shape) 
     m_material.m_restitution = restitution;
 }
 
-// MATCH-ONLY: the original keeps each field's load next to its store (scheduling off reproduces that, apart from
-// the prologue order).
-#pragma push
-#pragma scheduling off
 void hkRigidBody::getCinfo(hkRigidBodyCinfo& info) const {
     info.m_autoRemoveLevel = m_autoRemoveLevel;
     info.m_processContactCallbackDelay = m_processContactCallbackDelay;
@@ -356,7 +352,6 @@ void hkRigidBody::getCinfo(hkRigidBodyCinfo& info) const {
     info.m_allowedPenetrationDepth = m_collidable.m_allowedPenetrationDepth;
     info.m_qualityType = (hkRigidBodyCinfo::QualityType)m_collidable.m_broadPhaseHandle.m_objectQualityType;
 }
-#pragma pop
 
 bool hkRigidBody::setShape(hkShape* shape) {
     if (m_world && m_world->areCriticalOperationsLocked()) {

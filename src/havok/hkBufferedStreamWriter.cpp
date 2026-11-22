@@ -89,9 +89,6 @@ hkBool hkBufferedStreamWriter::isOk() const {
     return ok;
 }
 
-// MATCH-ONLY: scheduling
-#pragma push
-#pragma scheduling off
 hkBool hkBufferedStreamWriter::seekTellSupported() const {
     hkBool r;
     if (m_stream) {
@@ -101,7 +98,6 @@ hkBool hkBufferedStreamWriter::seekTellSupported() const {
     }
     return r;
 }
-#pragma pop
 
 hkResult hkBufferedStreamWriter::seek(int offset, int whence) {
     if (m_stream) {

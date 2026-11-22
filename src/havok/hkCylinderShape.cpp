@@ -83,11 +83,9 @@ hkReal hkCylinderShape::getCylinderRadius() const {
     return m_cylRadius;
 }
 
-#pragma scheduling off
 void hkCylinderShape::getFirstVertex(hkVector4& out) const {
     out = m_vertexB;
 }
-#pragma scheduling reset
 
 int hkCylinderShape::getNumVertices() const {
     return -1;

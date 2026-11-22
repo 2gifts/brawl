@@ -56,7 +56,6 @@ void hkRagdollConstraintData::getRuntimeInfo(void* unusedA, hkConstraintRuntimeI
     out->unk00 = 0x70;
 }
 
-#pragma scheduling off
 void hkRagdollConstraintData::getConstraintFrameA(hkMatrix3* out) const {
     *out = m_constraintFrameA;
 }
@@ -64,7 +63,6 @@ void hkRagdollConstraintData::getConstraintFrameA(hkMatrix3* out) const {
 void hkRagdollConstraintData::getConstraintFrameB(hkMatrix3* out) const {
     *out = m_constraintFrameB;
 }
-#pragma scheduling reset
 
 // HYPOTHESIS: validity chain. Each test runs only when the previous one passed; the tolerances are unknown.
 hkBool hkRagdollConstraintData::isValid() const {

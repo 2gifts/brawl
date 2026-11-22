@@ -175,7 +175,9 @@ void hkConvexListConvexShape::convertVertexIdsToVertices(const u16* ids, int num
         u16 childId = *ids & 0xFF;
         int child = *ids >> 8;
         m_childInfo[child].m_shape->convertVertexIdsToVertices(&childId, 1, out);
-        vertexIdWord(*out) += child << 8;
+        int id = vertexIdWord(*out);
+        id += child << 8;
+        vertexIdWord(*out) = id;
         ids++;
         out++;
     }

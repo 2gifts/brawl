@@ -107,9 +107,6 @@ int hkBufferedStreamReader::skip(int nbytes) {
     return nbytes;
 }
 
-// MATCH-ONLY: scheduling
-#pragma push
-#pragma scheduling off
 hkBool hkBufferedStreamReader::isOk() const {
     bool ok = true;
     if (m_buffer.m_current == m_buffer.m_end) {
@@ -119,7 +116,6 @@ hkBool hkBufferedStreamReader::isOk() const {
     }
     return hkBool(ok);
 }
-#pragma pop
 
 hkBool hkBufferedStreamReader::markSupported() const {
     return hkBool(m_buffer.m_bufSize != 0);

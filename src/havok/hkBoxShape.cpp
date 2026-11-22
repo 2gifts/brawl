@@ -49,11 +49,9 @@ int hkBoxShape::getType() const {
     return HK_SHAPE_BOX;
 }
 
-#pragma scheduling off
 void hkBoxShape::getFirstVertex(hkVector4& out) const {
     out = m_halfExtents;
 }
-#pragma scheduling reset
 
 void hkBoxShape::getCollisionSpheresInfo(hkCollisionSpheresInfo* out) const {
     out->m_numSpheres = 8;

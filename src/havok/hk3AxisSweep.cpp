@@ -174,8 +174,7 @@ void hk3AxisSweep::getAllAabbs(hkArray<hkAabb>& aabbs) const {
     aabbs.m_size = m_nodes.m_size - m_numMarkers;
     int out = 0;
     for (int i = 0; i < m_nodes.m_size; i++) {
-        // MATCH-ONLY: the aligned pointer turns copy propagation off as in the original.
-        const hkBpNode* node __attribute__((aligned(16))) = &m_nodes.begin()[i];
+        const hkBpNode* node = &m_nodes.begin()[i];
         if (((u32)node->m_handle & 1) == 0) {
             getAabbFromNode(node, aabbs.begin()[out++]);
         }

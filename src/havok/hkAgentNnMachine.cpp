@@ -43,9 +43,7 @@ static const hkReal HK_INVALID_TIM_TIME = -1.0f;
 void hkAgentNnMachine_GetAgentType(hkLinkedCollidable* collA, hkLinkedCollidable* collB,
                                    const hkProcessCollisionInput& inputIn, int* agentTypeOut, int* isFlippedOut) {
     const hkCollisionInput& input = (const hkCollisionInput&)inputIn;
-    // MATCH-ONLY: the aligned local turns copy propagation off for the function (the target reloads
-    // input.m_dispatcher and keeps its loads in source order).
-    hkCollisionDispatcher* dis __attribute__((aligned(16))) = input.m_dispatcher;
+    hkCollisionDispatcher* dis = input.m_dispatcher;
     int typeA = collA->getShape()->getType();
     int typeB = collB->getShape()->getType();
     int agentType;
