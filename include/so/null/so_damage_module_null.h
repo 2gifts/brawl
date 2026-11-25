@@ -1,7 +1,24 @@
 #pragma once
 
 #include <so/damage/so_damage_module_impl.h>
+#define soDamageEffectorNull soDamageEffectorNull_header_decl
 #include <so/damage/so_damage_effector_null.h>
+#undef soDamageEffectorNull
+
+class soDamageEffectorNull : public soDamageEffector {
+public:
+    virtual ~soDamageEffectorNull() { }
+    virtual void reqShake(soModuleAccesser*, int, Vec2f*, soCollisionAttackData*, int) { }
+    virtual void reqCommonEffect(float, float, float, soModuleAccesser*, soCollisionAttackData*, soCollisionLog*) { }
+    virtual void reqUniqEffect(soModuleAccesser*, int, soCollisionAttackData*) { }
+    virtual void reqInvincibleEffect(soModuleAccesser*, soCollisionLog*) { }
+    virtual void reqDamageEffectParam(float, float, soModuleAccesser*, soCollisionAttackData*) { }
+    virtual void reqEffectScreen(float, float, soModuleAccesser*, soCollisionAttackData*) { }
+    virtual void reqDamageGroundBeatDownEffect(soModuleAccesser*, Vec2f*) { }
+    virtual void reqQuake(float, soModuleAccesser*, int) { }
+    virtual void reqStop() { }
+    virtual void reqTipEffect(soModuleAccesser*, soCollisionLog*) { }
+};
 
 inline soDamageModule::~soDamageModule() { }
 

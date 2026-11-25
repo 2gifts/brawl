@@ -19,4 +19,16 @@ public:
     virtual void unk44();
     virtual void unk48();
     virtual void unk4C();
+    virtual void activate();
+    virtual void setStatus(u8);
+    virtual void setLayer(int);
+    virtual void setFix(bool);
+    virtual void setIgnoreSpeedX(u8);
+    virtual void sleep(bool);
+    virtual void update();
+    virtual void setRefer(int);
+    virtual void setPushSpeedX(float);
+    virtual void setPriority(int);
+    virtual void setJostleData(void*);
+    virtual void setForceGap(float);
 };

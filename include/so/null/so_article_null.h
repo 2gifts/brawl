@@ -80,6 +80,8 @@ extern soResourceIdAccesserNull g_soResourceIdAccesserNull;
 
 extern soResourceModuleNull g_soResourceModuleNull;
 
+inline soTurnModule::~soTurnModule() { }
+
 class soTurnModuleNull : public soTurnModule {
 public:
     virtual ~soTurnModuleNull();
@@ -95,13 +97,13 @@ public:
     virtual void setOmitIntermediate(bool omit);
 };
 
-class soSwitchDecideModuleNull : public soSwitchDecideModule {
+class soSwitchDecideModuleNull : public soNullable {
 public:
     virtual int decideSwitch(int kind, soArrayContractibleTable<const acCmdArgConv>* args, soModuleAccesser* acc);
     virtual ~soSwitchDecideModuleNull();
 };
 
-class soGeneralTermDecideModuleNull : public soGeneralTermDecideModule {
+class soGeneralTermDecideModuleNull : public soNullable {
 public:
     virtual bool checkEstablish(soGeneralTerm* term, soModuleAccesser* moduleAccesser, u32* returnWord,
                                 soGeneralTermCache* cache);
@@ -136,7 +138,7 @@ public:
     virtual bool isEnableTransitionTermGroup(int groupID);
     virtual void enableTransitionTermAll(int);
     virtual void clearTransitionTermAll(int);
-    virtual soTransitionInfo getLastStatusTransitionInfo();
+    virtual soTransitionInfo* getLastStatusTransitionInfo();
     virtual void addRangeUniqProc(soStatusUniqProcess** uniqProcs, u32 numUniqProcs);
     virtual char* getStatusName();
     virtual char* getStatusName(int);

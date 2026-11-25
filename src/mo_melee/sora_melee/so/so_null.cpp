@@ -6,6 +6,7 @@
 #define IT_RESOURCE_ACCESSER_DTOR_INLINE
 #define SO_KINETIC_ENERGY_INLINE_CTOR
 #define SO_KINETIC_ENERGY_INLINE_VIRTUALS
+#include <so/null/so_camera_module_null.h>
 #include <so/team/so_team_module.h>
 #include <so/article/so_article_mediator.h>
 #include <so/null/so_glow_module_null.h>
@@ -33,6 +34,7 @@
 #include <so/null/so_work_manage_module_null.h>
 #include <so/so_value_accesser.h>
 #include <so/null/so_effect_module_null.h>
+#include <so/null/so_generate_article_manage_module_null.h>
 #include <so/article/so_generate_article_manage_module.h>
 #include <so/null/so_motion_module_null.h>
 #include <so/null/so_visibility_module_null.h>
@@ -58,16 +60,54 @@
 #include <so/null/so_event_system_null.h>
 #include <so/null/so_link_module_null.h>
 #include <so/null/so_article_null.h>
+#include <so/null/so_motion_anim_obj_cache_module_null.h>
+#include <so/param/so_param_customize_module_impl.h>
+#include <so/so_heap_module.h>
+#include <so/null/so_abnormal_module_null.h>
+#include <so/null/so_team_module_null.h>
+#include <so/article/so_article_mediator_null.h>
+#include <so/null/so_kinetic_mediator_null.h>
 
 int soSoundIdExchangerNull::getLandingId(int landingId, soModuleAccesser* moduleAccesser) { return landingId; }
 int soSoundIdExchangerNull::getStepId(int stepId, soModuleAccesser* moduleAccesser) { return stepId; }
 SndID soSoundIdExchangerNull::getId(SndID sndID, soModuleAccesser* moduleAccesser) { return sndID; }
 soSoundIdExchangerNull::~soSoundIdExchangerNull() { }
 
+bool soMotionAnimObjCacheModuleNull::isContainAnimChr(int) { return false; }
+bool soMotionAnimObjCacheModuleNull::setCacheAnimChr(int, void*, int) { return false; }
+void* soMotionAnimObjCacheModuleNull::getCacheAnimChr(int) { return NULL; }
+
+void soGlowModuleNull::dbgReport() { }
+void soGlowModuleNull::setRefLinkNo(s32) { }
+float soGlowModuleNull::getPower(float power, soCollisionAttackData*, soGlowModule*) { return power; }
+float soGlowModuleNull::getPower(float power, soCollisionAttackData*, int) { return power; }
+void soGlowModuleNull::setGlowDefenseAttr(int) { }
+void soGlowModuleNull::setWeaponGlowAttack(int) { }
+int soGlowModuleNull::getGlowAttackAdd(soCollisionAttackData*) { return 0; }
+void soGlowModuleNull::addGlowAttackStatus(int) { }
+void soGlowModuleNull::setGlowAttackStatus(int) { }
+void soGlowModuleNull::clearGlowAttackStatus() { }
+void soGlowModuleNull::setGlowAttackRegion(int) { }
+void soGlowModuleNull::setGlowAttackAttr(int) { }
+int soGlowModuleNull::getGlowAttackMax() { return 999; }
+void soGlowModuleNull::setGlowAttackMax(int) { }
+float soGlowModuleNull::getGlowPowerMax() { return 0.0f; }
+float soGlowModuleNull::getGlowPowerMin() { return 0.0f; }
+float soGlowModuleNull::getGlowPowerEff() { return 0.0f; }
+void soGlowModuleNull::setGlowPower(float, float, float) { }
+void soGlowModuleNull::setGlowDefense(s32) { }
+s32 soGlowModuleNull::getGlowDefense() { return 0; }
+s32 soGlowModuleNull::getGlowDefense(int) { return 0; }
 bool soGlowModuleNull::isGlow() { return false; }
 void soGlowModuleNull::setGlowAttack(s32 attack) { }
 s32 soGlowModuleNull::getGlowAttack() { return 0; }
+s32 soGlowModuleNull::getGlowAttack(soCollisionAttackData*) { return 0; }
+void soGlowModuleNull::setup() { }
+void soGlowModuleNull::activate() { }
 soGlowModuleNull::~soGlowModuleNull() { }
+
+static soParamCustomizeModuleNull s_soParamCustomizeModuleNull;
+static soHeapModuleNull s_soHeapModuleNull;
 
 void soReflectModuleNull::setNoSpeedMul(bool) {  }
 bool soReflectModuleNull::isCountMax() { return false; }
@@ -82,6 +122,9 @@ void soReflectModuleNull::resetInfo() {  }
 void soReflectModuleNull::initInfo() {  }
 void soReflectModuleNull::deactivate() {  }
 void soReflectModuleNull::activate() {  }
+soReflectModuleNull::~soReflectModuleNull() { }
+
+static soStatusUniqProcessNull s_soStatusUniqProcessNull;
 
 int soSlowModuleNull::getWholeFrame() { return (int)0; }
 void soSlowModuleNull::setWholeFrame(int wholeFrame) {  }
@@ -99,13 +142,44 @@ void soSlowModuleNull::resetSkip() {  }
 void soSlowModuleNull::update(bool) {  }
 void soSlowModuleNull::deactivate() {  }
 void soSlowModuleNull::activate() {  }
+soSlowModuleNull::~soSlowModuleNull() { }
 
+soAbnormalModule::~soAbnormalModule() { }
+void soAbnormalModuleNull::clearAll() { }
+void soAbnormalModuleNull::clear(int) { }
+void soAbnormalModuleNull::set(int) { }
+bool soAbnormalModuleNull::isStatus(int) { return false; }
+float soAbnormalModuleNull::getDamageReactionMul() { return 1.0f; }
+float soAbnormalModuleNull::getAttackPowerMul() { return 1.0f; }
+void soAbnormalModuleNull::update() { }
+void soAbnormalModuleNull::activate() { }
+soAbnormalModuleNull::~soAbnormalModuleNull() { }
+
+void soJostleModuleNull::setForceGap(float) { }
+void soJostleModuleNull::setJostleData(void*) { }
+void soJostleModuleNull::setPriority(int) { }
+void soJostleModuleNull::setPushSpeedX(float) { }
+void soJostleModuleNull::setRefer(int) { }
+void soJostleModuleNull::update() { }
+void soJostleModuleNull::sleep(bool) { }
+void soJostleModuleNull::setIgnoreSpeedX(u8) { }
+void soJostleModuleNull::setFix(bool) { }
+void soJostleModuleNull::setLayer(int) { }
+void soJostleModuleNull::setStatus(u8) { }
+void soJostleModuleNull::activate() { }
 float soJostleModuleNull::getPosZ() { return 0.0f; }
 float soJostleModuleNull::getSpeedX() { return 0.0f; }
 soJostleModuleNull::~soJostleModuleNull() {  }
 
 soJostleModule::~soJostleModule() { }
 
+soTransitionInfo* soTransitionModuleNull::getLastTransitionInfo() {
+    soTransitionInfo info;
+    info.m_groupId = -1;
+    info.m_unitId = -1;
+    info._unk08 = 0;
+    return &info;
+}
 soTransitionModuleNull::~soTransitionModuleNull() {  }
 int soTransitionModuleNull::notifyEventAnimCmd(int commandType, soArrayContractibleTable<acCmdArgConv> commandArgList, u8* option, soModuleAccesser* accesser) { return 1; }
 void soTransitionModuleNull::clearTransitionTermAll(int groupID) {  }
@@ -121,6 +195,13 @@ void soTransitionModuleNull::unableTerm(int unitID, int groupID) {  }
 void soTransitionModuleNull::enableTerm(int unitID, int groupID) {  }
 int soTransitionModuleNull::checkEstablish(soModuleAccesser* accesser, u32* targetKindOut, int groupID, u16* attrMask, soGeneralTermCache* generalTermCache) { return (int)0; }
 
+void soColorBlendModuleNull::setPri() { }
+void soColorBlendModuleNull::setLightDir() { }
+void soColorBlendModuleNull::setLightColorFrame() { }
+void soColorBlendModuleNull::setLightColor() { }
+void soColorBlendModuleNull::setLight() { }
+void soColorBlendModuleNull::setFlashColorFrame() { }
+void soColorBlendModuleNull::setFlash() { }
 s8 soColorBlendModuleNull::getLightSet() { return 0; }
 soColorBlend * soColorBlendModuleNull::getColorBlend() { return nullptr; }
 GXColor soColorBlendModuleNull::getSubColor() { GXColor color = { 0, 0, 0, 0 }; return color; }
@@ -210,10 +291,47 @@ soItemManageModuleNull::~soItemManageModuleNull() {  }
 
 soItemManageModule::~soItemManageModule() { }
 
+int soKineticMediatorNull::getMediateNum() { return 0; }
+void soKineticMediatorNull::notifyEventChangeStatus(void*, void*, void*, void*) { }
+void soKineticMediatorNull::addSpeedOutside(int, void*, soModuleAccesser*) { }
+void soKineticMediatorNull::addSpeed(void*, soModuleAccesser*) { }
+void soKineticMediatorNull::postUpdateEnergy() { }
+void soKineticMediatorNull::updateEnergy(soArray<soKineticEnergy**>*, soModuleAccesser*) { }
+void soKineticMediatorNull::updateEnergy(soModuleAccesser*, u32) { }
+void soKineticMediatorNull::updateEnergy(soModuleAccesser*) { }
+void soKineticMediatorNull::changeKinetic(int, soModuleAccesser*) { }
+
 soTeamModule::~soTeamModule() { }
+static soTeamNull s_soTeamNull;
+void soTeamModuleNull::setEnableOwnerEvent(bool) { }
+void soTeamModuleNull::reset() { }
+void soTeamModuleNull::deactivate() { }
+void soTeamModuleNull::activate() { }
+void soTeamModuleNull::setHit2nd(s32) { }
+void soTeamModuleNull::set2nd(s32) { }
+s32 soTeamModuleNull::getTeamOwnerId() { return -1; }
+void soTeamModuleNull::setTeamOwnerId(s32) { }
+void soTeamModuleNull::setHitTeam(s32) { }
+soTeam* soTeamModuleNull::getIndirectTeam() { return &s_soTeamNull; }
+soTeam* soTeamModuleNull::getHitTeam() { return &s_soTeamNull; }
+void soTeamModuleNull::setTeam(s32, bool) { }
+soTeam* soTeamModuleNull::getTeam() { return &s_soTeamNull; }
+soTeamModuleNull::~soTeamModuleNull() { }
+
+void soTeamNull::reset() { }
+void soTeamNull::set2nd(int) { }
+int soTeamNull::get2nd() const { return -1; }
+void soTeamNull::setIndirectNo(int) { }
+int soTeamNull::getIndirectNo() const { return -1; }
+void soTeamNull::setNo(int) { }
+int soTeamNull::getNo() const { return -1; }
+soTeamNull::~soTeamNull() { }
 
 soArticleMediator::~soArticleMediator() { }
+static soArticleMediatorNull s_soArticleMediatorNull;
 
+static s8 s_loupeNo = -1;
+s8 soModelModuleNull::getLoupeNo() { return s_loupeNo; }
 soModelModuleNull::~soModelModuleNull() {  }
 void soModelModuleNull::setDisposeInstanceImm(bool) {  }
 void soModelModuleNull::setShadowNode(int) {  }
@@ -310,6 +428,7 @@ void soShadowModuleNull::setActive(bool) {  }
 void soShadowModuleNull::deactivate() {  }
 void soShadowModuleNull::activate() {  }
 soShadowModuleNull::~soShadowModuleNull() {  }
+static soShadowModuleNull s_soShadowModuleNull;
 
 void soSlopeModuleNull::setInvalidStatus(u32 statusMask) {  }
 void soSlopeModuleNull::setPartNode(int) {  }
@@ -322,6 +441,7 @@ void soSlopeModuleNull::activate() {  }
 
 
 soSlopeModule::~soSlopeModule() { }
+soSlopeModuleNull::~soSlopeModuleNull() { }
 
 void soPhysicsModuleNull::setToeAngleLimit(int ikId, float limit) { }
 const char* soPhysicsModuleNull::getIKEndNodeName(int ikId, int index) { return NULL; }
@@ -374,6 +494,7 @@ void soPhysicsModuleNull::setUpVisibility() { }
 void soPhysicsModuleNull::setUpMtx2nd() { }
 void soPhysicsModuleNull::setUpMtx2ndPreCollision() { }
 bool soPhysicsModuleNull::isNcessarySetUpMtx2ndBoth() { return false; }
+bool soPhysicsModuleNull::correct2ndBoth() { return false; }
 void soPhysicsModuleNull::setUpMtx2ndBoth() { }
 void soPhysicsModuleNull::setUpMtxIK() { }
 void soPhysicsModuleNull::begin() { }
@@ -381,6 +502,7 @@ void soPhysicsModuleNull::activate() { }
 void soPhysicsModuleNull::deactivate() { }
 void soPhysicsModuleNull::destructController() { }
 void soPhysicsModuleNull::constructController() { }
+soPhysicsModuleNull::~soPhysicsModuleNull() { }
 
 void soTargetSearchModuleNull::rayCheckCacheSet() { }
 bool soTargetSearchModuleNull::rayCheckCacheCheck() { return false; }
@@ -455,6 +577,7 @@ void soAreaEnviromentElementCheckerNull::clear() { }
 void soAreaEnviromentElementCheckerNull::clearWaterInfo() { }
 void soAreaEnviromentElementCheckerNull::check(soModuleAccesser*) { }
 soAreaEnviromentElementCheckerNull::~soAreaEnviromentElementCheckerNull() { }
+static soAreaEnviromentElementCheckerNull s_soAreaEnviromentElementCheckerNull;
 
 int soComboModuleNull::getCount() { return 0; }
 void soComboModuleNull::clearSetting() { }
@@ -462,6 +585,7 @@ void soComboModuleNull::update() { }
 void soComboModuleNull::set(int kind) { }
 void soComboModuleNull::activate() { }
 soComboModuleNull::~soComboModuleNull() { }
+static soComboModuleNull s_soComboModuleNull;
 
 bool soDebugModule::isSubFlag() { return false; }
 bool soDebugModule::isDebugTarget() { return false; }
@@ -545,6 +669,7 @@ void soEffectModuleNull::setScale(int, Vec3f* scale) { }
 void soEffectModuleNull::setRot(int, Vec3f* rot) { }
 void soEffectModuleNull::setPos(int, Vec3f* pos) { }
 void soEffectModuleNull::removeAllAfterImage(u32, int) { }
+void soEffectModuleNull::removeAfterImage(int, int) { }
 int soEffectModuleNull::reqAfterImage(int nodeID1, int nodeID2, int, short, Vec3f*, Vec3f*, u32, EfID effectId, int, Vec3f* pos, Vec3f*, float scale, u8, u8, float) { return 0; }
 void soEffectModuleNull::killAll(u32, bool, bool) { }
 void soEffectModuleNull::killKind(int effectKind, bool, bool) { }
@@ -570,7 +695,36 @@ void soEffectModuleNull::begin() { }
 void soEffectModuleNull::activate() { }
 void soEffectModuleNull::deactivate() { }
 soEffectModuleNull::~soEffectModuleNull() { }
+static soEffectModule s_soEffectModule;
 
+void soGenerateArticleManageModuleNull::setDynamicArticleMediator(soArticleMediator*) { }
+void soGenerateArticleManageModuleNull::getArticleList(soArray<soArticle*>*, int, int) { }
+soArticle* soGenerateArticleManageModuleNull::getArticleFromNo(int, int) { return NULL; }
+soArticle* soGenerateArticleManageModuleNull::getArticle(int) { return NULL; }
+void soGenerateArticleManageModuleNull::setAutoRecycle(bool) { }
+int soGenerateArticleManageModuleNull::getGenerateRestNum(int) { return 0; }
+int soGenerateArticleManageModuleNull::getGenerateMaxNum(int) { return 0; }
+int soGenerateArticleManageModuleNull::getActiveNum(int) { return 0; }
+bool soGenerateArticleManageModuleNull::isGeneratable(int) { return false; }
+int soGenerateArticleManageModuleNull::getNum(int) { return 0; }
+bool soGenerateArticleManageModuleNull::isExist(int) { return false; }
+void soGenerateArticleManageModuleNull::removeExistTaskId(int) { }
+void soGenerateArticleManageModuleNull::removeExist(int, int) { }
+void soGenerateArticleManageModuleNull::remove(int, int) { }
+void soGenerateArticleManageModuleNull::eject(int) { }
+void soGenerateArticleManageModuleNull::entry(soArticle*) { }
+void soGenerateArticleManageModuleNull::setSituationKind(int, SituationKind) { }
+void soGenerateArticleManageModuleNull::set2nd(int, u8, int) { }
+void soGenerateArticleManageModuleNull::setVisibilityWhole(int, u8, int) { }
+void soGenerateArticleManageModuleNull::changeStatus(int, int, int) { }
+void soGenerateArticleManageModuleNull::setRate(int, float) { }
+void soGenerateArticleManageModuleNull::setFrame(int, float) { }
+void soGenerateArticleManageModuleNull::changeMotion(int, int, bool) { }
+void soGenerateArticleManageModuleNull::shoot(int, int, bool) { }
+void soGenerateArticleManageModuleNull::have(int, int, int, int) { }
+soArticle* soGenerateArticleManageModuleNull::generate(int, void*, bool) { return reinterpret_cast<soArticle*>(g_ftRobotNullArticleStorage); }
+void soGenerateArticleManageModuleNull::deactivate(bool) { }
+void soGenerateArticleManageModuleNull::activate() { }
 soGenerateArticleManageModuleNull::~soGenerateArticleManageModuleNull() { }
 soGenerateArticleManageModule::~soGenerateArticleManageModule() { }
 
@@ -587,7 +741,15 @@ void soMotionModuleNull::setResourceId(int, int) { }
 void soMotionModuleNull::setAnmObjChrBlend(void*) { }
 void* soMotionModuleNull::detachAnmObjChrBlend() { return NULL; }
 void soMotionModuleNull::setCheckTexBind() { }
+bool soMotionModuleNull::setAnimObjCacheModule(void*) { return false; }
 void soMotionModuleNull::cacheAnimChrForce(int kind) { }
+void* soMotionModuleNull::getLastMotionTransitionInfo() {
+    soTransitionInfo info;
+    info.m_groupId = -1;
+    info.m_unitId = -1;
+    info._unk08 = 0;
+    return &info;
+}
 void soMotionModuleNull::setOnlyChr(bool) { }
 void soMotionModuleNull::setShareCancelNode(int, int) { }
 void soMotionModuleNull::addTransitionTerm(void*, int numTerms, int) { }
@@ -690,6 +852,7 @@ void soMotionModuleNull::updateFrame(float) { }
 void soMotionModuleNull::setData(void*) { }
 void soMotionModuleNull::deactivate() { }
 void soMotionModuleNull::activate() { }
+soMotionModuleNull::~soMotionModuleNull() { }
 
 
 // soVisibilityModuleNull
@@ -910,6 +1073,10 @@ void soCollisionCatchModuleNull::activate(float, float, float, int, bool) { }
 soCollisionCatchModuleNull::~soCollisionCatchModuleNull() { }
 
 // soCollisionShieldModuleNull
+float soCollisionShieldModuleNull::getPosX(u32) const { return 0.0f; }
+float soCollisionShieldModuleNull::getLifeMul(u32) const { return 0.0f; }
+float soCollisionShieldModuleNull::getSpeedMul(u32) const { return 1.0f; }
+float soCollisionShieldModuleNull::getAttackMul(u32) const { return 1.0f; }
 void soCollisionShieldModuleNull::setTargetProperty(u32, u32) { }
 u32 soCollisionShieldModuleNull::getGroupNum() { return 0; }
 float soCollisionShieldModuleNull::getLr(u32) const { return 1.0f; }
@@ -1326,6 +1493,7 @@ bool soCameraModuleNull::isLocked() { return true; }
 soCameraClipSphere* soCameraModuleNull::getClipSphere(u32) { return NULL; }
 bool soCameraModuleNull::isClipInAll(bool) { return true; }
 bool soCameraModuleNull::isClipIn(bool) { return true; }
+u8 soCameraModuleNull::getClipOutStatus(bool) { return 0xff; }
 void soCameraModuleNull::setDemoDistScaleMul(float, u32) { }
 u8 soCameraModuleNull::getAdvPri(u32) { return 0; }
 void soCameraModuleNull::setAdvPri(u8, int) { }
@@ -1577,6 +1745,7 @@ void soLinkModuleNull::unlinkAll() { }
 bool soLinkModuleNull::link(u32, int) { return false; }
 void soLinkModuleNull::deactivate() { }
 void soLinkModuleNull::activate() { }
+s8 soLinkModuleNull::getParentModelLoupeNo(u32) { return s_loupeNo; }
 soLinkModuleNull::~soLinkModuleNull() { }
 
 
@@ -1610,6 +1779,9 @@ s16 soArticleNull::getArticleEventManageId() { return -1; }
 int soArticleNull::getArticleId() { return -1; }
 void soArticleNull::changeMotion(int, bool) { }
 void soArticleNull::remove() { }
+static soArticleNull s_soArticleNull;
+soResourceIdAccesserNull g_soResourceIdAccesserNull;
+soResourceModuleNull g_soResourceModuleNull(true);
 
 soControllerNull::~soControllerNull() { }
 void soControllerNull::resetFlickBonusLr() { }
@@ -1668,6 +1840,7 @@ void soTurnModuleNull::update(bool) { }
 void soTurnModuleNull::end() { }
 void soTurnModuleNull::set(const soTurnData*, bool, bool, float) { }
 void soTurnModuleNull::activate() { }
+soTurnModuleNull::~soTurnModuleNull() { }
 
 static soKineticEnergyNull s_kineticEnergyNull;
 
@@ -1698,8 +1871,10 @@ void soKineticModuleNull::activate() { }
 int soKineticModule::getKineticType() { return -1; }
 
 int soSwitchDecideModuleNull::decideSwitch(int, soArrayContractibleTable<const acCmdArgConv>*, soModuleAccesser*) { return 0; }
+soSwitchDecideModuleNull::~soSwitchDecideModuleNull() { }
 
 bool soGeneralTermDecideModuleNull::checkEstablish(soGeneralTerm*, soModuleAccesser*, u32*, soGeneralTermCache*) { return true; }
+soGeneralTermDecideModuleNull::~soGeneralTermDecideModuleNull() { }
 
 void soStatusModuleNull::changeStatus(int, soModuleAccesser*) { }
 soStatusModuleNull::~soStatusModuleNull() { }
@@ -1712,6 +1887,13 @@ char* soStatusModuleNull::getStatusName(int) { return "None"; }
 char* soStatusModuleNull::getStatusName() { return "None"; }
 void soStatusModuleNull::addRangeUniqProc(soStatusUniqProcess**, u32) { }
 void soStatusModuleNull::clearTransitionTermAll(int) { }
+soTransitionInfo* soStatusModuleNull::getLastStatusTransitionInfo() {
+    soTransitionInfo info;
+    info.m_groupId = -1;
+    info.m_unitId = -1;
+    info._unk08 = 0;
+    return &info;
+}
 void soStatusModuleNull::enableTransitionTermAll(int) { }
 bool soStatusModuleNull::isEnableTransitionTermGroup(int) { return false; }
 void soStatusModuleNull::unableTransitionTermGroup(int) { }

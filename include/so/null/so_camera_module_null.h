@@ -1,6 +1,8 @@
 #pragma once
 
+#define getClipOutStatus getClipOutStatus_base
 #include <so/camera/so_camera_module_simple.h>
+#undef getClipOutStatus
 
 class soCameraModuleNull : public soCameraModule {
 public:
@@ -49,7 +51,8 @@ public:
     virtual bool isLocked();
     virtual bool isClipIn(bool);
     virtual bool isClipInAll(bool);
-    virtual s8 getClipOutStatus(bool);
+    virtual s8 getClipOutStatus_base(bool) { return 0; }
+    virtual u8 getClipOutStatus(bool);
     virtual soCameraClipSphere* getClipSphere(u32 index);
     virtual void getSubjectRange(Rect2D* outRange, u32 index);
     virtual Vec3f getSubjectPos(u32 index);

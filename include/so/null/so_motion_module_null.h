@@ -2,7 +2,9 @@
 
 #include <so/motion/so_motion_module_impl.h>
 
-class soMotionModuleNull : public soMotionModule {
+inline soMotionModule::~soMotionModule() { }
+
+class soMotionModuleNull : public soNull, public soNullable {
 public:
     virtual ~soMotionModuleNull();
     virtual void activate();
@@ -109,7 +111,7 @@ public:
     virtual void setOnlyChr(bool);
     virtual void* getLastMotionTransitionInfo();
     virtual void cacheAnimChrForce(int kind);
-    virtual void setAnimObjCacheModule(void*);
+    virtual bool setAnimObjCacheModule(void*);
     virtual void setCheckTexBind();
     virtual void* detachAnmObjChrBlend();
     virtual void setAnmObjChrBlend(void*);

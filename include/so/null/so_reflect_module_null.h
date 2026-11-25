@@ -2,6 +2,8 @@
 
 #include <so/reflect/so_reflect_module.h>
 
+inline soReflectModule::~soReflectModule() { }
+
 class soReflectModuleNull : public soReflectModule {
 public:
     virtual ~soReflectModuleNull();

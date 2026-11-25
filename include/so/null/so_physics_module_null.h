@@ -2,7 +2,9 @@
 
 #include <so/physics/so_physics_module_impl.h>
 
-class soPhysicsModuleNull : public soPhysicsModule {
+inline soPhysicsModule::~soPhysicsModule() { }
+
+class soPhysicsModuleNull : public soNull, public soNullable {
 public:
     virtual ~soPhysicsModuleNull();
     virtual void constructController();
@@ -13,7 +15,7 @@ public:
     virtual void setUpMtxIK();
     virtual void setUpMtx2ndBoth();
     virtual bool isNcessarySetUpMtx2ndBoth();
-    virtual void correct2ndBoth();
+    virtual bool correct2ndBoth();
     virtual void setUpMtx2ndPreCollision();
     virtual void setUpMtx2nd();
     virtual void setUpVisibility();

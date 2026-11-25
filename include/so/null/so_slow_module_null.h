@@ -2,6 +2,8 @@
 
 #include <so/slow/so_slow_module_simple.h>
 
+inline soSlowModule::~soSlowModule() { }
+
 class soSlowModuleNull : public soSlowModule {
 public:
     virtual ~soSlowModuleNull();

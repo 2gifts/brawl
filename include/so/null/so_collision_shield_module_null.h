@@ -4,7 +4,7 @@
 
 inline soCollisionShieldModule::~soCollisionShieldModule() { }
 
-class soCollisionShieldModuleNull : public soCollisionShieldModule {
+class soCollisionShieldModuleNull : public soNull, public soNullable {
 public:
     virtual ~soCollisionShieldModuleNull();
     virtual void activate(double, double, double);
@@ -29,9 +29,9 @@ public:
     virtual void setTurn(bool isTurn, u32 collisionShieldGroupIndex);
     virtual void setFront(bool isFront, u32 collisionShieldGroupIndex);
     virtual void setHop(float hopAngle, bool isHop, u32 collisionShieldGroupIndex);
-    virtual double getAttackMul(u32 collisionShieldGroupIndex) const;
-    virtual double getSpeedMul(u32 collisionShieldGroupIndex) const;
-    virtual double getLifeMul(u32 collisionShieldGroupIndex) const;
+    virtual float getAttackMul(u32 collisionShieldGroupIndex) const;
+    virtual float getSpeedMul(u32 collisionShieldGroupIndex) const;
+    virtual float getLifeMul(u32 collisionShieldGroupIndex) const;
     virtual float getAttackLimit(u32 collisionShieldGroupIndex) const;
     virtual u8 isNoMBall(u32 collisionShieldGroupIndex) const;
     virtual int getPartSize(u32 collisionShieldGroupIndex) const;
@@ -44,6 +44,6 @@ public:
     virtual Vec3f getCenterPos(u32, u32 collisionShieldGroupIndex);
     virtual float getLr(u32 collisionShieldGroupIndex) const;
     virtual u32 getGroupNum();
-    virtual double getPosX(u32 collisionShieldGroupIndex) const;
+    virtual float getPosX(u32 collisionShieldGroupIndex) const;
     virtual void setTargetProperty(u32, u32 collisionShieldGroupIndex);
 };

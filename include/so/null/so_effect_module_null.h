@@ -2,7 +2,7 @@
 
 #include <so/effect/so_effect_module_impl.h>
 
-class soEffectModuleNull : public soEffectModule {
+class soEffectModuleNull : public soNull, public soNullable {
 public:
     virtual ~soEffectModuleNull();
     virtual void activate();
@@ -29,7 +29,7 @@ public:
     virtual void killKind(int effectKind, bool, bool);
     virtual void killAll(u32, bool, bool);
     virtual int reqAfterImage(int nodeID1, int nodeID2, int, short, Vec3f*, Vec3f*, u32, EfID effectId, int, Vec3f* pos, Vec3f*, float scale, u8, u8, float);
-    virtual bool removeAfterImage(int, int);
+    virtual void removeAfterImage(int, int);
     virtual void removeAllAfterImage(u32, int);
     virtual void setPos(int, Vec3f* pos);
     virtual void setRot(int, Vec3f* rot);
