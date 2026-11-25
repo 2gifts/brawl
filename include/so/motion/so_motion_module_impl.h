@@ -261,6 +261,8 @@ public:
 #ifdef SO_MOTION_MODULE_IMPL_UNIT
     // HYPOTHESIS: observed register arguments; the command attribute is passed by reference.
     void syncAnimCmdInterpreterMain(int kind, int group, const soAttributeFlag& attr, bool, float frame);
+    void bindResFile(nw4r::g3d::ResFile* resFile);
+    void removeAnimChr(bool resetFlag);
 #endif
     // TODO: verify params
     virtual ~soMotionModuleImpl();
