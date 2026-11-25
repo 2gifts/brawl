@@ -1,3 +1,4 @@
+#define CS_FIGURE_RESMDL_GETRESMAT_INT
 #include <gf/gf_3d_scene.h>
 #include <gf/gf_model.h>
 #include <havok/hkWorld.h>
@@ -10,6 +11,8 @@
 #include <types.h>
 
 extern "C" void fn_8003F074(Matrix* mtx, float x, float y, float z);
+extern "C" void fn_801B0A28();
+nw4r::g3d::ScnMdl* ScnMdl_Construct(MEMAllocator* allocator, u32* size, nw4r::g3d::ResMdl mdl, u32 bufferOption, int nView, void (*callback)());
 extern IfCoinShooter* lbl_805A0310;
 void ScnMdl_SetNodeMtx(nw4r::g3d::ScnMdl* scnMdl, u32 node, const Matrix* mtx);
 
@@ -25,6 +28,23 @@ struct csPhysicsWorld {
 
 class csElement;
 
+namespace utility {
+template <class T>
+class SafePtr {
+public:
+    T* m_ptr;
+
+    ~SafePtr() {
+        if (m_ptr != NULL) {
+            m_ptr->destroy();
+        }
+        m_ptr = NULL;
+    }
+};
+}
+
+template utility::SafePtr<IfFigureLoader::Entry>::~SafePtr();
+
 struct csCoinshooterView {
     u8 m_unk0[0x46];
     u8 m_unk46;                                  // 0x46
@@ -33,7 +53,9 @@ struct csCoinshooterView {
     u8 m_unk65[0x120 - 0x65];
     u32 m_unk120;                                // 0x120
     u32 m_unk124;                                // 0x124
-    u8 m_unk128[0x374 - 0x128];
+    u8 m_unk128[0x34C - 0x128];
+    utility::SafePtr<IfFigureLoader::Entry> m_figEntries[3]; // 0x34C
+    u8 m_unk358[0x374 - 0x358];
     IfCoinShooterLabel m_unk374;                 // 0x374
     u32 m_unk378;                                // 0x378
     u32 m_unk37C;                                // 0x37C
@@ -98,23 +120,6 @@ public:
     virtual ~csArticle();
 };
 
-namespace utility {
-template <class T>
-class SafePtr {
-public:
-    T* m_ptr;
-
-    ~SafePtr() {
-        if (m_ptr != NULL) {
-            m_ptr->destroy();
-        }
-        m_ptr = NULL;
-    }
-};
-}
-
-template utility::SafePtr<IfFigureLoader::Entry>::~SafePtr();
-
 class csPathArticle {
 public:
     static void checkBonusFire(const Vec3f* pos, bool hit);
@@ -122,14 +127,15 @@ public:
 
 class csFigure : public csArticle {
 public:
-    u32 m_unk24;                     // 0x24
-    nw4r::g3d::G3dObj* m_unk28;      // 0x28
-    nw4r::g3d::G3dObj* m_unk2C;      // 0x2C
-    nw4r::g3d::G3dObj* m_unk30;      // 0x30
+    u32 m_unk24;                      // 0x24
+    nw4r::g3d::ScnMdl* m_unk28;       // 0x28
+    nw4r::g3d::ScnMdl* m_unk2C;       // 0x2C
+    nw4r::g3d::ScnMdlExpand* m_unk30; // 0x30
     u8 m_unk34[0x44 - 0x34];
-    u32 m_unk44;                     // 0x44
-    u8 m_unk48[0x6C - 0x48];
-    u32 m_unk6C;                     // 0x6C
+    u32 m_unk44;                      // 0x44
+    u8 m_unk48[0x68 - 0x48];
+    u32 m_unk68;                      // 0x68
+    u32 m_unk6C;                      // 0x6C
 
     csFigure();
     virtual ~csFigure();
@@ -137,6 +143,7 @@ public:
     virtual void afterOperation();
     virtual void debugDraw() { }
     virtual void applyDestroy();
+    void setFigureModel();
 };
 
 class csEnemy : public csArticle {
@@ -216,6 +223,32 @@ void csFigure::applyDestroy() {
     }
 }
 
+void csFigure::setFigureModel() {
+    nw4r::g3d::ResFile resFile = lbl_20_bss_8->m_figEntries[m_unk68].m_ptr->m_resFile;
+    nw4r::g3d::ResFile::Init(&resFile);
+    resFile.Bind();
+    gfSceneRoot* sceneRoot = g_gfSceneRoot;
+    nw4r::g3d::ResMdl resMdl = resFile.GetResMdl(0);
+    MEMAllocator* allocator = gfHeapManager::getMEMAllocator(Heaps::MenuInstance);
+    u32 size;
+    m_unk28 = ScnMdl_Construct(allocator, &size, resMdl, 0, 1, fn_801B0A28);
+    nw4r::g3d::ResMat resMat = resMdl.GetResMat(0);
+    resMat.Bind(resFile);
+    if (m_unk2C == NULL) {
+        resFile = lbl_805A0310->m_standRes;
+        nw4r::g3d::ResFile::Init(&resFile);
+        resFile.Bind();
+        resMdl = resFile.GetResMdl(0);
+        u32 standSize;
+        m_unk2C = ScnMdl_Construct(allocator, &standSize, resMdl, 0, 1, fn_801B0A28);
+        resMat = resMdl.GetResMat(0);
+        resMat.Bind(resFile);
+    }
+    m_unk30 = nw4r::g3d::ScnMdlExpand::Construct(allocator, NULL, 1, m_unk28);
+    m_unk30->PushBack(m_unk2C, "pos00");
+    sceneRoot->add(gfSceneRoot::Layer_Ground, reinterpret_cast<nw4r::g3d::ScnMdl*>(m_unk30));
+}
+
 void csEnemy::afterOperation() {
     lbl_20_bss_8->m_physicsWorld->m_inner->m_world->lock();
     lbl_20_bss_8->m_physicsWorld->m_inner->m_world->unlock();
@@ -227,6 +260,40 @@ void csEnemy::applyDestroy() {
         m_unk28->Destroy();
         m_unk28 = NULL;
     }
+}
+
+void csEnemy::setEnemyModel() {
+    csCoinshooterView* view = lbl_20_bss_8;
+    m_unk2C = view->m_enemyModels[m_unk50][m_unk58];
+    m_unk30 = view->m_enemyAnims[m_unk50][m_unk58];
+    m_unk30->setFrame(0.0f);
+    m_unk30->setUpdateRate(1.0f);
+    g_gfSceneRoot->add(gfSceneRoot::Layer_Ground, m_unk2C);
+    Matrix mtx(true);
+    mtx.setIdentity();
+    fn_8003F074(&mtx, m_unk34, m_unk38, m_unk3C);
+    ScnMdl_SetNodeMtx(m_unk2C, 0, &mtx);
+    m_unk2C->UpdateFrame();
+}
+
+void csPathArticle::checkBonusFire(const Vec3f* pos, bool hit) {
+    csCoinshooterView* view = lbl_20_bss_8;
+    if (hit) {
+        if (view->m_unk46 != 0) {
+            g_sndSystem->playSE((SndID)0x1EC7, -1, 0, 0, -1);
+        }
+        IfCoinShooterLabel label;
+        label.create(IfCoinShooterLabel::Type_3, 0, 0);
+        label.setPos(pos);
+    }
+    if (view->m_unk124 >= view->m_unk120) {
+        view->m_unk384 = view->m_unk46 != 0 ? g_sndSystem->playSE((SndID)0x1EC5, -1, 0, 0, -1) : 0;
+        view->m_unk64 = 1;
+        view->m_unk378 = view->m_unk37C;
+        view->m_unk374.create(IfCoinShooterLabel::Type_6, 0, 0);
+        view->m_unk124 -= view->m_unk120;
+    }
+    lbl_805A0310->m_bonusTarget = view->m_unk124;
 }
 
 void csMissile::afterOperation() {
