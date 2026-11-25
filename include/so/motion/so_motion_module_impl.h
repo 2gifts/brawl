@@ -16,6 +16,7 @@
 #include <types.h>
 #ifdef SO_MOTION_MODULE_IMPL_UNIT
 #include <so/motion/so_motion_data_accesser.h>
+#include <nw4r/g3d/g3d_anmchrblend.h>
 #include <so/templates/so_array_value_soPartialAnim.h>
 #include <so/templates/so_array_value_soOtherAnim.h>
 #endif
@@ -193,7 +194,11 @@ public:
     float m_prevWeight;
 
     // 100
+#ifdef SO_MOTION_MODULE_IMPL_UNIT
+    float m_saveWeight;
+#else
     char _100[4];
+#endif
 
     // 104
     float m_weightRate;
@@ -208,7 +213,12 @@ public:
 #ifdef SO_MOTION_MODULE_IMPL_UNIT
     soArray<soPartialAnim>* m_partialAnims;
     soArray<soOtherAnim>* m_otherAnims;
-    char unk148[92];
+    nw4r::g3d::AnmObjChrBlend* m_anmObjChrBlend;
+    Vec3f m_transNTranslate;
+    Vec3f m_transMoveSpeed;
+    Vec3f m_secondaryTransNTranslate;
+    Vec3f m_secondaryTransMoveSpeed;
+    soAnimObj m_otherAnim;
 #else
     char _spacer3[100];
 #endif
@@ -221,14 +231,23 @@ public:
 
     // 320
 #ifdef SO_MOTION_MODULE_IMPL_UNIT
-    char unk320[28];
+    char unk320[24];
+    int m_shareAnimObjKind;
     int m_shareAnimObjPartialKind;
     int m_shareAnimObjPartialSlot;
     u8 m_transMove : 1;
-    u8 unk356_1 : 4;
+    u8 unk356_1 : 1;
+    u8 unk356_2 : 1;
+    u8 unk356_3 : 1;
+    u8 unk356_4 : 1;
     u8 m_secondaryTransMove : 1;
     u8 unk356_6 : 2;
-    char unk357[3];
+    u8 unk357_0 : 2;
+    u8 unk357_2 : 2;
+    u8 unk357_4 : 2;
+    u8 unk357_6 : 1;
+    u8 unk357_7 : 1;
+    char unk358[2];
 #else
     char _spacer4[40];
 #endif
@@ -239,6 +258,10 @@ public:
     // 364
     char _spacer5[4];
 
+#ifdef SO_MOTION_MODULE_IMPL_UNIT
+    // HYPOTHESIS: observed register arguments; the command attribute is passed by reference.
+    void syncAnimCmdInterpreterMain(int kind, int group, const soAttributeFlag& attr, bool, float frame);
+#endif
     // TODO: verify params
     virtual ~soMotionModuleImpl();
     virtual void activate();
@@ -370,5 +393,18 @@ public:
     virtual void notifyEventChangeStatus(int statusKind, int prevStatusKind, soStatusData* statusData, soModuleAccesser* moduleAccesser);
     virtual void notifyEventConstructInstance(bool, soModuleAccesser* moduleAccesser);
     virtual void notifyEventDestructInstance(soModuleAccesser* moduleAccesser);
+
+    // part2/part3
+    void clearAnim();
+    void change(float, float, int, u8, u8, u8, u8);
+    nw4r::g3d::AnmObjChrRes* createNodeAnim(int, int, bool, u32*, bool);
+    void syncPartialAnimCmdInterpreterMain(int, int, bool, const soAttributeFlag&, bool, float);
+    void applyDefaultTransitionTerm();
+    void interpretCmd();
+    void interpretCmdPost();
+    void interpretCmdSub(const soAttributeFlag&, bool) __attribute__((never_inline));
+    void interpretCmdSubPartial(const soAttributeFlag&, bool) __attribute__((never_inline));
+    void interpretCmdAdjustSub(const soAttributeFlag&) __attribute__((never_inline));
+    void interpretCmdAdjustSubPartial(const soAttributeFlag&) __attribute__((never_inline));
 };
 static_assert(sizeof(soMotionModuleImpl) == 368, "Class is wrong size!");
