@@ -26,6 +26,10 @@ typedef struct PF_FAT_TYPE_INFO {
 } PF_FAT_TYPE_INFO;
 extern const PF_FAT_TYPE_INFO lbl_8041B0E0[3];
 
+s32 PFFAT_GetClusterAllocatedInChain(PF_FFD* p_ffd, u32 initial_cluster, u32 chain_index, u32 size, u32* p_num_clusters);
+s32 PFFAT12_ReadFATEntryWithBuf(PF2_VOLUME* p_vol, u16 cluster, u32* p_value, PF_CACHE_PAGE* p_page);
+s32 PFFAT16_ReadFATEntryWithBuf(PF2_VOLUME* p_vol, u32 cluster, u32* p_value, PF_CACHE_PAGE* p_page);
+s32 PFFAT32_ReadFATEntryWithBuf(PF2_VOLUME* p_vol, u32 cluster, u32* p_value, PF_CACHE_PAGE* p_page);
 s32 PFFAT12_WriteFATEntry(PF2_VOLUME* p_vol, u16 cluster, u16 value);
 s32 PFFAT16_WriteFATEntry(PF2_VOLUME* p_vol, u32 cluster, u32 value);
 s32 PFFAT_FindClusterLink(PF_FFD* p_ffd, u32 chain_index, u32* p_cluster, u32* is_found);
@@ -697,3 +701,220 @@ int PFFAT_CountAllocatedClusters(PF_FFD* p_ffd, u32 size, u32* p_num_alloc_clust
     return 0;
 }
 
+s32 PFFAT_GetClusterAllocatedInChain(PF_FFD* p_ffd, u32 initial_cluster, u32 chain_index, u32 size, u32* p_num_clusters) {
+    PF_VOLUME* p_vol = p_ffd->p_vol;
+    u32 next_cluster = -1;
+    u32 chk_clstlnk = 1;
+    u32 cluster = initial_cluster;
+    u32 bytes = 0;
+    s32 err;
+
+    while (next_cluster != 0) {
+        bytes += p_vol->bpb.bytes_per_sector * p_vol->bpb.sectors_per_cluster;
+        (*p_num_clusters)++;
+        if (bytes >= size) break;
+        err = PFFAT_ReadCluster(p_ffd, cluster, chain_index, &next_cluster, &chk_clstlnk);
+        if (err != 0) return err;
+        if (next_cluster == lbl_8041B0E0[p_vol->bpb.fat_type].end_of_chain) {
+            p_ffd->last_cluster.num_last_cluster = cluster;
+            p_ffd->last_cluster.max_chain_index = chain_index - 1;
+            break;
+        }
+        cluster = next_cluster;
+        chain_index++;
+    }
+    return 0;
+}
+
+static inline s32 pffat_read_entry_with_buf(PF2_VOLUME* p_vol, u32 cluster, u32* p_value, PF_CACHE_PAGE* p_page) {
+    switch (p_vol->bpb.fat_type) {
+    case FAT_12:
+        return PFFAT12_ReadFATEntryWithBuf(p_vol, (u16)cluster, p_value, p_page);
+    case FAT_16:
+        return PFFAT16_ReadFATEntryWithBuf(p_vol, cluster, p_value, p_page);
+    case FAT_32:
+        return PFFAT32_ReadFATEntryWithBuf(p_vol, cluster, p_value, p_page);
+    default:
+        return 15;
+    }
+}
+
+s32 PFFAT_getBeforeChain(PF2_VOLUME* p_vol, u32 cluster, u32 target_cluster, u32* p_before_cluster) {
+    u32 next_cluster;
+    PF_CACHE_PAGE* p_page;
+    u32 is_hit;
+    u32 limit = lbl_8041B0E0[p_vol->bpb.fat_type].unk4;
+    s32 err;
+
+    *p_before_cluster = -1;
+    err = PFCACHE_AllocateDataPage((PF_VOLUME*)p_vol, -1, &p_page, &is_hit);
+    if (err != 0) return err;
+    p_page->option = 0;
+    while (cluster < limit) {
+        err = pffat_read_entry_with_buf(p_vol, cluster, &next_cluster, p_page);
+        if (err != 0) {
+            PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+            return err;
+        }
+        if (target_cluster == next_cluster) {
+            *p_before_cluster = cluster;
+            return 0;
+        }
+        cluster--;
+        if (!(cluster >= 2 && cluster < p_vol->bpb.num_clusters + 2) && cluster < limit) {
+            *p_before_cluster = target_cluster;
+            return 0;
+        }
+    }
+    PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+    return 13;
+}
+
+s32 PFFAT_FindClusterLink(PF_FFD* p_ffd, u32 chain_index, u32* p_cluster, u32* is_found) {
+    u32 next_cluster = 0xFFFFFFFF;
+    u32 cluster;
+    u32 remaining;
+    u32 index;
+    s32 err;
+
+    *is_found = 0;
+    if (p_ffd->cluster_link.position == 0) return 0;
+    if (p_ffd->cluster_link.save_index >= chain_index) {
+        index = chain_index / (p_ffd->cluster_link.interval + 1);
+        remaining = chain_index % (p_ffd->cluster_link.interval + 1);
+        if (remaining == 0) {
+            *p_cluster = p_ffd->cluster_link.buffer[index];
+            *is_found = 1;
+        } else {
+            cluster = p_ffd->cluster_link.buffer[index];
+            while (remaining != 0) {
+                switch (p_ffd->p_vol->bpb.fat_type) {
+                case FAT_12:
+                    err = fn_803E2468((struct Ctx*)p_ffd->p_vol, (u16)cluster, (int*)&next_cluster);
+                    break;
+                case FAT_16:
+                    err = PFFAT16_ReadFATEntry((PF2_VOLUME*)p_ffd->p_vol, cluster, &next_cluster);
+                    break;
+                case FAT_32:
+                    err = PFFAT32_ReadFATEntry((PF2_VOLUME*)p_ffd->p_vol, cluster, &next_cluster);
+                    break;
+                default:
+                    next_cluster = -1;
+                    err = 15;
+                    break;
+                }
+                if (err != 0) return err;
+                cluster = next_cluster;
+                if (cluster == 0) return 13;
+                remaining--;
+            }
+            if (next_cluster == 0) return 13;
+            if (next_cluster == lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].end_of_chain) return 0;
+            *p_cluster = next_cluster;
+            *is_found = 1;
+        }
+    } else {
+        return 0;
+    }
+    return 0;
+}
+
+static inline s32 pffat_specify_cluster(PF_FFD* p_ffd, u32 chain_index, u32 may_allocate, u32* p_cluster) {
+    u32 locate_start;
+    u32 locate_end;
+    s32 err;
+
+    *p_cluster = 0xFFFFFFFF;
+    err = PFFAT_GetClusterInChain(p_ffd, chain_index, may_allocate ? 1 : 0, 0, &locate_start, &locate_end);
+    if (err != 0) return err;
+    if (locate_end >= 2 && locate_end < p_ffd->p_vol->bpb.num_clusters + 2) *p_cluster = locate_end;
+    return 0;
+}
+
+s32 PFFAT_GetClusterSpecified(PF_FFD* p_ffd, u32 chain_index, u32 may_allocate, u32* p_cluster) {
+    PF_FAT_HINT* p_hint;
+    PF_VOLUME* p_vol;
+    s32 err;
+    u32 found;
+    u32 fat_type;
+
+    p_vol = p_ffd->p_vol;
+    fat_type = p_vol->bpb.fat_type;
+    p_hint = p_ffd->p_hint;
+    if (*p_ffd->p_start_cluster == 0 && !may_allocate) {
+        *p_cluster = 0xFFFFFFFF;
+        return 0;
+    }
+    if (*p_ffd->p_start_cluster == 1) {
+        if (fat_type <= 1) {
+            *p_cluster = 0xFFFFFFFF;
+            return 0;
+        }
+        *p_ffd->p_start_cluster = p_vol->bpb.root_dir_cluster;
+    }
+    if (p_ffd->cluster_link.buffer != NULL && !may_allocate) {
+        err = PFFAT_FindClusterLink(p_ffd, chain_index, p_cluster, &found);
+        if (err != 0) return err;
+        if (found == 1) {
+            p_hint->file_version = p_ffd->file_version;
+            p_hint->chain_index = chain_index;
+            p_hint->cluster = *p_cluster;
+            return 0;
+        }
+    }
+    err = pffat_specify_cluster(p_ffd, chain_index, may_allocate, p_cluster);
+    if (err != 0) return err;
+    if (*p_cluster == 0xFFFFFFFF) return 0;
+    p_hint->file_version = p_ffd->file_version;
+    p_hint->chain_index = chain_index;
+    p_hint->cluster = *p_cluster;
+    return 0;
+}
+
+s32 PFFAT_FindClusterLinkWithBuf(PF_FFD* p_ffd, u32 chain_index, u32* p_cluster, u32* is_found, PF_CACHE_PAGE* p_page) {
+    u32 next_cluster = 0xFFFFFFFF;
+    u32 remaining;
+    u32 cluster;
+    u32 index;
+    s32 err;
+
+    *is_found = 0;
+    if (p_ffd->cluster_link.position == 0) return 0;
+    if (p_ffd->cluster_link.save_index >= chain_index) {
+        index = chain_index / (p_ffd->cluster_link.interval + 1);
+        remaining = chain_index % (p_ffd->cluster_link.interval + 1);
+        if (remaining == 0) {
+            *p_cluster = p_ffd->cluster_link.buffer[index];
+            *is_found = 1;
+        } else {
+            cluster = p_ffd->cluster_link.buffer[index];
+            while (remaining != 0) {
+                switch (p_ffd->p_vol->bpb.fat_type) {
+                case FAT_12:
+                    err = PFFAT12_ReadFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, (u16)cluster, &next_cluster, p_page);
+                    break;
+                case FAT_16:
+                    err = PFFAT16_ReadFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, cluster, &next_cluster, p_page);
+                    break;
+                case FAT_32:
+                    err = PFFAT32_ReadFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, cluster, &next_cluster, p_page);
+                    break;
+                default:
+                    err = 15;
+                    break;
+                }
+                if (err != 0) return err;
+                cluster = next_cluster;
+                if (cluster == 0) return 13;
+                remaining--;
+            }
+            if (next_cluster == 0) return 13;
+            if (next_cluster == lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].end_of_chain) return 0;
+            *p_cluster = next_cluster;
+            *is_found = 1;
+        }
+    } else {
+        return 0;
+    }
+    return 0;
+}
