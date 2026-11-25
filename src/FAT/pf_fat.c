@@ -5,9 +5,13 @@
 // it as in the VF copy, and the driver callback with its argument sit near the end.
 struct PF2_VOLUME {
     PF_BPB bpb;
-    u8 unk38[0x1F84 - 0x38];
+    u32 num_free_clusters;
+    u32 last_free_cluster;
+    u8 unk40[0x1F84 - 0x40];
     void* p_callback_arg;
-    u8 unk1F88[0x1FC0 - 0x1F88];
+    u8 unk1F88[0x1FAC - 0x1F88];
+    u16 fsi_flag;
+    u8 unk1FAE[0x1FC0 - 0x1FAE];
     int (*p_callback)(void*);
 };
 
@@ -25,11 +29,13 @@ extern const PF_FAT_TYPE_INFO lbl_8041B0E0[3];
 s32 PFFAT12_WriteFATEntry(PF2_VOLUME* p_vol, u16 cluster, u16 value);
 s32 PFFAT16_WriteFATEntry(PF2_VOLUME* p_vol, u32 cluster, u32 value);
 s32 PFFAT_FindClusterLink(PF_FFD* p_ffd, u32 chain_index, u32* p_cluster, u32* is_found);
+s32 PFFAT_GetClusterSpecified(PF_FFD* p_ffd, u32 chain_index, u32 may_allocate, u32* p_cluster);
+s32 PFFAT_GetSector(PF_FFD* p_ffd, u32 file_sector_index, u32 mode, u32 size, u32* p_sector);
 
 // Function bodies below are derived from https://github.com/jj-link/brawl.
 
 u32 PFFAT_GetSectorSpecified(PF_FFD* p_ffd, u32 index, u32 may_allocate, u32* p_cluster) {
-    u32 err = fn_803E12B4(p_ffd, index, may_allocate ? 1 : 0, 0, p_cluster);
+    u32 err = PFFAT_GetSector(p_ffd, index, may_allocate ? 1 : 0, 0, p_cluster);
 
     if (err != 0) {
         return err;
@@ -38,7 +44,7 @@ u32 PFFAT_GetSectorSpecified(PF_FFD* p_ffd, u32 index, u32 may_allocate, u32* p_
 }
 
 int PFFAT_GetSectorAllocated(PF_FFD* p_ffd, u32 index, u32 size, u32* p_cluster) {
-    int err = fn_803E12B4(p_ffd, index, 2, size, p_cluster);
+    int err = PFFAT_GetSector(p_ffd, index, 2, size, p_cluster);
 
     if (err != 0) {
         return err;
@@ -634,6 +640,60 @@ s32 PFFAT_MakeRootDir(PF2_VOLUME* p_vol) {
         }
     }
     PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+    return 0;
+}
+
+s32 PFFAT16_WriteFATEntry(PF2_VOLUME* p_vol, u32 cluster, u32 value) {
+    u32 offset = cluster * 2;
+    u16 sector = p_vol->bpb.active_FAT_sector + (offset >> p_vol->bpb.log2_bytes_per_sector);
+    u16 pos = offset & (p_vol->bpb.bytes_per_sector - 1);
+    u16 buf;
+    u32 i;
+    s32 first_err = 0;
+
+    buf = ((value >> 8) & 0xFF) | ((value << 8) & 0xFF00);
+    for (i = 0; i < p_vol->bpb.num_active_FATs; i++) {
+        s32 err = PFSEC_WriteFAT(p_vol, (u8*)&buf, sector, pos, 2);
+        if (err != 0 && first_err == 0) {
+            first_err = err;
+        }
+        sector += p_vol->bpb.sectors_per_FAT;
+    }
+    return first_err;
+}
+
+int PFFAT_CountAllocatedClusters(PF_FFD* p_ffd, u32 size, u32* p_num_alloc_clusters) {
+    u32 start_cluster;
+    u32 initial_cluster;
+    u32 chain_index;
+    s32 err;
+
+    *p_num_alloc_clusters = 0;
+    start_cluster = *p_ffd->p_start_cluster;
+    if (start_cluster < 2) {
+        return 0;
+    }
+    if (p_ffd->last_cluster.num_last_cluster != 0) {
+        *p_num_alloc_clusters = p_ffd->last_cluster.max_chain_index + 1;
+        return 0;
+    }
+    if (p_ffd->p_hint->cluster != 0) {
+        if (size <= (p_ffd->p_hint->chain_index + 1) * (p_ffd->p_vol->bpb.bytes_per_sector * p_ffd->p_vol->bpb.sectors_per_cluster)) {
+            *p_num_alloc_clusters = p_ffd->p_hint->chain_index + 1;
+            return 0;
+        }
+        *p_num_alloc_clusters = p_ffd->p_hint->chain_index;
+        initial_cluster = p_ffd->p_hint->cluster;
+        chain_index = p_ffd->p_hint->chain_index + 1;
+        size -= p_ffd->p_hint->chain_index * (p_ffd->p_vol->bpb.bytes_per_sector * p_ffd->p_vol->bpb.sectors_per_cluster);
+    } else {
+        initial_cluster = start_cluster;
+        chain_index = 1;
+    }
+    err = PFFAT_GetClusterAllocatedInChain(p_ffd, initial_cluster, chain_index, size, p_num_alloc_clusters);
+    if (err != 0) {
+        return err;
+    }
     return 0;
 }
 
