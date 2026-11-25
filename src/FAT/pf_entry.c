@@ -159,6 +159,8 @@ s32 PFENT_ITER_IteratorInitialize(PF2_ENT_ITER* p_iter, u32 index_start_from) {
 // HYPOTHESIS: layout of the PrFile2 volume fields this unit touches.
 struct PF2_VOLUME {
     PF_BPB bpb;
+    u8 unk38[0x1F74 - sizeof(PF_BPB)];
+    struct PF_DIR_TAIL tail_entry;
 };
 
 // HYPOTHESIS: the PrFile2 volume set; only the critical section is known here.
@@ -281,5 +283,181 @@ s32 PFENT_RecalcEntryIterator(PF2_ENT_ITER* p_iter, u32 may_allocate) {
         }
     }
     p_iter->offset = (p_iter->index & p_iter->offset_mask) << 5;
+    return 0;
+}
+
+/* FAT directory entry fields in their on-disk order; numeric fields are little-endian. */
+typedef struct PF2_DISK_DIR_ENT {
+    u8 short_name[11];
+    u8 attr;
+    u8 small_letter_flag;
+    u8 create_time_ms;
+    u16 create_time;
+    u16 create_date;
+    u16 access_date;
+    u16 cluster_high;
+    u16 modify_time;
+    u16 modify_date;
+    u16 cluster_low;
+    u32 file_size;
+} PF2_DISK_DIR_ENT;
+
+#define PFENT_SWAP16(x) ((((x) >> 8) & 0xFF) | (((x) << 8) & 0xFF00))
+#define PFENT_SWAP32(x) (((x) >> 24) | (((x) >> 8) & 0xFF00) | (((x) << 8) & 0xFF0000) | ((x) << 24))
+
+void PFENT_StoreEntryNumericFieldsToBuf(u8* buf, const PF2_DIR_ENT* p_ent) {
+    PF2_DISK_DIR_ENT* disk = (PF2_DISK_DIR_ENT*)buf;
+    disk->attr = p_ent->attr;
+    disk->small_letter_flag = p_ent->small_letter_flag;
+    disk->create_time_ms = p_ent->create_time_ms;
+    disk->create_time = PFENT_SWAP16(p_ent->create_time);
+    disk->create_date = PFENT_SWAP16(p_ent->create_date);
+    disk->access_date = PFENT_SWAP16(p_ent->access_date);
+    disk->modify_time = PFENT_SWAP16(p_ent->modify_time);
+    disk->modify_date = PFENT_SWAP16(p_ent->modify_date);
+    disk->cluster_high = PFENT_SWAP16((u16)(p_ent->start_cluster >> 16));
+    disk->cluster_low = PFENT_SWAP16(p_ent->start_cluster);
+    disk->file_size = PFENT_SWAP32(p_ent->file_size);
+}
+
+void PFENT_loadEntryNumericFieldsFromBuf(PF2_DIR_ENT* p_ent, const u8* buf) {
+    const PF2_DISK_DIR_ENT* disk = (const PF2_DISK_DIR_ENT*)buf;
+    p_ent->attr = disk->attr;
+    p_ent->small_letter_flag = disk->small_letter_flag;
+    p_ent->create_time_ms = disk->create_time_ms;
+    p_ent->create_time = PFENT_SWAP16(disk->create_time);
+    p_ent->create_date = PFENT_SWAP16(disk->create_date);
+    p_ent->access_date = PFENT_SWAP16(disk->access_date);
+    p_ent->modify_time = PFENT_SWAP16(disk->modify_time);
+    p_ent->modify_date = PFENT_SWAP16(disk->modify_date);
+    p_ent->file_size = PFENT_SWAP32(disk->file_size);
+    p_ent->start_cluster = (PFENT_SWAP16(disk->cluster_high) << 16) | (u16)PFENT_SWAP16(disk->cluster_low);
+}
+
+s32 PFENT_findEmptyTailSFN(PF2_DIR_ENT* p_ent, const s8* name, u32* p_tails);
+int fn_803E855C(char* buf, u32 num);
+
+s32 PFENT_AdjustSFN(PF2_DIR_ENT* p_ent, s8* p_short_name) {
+    u32 tail;
+    s32 err;
+    u32 index = 1;
+    while (p_short_name[index] != '~' && p_short_name[index] && index < 7) index++;
+    if (index < 7 && p_short_name[index] == '~') {
+        index++;
+        while (p_short_name[index] >= '0' && p_short_name[index] <= '9') index++;
+        if (p_short_name[index] == '.' || p_short_name[index] == 0) {
+            err = PFENT_findEmptyTailSFN(p_ent, p_short_name, &tail);
+            if (err) return err;
+            if (tail != 1) fn_803E855C((char*)p_short_name, tail);
+        }
+    }
+    return 0;
+}
+
+
+u32 PFENT_ITER_IsAtLogicalEnd(PF2_ENT_ITER* p_iter) {
+    u32 num_success;
+    u32 sector_index;
+    u32 index;
+    s32 err;
+    s32 status;
+
+    if (p_iter->sector == 0xFFFFFFFF || p_iter->buf[0] == 0 || p_iter->index >= 999999) {
+        sector_index = p_iter->file_sector_index;
+        index = p_iter->index;
+        p_iter->index = (sector_index + 1) << p_iter->log2_entries_per_sector;
+        err = PFENT_RecalcEntryIterator(p_iter, 0);
+        if (err != 0) {
+            p_iter->index = index;
+            p_iter->file_sector_index = sector_index;
+            return 1;
+        }
+        if (p_iter->sector != 0xFFFFFFFF) {
+            if (p_iter->sector == 0xFFFFFFFF) {
+                status = 0x10;
+            } else {
+                err = PFSEC_ReadData(p_iter->p_vol, p_iter->buf, p_iter->sector, p_iter->offset, 0x20, &num_success, 0);
+                status = 0x11;
+                if (num_success == 0x20) status = err;
+            }
+            return status != 0;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+/* FAT long-name entry: the first five UTF-16 code units are unaligned. */
+typedef struct PF2_DISK_LFN_ENT {
+    u8 ordinal;
+    u8 name_first[10];
+    u8 attr;
+    u8 type;
+    u8 check_sum;
+    u16 name_middle[6];
+    u16 cluster;
+    u16 name_last[2];
+} PF2_DISK_LFN_ENT;
+
+void VFiPF_LE16_TO_U16_STR(u8* str, u32 num);
+
+void PFENT_storeLFNEntryFieldsToBuf(u8* buf, PF2_DIR_ENT* p_ent, u8 ord, u8 sum, u32 is_last) {
+    u16* name;
+    u16* end;
+    u16* pos;
+    PF2_DISK_LFN_ENT* disk = (PF2_DISK_LFN_ENT*)buf;
+
+    if (is_last) disk->ordinal = ord | 0x40;
+    else disk->ordinal = ord;
+    disk->attr = 15;
+    disk->check_sum = sum;
+    disk->type = 0;
+    disk->cluster = 0;
+    name = p_ent->long_name + (u32)(ord - 1) * 13;
+    if (is_last) {
+        end = name + 13;
+        for (pos = name; pos < end; pos++) {
+            if (*pos == 0) {
+                pos++;
+                break;
+            }
+        }
+        for (; pos < end; pos++) *pos = 0xFFFF;
+    }
+    VFipf_memcpy(disk->name_first, name, 10);
+    VFipf_memcpy(disk->name_middle, name + 5, 12);
+    VFipf_memcpy(disk->name_last, name + 11, 4);
+    VFiPF_LE16_TO_U16_STR(disk->name_first, 10);
+    VFiPF_LE16_TO_U16_STR((u8*)disk->name_middle, 12);
+    VFiPF_LE16_TO_U16_STR((u8*)disk->name_last, 4);
+}
+
+s32 PFENT_searchEmptyTailSFN(PF_FFD* p_ffd, u32 tail_index, const s8* name, u32* p_tail_bit);
+
+s32 PFENT_findEmptyTailSFN(PF2_DIR_ENT* p_ent_containing_dir, const s8* name, u32* p_tails) {
+    PF_FAT_HINT hint;
+    PF_FFD ffd;
+    u32 tail_index;
+    s32 err;
+    u32 i;
+    PF2_VOLUME* p_vol = p_ent_containing_dir->p_vol;
+
+    *p_tails = 1;
+    PFFAT_InitFFD(&ffd, &hint, (PF_VOLUME*)p_ent_containing_dir->p_vol, &p_ent_containing_dir->start_cluster);
+    for (tail_index = 1; tail_index <= 999999; tail_index += p_vol->tail_entry.tracker_size * 32) {
+        err = PFENT_searchEmptyTailSFN(&ffd, tail_index, name, p_vol->tail_entry.tracker_bits);
+        if (err != 0) return err;
+        for (i = 0; i < p_vol->tail_entry.tracker_size; i++) {
+            if (p_vol->tail_entry.tracker_bits[i] != 0xFFFFFFFF) {
+                while (p_vol->tail_entry.tracker_bits[i] & 1) {
+                    p_vol->tail_entry.tracker_bits[i] >>= 1;
+                    ++*p_tails;
+                }
+                tail_index = 1000000;
+                break;
+            }
+            *p_tails += 32;
+        }
+    }
     return 0;
 }
