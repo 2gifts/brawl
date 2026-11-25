@@ -14,6 +14,11 @@
 #include <so/anim/so_anim_cmd_event_presenter.h>
 #include <so/transition/so_transition_module_impl.h>
 #include <types.h>
+#ifdef SO_MOTION_MODULE_IMPL_UNIT
+#include <so/motion/so_motion_data_accesser.h>
+#include <so/templates/so_array_value_soPartialAnim.h>
+#include <so/templates/so_array_value_soOtherAnim.h>
+#endif
 
 class soModuleAccesser;
 #if defined(FT_MODULE_BUILDER) || defined(WN_EM_SIMPLE_UNIT)
@@ -164,11 +169,16 @@ private:
 #endif
 public:
 
+#ifdef SO_MOTION_MODULE_IMPL_UNIT
+    // setData/getName address the accesser at 52, including its kind offset.
+    soMotionDataAccesser m_dataAccesser;
+#else
     // 52
     char _spacer1[4];
 
     // 56
     int m_kindOffset;
+#endif
 
     // 60
     soAnimChr m_mainAnim;
@@ -195,7 +205,13 @@ public:
     int m_secondaryKind;
 
     // 140
+#ifdef SO_MOTION_MODULE_IMPL_UNIT
+    soArray<soPartialAnim>* m_partialAnims;
+    soArray<soOtherAnim>* m_otherAnims;
+    char unk148[92];
+#else
     char _spacer3[100];
+#endif
 
     // 240
     soTransitionModule* m_transitionModule;
@@ -204,7 +220,18 @@ public:
     soArrayVector<soMotionChangeParam, 4> m_motionChangeParamArray;
 
     // 320
+#ifdef SO_MOTION_MODULE_IMPL_UNIT
+    char unk320[28];
+    int m_shareAnimObjPartialKind;
+    int m_shareAnimObjPartialSlot;
+    u8 m_transMove : 1;
+    u8 unk356_1 : 4;
+    u8 m_secondaryTransMove : 1;
+    u8 unk356_6 : 2;
+    char unk357[3];
+#else
     char _spacer4[40];
+#endif
 
     // 360
     soModuleAccesser* m_moduleAccesser;
