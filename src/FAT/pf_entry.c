@@ -224,7 +224,7 @@ s32 PFENT_ITER_FindEntry(PF2_ENT_ITER* p_iter, PF2_DIR_ENT* p_ent, PF_STR* p_pat
         if (err != 0) {
             return err;
         }
-        if (PFSTR_StrNumChar(p_path, 1) == 1 && PFSTR_StrNCmp(p_path, (const s8*)"", 2, 0, 1) == 0) {
+        if ((u16)PFSTR_StrNumChar(p_path, 1) == 1 && PFSTR_StrNCmp(p_path, (const s8*)"", 2, 0, 1) == 0) {
             return 0;
         }
     } else {
@@ -235,4 +235,51 @@ s32 PFENT_ITER_FindEntry(PF2_ENT_ITER* p_iter, PF2_DIR_ENT* p_ent, PF_STR* p_pat
     }
     err = PFENT_ITER_DoFindEntry(p_iter, p_ent, p_path, wildcard, no_look_last_token, p_pos);
     return err != 0 ? err : 0;
+}
+
+s32 PFENT_RecalcEntryIterator(PF2_ENT_ITER* p_iter, u32 may_allocate) {
+    PF_CACHE_PAGE* page;
+    u32 num_success;
+    u32 is_hit;
+    u32 old_sector;
+    u32 sector;
+    u32 i;
+    s32 err;
+
+    sector = p_iter->index >> p_iter->log2_entries_per_sector;
+    old_sector = p_iter->file_sector_index;
+    if (sector != old_sector) {
+        p_iter->file_sector_index = sector;
+        err = PFFAT_GetSectorSpecified(&p_iter->ffd, sector, 0, &p_iter->sector);
+        if (err != 0) {
+            return err;
+        }
+        if (p_iter->sector == 0xFFFFFFFF && may_allocate) {
+            err = PFFAT_GetSectorSpecified(&p_iter->ffd, sector, 1, &p_iter->sector);
+            if (err != 0) {
+                return err;
+            }
+            if (p_iter->sector != 0xFFFFFFFF && old_sector != 0xFFFFFFFF) {
+                err = PFCACHE_AllocateDataPage(p_iter->p_vol, 0xFFFFFFFF, &page, &is_hit);
+                if (err != 0) {
+                    return err;
+                }
+                VFipf_memset(page->p_buf, 0, p_iter->p_vol->bpb.bytes_per_sector);
+                for (i = 0; i < p_iter->p_vol->bpb.sectors_per_cluster; i++) {
+                    err = PFSEC_WriteData(p_iter->p_vol, page->p_buf, p_iter->sector + i, 0, p_iter->p_vol->bpb.bytes_per_sector, &num_success, 0);
+                    if (err != 0) {
+                        PFCACHE_FreeDataPage(p_iter->p_vol, page);
+                        return err;
+                    }
+                    if (num_success != p_iter->p_vol->bpb.bytes_per_sector) {
+                        PFCACHE_FreeDataPage(p_iter->p_vol, page);
+                        return 17;
+                    }
+                }
+                PFCACHE_FreeDataPage(p_iter->p_vol, page);
+            }
+        }
+    }
+    p_iter->offset = (p_iter->index & p_iter->offset_mask) << 5;
+    return 0;
 }
