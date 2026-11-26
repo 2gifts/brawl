@@ -1007,3 +1007,346 @@ s32 PFFAT_ReadClusterWithBuf(PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* p
     }
     return 0;
 }
+
+s32 PFFAT12_WriteFATEntryWithBuf(PF2_VOLUME* p_vol, u16 cluster, u16 value, PF_CACHE_PAGE* p_page);
+
+s32 PFFAT_WriteClusterWithBuf(PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 next_cluster, u32 use_clstlnk, PF_CACHE_PAGE* p_page) {
+    u32 index;
+    u32 interval;
+    u32 found_cluster;
+    u32* buffer;
+    s32 err;
+
+    switch (p_ffd->p_vol->bpb.fat_type) {
+    case FAT_12:
+        if (next_cluster > 0xFFF) err = 16;
+        else err = PFFAT12_WriteFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, (u16)cluster, (u16)next_cluster, p_page);
+        break;
+    case FAT_16:
+        if (next_cluster > 0xFFFF) err = 16;
+        else err = PFFAT16_WriteFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, cluster, next_cluster, p_page);
+        break;
+    case FAT_32:
+        if (next_cluster > 0xFFFFFFF) err = 16;
+        else err = PFFAT32_WriteFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, cluster, next_cluster, p_page);
+        break;
+    default:
+        err = 15;
+        break;
+    }
+    if (err != 0) return err;
+    buffer = p_ffd->cluster_link.buffer;
+    if (buffer != NULL && use_clstlnk == 1) {
+        if (next_cluster == 0) {
+            interval = p_ffd->cluster_link.interval + 1;
+            index = chain_index / interval;
+            if (p_ffd->cluster_link.max_count >= index) {
+                if (chain_index % interval == 0) buffer[index] = 0;
+                if (p_ffd->cluster_link.save_index >= chain_index) {
+                    p_ffd->cluster_link.save_index = chain_index - 1;
+                    p_ffd->cluster_link.position = (chain_index - 1) / (p_ffd->cluster_link.interval + 1);
+                    p_ffd->cluster_link.interval_offset = (chain_index - 1) % (p_ffd->cluster_link.interval + 1);
+                }
+            }
+        } else if (cluster != lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].end_of_chain) {
+            err = PFFAT_FindClusterLinkWithBuf(p_ffd, chain_index, &found_cluster, &use_clstlnk, p_page);
+            if (err != 0) return err;
+            if (!use_clstlnk && p_ffd->cluster_link.max_count > p_ffd->cluster_link.position && p_ffd->cluster_link.max_count != 0) {
+                if (chain_index == p_ffd->cluster_link.position * (p_ffd->cluster_link.interval + 1)) {
+                    p_ffd->cluster_link.interval_offset = 0;
+                    p_ffd->cluster_link.buffer[p_ffd->cluster_link.position] = cluster;
+                    p_ffd->cluster_link.position++;
+                } else {
+                    p_ffd->cluster_link.interval_offset++;
+                }
+                p_ffd->cluster_link.save_index = chain_index;
+            }
+        }
+    }
+    return 0;
+}
+
+s32 PFFAT_WriteCluster(PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 next_cluster, u32 use_clstlnk) {
+    u32 index;
+    u32 interval;
+    u32 found_cluster;
+    u32* buffer;
+    s32 err;
+
+    switch (p_ffd->p_vol->bpb.fat_type) {
+    case FAT_12:
+        if (next_cluster > 0xFFF) err = 16;
+        else err = PFFAT12_WriteFATEntry((PF2_VOLUME*)p_ffd->p_vol, (u16)cluster, (u16)next_cluster);
+        break;
+    case FAT_16:
+        if (next_cluster > 0xFFFF) err = 16;
+        else err = PFFAT16_WriteFATEntry((PF2_VOLUME*)p_ffd->p_vol, cluster, next_cluster);
+        break;
+    case FAT_32:
+        if (next_cluster > 0xFFFFFFF) err = 16;
+        else err = PFFAT32_WriteFATEntry((PF2_VOLUME*)p_ffd->p_vol, cluster, next_cluster);
+        break;
+    default:
+        err = 15;
+        break;
+    }
+    if (err != 0) return err;
+    buffer = p_ffd->cluster_link.buffer;
+    if (buffer != NULL && use_clstlnk == 1) {
+        if (next_cluster == 0) {
+            interval = p_ffd->cluster_link.interval + 1;
+            index = chain_index / interval;
+            if (p_ffd->cluster_link.max_count >= index) {
+                if (chain_index % interval == 0) buffer[index] = 0;
+                if (p_ffd->cluster_link.save_index >= chain_index) {
+                    p_ffd->cluster_link.save_index = chain_index - 1;
+                    p_ffd->cluster_link.position = (chain_index - 1) / (p_ffd->cluster_link.interval + 1);
+                    p_ffd->cluster_link.interval_offset = (chain_index - 1) % (p_ffd->cluster_link.interval + 1);
+                }
+            }
+        } else if (cluster != lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].end_of_chain) {
+            err = PFFAT_FindClusterLink(p_ffd, chain_index, &found_cluster, &use_clstlnk);
+            if (err != 0) return err;
+            if (!use_clstlnk && p_ffd->cluster_link.max_count > p_ffd->cluster_link.position && p_ffd->cluster_link.max_count != 0) {
+                if (chain_index == p_ffd->cluster_link.position * (p_ffd->cluster_link.interval + 1)) {
+                    p_ffd->cluster_link.interval_offset = 0;
+                    p_ffd->cluster_link.buffer[p_ffd->cluster_link.position] = cluster;
+                    p_ffd->cluster_link.position++;
+                } else {
+                    p_ffd->cluster_link.interval_offset++;
+                }
+                p_ffd->cluster_link.save_index = chain_index;
+            }
+        }
+    }
+    return 0;
+}
+
+s32 PFFAT_RefreshFSINFO(PF2_VOLUME* p_vol);
+
+s32 PFFAT_CountFreeClusters(PF2_VOLUME* p_vol, u32* p_num_free_clusters) {
+    s32 err;
+    u32 cluster;
+    u32 value;
+    u32 is_hit;
+    PF_CACHE_PAGE* p_page;
+
+    if ((p_vol->fsi_flag & 4) != 0 && p_vol->num_free_clusters != 0xFFFFFFFF) {
+        *p_num_free_clusters = p_vol->num_free_clusters;
+        return 0;
+    }
+    *p_num_free_clusters = 0;
+    cluster = 2;
+    err = PFCACHE_AllocateDataPage((PF_VOLUME*)p_vol, 0xFFFFFFFF, &p_page, &is_hit);
+    if (err != 0) return err;
+    err = PFFAT_ReadFATSector(p_vol, p_page, 2);
+    if (err != 0) {
+        PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+        return err;
+    }
+    p_page->option = 0;
+    for (; cluster >= 2 && cluster < p_vol->bpb.num_clusters + 2; cluster++) {
+        PF_CACHE_PAGE* p_fat_page = p_page;
+        switch (p_vol->bpb.fat_type) {
+        case FAT_12:
+            err = PFFAT12_ReadFATEntryWithBuf(p_vol, (u16)cluster, &value, p_fat_page);
+            break;
+        case FAT_16:
+            err = PFFAT16_ReadFATEntryWithBuf(p_vol, cluster, &value, p_fat_page);
+            break;
+        case FAT_32:
+            err = PFFAT32_ReadFATEntryWithBuf(p_vol, cluster, &value, p_fat_page);
+            break;
+        default:
+            err = 15;
+            break;
+        }
+        if (err != 0) {
+            PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+            return err;
+        }
+        if (value == 0) (*p_num_free_clusters)++;
+    }
+    PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+    p_vol->fsi_flag |= 4;
+    p_vol->num_free_clusters = *p_num_free_clusters;
+    if (p_vol->bpb.fat_type == FAT_32 && (p_vol->fsi_flag & 2) != 0) {
+        if (PFFAT_RefreshFSINFO(p_vol) != 0) {
+            p_vol->num_free_clusters = 0xFFFFFFFF;
+            p_vol->fsi_flag &= ~4;
+        }
+    }
+    return 0;
+}
+
+s32 PFFAT_SearchForNumFreeClusters(PF2_VOLUME* p_vol, u32 start_cluster, u32 end_cluster, u32 num_cluster, u32* p_start_free_cluster, u32* p_last_free_cluster) {
+    u32 limit;
+    u32 num_free;
+    u32 best_start;
+    u32 best_num;
+    u32 wrapped;
+    u32 first_cluster;
+    u32 value;
+    u32 is_hit;
+    PF_CACHE_PAGE* p_page;
+    s32 err;
+
+    *p_start_free_cluster = 0xFFFFFFFF;
+    *p_last_free_cluster = 0xFFFFFFFF;
+    wrapped = 0;
+    num_free = 0;
+    best_start = 0xFFFFFFFF;
+    limit = p_vol->bpb.num_clusters + 2;
+    best_num = 0;
+    if (start_cluster < 2 || start_cluster >= limit) {
+        start_cluster = 2;
+    }
+    if (end_cluster < 2 || end_cluster >= limit) {
+        end_cluster = limit - 1;
+    }
+    first_cluster = start_cluster;
+    err = PFCACHE_AllocateDataPage((PF_VOLUME*)p_vol, 0xFFFFFFFF, &p_page, &is_hit);
+    if (err != 0) return err;
+    err = PFFAT_ReadFATSector(p_vol, p_page, start_cluster);
+    if (err != 0) {
+        PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+        return err;
+    }
+    p_page->option = 0;
+
+    while (start_cluster <= end_cluster) {
+        PF_CACHE_PAGE* p_fat_page;
+        if (limit <= start_cluster) {
+            start_cluster = 2;
+        }
+        p_fat_page = p_page;
+        switch (p_vol->bpb.fat_type) {
+        case FAT_12:
+            err = PFFAT12_ReadFATEntryWithBuf(p_vol, (u16)start_cluster, &value, p_fat_page);
+            break;
+        case FAT_16:
+            err = PFFAT16_ReadFATEntryWithBuf(p_vol, start_cluster, &value, p_fat_page);
+            break;
+        case FAT_32:
+            err = PFFAT32_ReadFATEntryWithBuf(p_vol, start_cluster, &value, p_fat_page);
+            break;
+        default:
+            err = 0xF;
+            break;
+        }
+        if (err != 0) {
+            return err;
+        }
+        if (value == 0) {
+            if (*p_start_free_cluster == 0xFFFFFFFF) {
+                *p_start_free_cluster = start_cluster;
+            }
+            num_free++;
+            if (num_free >= num_cluster) {
+                *p_last_free_cluster = start_cluster;
+                PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+                return 0;
+            }
+        } else {
+            if (best_num < num_free) {
+                best_start = *p_start_free_cluster;
+                best_num = num_free;
+            }
+            *p_start_free_cluster = 0xFFFFFFFF;
+            num_free = 0;
+        }
+        start_cluster++;
+        if (wrapped == 0 && num_free == 0 && start_cluster > 2 && start_cluster == end_cluster) {
+            end_cluster = first_cluster;
+            start_cluster = 2;
+            wrapped = 1;
+        }
+    }
+
+    if (best_num < num_free) {
+        best_start = *p_start_free_cluster;
+        best_num = num_free;
+    }
+    if (best_num != 0) {
+        *p_start_free_cluster = best_start;
+        *p_last_free_cluster = (best_num + best_start) - 1;
+    }
+    PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+    return 0;
+}
+
+s32 PFCACHE_AllocateFATPage(PF_VOLUME* p_vol, u32 sector, PF_CACHE_PAGE** pp_page, u32* p_is_hit);
+s32 PFCACHE_WriteFATSectorAndFreeIfNeeded(PF_VOLUME* p_vol, const u8* p_buf, u32 sector);
+void PFCACHE_FreeFATPage(PF_VOLUME* p_vol, PF_CACHE_PAGE* p_page);
+
+s32 PFFAT_InitFATRegion(PF2_VOLUME* p_vol) {
+    u32 sector;
+    u32 value;
+    struct PF_CACHE_PAGE* p_page;
+    u32 is_hit;
+    s32 err;
+
+    err = PFCACHE_AllocateFATPage((PF_VOLUME*)p_vol, -1, &p_page, &is_hit);
+    if (err) {
+        return err;
+    }
+
+    VFipf_memset(p_page->p_buf, 0, p_vol->bpb.bytes_per_sector);
+    for (sector = p_vol->bpb.num_reserved_sectors; sector < p_vol->bpb.first_root_dir_sector; sector++) {
+        err = PFCACHE_WriteFATSectorAndFreeIfNeeded((PF_VOLUME*)p_vol, p_page->p_buf, sector);
+        if (err) {
+            PFCACHE_FreeFATPage((PF_VOLUME*)p_vol, p_page);
+            return err;
+        }
+    }
+
+    PFCACHE_FreeFATPage((PF_VOLUME*)p_vol, p_page);
+
+    value = p_vol->bpb.media | lbl_8041B0E0[p_vol->bpb.fat_type].unkC;
+    switch (p_vol->bpb.fat_type) {
+    case FAT_12:
+        if (value > 0xFFF) err = 16;
+        else err = PFFAT12_WriteFATEntry(p_vol, 0, (u16)value);
+        break;
+    case FAT_16:
+        if (value > 0xFFFF) err = 16;
+        else err = PFFAT16_WriteFATEntry(p_vol, 0, value);
+        break;
+    case FAT_32:
+        if (value > 0xFFFFFFF) err = 16;
+        else err = PFFAT32_WriteFATEntry(p_vol, 0, value);
+        break;
+    default:
+        err = 15;
+        break;
+    }
+    if (err) {
+        return err;
+    }
+    value = lbl_8041B0E0[p_vol->bpb.fat_type].unk10;
+    switch (p_vol->bpb.fat_type) {
+    case FAT_12:
+        if (value > 0xFFF) err = 16;
+        else err = PFFAT12_WriteFATEntry(p_vol, 1, (u16)value);
+        break;
+    case FAT_16:
+        if (value > 0xFFFF) err = 16;
+        else err = PFFAT16_WriteFATEntry(p_vol, 1, value);
+        break;
+    case FAT_32:
+        if (value > 0xFFFFFFF) err = 16;
+        else err = PFFAT32_WriteFATEntry(p_vol, 1, value);
+        break;
+    default:
+        err = 15;
+        break;
+    }
+    if (err) {
+        return err;
+    }
+    err = PFCACHE_FlushFATCache(p_vol);
+    if (err) {
+        return err;
+    }
+    return 0;
+}
