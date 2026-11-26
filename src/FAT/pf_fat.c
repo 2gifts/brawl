@@ -497,7 +497,7 @@ int fn_803E2468(struct Ctx *arg0, int arg1, int *arg2) {
 typedef struct Info { char pad0[0x10]; u32 value; char pad14[8]; u32 count; char pad20[0x14]; u32 limit; } Info;
 typedef struct Record { int key; u32 value; int owner; } Record;
 typedef struct Context { int owner; char pad4[4]; int *state; char padc[0x10]; int flag; char pad20[0x10]; Record *record; Info *info; } Context;
-extern int fn_803E0A88(Context *, int, int, int, u32 *, u32 *);
+s32 PFFAT_GetClusterInChain(struct PF_FFD* p_ffd, u32 chain_index, u32 mode, u32 num_cluster, u32* locate_start, u32* locate_end);
 // TODO: clean up, give variables real names
 int fn_803E119C(Context *ctx, int key, int arg2, u32 *out) {
     u32 value, other;
@@ -510,7 +510,7 @@ int fn_803E119C(Context *ctx, int key, int arg2, u32 *out) {
         *ctx->state = info->value;
     }
     *out = -1;
-    result = fn_803E0A88(ctx, key, 2, arg2, &other, &value);
+    result = PFFAT_GetClusterInChain((struct PF_FFD*)ctx, key, 2, arg2, &other, &value);
     switch (result) {
     case 0:
         if (other >= 2 && other < ctx->info->limit + 2) *out = other;
@@ -1347,6 +1347,252 @@ s32 PFFAT_InitFATRegion(PF2_VOLUME* p_vol) {
     err = PFCACHE_FlushFATCache(p_vol);
     if (err) {
         return err;
+    }
+    return 0;
+}
+
+s32 PFFAT_DoAllocateChain(PF_FFD* p_ffd, u32 chain_len, u32 chain_index, u32* p_chain_start, u32* p_last_allocated, u32 reset_cluster);
+s32 PFFAT_FreeChain(PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32 size);
+s32 PFFAT_RefreshFSINFO(PF2_VOLUME* p_vol);
+
+static inline s32 PFFAT_AllocateChain(PF_FFD* p_ffd, u32 chain_len, u32 chain_index, u32* p_chain_start, u32* p_last_allocated) {
+    s32 err;
+
+    err = PFFAT_DoAllocateChain(p_ffd, chain_len, chain_index, p_chain_start, p_last_allocated, 0);
+    if (err) {
+        if (*p_chain_start != -1) {
+            PFFAT_FreeChain(p_ffd, *p_chain_start, chain_index, -1);
+        }
+        *p_chain_start = -1;
+        *p_last_allocated = -1;
+        return err;
+    }
+    return 0;
+}
+
+s32 PFFAT_GetClusterInChain(struct PF_FFD* p_ffd, u32 chain_index, u32 mode, u32 num_cluster, u32* locate_start, u32* locate_end) {
+    s32 err;
+    u32 bad;
+    u32 eoc1;
+    u32 current_cluster;
+    u32 next_cluster;
+    u32 trace_cnt;
+    u32 append_cnt;
+    u32 search_index;
+    u32* p_chain_start;
+    u32 chain_start;
+    u32 is_hit;
+    u32 check_use;
+    struct PF_CACHE_PAGE* p_page;
+
+    bad = lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].unk0;
+    eoc1 = lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].unk4;
+    *locate_end = -1;
+    *locate_start = -1;
+
+    if (p_ffd->last_access_cluster.chain_index != 0 && p_ffd->last_access_cluster.chain_index <= chain_index) {
+        chain_start = p_ffd->last_access_cluster.cluster;
+        p_chain_start = &chain_start;
+        trace_cnt = chain_index - p_ffd->last_access_cluster.chain_index;
+        search_index = p_ffd->last_access_cluster.chain_index + 1;
+    } else {
+        p_chain_start = p_ffd->p_start_cluster;
+        trace_cnt = chain_index;
+        search_index = 1;
+    }
+
+    current_cluster = *p_chain_start;
+    next_cluster = *p_chain_start;
+
+    if (mode == 2) {
+        if (trace_cnt != 0 && num_cluster != 0) {
+            trace_cnt += num_cluster - 1;
+        } else {
+            trace_cnt = num_cluster;
+        }
+        append_cnt = trace_cnt;
+        if (p_ffd->last_cluster.num_last_cluster != 0) {
+            trace_cnt = 0;
+            append_cnt = p_ffd->last_cluster.max_chain_index + num_cluster - chain_index;
+            current_cluster = p_ffd->last_cluster.num_last_cluster;
+            next_cluster = lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].end_of_chain;
+            search_index = p_ffd->last_cluster.max_chain_index + 1;
+        }
+    } else {
+        if (mode == 1 && current_cluster == 0) {
+            trace_cnt++;
+        }
+        append_cnt = trace_cnt;
+    }
+
+    if (trace_cnt != 0) {
+        err = PFCACHE_AllocateDataPage(p_ffd->p_vol, -1, &p_page, &is_hit);
+        if (err) return err;
+        err = PFFAT_ReadFATSector((PF2_VOLUME*)p_ffd->p_vol, p_page, current_cluster);
+        if (err) {
+            PFCACHE_FreeDataPage(p_ffd->p_vol, p_page);
+            return err;
+        }
+        p_page->option = 0;
+        check_use = 1;
+
+        while (trace_cnt-- != 0 && current_cluster < bad) {
+            if (current_cluster != 0) {
+                err = PFFAT_ReadClusterWithBuf(p_ffd, current_cluster, search_index, &next_cluster, &check_use, p_page);
+                if (err != 0 && next_cluster != (u32)-1) {
+                    PFCACHE_FreeDataPage(p_ffd->p_vol, p_page);
+                    return err;
+                }
+            } else {
+                search_index--;
+                next_cluster = lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].end_of_chain;
+            }
+
+            if ((next_cluster < 2 || next_cluster >= (p_ffd->p_vol->bpb.num_clusters + 2)) && next_cluster < eoc1) {
+                PFCACHE_FreeDataPage(p_ffd->p_vol, p_page);
+                return 14;
+            }
+
+            if (mode != 0 && next_cluster >= eoc1) {
+                break;
+            }
+
+            current_cluster = next_cluster;
+            search_index++;
+        }
+        append_cnt = trace_cnt;
+        PFCACHE_FreeDataPage(p_ffd->p_vol, p_page);
+    }
+
+    if (mode != 0 && next_cluster >= eoc1) {
+        *locate_start = 0;
+        err = PFFAT_AllocateChain(p_ffd, append_cnt + 1, search_index, locate_start, &next_cluster);
+        if (err) {
+            return err;
+        }
+        if (next_cluster == -1) {
+            return 6;
+        }
+        if (*p_chain_start == 0) {
+            *p_chain_start = *locate_start;
+        } else {
+            err = PFFAT_WriteCluster(p_ffd, current_cluster, search_index - 1, *locate_start, 1);
+            if (err) {
+                return err;
+            }
+        }
+        current_cluster = next_cluster;
+    }
+
+    *locate_end = current_cluster;
+    return 0;
+}
+
+static inline s32 PFFAT_UpdateFATEntry(PF2_VOLUME* p_vol, PF_CACHE_PAGE* p_page) {
+    u16 i;
+    u32 sector = p_page->sector;
+    s32 first_err = 0;
+    for (i = 0; i < p_vol->bpb.num_active_FATs; i++) {
+        s32 err = PFSEC_WriteFAT(p_vol, p_page->p_buf, sector, 0, p_vol->bpb.bytes_per_sector);
+        if (err != 0 && first_err == 0) first_err = err;
+        sector += p_vol->bpb.sectors_per_FAT;
+    }
+    return first_err;
+}
+
+s32 PFFAT_DoAllocateChain(struct PF_FFD* p_ffd, u32 chain_len, u32 chain_index, u32* p_chain_start, u32* p_last_allocated, u32 reset_cluster) {
+    PF2_VOLUME* p_vol;
+    u32 eoc2;
+    enum FatType fat_type;
+    u32 first_allocated_cluster;
+    u32 last_allocated_cluster;
+    u32 start_cluster;
+    s32 err;
+    u32 is_hit;
+    struct PF_CACHE_PAGE* p_page;
+
+    u32 i;
+
+    p_vol = (PF2_VOLUME*)p_ffd->p_vol;
+    fat_type = p_vol->bpb.fat_type;
+    eoc2 = lbl_8041B0E0[fat_type].end_of_chain;
+    *p_chain_start = -1;
+    *p_last_allocated = -1;
+    last_allocated_cluster = -1;
+
+    err = PFFAT_SearchForNumFreeClusters(p_vol, p_vol->last_free_cluster, -1, chain_len, &first_allocated_cluster, &last_allocated_cluster);
+    if (err) {
+        return err;
+    }
+    if (first_allocated_cluster == -1) {
+        return 0;
+    }
+
+    if (reset_cluster) {
+        err = PFFAT_ResetCluster((PF_VOLUME*)p_vol, first_allocated_cluster);
+        if (err) return err;
+    }
+    err = PFCACHE_AllocateDataPage((PF_VOLUME*)p_vol, -1, &p_page, &is_hit);
+    if (err) return err;
+    err = PFFAT_ReadFATSector(p_vol, p_page, first_allocated_cluster);
+    if (err) {
+        PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+        return err;
+    }
+
+    p_page->option = 0;
+    for (i = first_allocated_cluster; i < last_allocated_cluster; i++) {
+        err = PFFAT_WriteClusterWithBuf(p_ffd, i, chain_index, i + 1, 1, p_page);
+        if (err) {
+            PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+            return err;
+        }
+        if ((p_vol->fsi_flag & 4) && p_vol->num_free_clusters != -1 && p_vol->num_free_clusters != 0) {
+            if (p_vol->bpb.fat_type != FAT_32 || last_allocated_cluster != p_vol->bpb.root_dir_cluster) {
+                p_vol->num_free_clusters--;
+            }
+        }
+        if (*p_chain_start == -1) {
+            *p_chain_start = i;
+        }
+        *p_last_allocated = i;
+        chain_index++;
+    }
+
+    if (last_allocated_cluster != -1) {
+        err = PFFAT_WriteClusterWithBuf(p_ffd, last_allocated_cluster, chain_index, eoc2, 1, p_page);
+        if (err) {
+            PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+            return err;
+        }
+        if (*p_chain_start == -1) {
+            *p_chain_start = i;
+        }
+        *p_last_allocated = i;
+        if (p_vol->num_free_clusters != -1 && p_vol->num_free_clusters != 0) {
+            if (p_vol->bpb.fat_type != FAT_32 || last_allocated_cluster != p_vol->bpb.root_dir_cluster) {
+                p_vol->num_free_clusters--;
+            }
+        }
+    }
+
+    p_vol->last_free_cluster = last_allocated_cluster + 1;
+    p_ffd->last_cluster.num_last_cluster = last_allocated_cluster;
+    p_ffd->last_cluster.max_chain_index = chain_index;
+    *p_last_allocated = last_allocated_cluster;
+
+    err = PFFAT_UpdateFATEntry(p_vol, p_page);
+    if (err != 0) {
+        PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+        return err;
+    }
+    PFCACHE_FreeDataPage((PF_VOLUME*)p_vol, p_page);
+
+    if (p_vol->bpb.fat_type == FAT_32 && (p_vol->fsi_flag & 2)) {
+        if (PFFAT_RefreshFSINFO(p_vol)) {
+            p_vol->num_free_clusters = -1;
+            p_vol->fsi_flag &= ~4;
+        }
     }
     return 0;
 }
