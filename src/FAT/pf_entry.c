@@ -68,10 +68,12 @@ int PFENT_findEntry(PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index, PF2_STR* patte
     return PFENT_findEntryPos(p_ffd, p_ent, index, pattern, attr_required, attr_unwanted, &lpos, &ppos);
 }
 
+s32 PFENT_allocateEntryPos(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename, u32* p_pos);
+
 int PFENT_allocateEntry(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename) {
     u32 pos;
 
-    return fn_803DD674(p_ent, num_entries, p_ffd, p_next_chain, p_filename, &pos);
+    return PFENT_allocateEntryPos(p_ent, num_entries, p_ffd, p_next_chain, p_filename, &pos);
 }
 
 int PFENT_ITER_GetEntryOfPattern(PF2_ENT_ITER* iter, PF2_DIR_ENT* ent, PF2_VOLUME* vol, PF2_STR* path) {
@@ -618,4 +620,118 @@ s32 PFENT_findEntryPos(struct PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index_searc
     *p_lpos = 999999;
     *p_ppos = 999999;
     return 3;
+}
+
+
+int PFPATH_CheckExtShortNameSignature(PF_STR* p_str);
+
+s32 PFENT_allocateEntryPos(PF2_DIR_ENT* p_ent, u8 num_entries, struct PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename, u32* p_pos) {
+    s32 err;
+    struct PF_VOLUME* p_vol;
+    PF2_ENT_ITER iter;
+    PF2_DIR_ENT wk_ent;
+    u32 wk_sector;
+    u16 wk_offset;
+    u32 prev_sector;
+    u32 next_sector1;
+    u32 next_sector2;
+    u32 is_found;
+    u32 sector;
+    u32 count_unused_entries;
+    u32 physical_index;
+    u32 dummy_index;
+
+    if ((lbl_805644C0.flags & 2) == 2) {
+        if ((u32)PFPATH_CheckExtShortNameSignature((PF_STR*)p_filename) == 1) {
+            return 1;
+        }
+    }
+
+    p_vol = p_ffd->p_vol;
+    count_unused_entries = 0;
+    physical_index = 0;
+
+    wk_sector = -1;
+    wk_offset = 0;
+    p_next_chain[1] = -1;
+    p_next_chain[0] = -1;
+    prev_sector = -1;
+    next_sector2 = -1;
+    next_sector1 = -1;
+    is_found = 0;
+
+    iter.sector = 0;
+    iter.index = 0;
+    iter.ffd = *p_ffd;
+    err = PFENT_ITER_IteratorInitialize(&iter, 0);
+
+    while (1) {
+        if (err != 0) {
+            return err;
+        }
+
+        if (iter.sector == -1) {
+            break;
+        }
+        if (is_found == 0 && count_unused_entries == 0) {
+            wk_offset = iter.offset;
+            wk_sector = iter.sector;
+            prev_sector = iter.sector;
+        }
+        if (is_found == 0) {
+            if (iter.buf[0] == 0 || iter.buf[0] == 0xE5) {
+                if (prev_sector != iter.sector) {
+                    if (next_sector1 == -1) {
+                        next_sector1 = iter.sector;
+                    } else {
+                        next_sector2 = iter.sector;
+                    }
+                    prev_sector = iter.sector;
+                }
+                count_unused_entries++;
+            } else {
+                count_unused_entries = 0;
+                next_sector1 = -1;
+                next_sector2 = -1;
+            }
+        }
+        if (count_unused_entries >= num_entries) {
+            if (is_found == 0) {
+                physical_index = iter.index;
+                is_found = 1;
+            }
+            if (iter.buf[0] == 0) {
+                break;
+            }
+        }
+        if (iter.buf[0] != 0 && iter.buf[0] != 0xE5) {
+            err = fn_803DC790(&wk_ent, &iter, p_filename, 0x7F, 0, &dummy_index);
+            if (err == 0) {
+                *p_ent = wk_ent;
+                p_ent->p_vol = (PF2_VOLUME*)p_ffd->p_vol;
+                return 8;
+            }
+        }
+        if (iter.offset + 32 == p_vol->bpb.bytes_per_sector) {
+            err = PFFAT_GetSectorSpecified(p_ffd, iter.file_sector_index + 1, 0, &sector);
+            if (err != 0) {
+                return err;
+            }
+            if (sector == -1 && is_found == 1) {
+                break;
+            }
+        }
+        err = fn_803DEF54(&iter, 1);
+    }
+
+    if (is_found == 0) {
+        return 5;
+    }
+
+    p_next_chain[0] = next_sector1;
+    p_next_chain[1] = next_sector2;
+    p_ent->entry_sector = wk_sector;
+    p_ent->entry_offset = wk_offset;
+    *p_pos = physical_index;
+    return 0;
 }
