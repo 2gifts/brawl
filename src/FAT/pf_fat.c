@@ -918,3 +918,92 @@ s32 PFFAT_FindClusterLinkWithBuf(PF_FFD* p_ffd, u32 chain_index, u32* p_cluster,
     }
     return 0;
 }
+
+s32 PFFAT12_WriteFATEntry(PF2_VOLUME* p_vol, u16 cluster, u16 value) {
+    s32 err;
+    u16 fat_offset = (u16)(cluster + (cluster >> 1));
+    u16 fat_sector = (u16)(p_vol->bpb.active_FAT_sector + (fat_offset >> p_vol->bpb.log2_bytes_per_sector));
+    u16 offset_in_sector = (u16)(fat_offset & (p_vol->bpb.bytes_per_sector - 1));
+    u16 word;
+    u8 buf[2];
+    u16 i;
+    s32 first_err;
+
+    if (cluster & 1) {
+        err = PFSEC_ReadFAT(p_vol, buf, fat_sector, offset_in_sector, 1);
+        if (err != 0) return err;
+        word = (u16)((value << 4) + (buf[0] & 0xF));
+    } else {
+        u16 fat_sector2 = (u16)(p_vol->bpb.active_FAT_sector + ((fat_offset + 1) >> p_vol->bpb.log2_bytes_per_sector));
+        u16 offset_in_sector2 = (u16)((fat_offset + 1) & (p_vol->bpb.bytes_per_sector - 1));
+        err = PFSEC_ReadFAT(p_vol, buf, fat_sector2, offset_in_sector2, 1);
+        if (err != 0) return err;
+        word = (u16)(((buf[0] << 8) & 0xF000) + (value & 0xFFF));
+    }
+    *(u16*)buf = ((word >> 8) & 0xFF) | ((word << 8) & 0xFF00);
+    first_err = 0;
+    for (i = 0; i < p_vol->bpb.num_active_FATs; i++) {
+        if (offset_in_sector < p_vol->bpb.bytes_per_sector - 1) {
+            err = PFSEC_WriteFAT(p_vol, buf, fat_sector, offset_in_sector, 2);
+            if (err != 0 && first_err == 0) first_err = err;
+        } else {
+            err = PFSEC_WriteFAT(p_vol, buf, fat_sector, offset_in_sector, 1);
+            if (err != 0 && first_err == 0) first_err = err;
+            err = PFSEC_WriteFAT(p_vol, &buf[1], fat_sector + 1, 0, 1);
+            if (err != 0 && first_err == 0) first_err = err;
+        }
+        fat_sector += p_vol->bpb.sectors_per_FAT;
+    }
+    return first_err;
+}
+
+s32 PFFAT_ReadClusterWithBuf(PF_FFD* p_ffd, u32 cluster, u32 chain_index, u32* p_next_cluster, u32* p_chk_clstlnk, PF_CACHE_PAGE* p_page) {
+    s32 err;
+    u32 next_cluster;
+
+    *p_next_cluster = 0xFFFFFFFF;
+    if (p_ffd->cluster_link.buffer != NULL && *p_chk_clstlnk == 1) {
+        err = PFFAT_FindClusterLinkWithBuf(p_ffd, chain_index, p_next_cluster, p_chk_clstlnk, p_page);
+        if (err != 0) {
+            return err;
+        }
+    }
+    if (p_ffd->cluster_link.buffer == NULL || *p_chk_clstlnk == 0) {
+        switch (p_ffd->p_vol->bpb.fat_type) {
+        case FAT_12:
+            err = PFFAT12_ReadFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, (u16)cluster, p_next_cluster, p_page);
+            break;
+        case FAT_16:
+            err = PFFAT16_ReadFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, cluster, p_next_cluster, p_page);
+            break;
+        case FAT_32:
+            err = PFFAT32_ReadFATEntryWithBuf((PF2_VOLUME*)p_ffd->p_vol, cluster, p_next_cluster, p_page);
+            break;
+        default:
+            err = 15;
+            break;
+        }
+        if (err != 0) {
+            return err;
+        }
+        next_cluster = *p_next_cluster;
+        if (next_cluster == 0) {
+            return 13;
+        }
+        if (next_cluster == 0xFFFFFFFF) {
+            return 6;
+        }
+        if (p_ffd->cluster_link.buffer != NULL && next_cluster != lbl_8041B0E0[p_ffd->p_vol->bpb.fat_type].end_of_chain &&
+            p_ffd->cluster_link.max_count > p_ffd->cluster_link.position && p_ffd->cluster_link.max_count != 0) {
+            if (chain_index == p_ffd->cluster_link.position * (p_ffd->cluster_link.interval + 1)) {
+                p_ffd->cluster_link.interval_offset = 0;
+                p_ffd->cluster_link.buffer[p_ffd->cluster_link.position] = next_cluster;
+                p_ffd->cluster_link.position++;
+            } else {
+                p_ffd->cluster_link.interval_offset++;
+            }
+            p_ffd->cluster_link.save_index = chain_index;
+        }
+    }
+    return 0;
+}
