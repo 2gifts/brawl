@@ -59,11 +59,13 @@ int PFENT_ITER_GetEntryOfPath(PF2_ENT_ITER* iter, PF2_DIR_ENT* entry, PF2_VOLUME
     return fn_803DE800(iter, entry, vol, str, 0, no_look_last_token);
 }
 
+s32 PFENT_findEntryPos(PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index_search_from, PF2_STR* p_pattern, u8 attr_required, u8 attr_unwanted, u32* p_lpos, u32* p_ppos);
+
 int PFENT_findEntry(PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index, PF2_STR* pattern, u8 attr_required, u8 attr_unwanted) {
     u32 lpos;
     u32 ppos;
 
-    return fn_803DD390(p_ffd, p_ent, index, pattern, attr_required, attr_unwanted, &lpos, &ppos);
+    return PFENT_findEntryPos(p_ffd, p_ent, index, pattern, attr_required, attr_unwanted, &lpos, &ppos);
 }
 
 int PFENT_allocateEntry(PF2_DIR_ENT* p_ent, u8 num_entries, PF_FFD* p_ffd, u32* p_next_chain, PF2_STR* p_filename) {
@@ -165,7 +167,8 @@ struct PF2_VOLUME {
 
 // HYPOTHESIS: the PrFile2 volume set; only the critical section is known here.
 extern struct PF2_VOLUME_SET {
-    u8 _0[0x64];
+    u8 _0[0x60];
+    u32 flags;
     PF_CRITICAL critical;
 } lbl_805644C0;
 
@@ -517,4 +520,102 @@ s32 PFENT_LoadLFNEntryFieldsFromBuf(PF2_DIR_ENT* p_ent, const u8* buf) {
     }
     p_ent->num_entry_LFNs++;
     return 0;
+}
+
+
+u32 fn_803E8BD0(PF_STR* pattern, u32* index);
+s32 fn_803DEF54(PF2_ENT_ITER* p_iter, u32 may_allocate);
+s32 fn_803DC790(PF2_DIR_ENT* p_ent, PF2_ENT_ITER* p_iter, PF2_STR* p_pattern, u8 attr_required, u8 attr_unwanted, u32* logical_index);
+
+s32 PFENT_findEntryPos(struct PF_FFD* p_ffd, PF2_DIR_ENT* p_ent, u32 index_search_from, PF2_STR* p_pattern, u8 attr_required, u8 attr_unwanted, u32* p_lpos, u32* p_ppos) {
+    s32 err;
+    PF2_ENT_ITER iter;
+    u32 logical_index;
+    u32 is_extsfn;
+
+    is_extsfn = 0;
+
+    *p_lpos = 0;
+    *p_ppos = 0;
+
+    p_ent->num_entry_LFNs = 0;
+    p_ent->ordinal = 0;
+    p_ent->check_sum = 0;
+    p_ent->long_name[0] = 0;
+
+    logical_index = 0;
+
+    if ((lbl_805644C0.flags & 2) == 2) {
+        is_extsfn = fn_803E8BD0((PF_STR*)p_pattern, &index_search_from);
+    }
+
+    iter.ffd = *p_ffd;
+
+    if (is_extsfn == 1) {
+        err = PFENT_ITER_IteratorInitialize(&iter, index_search_from - 1);
+        if (err != 0) {
+            *p_lpos = 999999;
+            *p_ppos = 999999;
+            return err;
+        }
+
+        err = fn_803DC790(p_ent, &iter, p_pattern, attr_required, attr_unwanted, &logical_index);
+
+        if (err == 0) {
+            *p_lpos = 999999;
+            *p_ppos = 999999;
+            return 3;
+        }
+
+        if ((iter.buf[0] & 0x40) != 0) {
+            err = PFENT_ITER_IteratorInitialize(&iter, index_search_from);
+            if (err != 0) {
+                *p_lpos = 999999;
+                *p_ppos = 999999;
+                return err;
+            }
+
+            err = fn_803DC790(p_ent, &iter, p_pattern, attr_required, attr_unwanted, &logical_index);
+
+            if (err == 0) {
+                p_ent->p_vol = (PF2_VOLUME*)p_ffd->p_vol;
+                *p_lpos = logical_index;
+                *p_ppos = iter.index;
+                return 0;
+            }
+        }
+
+    } else {
+        err = PFENT_ITER_IteratorInitialize(&iter, index_search_from);
+        while (PFENT_ITER_IsAtLogicalEnd(&iter) == 0) {
+            if (err != 0) {
+                *p_lpos = 999999;
+                *p_ppos = 999999;
+                return err;
+            }
+            if (iter.buf[0] == 0) {
+                break;
+            }
+            if (iter.buf[0] == 0xE5) {
+                p_ent->num_entry_LFNs = 0;
+                p_ent->long_name[0] = 0;
+
+            } else {
+                err = fn_803DC790(p_ent, &iter, p_pattern, attr_required, attr_unwanted, &logical_index);
+
+                if (err == 0) {
+                    p_ent->p_vol = (PF2_VOLUME*)p_ffd->p_vol;
+                    *p_lpos = logical_index;
+                    *p_ppos = iter.index;
+                    return 0;
+                }
+            }
+
+            err = fn_803DEF54(&iter, 0);
+        }
+    }
+
+    *p_lpos = 999999;
+    *p_ppos = 999999;
+    return 3;
 }
