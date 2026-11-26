@@ -461,3 +461,60 @@ s32 PFENT_findEmptyTailSFN(PF2_DIR_ENT* p_ent_containing_dir, const s8* name, u3
     }
     return 0;
 }
+
+s32 PFENT_LoadLFNEntryFieldsFromBuf(PF2_DIR_ENT* p_ent, const u8* buf) {
+    const PF2_DISK_LFN_ENT* disk = (const PF2_DISK_LFN_ENT*)buf;
+    u32 last;
+    u16* name;
+    u8 ord = disk->ordinal;
+    u8 sum = disk->check_sum;
+    u16* end;
+
+    if ((ord & ~0x40) > 20U) {
+        p_ent->ordinal = 0;
+        p_ent->check_sum = 0;
+        p_ent->num_entry_LFNs = 0;
+        return 33;
+    }
+    if (ord & 0x40) {
+        p_ent->num_entry_LFNs = 0;
+        ord &= ~0x40;
+        last = 1;
+    } else {
+        last = 0;
+        if (p_ent->num_entry_LFNs == 0) return 33;
+        if (ord != p_ent->ordinal - 1 || sum != p_ent->check_sum) {
+            p_ent->ordinal = 0;
+            p_ent->check_sum = 0;
+            p_ent->num_entry_LFNs = 0;
+            return 33;
+        }
+    }
+    p_ent->ordinal = ord;
+    p_ent->check_sum = sum;
+    name = p_ent->long_name + (u32)(ord - 1) * 13;
+    VFipf_memcpy(name, (void*)disk->name_first, 10);
+    VFipf_memcpy(name + 5, (void*)disk->name_middle, 12);
+    VFipf_memcpy(name + 11, (void*)disk->name_last, 4);
+    VFiPF_LE16_TO_U16_STR((u8*)name, 10);
+    VFiPF_LE16_TO_U16_STR((u8*)(name + 5), 12);
+    VFiPF_LE16_TO_U16_STR((u8*)(name + 11), 4);
+    if (last) {
+        end = name + 13;
+        *end = 0;
+        for (; name < end; name++) {
+            if (*name == 0) {
+                name++;
+                break;
+            }
+        }
+        for (; name < end; name++) {
+            if (*name != 0xFFFF) {
+                p_ent->num_entry_LFNs = 0;
+                return 33;
+            }
+        }
+    }
+    p_ent->num_entry_LFNs++;
+    return 0;
+}
